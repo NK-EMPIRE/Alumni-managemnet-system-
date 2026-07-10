@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin Dashboard - Alumni Professional Details Update Management System">
+  <title>Admin Dashboard - APIUMS | Alumni Professional Information Update Management System</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Fonts - Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- ============================================================
+       LOADING SCREEN
+       ============================================================ -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Dashboard...</div>
+  </div>
+
+  <!-- ============================================================
+       SIDEBAR OVERLAY (mobile)
+       ============================================================ -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <span class="sidebar-brand-text">AlumniMS</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-label">Main</div>
+      <a class="sidebar-item active" data-section="dashboard" onclick="navigateTo('dashboard', this)">
+        <i class="fas fa-th-large"></i>
+        <span class="sidebar-item-text">Dashboard</span>
+      </a>
+      <a class="sidebar-item has-sub" data-section="teamLeaders" onclick="toggleSubmenu(this);navigateTo('teamLeaders', this)">
+        <i class="fas fa-user-tie"></i>
+        <span class="sidebar-item-text">Team Leaders</span>
+        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
+      </a>
+      <div class="submenu" style="display:none;padding-left:36px;">
+        <a class="sidebar-item sub-item" data-section="teamLeaders" data-sub="viewAll" onclick="navigateTo('teamLeaders', this)">
+          <i class="fas fa-list"></i>
+          <span class="sidebar-item-text">View All</span>
+        </a>
+        <a class="sidebar-item sub-item" data-section="addTeamLeader" onclick="openModal('addTeamLeaderModal')">
+          <i class="fas fa-plus-circle"></i>
+          <span class="sidebar-item-text">Add New</span>
+        </a>
+      </div>
+      <a class="sidebar-item has-sub" data-section="teamMembers" onclick="toggleSubmenu(this);navigateTo('teamMembers', this)">
+        <i class="fas fa-users"></i>
+        <span class="sidebar-item-text">Team Members</span>
+        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
+      </a>
+      <div class="submenu" style="display:none;padding-left:36px;">
+        <a class="sidebar-item sub-item" data-section="teamMembers" data-sub="viewAll" onclick="navigateTo('teamMembers', this)">
+          <i class="fas fa-list"></i>
+          <span class="sidebar-item-text">View All</span>
+        </a>
+        <a class="sidebar-item sub-item" data-section="addTeamMember" onclick="openModal('addTeamMemberModal')">
+          <i class="fas fa-plus-circle"></i>
+          <span class="sidebar-item-text">Add New</span>
+        </a>
+      </div>
+      <a class="sidebar-item" data-section="import" onclick="navigateTo('import', this)">
+        <i class="fas fa-file-import"></i>
+        <span class="sidebar-item-text">Import Alumni</span>
+      </a>
+      <a class="sidebar-item" data-section="assignAlumni" onclick="navigateTo('assignAlumni', this)">
+        <i class="fas fa-user-graduate"></i>
+        <span class="sidebar-item-text">Assign Alumni</span>
+      </a>
+      <a class="sidebar-item" data-section="progress" onclick="navigateTo('progress', this)">
+        <i class="fas fa-chart-line"></i>
+        <span class="sidebar-item-text">Progress</span>
+      </a>
+      <a class="sidebar-item" data-section="reports" onclick="navigateTo('reports', this)">
+        <i class="fas fa-file-alt"></i>
+        <span class="sidebar-item-text">Reports</span>
+      </a>
+      <a class="sidebar-item" data-section="audit" onclick="navigateTo('audit', this)">
+        <i class="fas fa-history"></i>
+        <span class="sidebar-item-text">Audit Logs</span>
+      </a>
+
+      <div class="sidebar-label">Other</div>
+      <a class="sidebar-item" data-section="settings" onclick="navigateTo('settings', this)">
+        <i class="fas fa-cog"></i>
+        <span class="sidebar-item-text">Settings</span>
+      </a>
+      <a class="sidebar-item" onclick="handleLogout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="sidebar-item-text">Logout</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">AD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin User</div>
+          <div class="sidebar-user-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PAGE WRAPPER
+       ============================================================ -->
+  <div class="page-wrapper" id="pageWrapper">
+
+    <!-- ============================================================
+         TOP NAVBAR
+         ============================================================ -->
+    <header class="top-navbar" id="topNavbar">
+      <div class="navbar-left">
+        <button class="navbar-hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <div class="breadcrumb" id="breadcrumb">
+            <a href="#" onclick="event.preventDefault();navigateTo('dashboard',document.querySelector('[data-section=dashboard]'))">Home</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="current">Dashboard</span>
+          </div>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="navbar-search">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search anything..." id="globalSearch" oninput="handleGlobalSearch(this.value)">
+        </div>
+        <div class="dropdown" id="notifDropdown">
+          <button class="navbar-btn" onclick="toggleNotifications(event)">
+            <i class="fas fa-bell"></i>
+            <span class="notification-count">5</span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;right:auto;left:-120px;">
+            <div class="dropdown-header">Notifications</div>
+            <div id="notifList"></div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" style="justify-content:center;color:var(--primary);font-weight:500;" onclick="showAllNotifications()">
+              View All Notifications
+            </button>
+          </div>
+        </div>
+        <div class="dropdown" id="profileDropdown">
+          <button class="navbar-profile" onclick="toggleProfileDropdown(event)">
+            <div class="navbar-profile-avatar" style="background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.85rem;">
+              AD
+            </div>
+            <span class="navbar-profile-name" id="navbarProfileName">Admin</span>
+            <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#94A3B8;"></i>
+          </button>
+          <div class="dropdown-menu" id="profileMenu">
+            <button class="dropdown-item" onclick="Toast.info('Profile','View profile page')">
+              <i class="fas fa-user"></i> View Profile
+            </button>
+            <button class="dropdown-item" onclick="navigateTo('settings',document.querySelector('[data-section=settings]'))">
+              <i class="fas fa-cog"></i> Settings
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="handleLogout()">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         PAGE CONTENT
+         ============================================================ -->
+    <main class="page-content" id="pageContent">
+
+      <!-- ─── DASHBOARD SECTION ─── -->
+      <section id="section-dashboard" class="content-section active">
+
+        <!-- Page Header -->
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Dashboard</h1>
+            <p>Welcome back! Here is what is happening with your alumni data today.</p>
+          </div>
+          <div>
+            <span style="font-size:0.85rem;color:var(--text-muted);">
+              <i class="far fa-calendar-alt" style="margin-right:6px;"></i>
+              <span id="currentDate"></span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Overview Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-8 stagger-children">
+          <div class="stat-card">
+            <div class="stat-card-icon blue">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-card-content">
+              <div class="stat-card-value" id="totalAlumni">0</div>
+              <div class="stat-card-label">Total Alumni</div>
+              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 12%</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon yellow">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-card-content">
+              <div class="stat-card-value" id="pendingUpdates">0</div>
+              <div class="stat-card-label">Pending Updates</div>
+              <span class="stat-card-change down"><i class="fas fa-arrow-down"></i> 3%</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon green">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-card-content">
+              <div class="stat-card-value" id="completedUpdates">0</div>
+              <div class="stat-card-label">Completed Updates</div>
+              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 8%</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon purple">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-card-content">
+              <div class="stat-card-value" id="totalTeamLeaders">0</div>
+              <div class="stat-card-label">Team Leaders</div>
+              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 2</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:#CCFBF1;color:#0D9488;">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-card-content">
+              <div class="stat-card-value" id="totalTeamMembers">0</div>
+              <div class="stat-card-label">Team Members</div>
+              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 5</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:#FCE7F3;color:#DB2777;">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+            <div class="stat-card-content">
+              <div class="stat-card-value" id="overallProgress">0%</div>
+              <div class="stat-card-label">Overall Progress</div>
+              <div class="progress mt-2" style="height:6px;">
+                <div class="progress-bar" id="progressBar" style="width:0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="card fade-in-up">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-pie" style="color:var(--primary);margin-right:8px;"></i>Completion Status</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="height:280px;">
+                <canvas id="completionChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card fade-in-up">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Department-wise Progress</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="height:280px;">
+                <canvas id="departmentChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card fade-in-up">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>Weekly Trend</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="height:280px;">
+                <canvas id="weeklyChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="card mb-8 fade-in-up">
+          <div class="card-header">
+            <h3><i class="fas fa-bolt" style="color:var(--primary);margin-right:8px;"></i>Recent Activity</h3>
+            <button class="btn btn-sm btn-ghost" onclick="Toast.info('Activity','Refreshing activity feed...')">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+          <div class="card-body" style="padding:16px 22px;">
+            <div class="activity-feed" id="activityFeed"></div>
+          </div>
+        </div>
+
+        <!-- Recent Assignments Table -->
+        <div class="card fade-in-up">
+          <div class="card-header">
+            <h3><i class="fas fa-tasks" style="color:var(--primary);margin-right:8px;"></i>Recent Assignments</h3>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-sm btn-primary" onclick="openModal('assignAlumniModal')">
+                <i class="fas fa-plus"></i> Assign New
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="handleExport()">
+                <i class="fas fa-download"></i> Export
+              </button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <!-- Filters -->
+            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
+              <div class="search-bar" style="max-width:280px;flex:1;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search alumni..." id="tableSearch" oninput="filterTable()">
+              </div>
+              <select class="form-control form-select" id="filterDepartment" style="width:140px;" onchange="filterTable()">
+                <option value="">All Depts</option>
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="EEE">EEE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+                <option value="IT">IT</option>
+              </select>
+              <select class="form-control form-select" id="filterStatus" style="width:140px;" onchange="filterTable()">
+                <option value="">All Status</option>
+                <option value="Completed">Completed</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Pending">Pending</option>
+              </select>
+              <select class="form-control form-select" id="filterBatch" style="width:120px;" onchange="filterTable()">
+                <option value="">All Batch</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+              </select>
+            </div>
+            <!-- Table -->
+            <div class="table-container">
+              <table class="table" id="assignmentsTable">
+                <thead>
+                  <tr>
+                    <th style="width:50px;">S.No</th>
+                    <th>Alumni Name</th>
+                    <th>Department</th>
+                    <th>Batch</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Completion %</th>
+                    <th style="width:80px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+            <!-- Pagination -->
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 22px;border-top:1px solid var(--border);">
+              <div class="pagination-info" id="paginationInfo"></div>
+              <div class="pagination" id="pagination"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TEAM LEADERS SECTION ─── -->
+      <section id="section-teamLeaders" class="content-section">
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Team Leaders</h1>
+            <p>Manage all team leaders and their assignments.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('addTeamLeaderModal')">
+            <i class="fas fa-plus"></i> Add Team Leader
+          </button>
+        </div>
+        <div class="card fade-in-up">
+          <div class="card-body" style="padding:0;">
+            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
+              <div class="search-bar" style="max-width:280px;flex:1;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search team leaders..." id="tlSearch" oninput="filterTeamLeaders()">
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="table" id="tlTable">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Department</th>
+                    <th>Members</th>
+                    <th>Assigned Alumni</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tlBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TEAM MEMBERS SECTION ─── -->
+      <section id="section-teamMembers" class="content-section">
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Team Members</h1>
+            <p>Manage all team members under team leaders.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('addTeamMemberModal')">
+            <i class="fas fa-plus"></i> Add Team Member
+          </button>
+        </div>
+        <div class="card fade-in-up">
+          <div class="card-body" style="padding:0;">
+            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
+              <div class="search-bar" style="max-width:280px;flex:1;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search team members..." id="tmSearch" oninput="filterTeamMembers()">
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="table" id="tmTable">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Department</th>
+                    <th>Team Leader</th>
+                    <th>Assigned Alumni</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tmBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── ASSIGN ALUMNI SECTION ─── -->
+      <section id="section-assignAlumni" class="content-section">
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Assign Alumni</h1>
+            <p>Assign alumni data to team leaders for professional details update.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('assignAlumniModal')">
+            <i class="fas fa-plus"></i> New Assignment
+          </button>
+        </div>
+        <div class="card fade-in-up">
+          <div class="card-header">
+            <h3><i class="fas fa-history" style="color:var(--primary);margin-right:8px;"></i>Assignment History</h3>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-container">
+              <table class="table" id="assignHistoryTable">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Team Leader</th>
+                    <th>Department</th>
+                    <th>No. of Alumni</th>
+                    <th>Assigned Date</th>
+                    <th>Status</th>
+                    <th>Completed</th>
+                  </tr>
+                </thead>
+                <tbody id="assignHistoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── PROGRESS SECTION ─── -->
+      <section id="section-progress" class="content-section">
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Progress Overview</h1>
+            <p>Detailed progress tracking across all departments and teams.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div class="card fade-in-up">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Department Progress</h3>
+            </div>
+            <div class="card-body" id="deptProgressList"></div>
+          </div>
+          <div class="card fade-in-up">
+            <div class="card-header">
+              <h3><i class="fas fa-trophy" style="color:var(--primary);margin-right:8px;"></i>Team Leader Rankings</h3>
+            </div>
+            <div class="card-body" id="tlRankingList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── REPORTS SECTION ─── -->
+      <section id="section-reports" class="content-section">
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Reports</h1>
+            <p>Generate and view detailed reports.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8 stagger-children">
+          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating alumni report...')">
+            <div class="card-body" style="text-align:center;">
+              <div style="font-size:2.5rem;color:var(--primary);margin-bottom:12px;">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <h4 style="font-weight:600;margin:0;">Alumni Report</h4>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Complete alumni data</p>
+            </div>
+          </div>
+          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating progress report...')">
+            <div class="card-body" style="text-align:center;">
+              <div style="font-size:2.5rem;color:var(--success);margin-bottom:12px;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h4 style="font-weight:600;margin:0;">Progress Report</h4>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Update progress data</p>
+            </div>
+          </div>
+          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating department report...')">
+            <div class="card-body" style="text-align:center;">
+              <div style="font-size:2.5rem;color:var(--warning);margin-bottom:12px;">
+                <i class="fas fa-building"></i>
+              </div>
+              <h4 style="font-weight:600;margin:0;">Department Report</h4>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Dept-wise statistics</p>
+            </div>
+          </div>
+          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating team report...')">
+            <div class="card-body" style="text-align:center;">
+              <div style="font-size:2.5rem;color:var(--danger);margin-bottom:12px;">
+                <i class="fas fa-users"></i>
+              </div>
+              <h4 style="font-weight:600;margin:0;">Team Report</h4>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Team performance data</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SETTINGS SECTION ─── -->
+      <section id="section-settings" class="content-section">
+        <div class="page-header fade-in">
+          <div class="page-header-left">
+            <h1>Settings</h1>
+            <p>Manage your system preferences and configurations.</p>
+          </div>
+        </div>
+        <div class="card fade-in-up">
+          <div class="card-body">
+            <div class="tabs" id="settingsTabs">
+              <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)">General</button>
+              <button class="tab-item" data-tab="notifications" onclick="switchSettingsTab('notifications',this)">Notifications</button>
+              <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)">Security</button>
+              <button class="tab-item" data-tab="backup" onclick="switchSettingsTab('backup',this)">Backup</button>
+            </div>
+            <div class="tab-content active" id="tab-general">
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">System Name</label>
+                <input class="form-control" type="text" value="Alumni Professional Details Update Management System" style="max-width:400px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Admin Email</label>
+                <input class="form-control" type="email" value="admin@alumnims.edu" style="max-width:400px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Records Per Page</label>
+                <select class="form-control form-select" style="max-width:200px;">
+                  <option>5</option>
+                  <option selected>10</option>
+                  <option>20</option>
+                  <option>50</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="Toast.success('Settings','General settings saved successfully!')">
+                <i class="fas fa-save"></i> Save Settings
+              </button>
+            </div>
+            <div class="tab-content" id="tab-notifications">
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:12px;">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span> Email Notifications
+                </label>
+                <label class="form-switch" style="margin-bottom:12px;">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span> SMS Notifications
+                </label>
+                <label class="form-switch" style="margin-bottom:12px;">
+                  <input type="checkbox">
+                  <span class="slider"></span> Weekly Digest
+                </label>
+              </div>
+              <button class="btn btn-primary" onclick="Toast.success('Settings','Notification preferences saved!')">
+                <i class="fas fa-save"></i> Save Preferences
+              </button>
+            </div>
+            <div class="tab-content" id="tab-security">
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
+                <input class="form-control" type="password" value="password123" style="max-width:400px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
+                <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
+                <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;">
+              </div>
+              <button class="btn btn-primary" onclick="Toast.success('Security','Password changed successfully!')">
+                <i class="fas fa-save"></i> Update Password
+              </button>
+            </div>
+            <div class="tab-content" id="tab-backup">
+              <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;">
+                <i class="fas fa-info-circle" style="color:var(--primary);"></i>
+                Last backup: 05 July 2026, 03:00 AM
+              </p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="Toast.success('Backup','Backup started successfully!')">
+                  <i class="fas fa-database"></i> Backup Now
+                </button>
+                <button class="btn btn-secondary" onclick="Toast.info('Backup','Downloading latest backup...')">
+                  <i class="fas fa-download"></i> Download Backup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── IMPORT ALUMNI SECTION ─── -->
+      <div class="dashboard-section" id="section-import" style="display:none;">
+        <div class="section-header">
+          <h2><i class="fas fa-file-import"></i> Import Alumni Data</h2>
+          <div class="breadcrumb">
+            <span>Admin</span> <i class="fas fa-chevron-right"></i> <span>Import Alumni</span>
+          </div>
+        </div>
+
+        <!-- Import Stats -->
+        <div class="stats-grid" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#DBEAFE;color:#2563EB;">
+              <i class="fas fa-database"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Total Records</h3>
+              <p>2,450</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#D1FAE5;color:#10B981;">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Last Import</h3>
+              <p>05 Jul 2026</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FEF3C7;color:#F59E0B;">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Pending Import</h3>
+              <p>0</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#EDE9FE;color:#8B5CF6;">
+              <i class="fas fa-file-excel"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Format</h3>
+              <p>.xlsx, .csv</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Form Card -->
+        <div class="card" style="padding:32px;margin-bottom:24px;">
+          <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:8px;">Upload Excel File</h3>
+          <p style="font-size:0.85rem;color:#64748B;margin-bottom:24px;">Upload an Excel file (.xlsx or .csv) containing alumni records. Maximum file size: 50 MB.</p>
+          
+          <div class="upload-zone" id="uploadZone" style="border:2px dashed #CBD5E1;border-radius:12px;padding:48px;text-align:center;background:#F8FAFC;cursor:pointer;transition:all 0.3s;">
+            <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#2563EB;margin-bottom:16px;display:block;"></i>
+            <h4 style="font-size:1rem;color:#1E293B;margin-bottom:8px;font-weight:600;">Drag & drop your file here</h4>
+            <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:16px;">or click to browse files</p>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+            <button class="btn btn-primary" id="browseBtn" type="button">
+              <i class="fas fa-folder-open"></i> Browse Files
+            </button>
+            <div id="fileName" style="margin-top:12px;font-size:0.85rem;color:#10B981;display:none;"></div>
+          </div>
+
+          <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="importBtn" disabled>
+              <i class="fas fa-upload"></i> Import Data
+            </button>
+            <button class="btn btn-outline" id="downloadTemplateBtn">
+              <i class="fas fa-download"></i> Download Template
+            </button>
+          </div>
+
+          <!-- Import Rules -->
+          <div style="margin-top:24px;padding:16px;background:#FFFBEB;border-radius:8px;border:1px solid #FDE68A;">
+            <h5 style="font-size:0.85rem;font-weight:600;color:#92400E;margin-bottom:8px;">
+              <i class="fas fa-info-circle"></i> Import Guidelines
+            </h5>
+            <ul style="font-size:0.8rem;color:#92400E;list-style:disc;padding-left:20px;line-height:1.8;">
+              <li>File must be in .xlsx, .xls, or .csv format</li>
+              <li>Maximum file size: 50 MB</li>
+              <li>Required columns: FullName, Department, Batch, Email</li>
+              <li>Duplicate email entries will be skipped</li>
+              <li>Download the template for the correct column structure</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Import History Table -->
+        <div class="card" style="padding:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+            <h3 style="font-size:1rem;font-weight:600;color:#1E293B;">Import History</h3>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>File Name</th>
+                  <th>Records Imported</th>
+                  <th>Duplicates Skipped</th>
+                  <th>Errors</th>
+                  <th>Imported By</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="importHistoryBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── AUDIT LOGS SECTION ─── -->
+      <div class="dashboard-section" id="section-audit" style="display:none;">
+        <div class="section-header">
+          <h2><i class="fas fa-history"></i> Audit Logs</h2>
+          <div class="breadcrumb">
+            <span>Admin</span> <i class="fas fa-chevron-right"></i> <span>Audit Logs</span>
+          </div>
+        </div>
+
+        <!-- Audit Filters -->
+        <div class="card" style="padding:20px;margin-bottom:20px;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <div class="form-group" style="min-width:160px;flex:1;">
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Action Type</label>
+              <select class="form-control" id="auditActionFilter">
+                <option value="all">All Actions</option>
+                <option value="login">Login</option>
+                <option value="logout">Logout</option>
+                <option value="create">Create</option>
+                <option value="update">Update</option>
+                <option value="delete">Delete</option>
+                <option value="import">Import</option>
+                <option value="export">Export</option>
+                <option value="assign">Assign</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width:160px;flex:1;">
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">User Role</label>
+              <select class="form-control" id="auditRoleFilter">
+                <option value="all">All Roles</option>
+                <option value="Admin">Admin</option>
+                <option value="Leader">Team Leader</option>
+                <option value="Member">Team Member</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width:160px;flex:1;">
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Date Range</label>
+              <input type="date" class="form-control" id="auditDateFrom">
+            </div>
+            <div class="form-group" style="min-width:160px;flex:1;">
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">&nbsp;</label>
+              <input type="date" class="form-control" id="auditDateTo">
+            </div>
+            <div style="align-self:flex-end;">
+              <button class="btn btn-primary" id="auditFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+              <button class="btn btn-outline" id="auditResetBtn"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit Log Table -->
+        <div class="card" style="padding:24px;">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Action</th>
+                  <th>Target</th>
+                  <th>IP Address</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="auditLogBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="auditPagination"></div>
+        </div>
+      </div>
+
+      <!-- ─── QUICK ACTIONS ─── -->
+      <div style="position:fixed;bottom:24px;right:24px;z-index:1020;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <div id="quickActionMenu" style="display:none;flex-direction:column;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addTeamLeaderModal')" style="border-radius:50px;box-shadow:var(--shadow-md);">
+            <i class="fas fa-user-tie"></i> Add Team Leader
+          </button>
+          <button class="btn btn-success btn-sm" onclick="openModal('addTeamMemberModal')" style="border-radius:50px;box-shadow:var(--shadow-md);">
+            <i class="fas fa-user-plus"></i> Add Team Member
+          </button>
+          <button class="btn btn-warning btn-sm" onclick="openModal('assignAlumniModal')" style="border-radius:50px;box-shadow:var(--shadow-md);color:#fff;">
+            <i class="fas fa-user-graduate"></i> Assign Alumni
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('reports',document.querySelector('[data-section=reports]'))" style="border-radius:50px;box-shadow:var(--shadow-md);">
+            <i class="fas fa-file-alt"></i> View Reports
+          </button>
+        </div>
+        <button class="btn btn-primary" id="fabButton" onclick="toggleQuickActions()" style="width:52px;height:52px;border-radius:50%;padding:0;box-shadow:var(--shadow-lg);font-size:1.4rem;">
+          <i class="fas fa-plus" id="fabIcon"></i>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- ============================================================
+         FOOTER
+         ============================================================ -->
+    <footer style="text-align:center;padding:20px 32px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-muted);background:var(--bg-white);">
+      <p style="margin:0;">
+        &copy; 2026 Alumni Professional Details Update Management System. All rights reserved.
+        <span style="display:inline-block;margin:0 8px;">|</span>
+        Developed with <i class="fas fa-heart" style="color:#EF4444;"></i> by AlumniMS Team
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- ============================================================
+       MODALS
+       ============================================================ -->
+
+  <!-- Add Team Leader Modal -->
+  <div class="modal-overlay" id="addTeamLeaderModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-tie" style="color:var(--primary);margin-right:8px;"></i>Add Team Leader</h3>
+        <button class="modal-close" onclick="closeModal('addTeamLeaderModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input class="form-control" type="text" id="tlName" placeholder="Full Name" required>
+          <label class="floating-label">Full Name <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="email" id="tlEmail" placeholder="Email Address" required>
+          <label class="floating-label">Email Address <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="tel" id="tlPhone" placeholder="Phone Number" required>
+          <label class="floating-label">Phone Number <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <select class="form-control form-select" id="tlDept" required>
+            <option value="" disabled selected hidden></option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+            <option value="ME">ME</option>
+            <option value="CE">CE</option>
+            <option value="IT">IT</option>
+          </select>
+          <label class="floating-label">Department <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="password" id="tlPassword" placeholder="Password" required>
+          <label class="floating-label">Password <span style="color:var(--danger);">*</span></label>
+          <button class="password-toggle" onclick="togglePassword('tlPassword',this)" type="button">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addTeamLeaderModal')">Cancel</button>
+        <button class="btn btn-primary" id="tlSubmitBtn" onclick="submitAddTeamLeader()">
+          <i class="fas fa-save"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Team Member Modal -->
+  <div class="modal-overlay" id="addTeamMemberModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus" style="color:var(--primary);margin-right:8px;"></i>Add Team Member</h3>
+        <button class="modal-close" onclick="closeModal('addTeamMemberModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input class="form-control" type="text" id="tmName" placeholder="Full Name" required>
+          <label class="floating-label">Full Name <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="email" id="tmEmail" placeholder="Email Address" required>
+          <label class="floating-label">Email Address <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="tel" id="tmPhone" placeholder="Phone Number" required>
+          <label class="floating-label">Phone Number <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <select class="form-control form-select" id="tmDept" required>
+            <option value="" disabled selected hidden></option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+            <option value="ME">ME</option>
+            <option value="CE">CE</option>
+            <option value="IT">IT</option>
+          </select>
+          <label class="floating-label">Department <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <select class="form-control form-select" id="tmTeamLeader" required>
+            <option value="" disabled selected hidden></option>
+          </select>
+          <label class="floating-label">Select Team Leader <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="password" id="tmPassword" placeholder="Password" required>
+          <label class="floating-label">Password <span style="color:var(--danger);">*</span></label>
+          <button class="password-toggle" onclick="togglePassword('tmPassword',this)" type="button">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')">Cancel</button>
+        <button class="btn btn-primary" id="tmSubmitBtn" onclick="submitAddTeamMember()">
+          <i class="fas fa-save"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Alumni Modal -->
+  <div class="modal-overlay" id="assignAlumniModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-graduate" style="color:var(--primary);margin-right:8px;"></i>Assign Alumni Data</h3>
+        <button class="modal-close" onclick="closeModal('assignAlumniModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <select class="form-control form-select" id="assignTeamLeader" required>
+            <option value="" disabled selected hidden></option>
+          </select>
+          <label class="floating-label">Select Team Leader <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="number" id="assignCount" placeholder="Number of Alumni" min="1" max="500" required>
+          <label class="floating-label">Number of Alumni <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <select class="form-control form-select" id="assignBatch">
+            <option value="">All Batches</option>
+          </select>
+          <label class="floating-label">Batch Filter</label>
+        </div>
+        <div style="background:var(--bg-light);padding:12px 16px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-muted);">
+          <i class="fas fa-info-circle" style="color:var(--primary);margin-right:6px;"></i>
+          Only unassigned alumni matching the filter will be assigned.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('assignAlumniModal')">Cancel</button>
+        <button class="btn btn-primary" id="assignSubmitBtn" onclick="submitAssignAlumni()">
+          <i class="fas fa-check"></i> Assign
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SESSION TIMEOUT OVERLAY
+       ============================================================ -->
+  <div class="session-timeout-overlay" id="sessionTimeout">
+    <div class="session-timeout-card">
+      <div class="session-timeout-icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <h3>Session Timeout</h3>
+      <p>Your session is about to expire due to inactivity.</p>
+      <div class="session-timeout-timer" id="sessionTimer">60</div>
+      <p style="font-size:0.8rem;color:var(--text-muted);">seconds remaining</p>
+      <div class="session-timeout-actions">
+        <button class="btn btn-secondary" onclick="extendSession()">Stay Logged In</button>
+        <button class="btn btn-danger" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TOAST CONTAINER
+       ============================================================ -->
+  <div class="toast-container"></div>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <script src="js/app.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/services/api.js"></script>
+  <script>
+    if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
+  </script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

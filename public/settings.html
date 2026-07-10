@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Settings - Alumni Professional Details Update Management System">
+  <title>Settings - APIUMS | Alumni Professional Information Update Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="loadingScreen" class="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Settings...</div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-graduation-cap"></i></div>
+        <span class="sidebar-brand-text">AlumniMS</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-label">Main</div>
+      <a class="sidebar-item" href="admin.html"><i class="fas fa-th-large"></i><span class="sidebar-item-text">Dashboard</span></a>
+      <a class="sidebar-item" href="admin.html?section=teamLeaders"><i class="fas fa-user-tie"></i><span class="sidebar-item-text">Team Leaders</span></a>
+      <a class="sidebar-item" href="admin.html?section=teamMembers"><i class="fas fa-users"></i><span class="sidebar-item-text">Team Members</span></a>
+      <a class="sidebar-item" href="admin.html?section=assignAlumni"><i class="fas fa-user-graduate"></i><span class="sidebar-item-text">Assign Alumni</span></a>
+      <a class="sidebar-item" href="progress.html"><i class="fas fa-chart-line"></i><span class="sidebar-item-text">Progress</span></a>
+      <a class="sidebar-item" href="reports.html"><i class="fas fa-file-alt"></i><span class="sidebar-item-text">Reports</span></a>
+      <div class="sidebar-label">Other</div>
+      <a class="sidebar-item active" href="settings.html"><i class="fas fa-cog"></i><span class="sidebar-item-text">Settings</span></a>
+      <a class="sidebar-item" href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span class="sidebar-item-text">Logout</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">AD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Admin User</div>
+          <div class="sidebar-user-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="page-wrapper" id="pageWrapper">
+    <header class="top-navbar" id="topNavbar">
+      <div class="navbar-left">
+        <button class="navbar-hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="breadcrumb">
+          <a href="admin.html">Home</a>
+          <span class="separator"><i class="fas fa-chevron-right"></i></span>
+          <span class="current">Settings</span>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="navbar-search">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search settings..." oninput="handleGlobalSearch(this.value)">
+        </div>
+        <div class="dropdown" id="notifDropdown">
+          <button class="navbar-btn" onclick="toggleNotifications(event)"><i class="fas fa-bell"></i><span class="notification-count">3</span></button>
+          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;right:auto;left:-120px;">
+            <div class="dropdown-header">Notifications</div>
+            <div id="notifList"></div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" style="justify-content:center;color:var(--primary);font-weight:500;" onclick="showAllNotifications()">View All Notifications</button>
+          </div>
+        </div>
+        <div class="dropdown" id="profileDropdown">
+          <button class="navbar-profile" onclick="toggleProfileDropdown(event)">
+            <div class="navbar-profile-avatar" style="background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.85rem;">AD</div>
+            <span class="navbar-profile-name">Admin</span>
+            <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#94A3B8;"></i>
+          </button>
+          <div class="dropdown-menu" id="profileMenu">
+            <button class="dropdown-item" onclick="window.location.href='profile.html'"><i class="fas fa-user"></i> View Profile</button>
+            <button class="dropdown-item" onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> Settings</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="page-content" id="pageContent">
+      <div class="page-header fade-in">
+        <div class="page-header-left">
+          <h1>Settings</h1>
+          <p>Manage your system preferences and configurations.</p>
+        </div>
+      </div>
+
+      <div class="card fade-in-up">
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab-item active" data-tab="general" onclick="switchTab('general', this)"><i class="fas fa-sliders-h"></i> General Settings</button>
+            <button class="tab-item" data-tab="notifications" onclick="switchTab('notifications', this)"><i class="fas fa-bell"></i> Notification Settings</button>
+            <button class="tab-item" data-tab="security" onclick="switchTab('security', this)"><i class="fas fa-shield-alt"></i> Security Settings</button>
+            <button class="tab-item" data-tab="database" onclick="switchTab('database', this)"><i class="fas fa-database"></i> Database Settings</button>
+          </div>
+
+          <div class="tab-content active" id="tab-general">
+            <div style="max-width:600px;">
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Site Name</label>
+                <input class="form-control" type="text" id="siteName" value="Alumni Management System" style="max-width:400px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">College Name</label>
+                <input class="form-control" type="text" id="collegeName" value="Example College of Engineering" style="max-width:400px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Logo Upload</label>
+                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                  <div id="logoPreview" style="width:80px;height:80px;border-radius:12px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;background:var(--bg-light);color:var(--text-muted);font-size:0.7rem;text-align:center;overflow:hidden;">
+                    <i class="fas fa-image" style="font-size:1.5rem;opacity:0.4;"></i>
+                  </div>
+                  <div>
+                    <input type="file" id="logoUpload" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('logoUpload').click()"><i class="fas fa-upload"></i> Choose File</button>
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin:6px 0 0;">PNG, JPG or SVG. Max 2MB.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Timezone</label>
+                <select class="form-control form-select" id="timezone" style="max-width:280px;">
+                  <option value="IST" selected>India Standard Time (IST, UTC+5:30)</option>
+                  <option value="EST">Eastern Standard Time (EST, UTC-5:00)</option>
+                  <option value="PST">Pacific Standard Time (PST, UTC-8:00)</option>
+                  <option value="GMT">Greenwich Mean Time (GMT, UTC+0:00)</option>
+                  <option value="CST">Central Standard Time (CST, UTC-6:00)</option>
+                  <option value="AEST">Australian Eastern Standard Time (AEST, UTC+10:00)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Language</label>
+                <select class="form-control form-select" id="language" style="max-width:280px;">
+                  <option value="en" selected>English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="ta">Tamil</option>
+                  <option value="te">Telugu</option>
+                  <option value="bn">Bengali</option>
+                  <option value="mr">Marathi</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="saveGeneralSettings()"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-notifications">
+            <div style="max-width:500px;">
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:16px;display:flex;">
+                  <input type="checkbox" id="emailNotif" checked>
+                  <span class="slider"></span>
+                  <span><strong>Email Notifications</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Receive email alerts for important updates</span></span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:16px;display:flex;">
+                  <input type="checkbox" id="smsNotif" checked>
+                  <span class="slider"></span>
+                  <span><strong>SMS Notifications</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Receive SMS alerts for critical updates</span></span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Digest Frequency</label>
+                <select class="form-control form-select" id="digestFreq" style="max-width:280px;">
+                  <option value="daily">Daily</option>
+                  <option value="weekly" selected>Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:16px;display:flex;">
+                  <input type="checkbox" id="notifNewAssign" checked>
+                  <span class="slider"></span>
+                  <span><strong>Notify on New Assignment</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Get notified when alumni are assigned</span></span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:16px;display:flex;">
+                  <input type="checkbox" id="notifCompletion" checked>
+                  <span class="slider"></span>
+                  <span><strong>Notify on Completion</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Get notified when updates are completed</span></span>
+                </label>
+              </div>
+              <button class="btn btn-primary" onclick="saveNotificationSettings()"><i class="fas fa-save"></i> Save</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-security">
+            <div style="max-width:500px;">
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Session Timeout</label>
+                <select class="form-control form-select" id="sessionTimeout" style="max-width:280px;">
+                  <option value="15">15 Minutes</option>
+                  <option value="30" selected>30 Minutes</option>
+                  <option value="60">1 Hour</option>
+                  <option value="120">2 Hours</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Password Minimum Length</label>
+                <select class="form-control form-select" id="passMinLength" style="max-width:280px;">
+                  <option value="6">6 Characters</option>
+                  <option value="8" selected>8 Characters</option>
+                  <option value="10">10 Characters</option>
+                  <option value="12">12 Characters</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:16px;display:flex;">
+                  <input type="checkbox" id="requireSpecialChars" checked>
+                  <span class="slider"></span>
+                  <span><strong>Require Special Characters</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Passwords must include special characters (@, #, $, etc.)</span></span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch" style="margin-bottom:16px;display:flex;">
+                  <input type="checkbox" id="twoFactorAuth">
+                  <span class="slider"></span>
+                  <span><strong>Two-Factor Authentication</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Add an extra layer of security to your account</span></span>
+                </label>
+              </div>
+              <button class="btn btn-primary" onclick="saveSecuritySettings()"><i class="fas fa-save"></i> Save</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-database">
+            <div style="max-width:500px;">
+              <h4 style="font-size:0.95rem;font-weight:600;margin:0 0 16px;color:var(--text-dark);"><i class="fas fa-server" style="color:var(--primary);margin-right:8px;"></i> Database Configuration</h4>
+              <div style="background:var(--bg-light);border-radius:var(--radius-sm);padding:20px;margin-bottom:20px;border:1px solid var(--border);">
+                <div style="display:grid;grid-template-columns:140px 1fr;gap:12px 16px;font-size:0.85rem;">
+                  <span style="color:var(--text-muted);font-weight:500;">Host:</span>
+                  <span style="color:var(--text-dark);font-weight:600;font-family:monospace;" id="dbHost">localhost</span>
+                  <span style="color:var(--text-muted);font-weight:500;">Port:</span>
+                  <span style="color:var(--text-dark);font-weight:600;font-family:monospace;" id="dbPort">1433</span>
+                  <span style="color:var(--text-muted);font-weight:500;">Database:</span>
+                  <span style="color:var(--text-dark);font-weight:600;font-family:monospace;" id="dbName">alumni_db</span>
+                  <span style="color:var(--text-muted);font-weight:500;">User:</span>
+                  <span style="color:var(--text-dark);font-weight:600;font-family:monospace;" id="dbUser">sa</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+                <button class="btn btn-primary" onclick="testDbConnection()"><i class="fas fa-plug"></i> Test Connection</button>
+                <button class="btn btn-secondary" onclick="backupDatabase()"><i class="fas fa-database"></i> Backup Database</button>
+              </div>
+              <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:var(--radius-sm);padding:12px 16px;font-size:0.8rem;color:#166534;display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-shield-alt" style="font-size:1rem;"></i>
+                All data is stored securely with encryption at rest and in transit.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer style="text-align:center;padding:20px 32px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-muted);background:var(--bg-white);">
+      <p style="margin:0;">&copy; 2026 Alumni Professional Details Update Management System. All rights reserved. <span style="display:inline-block;margin:0 8px;">|</span> Developed with <i class="fas fa-heart" style="color:#EF4444;"></i> by AlumniMS Team</p>
+    </footer>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="js/app.js"></script>
+  <script src="js/services/api.js"></script>
+  <script>if(!API.isAuthenticated()){window.location.href='index.html'}</script>
+  <script src="js/settings.js"></script>
+</body>
+</html>

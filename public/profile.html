@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="My Profile - Alumni Professional Details Update Management System">
+  <title>My Profile - APIUMS | Alumni Professional Information Update Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="loadingScreen" class="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Profile...</div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="fas fa-graduation-cap"></i></div>
+        <span class="sidebar-brand-text">AlumniMS</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-label">Main</div>
+      <a class="sidebar-item" href="admin.html"><i class="fas fa-th-large"></i><span class="sidebar-item-text">Dashboard</span></a>
+      <a class="sidebar-item" href="admin.html?section=teamLeaders"><i class="fas fa-user-tie"></i><span class="sidebar-item-text">Team Leaders</span></a>
+      <a class="sidebar-item" href="admin.html?section=teamMembers"><i class="fas fa-users"></i><span class="sidebar-item-text">Team Members</span></a>
+      <a class="sidebar-item" href="admin.html?section=assignAlumni"><i class="fas fa-user-graduate"></i><span class="sidebar-item-text">Assign Alumni</span></a>
+      <a class="sidebar-item" href="progress.html"><i class="fas fa-chart-line"></i><span class="sidebar-item-text">Progress</span></a>
+      <a class="sidebar-item" href="reports.html"><i class="fas fa-file-alt"></i><span class="sidebar-item-text">Reports</span></a>
+      <div class="sidebar-label">Other</div>
+      <a class="sidebar-item active" href="profile.html"><i class="fas fa-user"></i><span class="sidebar-item-text">My Profile</span></a>
+      <a class="sidebar-item" href="settings.html"><i class="fas fa-cog"></i><span class="sidebar-item-text">Settings</span></a>
+      <a class="sidebar-item" href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span class="sidebar-item-text">Logout</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">AD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Admin User</div>
+          <div class="sidebar-user-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="page-wrapper" id="pageWrapper">
+    <header class="top-navbar" id="topNavbar">
+      <div class="navbar-left">
+        <button class="navbar-hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="breadcrumb">
+          <a href="admin.html">Home</a>
+          <span class="separator"><i class="fas fa-chevron-right"></i></span>
+          <span class="current">My Profile</span>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="navbar-search">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search..." oninput="handleGlobalSearch(this.value)">
+        </div>
+        <div class="dropdown" id="notifDropdown">
+          <button class="navbar-btn" onclick="toggleNotifications(event)"><i class="fas fa-bell"></i><span class="notification-count">3</span></button>
+          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;right:auto;left:-120px;">
+            <div class="dropdown-header">Notifications</div>
+            <div id="notifList"></div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" style="justify-content:center;color:var(--primary);font-weight:500;" onclick="showAllNotifications()">View All Notifications</button>
+          </div>
+        </div>
+        <div class="dropdown" id="profileDropdown">
+          <button class="navbar-profile" onclick="toggleProfileDropdown(event)">
+            <div class="navbar-profile-avatar" style="background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.85rem;">AD</div>
+            <span class="navbar-profile-name">Admin</span>
+            <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#94A3B8;"></i>
+          </button>
+          <div class="dropdown-menu" id="profileMenu">
+            <button class="dropdown-item" onclick="window.location.href='profile.html'"><i class="fas fa-user"></i> View Profile</button>
+            <button class="dropdown-item" onclick="window.location.href='settings.html'"><i class="fas fa-cog"></i> Settings</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="page-content" id="pageContent">
+      <div class="page-header fade-in">
+        <div class="page-header-left">
+          <h1>My Profile</h1>
+          <p>Manage your personal and professional information.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openEditProfile()"><i class="fas fa-edit"></i> Edit Profile</button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1">
+          <div class="card fade-in-up" style="text-align:center;">
+            <div class="card-body">
+              <div style="position:relative;display:inline-block;margin-bottom:16px;">
+                <div id="profileAvatar" class="avatar avatar-2xl" style="background:linear-gradient(135deg,#2563EB,#7C3AED);font-size:2.5rem;width:120px;height:120px;">AD</div>
+                <div style="position:absolute;bottom:4px;right:4px;width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;border:3px solid #fff;cursor:pointer;" onclick="document.getElementById('avatarUpload').click()" title="Change Avatar">
+                  <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="avatarUpload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)">
+              </div>
+              <h2 id="profileDisplayName" style="font-size:1.25rem;font-weight:700;margin:0 0 4px;color:var(--text-dark);">Admin User</h2>
+              <span class="badge badge-primary" style="margin-bottom:12px;"><i class="fas fa-shield-alt"></i> Administrator</span>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin:4px 0;"><i class="fas fa-envelope"></i> <span id="profileDisplayEmail">admin@college.edu</span></p>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin:4px 0;"><i class="fas fa-calendar-alt"></i> Joined <span id="profileDisplayJoinDate">January 2024</span></p>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin:4px 0;"><i class="fas fa-sign-in-alt"></i> Last login: <span id="profileDisplayLastLogin">Today at 10:30 AM</span></p>
+              <hr style="border-color:var(--border);margin:20px 0;">
+              <div style="text-align:left;">
+                <div class="progress-label"><span>Profile Completion</span><span id="profileCompletionPct">90%</span></div>
+                <div class="progress progress-lg"><div class="progress-bar" id="profileCompletionBar" style="width:90%;"></div></div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:8px 0 0;text-align:center;"><i class="fas fa-info-circle"></i> Complete your profile to reach 100%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-2">
+          <div class="card fade-in-up">
+            <div class="card-body" style="padding-bottom:0;">
+              <div class="tabs">
+                <button class="tab-item active" onclick="switchProfileTab('details', this)"><i class="fas fa-user-circle"></i> Profile Details</button>
+                <button class="tab-item" onclick="switchProfileTab('password', this)"><i class="fas fa-lock"></i> Change Password</button>
+                <button class="tab-item" onclick="switchProfileTab('activity', this)"><i class="fas fa-history"></i> Activity Log</button>
+              </div>
+            </div>
+
+            <div class="card-body tab-content active" id="profileTabDetails">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 style="font-size:0.9rem;font-weight:600;color:var(--text-dark);margin:0 0 16px;"><i class="fas fa-user-circle" style="color:var(--primary);margin-right:8px;"></i>Personal Information</h4>
+                  <div style="display:flex;flex-direction:column;gap:14px;">
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Full Name</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profFullName">Admin User</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Email</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profEmail">admin@college.edu</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Phone</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profPhone">+91 98765 43210</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Date of Birth</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profDob">15/03/1990</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Address</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profAddress">123, College Road, City</span></div>
+                  </div>
+                </div>
+                <div>
+                  <h4 style="font-size:0.9rem;font-weight:600;color:var(--text-dark);margin:0 0 16px;"><i class="fas fa-briefcase" style="color:var(--primary);margin-right:8px;"></i>Professional Information</h4>
+                  <div style="display:flex;flex-direction:column;gap:14px;">
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Department</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profDept">Computer Science</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Role</label><span class="badge badge-primary" id="profRole">Administrator</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Employee ID</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profEmpId">EMP001</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Join Date</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profJoinDate">15 Jan 2024</span></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:500;display:block;">Last Login</label><span style="font-size:0.9rem;color:var(--text-dark);font-weight:500;" id="profLastLogin">08 Jul 2026 10:30 AM</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body tab-content" id="profileTabPassword">
+              <div style="max-width:480px;">
+                <h4 style="font-size:0.9rem;font-weight:600;color:var(--text-dark);margin:0 0 20px;"><i class="fas fa-lock" style="color:var(--primary);margin-right:8px;"></i>Change Password</h4>
+                <div class="form-group">
+                  <input class="form-control" type="password" id="currentPassword" placeholder="Current Password">
+                  <label class="floating-label">Current Password</label>
+                  <button class="password-toggle" onclick="togglePasswordField('currentPassword', this)" type="button"><i class="far fa-eye"></i></button>
+                </div>
+                <div class="form-group">
+                  <input class="form-control" type="password" id="newPassword" placeholder="New Password" oninput="checkPasswordStrength(this.value)">
+                  <label class="floating-label">New Password</label>
+                  <button class="password-toggle" onclick="togglePasswordField('newPassword', this)" type="button"><i class="far fa-eye"></i></button>
+                </div>
+                <div style="display:flex;gap:4px;margin:0 0 8px;">
+                  <div id="str1" style="height:4px;flex:1;background:#E2E8F0;border-radius:4px;transition:background 0.3s ease;"></div>
+                  <div id="str2" style="height:4px;flex:1;background:#E2E8F0;border-radius:4px;transition:background 0.3s ease;"></div>
+                  <div id="str3" style="height:4px;flex:1;background:#E2E8F0;border-radius:4px;transition:background 0.3s ease;"></div>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:16px;"><span id="strengthLabel">Enter a password</span></div>
+                <div class="form-group">
+                  <input class="form-control" type="password" id="confirmPassword" placeholder="Confirm New Password">
+                  <label class="floating-label">Confirm New Password</label>
+                  <button class="password-toggle" onclick="togglePasswordField('confirmPassword', this)" type="button"><i class="far fa-eye"></i></button>
+                </div>
+                <button class="btn btn-primary" onclick="updatePassword()"><i class="fas fa-save"></i> Update Password</button>
+              </div>
+            </div>
+
+            <div class="card-body tab-content" id="profileTabActivity">
+              <h4 style="font-size:0.9rem;font-weight:600;color:var(--text-dark);margin:0 0 16px;"><i class="fas fa-history" style="color:var(--primary);margin-right:8px;"></i>Recent Activity</h4>
+              <div id="activityTimeline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer style="text-align:center;padding:20px 32px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-muted);background:var(--bg-white);">
+      <p style="margin:0;">&copy; 2026 Alumni Professional Details Update Management System. All rights reserved. <span style="display:inline-block;margin:0 8px;">|</span> Developed with <i class="fas fa-heart" style="color:#EF4444;"></i> by AlumniMS Team</p>
+    </footer>
+  </div>
+
+  <div class="modal-overlay" id="editProfileModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit" style="color:var(--primary);margin-right:8px;"></i>Edit Profile</h3>
+        <button class="modal-close" onclick="closeEditProfile()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-group">
+            <input class="form-control" type="text" id="editName" placeholder="Full Name">
+            <label class="floating-label">Full Name</label>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="email" id="editEmail" placeholder="Email Address">
+            <label class="floating-label">Email Address</label>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="tel" id="editPhone" placeholder="Phone Number">
+            <label class="floating-label">Phone Number</label>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="text" id="editDob" placeholder="Date of Birth (DD/MM/YYYY)">
+            <label class="floating-label">Date of Birth</label>
+          </div>
+          <div class="form-group md:col-span-2">
+            <input class="form-control" type="text" id="editAddress" placeholder="Address">
+            <label class="floating-label">Address</label>
+          </div>
+          <div class="form-group">
+            <select class="form-control form-select" id="editDept">
+              <option value="" disabled selected hidden></option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Mechanical">Mechanical</option>
+              <option value="Civil">Civil</option>
+            </select>
+            <label class="floating-label">Department</label>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="text" id="editEmpId" placeholder="Employee ID">
+            <label class="floating-label">Employee ID</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
+        <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfileChanges()"><i class="fas fa-save"></i> Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="js/app.js"></script>
+  <script src="js/services/api.js"></script>
+  <script>if(!API.isAuthenticated()){window.location.href='index.html'}</script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Alumni Professional Details Update Management System - Login">
+  <meta name="theme-color" content="#2563EB">
+  <title>APIUMS | Alumni Professional Information Update Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="login-page">
+    <!-- Left Illustration -->
+    <div class="login-illustration">
+      <div class="college-name">
+        <i class="fas fa-university"></i>&nbsp; MZCET
+      </div>
+      <div class="illustration-icons">
+        <div class="icon-circle"><i class="fas fa-graduation-cap"></i></div>
+        <div class="icon-circle"><i class="fas fa-building"></i></div>
+        <div class="icon-circle"><i class="fas fa-users"></i></div>
+        <div class="icon-circle"><i class="fas fa-chart-line"></i></div>
+        <div class="icon-circle"><i class="fas fa-user-graduate"></i></div>
+        <div class="icon-circle"><i class="fas fa-handshake"></i></div>
+        <div class="icon-circle"><i class="fas fa-globe"></i></div>
+      </div>
+      <div class="illustration-text">
+        <h2>Welcome to MZCET Alumni Portal</h2>
+        <!-- <p>Stay connected with your alma mater. Update your professional details, network with fellow alumni, and explore new opportunities.</p> -->
+      </div>
+    </div>
+
+    <!-- Right Login Form -->
+    <div class="login-form-wrapper">
+      <div class="login-card stagger-children">
+        <!-- Logo -->
+        <div class="logo-container">
+          <div class="logo-circle">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <h1 class="login-title">Alumni Professional Information<br>Update Management System</h1>
+        <p class="login-subtitle">Sign in to your account</p>
+
+        <!-- Login Form -->
+        <form id="loginForm" novalidate autocomplete="off">
+          <!-- Username -->
+          <div class="form-group floating">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" class="form-control" id="username" placeholder="Username" autocomplete="off" required>
+            <label for="username" class="floating-label">Username</label>
+            <div class="form-error" id="usernameError"></div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group floating">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" class="form-control" id="password" placeholder="Password" autocomplete="off" required>
+            <label for="password" class="floating-label">Password</label>
+            <button type="button" class="password-toggle" id="passwordToggle" tabindex="-1" aria-label="Toggle password visibility">
+              <i class="fas fa-eye"></i>
+            </button>
+            <div class="form-error" id="passwordError"></div>
+          </div>
+
+          <!-- Role -->
+          <!-- <div class="form-group floating select-group">
+            <i class="fas fa-user-tag input-icon"></i>
+            <select class="form-control form-select" id="role" required>
+              <option value="" disabled selected>Select your role</option>
+              <option value="Admin">Admin</option>
+              <option value="Team Leader">Team Leader</option>
+              <option value="Team Member">Team Member</option>
+            </select>
+            <label for="role" class="floating-label">Role</label>
+            <div class="form-error" id="roleError"></div>
+          </div> -->
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-options">
+            <label class="form-check">
+              <input type="checkbox" id="rememberMe">
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="forgot-link">Forgot Password?</a>
+          </div>
+
+          <!-- Sign In Button -->
+          <button type="submit" class="btn-login" id="loginBtn">
+            <span class="btn-spinner"></span>
+            <span class="btn-text">Sign In</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="login-loading-overlay" id="loginLoadingOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Signing in...</p>
+    <p class="loading-subtext">Please wait while we verify your credentials</p>
+  </div>
+
+  <script src="js/services/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
