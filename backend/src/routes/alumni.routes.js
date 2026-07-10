@@ -53,7 +53,7 @@ router.put(
 
 router.patch(
   '/:alumniId/draft',
-  authorize(ROLES.MEMBER),
+  authorize(ROLES.MEMBER, ROLES.LEADER),
   alumniController.saveDraft
 );
 
@@ -71,7 +71,7 @@ router.post(
 
 router.patch(
   '/assignments/:assignmentId/status',
-  authorize(ROLES.MEMBER),
+  authorize(ROLES.MEMBER, ROLES.LEADER),
   alumniController.updateAssignmentStatus
 );
 

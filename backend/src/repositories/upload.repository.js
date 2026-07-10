@@ -41,10 +41,16 @@ async function getImportHistory({ page, limit, offset }) {
 }
 
 async function ensureColumn(pool, columnName, columnDef) {
-  const check = await pool.request().query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Alumni' AND COLUMN_NAME = '" + columnName + "'");
-  if (check.recordset.length === 0) {
-    await pool.request().query("ALTER TABLE Alumni ADD " + columnName + " " + columnDef);
-  }
+  const query = `
+    IF NOT EXISTS (
+      SELECT * FROM sys.columns 
+      WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = '${columnName}'
+    )
+    BEGIN
+      ALTER TABLE dbo.Alumni ADD ${columnName} ${columnDef};
+    END
+  `;
+  await pool.request().query(query);
 }
 
 async function batchInsertAlumni(records) {
@@ -59,6 +65,11 @@ async function batchInsertAlumni(records) {
 
   try {
     for (const record of records) {
+      if (!record.registerNo || String(record.registerNo).trim() === '' || String(record.registerNo).trim().toLowerCase() === 'null') {
+        const { logger } = require('../utils/logger');
+        logger.warn('Skipping batch insert record due to missing or invalid registerNo: ' + JSON.stringify(record));
+        continue;
+      }
       await transaction.request()
         .input('registerNo', sql.NVarChar(30), record.registerNo)
         .input('name', sql.NVarChar(150), record.name)
@@ -92,9 +103,25 @@ async function findByRegisterNo(registerNo) {
   return result.recordset[0];
 }
 
+async function updateAlumniFields(alumniId, fields) {
+  const pool = await getPool();
+  const request = pool.request();
+  request.input('alumniId', sql.Int, alumniId);
+  
+  const setClauses = [];
+  Object.keys(fields).forEach((key, index) => {
+    request.input(`val_${index}`, sql.NVarChar(sql.MAX), fields[key]);
+    setClauses.push(`${key} = @val_${index}`);
+  });
+
+  const query = `UPDATE Alumni SET ${setClauses.join(', ')} WHERE alumni_id = @alumniId`;
+  await request.query(query);
+}
+
 module.exports = {
   createImportLog,
   getImportHistory,
   batchInsertAlumni,
-  findByRegisterNo
+  findByRegisterNo,
+  updateAlumniFields
 };

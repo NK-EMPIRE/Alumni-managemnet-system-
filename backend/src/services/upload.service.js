@@ -74,6 +74,28 @@ async function processExcelImport(filePath, currentUser) {
   for (const row of validRows) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
+      const fieldsToUpdate = {};
+      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation'];
+      
+      checkFields.forEach(f => {
+        const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
+                        f === 'workingDetails' ? 'working_details' :
+                        f === 'linkedinProfile' ? 'linkedin_profile' :
+                        f.replace(/([A-Z])/g, "_$1").toLowerCase();
+
+        const incomingVal = row[f];
+        const existingVal = existing[dbField];
+
+        if (incomingVal !== null && incomingVal !== undefined && String(incomingVal).trim() !== '') {
+          if (existingVal === null || existingVal === undefined || String(existingVal).trim() !== String(incomingVal).trim()) {
+            fieldsToUpdate[dbField] = String(incomingVal).trim();
+          }
+        }
+      });
+
+      if (Object.keys(fieldsToUpdate).length > 0) {
+        await uploadRepository.updateAlumniFields(existing.alumni_id, fieldsToUpdate);
+      }
       duplicateCount++;
     } else {
       newRows.push(row);
