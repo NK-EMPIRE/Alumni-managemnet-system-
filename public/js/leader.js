@@ -173,6 +173,7 @@
       '</div></div>';
 
     container.innerHTML = html;
+    container.style.marginBottom = html ? '28px' : '0';
   }
 
   function populateTeamTable() {

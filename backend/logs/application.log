@@ -263,3 +263,16 @@
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:54:52.028"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:54:52.028"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 13:55:30.859","userId":19}
+{"ip":"::1","level":"info","loginId":"ert","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:26:50.624"}
+{"ip":"::1","level":"info","loginId":"sundar","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:36:42.820"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:36:46.940","userId":22}
+{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:04.690"}
+{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:05.929"}
+{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:06.630"}
+{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:06.913"}
+{"ip":"::1","level":"info","loginId":"admin@gmail.com","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:07.493"}
+{"ip":"::1","level":"info","loginId":"sundar","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:11.954"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:37:12.589","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:37:14.301","userId":22}
+{"ip":"::1","level":"info","loginId":"sundar","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:14.906"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:37:15.986","userId":22}
