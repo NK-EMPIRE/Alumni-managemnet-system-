@@ -229,50 +229,21 @@
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 11:16:53.769"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 11:19:08.659","userId":19}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-10 11:21:23.805","userId":20}
-{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 11:30:14.394"}
-{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 11:30:14.396"}
-{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 11:30:14.396"}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 11:30:35.794"}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 11:30:38.763"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 11:31:32.223","userId":1}
-{"level":"warn","message":"Email not configured. Skipping email send.","subject":"APIUMS - Password Reset","timestamp":"2026-07-10 11:33:18.311","to":"naveen.karthickbusiness@gmail.com"}
-{"duplicates":0,"errors":2,"fileName":"1783663535877-4b4b438abbba063b.xlsx","imported":0,"level":"info","message":"[AUDIT] EXCEL_IMPORTED","timestamp":"2026-07-10 11:35:36.762","total":2,"userId":1}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 11:45:19.034","userId":19}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 11:47:29.799","userId":19}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 11:49:26.131"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 11:49:38.800","userId":1}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 11:49:44.909","userId":1}
-{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 12:37:31.307"}
-{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 12:37:31.308"}
-{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 12:37:31.309"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-10 12:37:48.610","userId":21}
-{"error":"Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","ip":"::1","level":"error","message":"GET /api/v1/dashboard/member","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:631:26)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","timestamp":"2026-07-10 13:18:05.255","userId":21}
-{"level":"error","message":"UNEXPECTED: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:631:26)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","timestamp":"2026-07-10 13:18:05.256"}
-{"error":"Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","ip":"::1","level":"error","message":"GET /api/v1/alumni/assigned?page=1&limit=500","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:631:26)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","timestamp":"2026-07-10 13:18:05.261","userId":21}
-{"level":"error","message":"UNEXPECTED: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:631:26)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","timestamp":"2026-07-10 13:18:05.263"}
-{"level":"info","message":"Migrations: Users table department column verified/added","timestamp":"2026-07-10 13:24:12.763"}
-{"level":"info","message":"Migrations: Alumni table extra columns verified/added","timestamp":"2026-07-10 13:24:13.892"}
-{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 13:24:13.895"}
-{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:24:13.895"}
-{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:24:13.895"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-10 13:24:40.824","userId":21}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 13:25:34.992","userId":19}
-{"level":"info","message":"Migrations: Users table department column verified/added","timestamp":"2026-07-10 13:54:49.977"}
-{"level":"info","message":"Migrations: Alumni table extra columns verified/added","timestamp":"2026-07-10 13:54:52.025"}
-{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 13:54:52.027"}
-{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:54:52.028"}
-{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:54:52.028"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 13:55:30.859","userId":19}
-{"ip":"::1","level":"info","loginId":"ert","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:26:50.624"}
-{"ip":"::1","level":"info","loginId":"sundar","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:36:42.820"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:36:46.940","userId":22}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:04.690"}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:05.929"}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:06.630"}
-{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:06.913"}
-{"ip":"::1","level":"info","loginId":"admin@gmail.com","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:07.493"}
-{"ip":"::1","level":"info","loginId":"sundar","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:11.954"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:37:12.589","userId":22}
-{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:37:14.301","userId":22}
-{"ip":"::1","level":"info","loginId":"sundar","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-10 14:37:14.906"}
-{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-10 14:37:15.986","userId":22}
+{"error":"Failed to connect to 103.207.1.87:1433 in 15000ms","level":"error","message":"Failed to start server:","timestamp":"2026-07-10 11:50:28.497"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 11:50:38.596"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 11:50:38.603"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 11:50:38.604"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 11:50:58.062","userId":19}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 12:10:59.965"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 12:10:59.968"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 12:10:59.969"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 12:11:40.113","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-10 12:14:36.712","userId":20}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 12:24:47.717","userId":1}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 12:29:21.981"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 12:29:21.983"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 12:29:21.984"}
+{"level":"warn","message":"Email not configured. Skipping email send.","subject":"APIUMS - Password Reset","timestamp":"2026-07-10 12:30:06.657","to":"sundar@1gmail.com"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 12:30:53.708","userId":19}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 12:35:16.555","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 12:35:59.867","userId":19}

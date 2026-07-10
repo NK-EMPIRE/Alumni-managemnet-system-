@@ -312,7 +312,7 @@ BEGIN
     DECLARE @adminRoleId INT;
     SELECT @adminRoleId = role_id FROM dbo.Roles WHERE role_name = 'ADMIN';
     INSERT INTO dbo.Users (role_id, first_name, last_name, email, password_hash, is_active)
-    VALUES (@adminRoleId, 'Admin', 'User', 'admin@alumni.edu', '$2b$10$eJ.QY/UiDxt.zReJM8TCFe.a/FFs6X4mGPItuGhDA/W4pWSpT1BP.', 1);
+    VALUES (@adminRoleId, 'Admin', 'User', 'admin@alumni.edu', '$2a$12$dBdejpulbaoNtO09eSez8eaWYGQbTWPvJ6IFltI9kTCNq.w45w/ZC', 1);
 END
 
 PRINT 'Database schema created successfully!';

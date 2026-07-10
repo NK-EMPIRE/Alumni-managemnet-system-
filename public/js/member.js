@@ -359,6 +359,11 @@
     }
 
     function handleSaveDraft() {
+        if (!validateForm()) {
+            showToast('Please fill all required fields', 'error');
+            return;
+        }
+
         saveDraftBtn.classList.add('loading');
         saveDraftBtn.disabled = true;
 

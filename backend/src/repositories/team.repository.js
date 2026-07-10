@@ -25,7 +25,7 @@ async function findAll({ page, limit, offset, search }) {
     SELECT
       t.team_id, t.team_name, t.leader_id, t.is_active,
       t.distribution_locked, t.created_at, t.updated_at,
-      u.first_name + ' ' + u.last_name AS leader_name,
+      RTRIM(CONCAT(u.first_name, ' ', u.last_name)) AS leader_name,
       (SELECT COUNT(*) FROM TeamMembers tm WHERE tm.team_id = t.team_id) AS member_count
     FROM Teams t
     INNER JOIN Users u ON t.leader_id = u.user_id
@@ -46,7 +46,7 @@ async function findById(teamId) {
       SELECT
         t.team_id, t.team_name, t.leader_id, t.is_active,
         t.distribution_locked, t.created_at, t.updated_at,
-        u.first_name + ' ' + u.last_name AS leader_name
+        RTRIM(CONCAT(u.first_name, ' ', u.last_name)) AS leader_name
       FROM Teams t
       INNER JOIN Users u ON t.leader_id = u.user_id
       WHERE t.team_id = @teamId

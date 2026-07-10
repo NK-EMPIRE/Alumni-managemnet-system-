@@ -86,9 +86,9 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
   return professionalInfo;
 }
 
-async function getMyAssignments(userId, role, { page, limit, onlyMe }) {
+async function getMyAssignments(userId, role, { page, limit }) {
   const p = computeOffset(page, limit);
-  if (role === 'LEADER' && !onlyMe) {
+  if (role === 'LEADER') {
     const pool = await getPool();
     const teamResult = await pool.request()
       .input('leaderId', sql.Int, userId)
