@@ -369,6 +369,33 @@ async function updateAssignmentMember(assignmentId, memberId) {
     .query('UPDATE AlumniAssignments SET member_id = @memberId WHERE assignment_id = @assignmentId');
 }
 
+async function getAssignmentHistory({ page, limit, offset }) {
+  const pool = await getPool();
+  const countResult = await pool.request()
+    .query(`SELECT COUNT(*) AS total FROM (SELECT team_id, COUNT(*) AS cnt FROM AlumniAssignments GROUP BY team_id) t`);
+  const total = countResult.recordset[0].total;
+
+  const result = await pool.request()
+    .input('offset', sql.Int, offset)
+    .input('limit', sql.Int, limit)
+    .query(`
+      SELECT
+        t.team_id,
+        CONCAT(RTRIM(u.first_name), ' ', RTRIM(u.last_name)) AS leader_name,
+        u.department,
+        COUNT(aa.assignment_id) AS total_assigned,
+        SUM(CASE WHEN aa.status = 'Completed' THEN 1 ELSE 0 END) AS completed,
+        MAX(aa.assigned_date) AS last_assigned
+      FROM AlumniAssignments aa
+      INNER JOIN Teams t ON aa.team_id = t.team_id
+      INNER JOIN Users u ON t.leader_id = u.user_id
+      GROUP BY t.team_id, u.first_name, u.last_name, u.department
+      ORDER BY last_assigned DESC
+      OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+    `);
+  return { total, rows: result.recordset };
+}
+
 module.exports = {
   findAll,
   findById,
@@ -382,5 +409,6 @@ module.exports = {
   getPendingAssignmentsByTeam,
   updateAssignmentMember,
   updateAssignmentStatus,
-  getStats
+  getStats,
+  getAssignmentHistory
 };

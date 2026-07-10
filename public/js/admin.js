@@ -7,29 +7,6 @@
    1. DATA – Dummy datasets for Indian context
    ──────────────────────────────────────────────────────────── */
 
-const dummyAlumni = [
-  { name: 'Aarav Sharma', dept: 'CSE', batch: 2022, company: 'Google', leader: 'Amit Verma', status: 'Completed', progress: 100 },
-  { name: 'Aditi Patel', dept: 'ECE', batch: 2021, company: 'Microsoft', leader: 'Priya Sharma', status: 'Completed', progress: 100 },
-  { name: 'Arjun Singh', dept: 'EEE', batch: 2020, company: 'Amazon', leader: 'Rajesh Patel', status: 'In Progress', progress: 65 },
-  { name: 'Bhavna Gupta', dept: 'ME', batch: 2023, company: 'TCS', leader: 'Sunita Gupta', status: 'Pending', progress: 0 },
-  { name: 'Deepak Verma', dept: 'CE', batch: 2022, company: 'Infosys', leader: 'Vikram Singh', status: 'Completed', progress: 100 },
-  { name: 'Divya Reddy', dept: 'IT', batch: 2021, company: 'Wipro', leader: 'Amit Verma', status: 'Completed', progress: 100 },
-  { name: 'Gaurav Kumar', dept: 'CSE', batch: 2020, company: 'Flipkart', leader: 'Priya Sharma', status: 'In Progress', progress: 45 },
-  { name: 'Ishita Nair', dept: 'ECE', batch: 2023, company: 'Uber', leader: 'Rajesh Patel', status: 'Pending', progress: 0 },
-  { name: 'Karan Mehta', dept: 'IT', batch: 2022, company: 'IBM', leader: 'Sunita Gupta', status: 'Completed', progress: 100 },
-  { name: 'Lavanya Joshi', dept: 'ME', batch: 2021, company: 'Accenture', leader: 'Vikram Singh', status: 'In Progress', progress: 78 },
-  { name: 'Manish Tiwari', dept: 'CE', batch: 2020, company: 'Google', leader: 'Amit Verma', status: 'Completed', progress: 100 },
-  { name: 'Neha Saxena', dept: 'CSE', batch: 2023, company: 'Microsoft', leader: 'Priya Sharma', status: 'Pending', progress: 0 },
-  { name: 'Pranav Iyer', dept: 'EEE', batch: 2022, company: 'Amazon', leader: 'Rajesh Patel', status: 'Completed', progress: 100 },
-  { name: 'Radhika Desai', dept: 'IT', batch: 2021, company: 'TCS', leader: 'Sunita Gupta', status: 'In Progress', progress: 55 },
-  { name: 'Rohan Mishra', dept: 'ECE', batch: 2020, company: 'Infosys', leader: 'Vikram Singh', status: 'Completed', progress: 100 },
-  { name: 'Shreya Rao', dept: 'ME', batch: 2023, company: 'Wipro', leader: 'Amit Verma', status: 'In Progress', progress: 30 },
-  { name: 'Siddharth Malhotra', dept: 'CSE', batch: 2021, company: 'Flipkart', leader: 'Priya Sharma', status: 'Completed', progress: 100 },
-  { name: 'Tanvi Kulkarni', dept: 'CE', batch: 2022, company: 'Uber', leader: 'Rajesh Patel', status: 'Pending', progress: 0 },
-  { name: 'Varun Chopra', dept: 'EEE', batch: 2020, company: 'IBM', leader: 'Sunita Gupta', status: 'Completed', progress: 100 },
-  { name: 'Vidya Pillai', dept: 'IT', batch: 2023, company: 'Accenture', leader: 'Vikram Singh', status: 'In Progress', progress: 82 }
-];
-
 const dummyTeamLeaders = [
   { name: 'Amit Verma', email: 'amit.verma@alumnims.edu', phone: '+91-9876543210', dept: 'CSE', members: 4, assigned: 35 },
   { name: 'Priya Sharma', email: 'priya.sharma@alumnims.edu', phone: '+91-9876543211', dept: 'ECE', members: 3, assigned: 28 },
@@ -83,20 +60,17 @@ const dummyDeptProgress = [
   { dept: 'IT', completed: 389, total: 595, color: '#EC4899' }
 ];
 
-const dummyAssignHistory = [
-  { leader: 'Amit Verma', dept: 'CSE', count: 15, date: '05 Jul 2026', status: 'In Progress', completed: 8 },
-  { leader: 'Priya Sharma', dept: 'ECE', count: 12, date: '04 Jul 2026', status: 'Completed', completed: 12 },
-  { leader: 'Rajesh Patel', dept: 'EEE', count: 20, date: '03 Jul 2026', status: 'In Progress', completed: 10 },
-  { leader: 'Sunita Gupta', dept: 'IT', count: 10, date: '02 Jul 2026', status: 'Completed', completed: 10 },
-  { leader: 'Vikram Singh', dept: 'ME', count: 8, date: '01 Jul 2026', status: 'Pending', completed: 0 },
-  { leader: 'Amit Verma', dept: 'CSE', count: 12, date: '28 Jun 2026', status: 'Completed', completed: 12 },
-  { leader: 'Rajesh Patel', dept: 'EEE', count: 15, date: '25 Jun 2026', status: 'Completed', completed: 15 },
-  { leader: 'Priya Sharma', dept: 'ECE', count: 10, date: '22 Jun 2026', status: 'Completed', completed: 10 }
+const dummyBatchProgress = [
+  { batch: '2024', completed: 120, total: 200, color: '#3B82F6' },
+  { batch: '2023', completed: 280, total: 400, color: '#10B981' },
+  { batch: '2022', completed: 350, total: 450, color: '#F59E0B' },
+  { batch: '2021', completed: 180, total: 250, color: '#EF4444' },
+  { batch: '2020', completed: 90, total: 120, color: '#8B5CF6' }
 ];
 
 /* ────────────────────────────────────────────────────────────
-   1b. IMPORT & AUDIT DATA
-   ──────────────────────────────────────────────────────────── */
+    1b. IMPORT & AUDIT DATA
+    ──────────────────────────────────────────────────────────── */
 
 var importHistory = [
   { file: 'alumni_batch_2023.xlsx', imported: 245, duplicates: 12, errors: 3, by: 'Admin User', date: '05 Jul 2026', status: 'Completed' },
@@ -107,26 +81,7 @@ var importHistory = [
   { file: 'batch_2020_update.xlsx', imported: 0, duplicates: 0, errors: 0, by: 'Admin User', date: '10 May 2026', status: 'Failed' }
 ];
 
-var auditLogs = [
-  { ts: '08 Jul 2026, 09:15:32', user: 'Admin User', role: 'Admin', action: 'login', target: 'Admin Dashboard', ip: '192.168.1.100', status: 'Success' },
-  { ts: '08 Jul 2026, 09:20:15', user: 'Amit Verma', role: 'Leader', action: 'login', target: 'Team Leader Panel', ip: '192.168.1.102', status: 'Success' },
-  { ts: '08 Jul 2026, 09:25:44', user: 'Admin User', role: 'Admin', action: 'create', target: 'Team Leader: Priya Sharma', ip: '192.168.1.100', status: 'Success' },
-  { ts: '08 Jul 2026, 10:00:12', user: 'Rajesh Patel', role: 'Leader', action: 'login', target: 'Team Leader Panel', ip: '192.168.1.105', status: 'Success' },
-  { ts: '08 Jul 2026, 10:05:33', user: 'Admin User', role: 'Admin', action: 'import', target: 'alumni_batch_2023.xlsx (245 records)', ip: '192.168.1.100', status: 'Success' },
-  { ts: '08 Jul 2026, 10:30:21', user: 'Priya Sharma', role: 'Leader', action: 'assign', target: '12 alumni to Team Members', ip: '192.168.1.103', status: 'Success' },
-  { ts: '08 Jul 2026, 11:00:08', user: 'Anjali Rao', role: 'Member', action: 'login', target: 'Member Panel', ip: '192.168.1.110', status: 'Success' },
-  { ts: '08 Jul 2026, 11:15:56', user: 'Admin User', role: 'Admin', action: 'update', target: 'Alumni record: Aarav Sharma', ip: '192.168.1.100', status: 'Success' },
-  { ts: '08 Jul 2026, 11:30:42', user: 'Kavita Joshi', role: 'Member', action: 'update', target: '5 alumni details updated', ip: '192.168.1.112', status: 'Success' },
-  { ts: '07 Jul 2026, 14:20:10', user: 'Admin User', role: 'Admin', action: 'export', target: 'Department report (CSE)', ip: '192.168.1.100', status: 'Success' },
-  { ts: '07 Jul 2026, 15:00:05', user: 'Sunita Gupta', role: 'Leader', action: 'login', target: 'Team Leader Panel', ip: '192.168.1.106', status: 'Success' },
-  { ts: '07 Jul 2026, 15:45:33', user: 'Admin User', role: 'Admin', action: 'delete', target: 'Duplicate alumni entry #1042', ip: '192.168.1.100', status: 'Success' },
-  { ts: '07 Jul 2026, 16:10:22', user: 'Rajesh Patel', role: 'Leader', action: 'assign', target: '20 alumni to Team Members', ip: '192.168.1.105', status: 'Success' },
-  { ts: '07 Jul 2026, 17:00:18', user: 'Vikram Singh', role: 'Leader', action: 'logout', target: 'Team Leader Panel', ip: '192.168.1.107', status: 'Success' },
-  { ts: '06 Jul 2026, 08:30:00', user: 'Unknown', role: 'Admin', action: 'login', target: 'Admin Dashboard', ip: '203.0.113.45', status: 'Failed' },
-  { ts: '06 Jul 2026, 09:00:12', user: 'Admin User', role: 'Admin', action: 'login', target: 'Admin Dashboard', ip: '192.168.1.100', status: 'Success' },
-  { ts: '06 Jul 2026, 09:30:45', user: 'Amit Verma', role: 'Leader', action: 'assign', target: '15 alumni from CSE department', ip: '192.168.1.102', status: 'Success' },
-  { ts: '06 Jul 2026, 10:15:33', user: 'Admin User', role: 'Admin', action: 'import', target: 'cse_alumni_2022.xlsx (180 records)', ip: '192.168.1.100', status: 'Success' }
-];
+var auditLogs = [];
 
 /* ────────────────────────────────────────────────────────────
    2. STATE
@@ -155,7 +110,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initSessionTimeout();
     setupClickOutside();
     populateTeamLeaderDropdowns();
-    initCharts();
     initImportHandlers();
     initAuditHandlers();
     fetchAllData();
@@ -171,6 +125,8 @@ var _apiMembers = null;
 var _apiAlumni = null;
 var _apiImportHistory = null;
 var _apiTeams = null;
+var _apiAuditLogs = null;
+var _apiAssignHistory = null;
 
 function setUserInfo() {
   var user = API.getUser();
@@ -187,7 +143,9 @@ function fetchAllData() {
     API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).catch(function () { return null; }),
     API.getAlumni({ page: 1, limit: 500 }).catch(function () { return null; }),
     API.getImportHistory().catch(function () { return null; }),
-    API.getTeams().catch(function () { return null; })
+    API.getTeams().catch(function () { return null; }),
+    API.getAuditLogs({ page: 1, limit: 1000 }).catch(function () { return null; }),
+    API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; })
   ]).then(function (results) {
     _dashboardData = results[0] && results[0].success ? results[0].data : null;
     _apiUsers = results[1] && results[1].success ? results[1].data : null;
@@ -195,6 +153,8 @@ function fetchAllData() {
     _apiAlumni = results[3] && results[3].success ? results[3].data : null;
     _apiImportHistory = results[4] && results[4].success ? results[4].data : null;
     _apiTeams = results[5] && results[5].success ? results[5].data : null;
+    _apiAuditLogs = results[6] && results[6].success ? results[6].data : null;
+    _apiAssignHistory = results[7] && results[7].success ? results[7].data : null;
     _apiDataLoaded = true;
     populateDashboardStats();
     populateActivityFeed();
@@ -207,7 +167,6 @@ function fetchAllData() {
     populateNotifications();
     populateImportHistory();
     populateAuditLogTable();
-    if (_dashboardData) updateChartsWithData(_dashboardData);
     populateTeamLeaderDropdowns();
   }).catch(function () {
     _apiDataLoaded = false;
@@ -251,12 +210,12 @@ function populateDashboardStats() {
     tmCount = d.totalMembers || 0;
     progressPct = d.completionPercentage || 0;
   } else {
-    total = dummyAlumni.length;
-    pending = dummyAlumni.filter(function (a) { return a.status === 'Pending'; }).length;
-    completed = dummyAlumni.filter(function (a) { return a.status === 'Completed'; }).length;
+    total = 0;
+    pending = 0;
+    completed = 0;
     tlCount = dummyTeamLeaders.length;
     tmCount = dummyTeamMembers.length;
-    progressPct = Math.round((completed / total) * 100);
+    progressPct = 0;
   }
 
   setText('totalAlumni', total);
@@ -327,7 +286,7 @@ function populateTable() {
       };
     });
   } else {
-    state.filteredData = dummyAlumni.slice();
+    state.filteredData = [];
   }
   state.currentPage = 1;
   renderTable();
@@ -395,11 +354,30 @@ function renderPagination(total) {
   if (!container) return;
   var html = '';
   html += '<button class="pagination-item ' + (page <= 1 ? 'disabled' : '') + '" onclick="goToPage(' + (page - 1) + ')" ' + (page <= 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
-  for (var i = 1; i <= totalPages; i++) {
+
+  var rangeStart = Math.max(1, page - 2);
+  var rangeEnd = Math.min(totalPages, page + 2);
+
+  if (rangeStart > 1) {
+    html += '<button class="pagination-item" onclick="goToPage(1)">1</button>';
+    if (rangeStart > 2) html += '<span style="padding:0 4px;color:var(--text-muted);">...</span>';
+  }
+  for (var i = rangeStart; i <= rangeEnd; i++) {
     html += '<button class="pagination-item ' + (i === page ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
   }
+  if (rangeEnd < totalPages) {
+    if (rangeEnd < totalPages - 1) html += '<span style="padding:0 4px;color:var(--text-muted);">...</span>';
+    html += '<button class="pagination-item" onclick="goToPage(' + totalPages + ')">' + totalPages + '</button>';
+  }
+
   html += '<button class="pagination-item ' + (page >= totalPages ? 'disabled' : '') + '" onclick="goToPage(' + (page + 1) + ')" ' + (page >= totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
   container.innerHTML = html;
+}
+
+function changeRowsPerPage(val) {
+  state.rowsPerPage = parseInt(val);
+  state.currentPage = 1;
+  renderTable();
 }
 
 function goToPage(page) {
@@ -429,8 +407,14 @@ function filterTable() {
       status: a.status || 'Pending',
       progress: a.progress || (a.status === 'Completed' ? 100 : a.status === 'Pending' ? 0 : Math.round(Math.random() * 80 + 10))
     };
-  }) : dummyAlumni;
+  }) : [];
 
+  if (!source || source.length === 0) {
+    state.filteredData = [];
+    state.currentPage = 1;
+    renderTable();
+    return;
+  }
   state.filteredData = source.filter(function (item) {
     var match = true;
     if (q && item.name.toLowerCase().indexOf(q) === -1) match = false;
@@ -516,13 +500,25 @@ function populateTeamMembersTable() {
 function populateAssignHistoryTable() {
   var tbody = document.getElementById('assignHistoryBody');
   if (!tbody) return;
-  var data;
-  if (_apiDataLoaded && _apiTeams && _apiTeams.assignments) {
-    data = _apiTeams.assignments.map(function (a) {
-      return { leader: a.leader || a.teamLeader || '-', dept: a.department || '-', count: a.count || a.alumniCount || 0, date: a.date || a.assignedAt || '-', status: a.status || 'Pending', completed: a.completed || 0 };
+  var data = [];
+  if (_apiDataLoaded && _apiAssignHistory && _apiAssignHistory.records) {
+    data = _apiAssignHistory.records.map(function (a) {
+      var dateStr = '';
+      if (a.last_assigned) {
+        var d = new Date(a.last_assigned);
+        dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+      var totalAssigned = a.total_assigned || 0;
+      var completedCount = a.completed || 0;
+      return {
+        leader: a.leader_name || '-',
+        dept: a.department || '-',
+        count: totalAssigned,
+        date: dateStr || '-',
+        status: completedCount === totalAssigned && totalAssigned > 0 ? 'Completed' : totalAssigned > 0 ? 'In Progress' : 'Pending',
+        completed: completedCount
+      };
     });
-  } else {
-    data = dummyAssignHistory;
   }
   var html = '';
   data.forEach(function (item, i) {
@@ -537,6 +533,9 @@ function populateAssignHistoryTable() {
     html += '<td>' + item.completed + '/' + item.count + '</td>';
     html += '</tr>';
   });
+  if (data.length === 0) {
+    html = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:8px;opacity:0.4;"></i>No assignment history found</td></tr>';
+  }
   tbody.innerHTML = html;
 }
 
@@ -548,12 +547,14 @@ function populateDeptProgress() {
   if (!container) return;
   var data;
   var colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-  if (_apiDataLoaded && _dashboardData && _dashboardData.departmentWiseProgress) {
-    data = _dashboardData.departmentWiseProgress.map(function (d, i) {
-      return { dept: d.department || d.dept || '-', completed: d.completed || 0, total: d.total || 1, color: d.color || colors[i % colors.length] };
+  if (_apiDataLoaded && _dashboardData && _dashboardData.batchWiseProgress) {
+    data = _dashboardData.batchWiseProgress.map(function (d, i) {
+      return { dept: 'Batch ' + (d.batch || '-'), completed: d.completed || 0, total: d.total || 1, color: d.color || colors[i % colors.length] };
     });
   } else {
-    data = dummyDeptProgress;
+    data = dummyBatchProgress.map(function (d) {
+      return { dept: 'Batch ' + d.batch, completed: d.completed, total: d.total, color: d.color };
+    });
   }
   var html = '';
   data.forEach(function (d) {
@@ -585,12 +586,7 @@ function populateTLRankings() {
   var medals = ['#FFD700', '#C0C0C0', '#CD7F32'];
   rankedData.forEach(function (tl, i) {
     var medal = i < 3 ? '<span style="margin-right:8px;font-size:1.1rem;">' + (i === 0 ? '<i class="fas fa-trophy" style="color:#FFD700;"></i>' : i === 1 ? '<i class="fas fa-trophy" style="color:#C0C0C0;"></i>' : '<i class="fas fa-trophy" style="color:#CD7F32;"></i>') + '</span>' : '<span style="margin-right:8px;font-weight:600;color:var(--text-muted);width:20px;display:inline-block;">' + (i + 1) + '.</span>';
-    var completed;
-    if (_apiDataLoaded && _dashboardData && _dashboardData.leaderRankings) {
-      completed = i < rankedData.length ? rankedData[i].completed : 0;
-    } else {
-      completed = dummyAlumni.filter(function (a) { return a.leader === tl.name && a.status === 'Completed'; }).length;
-    }
+    var completed = i < rankedData.length ? rankedData[i].completed : 0;
     html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">';
     html += medal;
     html += '<div style="flex:1;"><strong style="font-size:0.85rem;">' + tl.name + '</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">' + tl.dept + ' Dept</span></div>';
@@ -703,9 +699,9 @@ function updateChartsWithData(dashData) {
       colors: ['#10B981', '#F59E0B', '#3B82F6']
     });
 
-    if (dashData && dashData.departmentWiseProgress) {
-      var deptLabels = dashData.departmentWiseProgress.map(function (d) { return d.department || d.dept; });
-      var deptValues = dashData.departmentWiseProgress.map(function (d) { return Math.round((d.completed / d.total) * 100) || 0; });
+    if (dashData && dashData.batchWiseProgress) {
+      var deptLabels = dashData.batchWiseProgress.map(function (d) { return 'Batch ' + (d.batch || ''); });
+      var deptValues = dashData.batchWiseProgress.map(function (d) { return Math.round((d.completed / d.total) * 100) || 0; });
       AlumniCharts.createBarChart('departmentChart', { labels: deptLabels, values: deptValues, label: 'Completion Rate (%)' });
     } else {
       AlumniCharts.createBarChart('departmentChart');
@@ -768,7 +764,6 @@ function navigateTo(section, el) {
       'teamMembers': 'Team Members',
       'assignAlumni': 'Assign Alumni',
       'progress': 'Progress',
-      'reports': 'Reports',
       'settings': 'Settings',
       'import': 'Import Alumni',
       'audit': 'Audit Logs'
@@ -1213,10 +1208,29 @@ function switchSettingsTab(tab, btn) {
    30. EXPORT BUTTON
    ──────────────────────────────────────────────────────────── */
 function handleExport() {
-  Toast.success('Export', 'Preparing your export file...');
-  setTimeout(function () {
-    Toast.success('Export', 'Export completed! File is ready for download.');
-  }, 2000);
+  var data = state.filteredData;
+  if (!data || data.length === 0) {
+    Toast.warning('Export', 'No data to export');
+    return;
+  }
+  var csv = '\uFEFF';
+  csv += 'S.No,Name,Department,Batch,Team Leader,Status,Progress(%)\r\n';
+  data.forEach(function (item, i) {
+    var name = '"' + (item.name || '').replace(/"/g, '""') + '"';
+    var dept = '"' + (item.dept || '').replace(/"/g, '""') + '"';
+    var batch = '"' + (item.batch || '').replace(/"/g, '""') + '"';
+    var leader = '"' + (item.leader || '').replace(/"/g, '""') + '"';
+    csv += (i + 1) + ',' + name + ',' + dept + ',' + batch + ',' + leader + ',' + (item.status || '') + ',' + (item.progress || 0) + '\r\n';
+  });
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'alumni_export_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+  Toast.success('Export', 'Exported ' + data.length + ' records');
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -1395,7 +1409,8 @@ function initImportHandlers() {
   /* Download template button */
   if (downloadBtn) {
     downloadBtn.addEventListener('click', function () {
-      Toast.info('Template Downloaded', 'Alumni import template has been downloaded successfully.');
+      API.downloadTemplate();
+      Toast.info('Template', 'Downloading alumni import template...');
     });
   }
 }
@@ -1464,7 +1479,26 @@ function getAuditStatusBadge(status) {
 }
 
 function populateAuditLogTable() {
-  auditState.filteredData = auditLogs.slice();
+  if (_apiDataLoaded && _apiAuditLogs && _apiAuditLogs.records) {
+    auditState.filteredData = _apiAuditLogs.records.map(function (item) {
+      var tsStr = '';
+      if (item.created_at) {
+        var d = new Date(item.created_at);
+        tsStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+      return {
+        ts: tsStr,
+        user: item.username || '-',
+        role: item.role_name || '-',
+        action: item.action || '-',
+        target: item.target || '-',
+        ip: item.ip_address || '-',
+        status: item.status || 'Success'
+      };
+    });
+  } else {
+    auditState.filteredData = auditLogs.slice();
+  }
   auditState.currentPage = 1;
   renderAuditLogTable();
 }
@@ -1569,19 +1603,41 @@ function applyAuditFilters() {
   var fromVal = dateFrom ? dateFrom.value : '';
   var toVal = dateTo ? dateTo.value : '';
 
-  auditState.filteredData = auditLogs.filter(function (item) {
+  var fullData;
+  if (_apiDataLoaded && _apiAuditLogs && _apiAuditLogs.records) {
+    fullData = _apiAuditLogs.records.map(function (item) {
+      var tsStr = '';
+      if (item.created_at) {
+        var d = new Date(item.created_at);
+        tsStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+      return {
+        ts: tsStr,
+        user: item.username || '-',
+        role: item.role_name || '-',
+        action: item.action || '-',
+        target: item.target || '-',
+        ip: item.ip_address || '-',
+        status: item.status || 'Success',
+        created_at: item.created_at
+      };
+    });
+  } else {
+    fullData = auditLogs.slice();
+  }
+  auditState.filteredData = fullData.filter(function (item) {
     var match = true;
     if (actionVal !== 'all' && item.action !== actionVal) match = false;
     if (roleVal !== 'all' && item.role !== roleVal) match = false;
     if (fromVal) {
       var fromDate = new Date(fromVal);
-      var itemDate = parseAuditDate(item.ts);
+      var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
       if (itemDate < fromDate) match = false;
     }
     if (toVal) {
       var toDate = new Date(toVal);
       toDate.setHours(23, 59, 59, 999);
-      var itemDate = parseAuditDate(item.ts);
+      var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
       if (itemDate > toDate) match = false;
     }
     return match;
@@ -1602,4 +1658,104 @@ function parseAuditDate(ts) {
   var month = months[dparts[1]] !== undefined ? months[dparts[1]] : 0;
   var year = parseInt(dparts[2], 10);
   return new Date(year, month, day);
+}
+
+/* ────────────────────────────────────────────────────────────
+    40. REPORTS – View & Export
+    ──────────────────────────────────────────────────────────── */
+function viewReportData(type, title) {
+  var columns, rows;
+  if (type === 'alumni') {
+    columns = ['Name', 'Department', 'Batch', 'Company', 'Designation', 'Status'];
+    if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
+      rows = _apiAlumni.records.map(function (a) {
+        return [a.name || (a.first_name + ' ' + (a.last_name || '')).trim(), a.department || a.dept || '-', a.batch || '-', a.company || a.working_details || '-', a.designation || '-', a.status || 'Pending'];
+      });
+    } else {
+      rows = [];
+    }
+  } else if (type === 'progress') {
+    columns = ['Batch', 'Total', 'Completed', 'Remaining', 'Completion %'];
+    if (_apiDataLoaded && _dashboardData && _dashboardData.batchWiseProgress) {
+      rows = _dashboardData.batchWiseProgress.map(function (d) {
+        var remaining = (d.total || 0) - (d.completed || 0);
+        var pct = d.total > 0 ? Math.round((d.completed / d.total) * 100) : 0;
+        return ['Batch ' + d.batch, d.total || 0, d.completed || 0, remaining, pct + '%'];
+      });
+    } else {
+      rows = dummyBatchProgress.map(function (d) {
+        var remaining = d.total - d.completed;
+        var pct = Math.round((d.completed / d.total) * 100);
+        return ['Batch ' + d.batch, d.total, d.completed, remaining, pct + '%'];
+      });
+    }
+  } else if (type === 'department') {
+    columns = ['Department', 'Total Leaders', 'Total Members', 'Assigned Alumni'];
+    if (_apiDataLoaded && _dashboardData && _dashboardData.departmentWiseProgress) {
+      rows = _dashboardData.departmentWiseProgress.map(function (d) {
+        return [d.department || d.dept || '-', '-', '-', (d.total || 0) + ' (' + (d.completed || 0) + ' completed)'];
+      });
+    } else {
+      rows = dummyDeptProgress.map(function (d) { return [d.dept, '-', '-', d.total + ' (' + d.completed + ' completed)']; });
+    }
+  } else if (type === 'team') {
+    columns = ['Leader', 'Members', 'Assigned', 'Completed', 'Progress'];
+    if (_apiDataLoaded && _apiTeams && _apiTeams.records) {
+      rows = _apiTeams.records.map(function (t) {
+        var pct = (t.assigned_count || 0) > 0 ? Math.round(((t.completed_count || 0) / (t.assigned_count || 1)) * 100) : 0;
+        return [t.leader_name || t.name || '-', t.member_count || 0, t.assigned_count || 0, t.completed_count || 0, pct + '%'];
+      });
+    } else {
+      rows = dummyTeamLeaders.map(function (t) {
+        var pct = t.assigned > 0 ? Math.round(((t.assigned * 0.6) / t.assigned) * 100) : 0;
+        return [t.name, t.members, t.assigned, Math.round(t.assigned * 0.6), pct + '%'];
+      });
+    }
+  } else {
+    Toast.error('Report', 'Unknown report type');
+    return;
+  }
+  showReportModal(title, columns, rows);
+}
+
+function showReportModal(title, columns, rows) {
+  var existing = document.getElementById('reportViewerModal');
+  if (existing) existing.remove();
+
+  var html = '<div id="reportViewerModal" class="modal-overlay" onclick="if(event.target===this)this.remove()">';
+  html += '<div class="modal-content" style="max-width:900px;max-height:85vh;overflow-y:auto;">';
+  html += '<div class="modal-header"><h3>' + title + '</h3><button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()">&times;</button></div>';
+  html += '<div class="modal-body" style="padding:20px;">';
+  html += '<div style="margin-bottom:12px;text-align:right;"><button class="btn btn-primary btn-sm" onclick="exportReportData(\'' + title.replace(/'/g, "\\'") + '\')"><i class="fas fa-download"></i> Export CSV</button></div>';
+  html += '<div class="table-container"><table class="table"><thead><tr>';
+  columns.forEach(function (c) { html += '<th>' + c + '</th>'; });
+  html += '</tr></thead><tbody id="reportViewerBody">';
+  rows.forEach(function (r) {
+    html += '<tr>';
+    r.forEach(function (v) { html += '<td>' + v + '</td>'; });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div></div></div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+
+  var _reportColumns = columns;
+  var _reportRows = rows;
+  var _reportTitle = title;
+  window.exportReportData = function (t) {
+    var csv = '\uFEFF';
+    csv += _reportColumns.join(',') + '\r\n';
+    _reportRows.forEach(function (r) {
+      csv += r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',') + '\r\n';
+    });
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = t.replace(/\s+/g, '_') + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    Toast.success('Export', t + ' exported successfully');
+  };
 }

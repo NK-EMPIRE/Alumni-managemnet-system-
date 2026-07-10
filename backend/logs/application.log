@@ -247,3 +247,64 @@
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 12:30:53.708","userId":19}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 12:35:16.555","userId":1}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 12:35:59.867","userId":19}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 13:27:44.643"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:27:44.645"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:27:44.645"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 13:28:00.162","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-10 13:35:58.576","userId":19}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-10 13:37:39.002","userId":20}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-10 13:38:26.502","userId":21}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 13:41:53.706"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:41:53.711"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:41:53.712"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-10 13:42:28.492","userId":1}
+{"error":"Invalid column name 'audit_id'.","ip":"::1","level":"error","message":"GET /api/v1/audit-logs?page=1&limit=1000","stack":"RequestError: Invalid column name 'audit_id'.\n    at handleError (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:519:28)\n    at addChunk (node:internal/streams/readable:559:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:536:3)\n    at Readable.push (node:internal/streams/readable:391:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-07-10 13:42:31.496","userId":1}
+{"level":"error","message":"UNEXPECTED: Invalid column name 'audit_id'.","stack":"RequestError: Invalid column name 'audit_id'.\n    at handleError (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:519:28)\n    at addChunk (node:internal/streams/readable:559:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:536:3)\n    at Readable.push (node:internal/streams/readable:391:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-07-10 13:42:31.498"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 13:47:08.594"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:47:08.596"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:47:08.597"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 13:58:39.335"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 13:58:39.337"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 13:58:39.337"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:03:45.385"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:03:45.387"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:03:45.387"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:05:43.655"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:05:43.657"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:05:43.657"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:16:34.983"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:16:34.985"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:16:34.985"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:18:48.146"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:18:48.149"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:18:48.149"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:24:10.083"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:24:10.085"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:24:10.085"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:29:43.491"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:29:43.493"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:29:43.494"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:34:43.999"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:34:44.002"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:34:44.002"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:39:18.684"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:39:18.686"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:39:18.686"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:42:35.197"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:42:35.199"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:42:35.199"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 14:46:29.486"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 14:46:29.488"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 14:46:29.488"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 15:06:20.174"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 15:06:20.178"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 15:06:20.178"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 15:10:22.787"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 15:10:22.789"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 15:10:22.789"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 15:13:35.422"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 15:13:35.424"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 15:13:35.424"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 15:15:57.833"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 15:15:57.835"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 15:15:57.835"}

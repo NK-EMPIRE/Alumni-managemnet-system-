@@ -8,6 +8,12 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get(
+  '/history',
+  authorize(ROLES.ADMIN),
+  roundRobinController.getAssignmentHistory
+);
+
 router.post(
   '/:teamId/assign',
   authorize(ROLES.ADMIN, ROLES.LEADER),

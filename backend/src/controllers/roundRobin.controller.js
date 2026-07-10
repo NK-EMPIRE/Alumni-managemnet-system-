@@ -1,6 +1,7 @@
 const roundRobinService = require('../services/roundRobin.service');
+const alumniRepository = require('../repositories/alumni.repository');
 const { asyncHandler } = require('../middleware/errorHandler');
-const { success } = require('../utils/response');
+const { success, paginated } = require('../utils/response');
 
 const assignAlumni = asyncHandler(async (req, res) => {
   const { teamId } = req.params;
@@ -9,4 +10,12 @@ const assignAlumni = asyncHandler(async (req, res) => {
   success(res, result, 'Alumni assigned successfully');
 });
 
-module.exports = { assignAlumni };
+const getAssignmentHistory = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = (page - 1) * limit;
+  const result = await alumniRepository.getAssignmentHistory({ page, limit, offset });
+  paginated(res, result.rows, result.total, page, limit, 'Assignment history retrieved successfully');
+});
+
+module.exports = { assignAlumni, getAssignmentHistory };

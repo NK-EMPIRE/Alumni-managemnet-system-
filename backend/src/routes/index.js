@@ -8,6 +8,7 @@ const dashboardRoutes = require('./dashboard.routes');
 const reportRoutes = require('./report.routes');
 const uploadRoutes = require('./upload.routes');
 const assignmentRoutes = require('./assignment.routes');
+const auditRoutes = require('./audit.routes');
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/assignments', assignmentRoutes);
+router.use('/audit-logs', auditRoutes);
 
 module.exports = router;

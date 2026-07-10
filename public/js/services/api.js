@@ -204,6 +204,17 @@
     downloadReport: function (id) {
         return get('/reports/' + id + '/download');
     },
+    downloadTemplate: function () {
+        window.open('/api/v1/upload/template', '_blank');
+    },
+    getAssignmentHistory: function (params) {
+        return get('/assignments/history', params);
+    },
+
+    // Audit Logs
+    getAuditLogs: function (params) {
+        return get('/audit-logs', params);
+    },
 
     // Profile
     changePassword: function (oldPassword, newPassword) {

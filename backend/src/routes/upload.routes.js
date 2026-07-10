@@ -23,4 +23,10 @@ router.get(
   uploadController.getImportHistory
 );
 
+router.get(
+  '/template',
+  authorize(ROLES.ADMIN),
+  uploadController.downloadTemplate
+);
+
 module.exports = router;

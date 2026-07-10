@@ -43,9 +43,10 @@ async function getMemberStats(memberId) {
 }
 
 async function getAdminDashboard() {
-  const [stats, deptProgress, rankings, activities] = await Promise.all([
+  const [stats, deptProgress, batchProgress, rankings, activities] = await Promise.all([
     dashboardRepository.getAdminStats(),
     dashboardRepository.getDepartmentProgress(),
+    dashboardRepository.getBatchProgress(),
     dashboardRepository.getLeaderRankings(10),
     dashboardRepository.getRecentActivities(20)
   ]);
@@ -66,6 +67,11 @@ async function getAdminDashboard() {
       department: d.department,
       total: d.total,
       completed: d.completed
+    })),
+    batchWiseProgress: (batchProgress || []).map(b => ({
+      batch: b.batch,
+      total: b.total,
+      completed: b.completed
     })),
     leaderRankings: (rankings || []).map(r => ({
       name: `${r.first_name} ${r.last_name}`,

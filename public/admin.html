@@ -102,10 +102,6 @@
         <i class="fas fa-chart-line"></i>
         <span class="sidebar-item-text">Progress</span>
       </a>
-      <a class="sidebar-item" data-section="reports" onclick="navigateTo('reports', this)">
-        <i class="fas fa-file-alt"></i>
-        <span class="sidebar-item-text">Reports</span>
-      </a>
       <a class="sidebar-item" data-section="audit" onclick="navigateTo('audit', this)">
         <i class="fas fa-history"></i>
         <span class="sidebar-item-text">Audit Logs</span>
@@ -285,53 +281,6 @@
           </div>
         </div>
 
-        <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div class="card fade-in-up">
-            <div class="card-header">
-              <h3><i class="fas fa-chart-pie" style="color:var(--primary);margin-right:8px;"></i>Completion Status</h3>
-            </div>
-            <div class="card-body">
-              <div class="chart-container" style="height:280px;">
-                <canvas id="completionChart"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="card fade-in-up">
-            <div class="card-header">
-              <h3><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Department-wise Progress</h3>
-            </div>
-            <div class="card-body">
-              <div class="chart-container" style="height:280px;">
-                <canvas id="departmentChart"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="card fade-in-up">
-            <div class="card-header">
-              <h3><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>Weekly Trend</h3>
-            </div>
-            <div class="card-body">
-              <div class="chart-container" style="height:280px;">
-                <canvas id="weeklyChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Activity Feed -->
-        <div class="card mb-8 fade-in-up">
-          <div class="card-header">
-            <h3><i class="fas fa-bolt" style="color:var(--primary);margin-right:8px;"></i>Recent Activity</h3>
-            <button class="btn btn-sm btn-ghost" onclick="Toast.info('Activity','Refreshing activity feed...')">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-          </div>
-          <div class="card-body" style="padding:16px 22px;">
-            <div class="activity-feed" id="activityFeed"></div>
-          </div>
-        </div>
-
         <!-- Recent Assignments Table -->
         <div class="card fade-in-up">
           <div class="card-header">
@@ -395,6 +344,16 @@
             </div>
             <!-- Pagination -->
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 22px;border-top:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
+                <select class="form-control" id="rowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;" onchange="changeRowsPerPage(this.value)">
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
               <div class="pagination-info" id="paginationInfo"></div>
               <div class="pagination" id="pagination"></div>
             </div>
@@ -538,54 +497,6 @@
               <h3><i class="fas fa-trophy" style="color:var(--primary);margin-right:8px;"></i>Team Leader Rankings</h3>
             </div>
             <div class="card-body" id="tlRankingList"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── REPORTS SECTION ─── -->
-      <section id="section-reports" class="content-section">
-        <div class="page-header fade-in">
-          <div class="page-header-left">
-            <h1>Reports</h1>
-            <p>Generate and view detailed reports.</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8 stagger-children">
-          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating alumni report...')">
-            <div class="card-body" style="text-align:center;">
-              <div style="font-size:2.5rem;color:var(--primary);margin-bottom:12px;">
-                <i class="fas fa-user-graduate"></i>
-              </div>
-              <h4 style="font-weight:600;margin:0;">Alumni Report</h4>
-              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Complete alumni data</p>
-            </div>
-          </div>
-          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating progress report...')">
-            <div class="card-body" style="text-align:center;">
-              <div style="font-size:2.5rem;color:var(--success);margin-bottom:12px;">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <h4 style="font-weight:600;margin:0;">Progress Report</h4>
-              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Update progress data</p>
-            </div>
-          </div>
-          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating department report...')">
-            <div class="card-body" style="text-align:center;">
-              <div style="font-size:2.5rem;color:var(--warning);margin-bottom:12px;">
-                <i class="fas fa-building"></i>
-              </div>
-              <h4 style="font-weight:600;margin:0;">Department Report</h4>
-              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Dept-wise statistics</p>
-            </div>
-          </div>
-          <div class="card" style="cursor:pointer;" onclick="Toast.info('Report','Generating team report...')">
-            <div class="card-body" style="text-align:center;">
-              <div style="font-size:2.5rem;color:var(--danger);margin-bottom:12px;">
-                <i class="fas fa-users"></i>
-              </div>
-              <h4 style="font-weight:600;margin:0;">Team Report</h4>
-              <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">Team performance data</p>
-            </div>
           </div>
         </div>
       </section>
@@ -828,9 +739,9 @@
               <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">User Role</label>
               <select class="form-control" id="auditRoleFilter">
                 <option value="all">All Roles</option>
-                <option value="Admin">Admin</option>
-                <option value="Leader">Team Leader</option>
-                <option value="Member">Team Member</option>
+                <option value="ADMIN">Admin</option>
+                <option value="LEADER">Team Leader</option>
+                <option value="MEMBER">Team Member</option>
               </select>
             </div>
             <div class="form-group" style="min-width:160px;flex:1;">
@@ -885,8 +796,8 @@
           <button class="btn btn-warning btn-sm" onclick="openModal('assignAlumniModal')" style="border-radius:50px;box-shadow:var(--shadow-md);color:#fff;">
             <i class="fas fa-user-graduate"></i> Assign Alumni
           </button>
-          <button class="btn btn-secondary btn-sm" onclick="navigateTo('reports',document.querySelector('[data-section=reports]'))" style="border-radius:50px;box-shadow:var(--shadow-md);">
-            <i class="fas fa-file-alt"></i> View Reports
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('audit',document.querySelector('[data-section=audit]'))" style="border-radius:50px;box-shadow:var(--shadow-md);">
+            <i class="fas fa-history"></i> View Audit Logs
           </button>
         </div>
         <button class="btn btn-primary" id="fabButton" onclick="toggleQuickActions()" style="width:52px;height:52px;border-radius:50%;padding:0;box-shadow:var(--shadow-lg);font-size:1.4rem;">
