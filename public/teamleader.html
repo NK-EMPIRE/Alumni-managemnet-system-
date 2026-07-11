@@ -412,7 +412,7 @@
         <span class="lock-text" style="font-weight:600;font-size:0.85rem;color:#166534;">Distribution: Open</span>
       </div>
 
-      <section id="overviewCards" class="stagger-children" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;margin-bottom:28px"></section>
+      <section id="overviewCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;margin-bottom:28px"></section>
 
       <section style="margin-bottom:28px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
@@ -481,21 +481,13 @@
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:28px">
-        <div class="card">
-          <div class="card-header">
-            <h3><i class="fas fa-clock-rotate-left" style="color:#F59E0B;margin-right:8px"></i> Recent Activities</h3>
-          </div>
-          <div class="card-body" id="recentActivitiesContainer">
-            <div class="timeline" id="timeline"></div>
-          </div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:22px;margin-bottom:28px">
         <div class="card">
           <div class="card-header">
             <h3><i class="fas fa-bolt" style="color:#7C3AED;margin-right:8px"></i> Quick Actions</h3>
           </div>
           <div class="card-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
               <div class="quick-action-btn" id="assignModalBtn">
                 <div class="icon-wrap" style="background:#DBEAFE;color:#2563EB">
                   <i class="fas fa-user-plus"></i>
@@ -507,12 +499,6 @@
                   <i class="fas fa-rotate"></i>
                 </div>
                 <span>Refresh Data</span>
-              </div>
-              <div class="quick-action-btn" id="lockDistributionBtn">
-                <div class="icon-wrap" style="background:#FEF3C7;color:#D97706">
-                  <i class="fas fa-lock"></i>
-                </div>
-                <span>Lock Distribution</span>
               </div>
               <div class="quick-action-btn" id="exportReportBtn">
                 <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED">
@@ -530,13 +516,49 @@
       <div class="page-header fade-in">
         <div class="page-header-left">
           <h1>My Assignments</h1>
-          <p>View and manage alumni assignments distributed to your team.</p>
+          <p>Update and manage alumni details assigned to you.</p>
         </div>
       </div>
       <div class="card">
-        <div class="card-body" style="text-align:center;padding:48px;color:#64748B;">
-          <i class="fas fa-tasks" style="font-size:3rem;margin-bottom:16px;color:#CBD5E1;"></i>
-          <p style="font-size:1rem;font-weight:500;">Assignment overview will be displayed here.</p>
+        <div class="card-header">
+          <h3><i class="fas fa-list" style="margin-right:8px;color:#2563EB;"></i> My Assigned Alumni</h3>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="search-bar" style="max-width:260px">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
+            </div>
+            <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
+              <option value="all">All Status</option>
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-container">
+            <table class="table" id="myAssignmentsTable">
+              <thead>
+                <tr>
+                  <th style="width:50px">S.No</th>
+                  <th>Alumni Name</th>
+                  <th>Department</th>
+                  <th>Batch</th>
+                  <th>Company</th>
+                  <th>Designation</th>
+                  <th>Status</th>
+                  <th style="text-align:center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="myAssignmentsTableBody">
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8;">Loading assignments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div class="pagination-info" id="myAssignmentsPaginationInfo">Showing 0 of 0 assignments</div>
+            <div class="pagination" id="myAssignmentsPagination"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -545,13 +567,53 @@
       <div class="page-header fade-in">
         <div class="page-header-left">
           <h1>Team Progress</h1>
-          <p>Detailed progress tracking for your team.</p>
+          <p>Real-time progress overview of all team members.</p>
         </div>
       </div>
-      <div class="card">
-        <div class="card-body" style="text-align:center;padding:48px;color:#64748B;">
-          <i class="fas fa-chart-line" style="font-size:3rem;margin-bottom:16px;color:#CBD5E1;"></i>
-          <p style="font-size:1rem;font-weight:500;">Team progress charts will be displayed here.</p>
+      <div class="card" style="margin-bottom:28px">
+        <div class="card-header">
+          <h3><i class="fas fa-users" style="color:#2563EB;margin-right:8px"></i> Team Progress Breakdown</h3>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width:50px">S.No</th>
+                  <th>Member Name</th>
+                  <th style="text-align:center">Assigned</th>
+                  <th style="text-align:center">Completed</th>
+                  <th style="text-align:center">Pending</th>
+                  <th style="min-width:140px">Progress</th>
+                  <th>Status</th>
+                  <th>Last Activity</th>
+                </tr>
+              </thead>
+              <tbody id="realtimeProgressTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:28px">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-chart-bar" style="color:#2563EB;margin-right:8px"></i> Member Completion Rate</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height:280px">
+              <canvas id="realtimeMemberChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-chart-pie" style="color:#7C3AED;margin-right:8px"></i> Overall Team Status</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height:280px">
+              <canvas id="realtimeCompletionChart"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -559,14 +621,54 @@
     <section id="section-reports" class="content-section">
       <div class="page-header fade-in">
         <div class="page-header-left">
-          <h1>Reports</h1>
-          <p>Generate and view reports for your team.</p>
+          <h1>Team Report</h1>
+          <p>Read-only overview of all updates submitted by the team.</p>
         </div>
       </div>
       <div class="card">
-        <div class="card-body" style="text-align:center;padding:48px;color:#64748B;">
-          <i class="fas fa-file-alt" style="font-size:3rem;margin-bottom:16px;color:#CBD5E1;"></i>
-          <p style="font-size:1rem;font-weight:500;">Reports will be displayed here.</p>
+        <div class="card-header">
+          <h3><i class="fas fa-file-invoice" style="color:#2563EB;margin-right:8px"></i> Alumni Update History</h3>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div class="search-bar" style="max-width:200px">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="reportSearch" placeholder="Search alumni..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
+            </div>
+            <select id="reportUserFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
+              <option value="all">All Members</option>
+            </select>
+            <select id="reportStatusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
+              <option value="all">All Status</option>
+              <option value="Completed">Completed</option>
+              <option value="Draft">Draft</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-container">
+            <table class="table" id="teamReportTable">
+              <thead>
+                <tr>
+                  <th style="width:50px">S.No</th>
+                  <th>Alumni Name</th>
+                  <th>Department</th>
+                  <th>Batch</th>
+                  <th>Updated By</th>
+                  <th>Company</th>
+                  <th>Designation</th>
+                  <th>Status</th>
+                  <th>Completion Date</th>
+                </tr>
+              </thead>
+              <tbody id="teamReportTableBody">
+                <tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8;">Loading report details...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div class="pagination-info" id="reportPaginationInfo">Showing 0 of 0 entries</div>
+            <div class="pagination" id="reportPagination"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -575,7 +677,7 @@
       <div class="page-header fade-in">
         <div class="page-header-left">
           <h1>Settings</h1>
-          <p>Manage your account and team preferences.</p>
+          <p>Manage your account and preferences.</p>
         </div>
       </div>
       <div class="card">
@@ -705,6 +807,163 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-close="memberDetailModalOverlay">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="updateModal">
+    <div class="modal modal-xl" style="max-width:900px;width:95vw;">
+      <div class="modal-header">
+        <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
+          <div class="avatar" id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">A</div>
+          <div class="info">
+            <h3 id="modalTitle" style="font-size:16px;font-weight:700;color:#1E293B">Update Profile</h3>
+            <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
+          </div>
+        </div>
+        <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="updateForm" novalidate>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+            <span style="font-size:13px;color:#64748B;font-weight:500;">Current Status:</span>
+            <span class="status-badge pending" id="modalStatusBadge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:50px;font-size:12px;font-weight:600;background:#FFFBEB;color:#92400E;"><i class="fas fa-clock"></i> Pending</span>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Full Name <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldName" placeholder="Enter full name" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorName" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Name is required</div>
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
+              <select id="fieldDept" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <option value="">Select Department</option>
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="EEE">EEE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+                <option value="IT">IT</option>
+              </select>
+              <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Batch <span class="required" style="color:#EF4444">*</span></label>
+              <select id="fieldBatch" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <option value="">Select Batch</option>
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+              </select>
+              <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldCompany" placeholder="Current company" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation</label>
+              <input type="text" id="fieldDesignation" placeholder="Current designation" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Current City</label>
+              <input type="text" id="fieldCity" placeholder="Current city" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">State</label>
+              <input type="text" id="fieldState" placeholder="State" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Country</label>
+              <input type="text" id="fieldCountry" placeholder="Country" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Email</label>
+              <input type="email" id="fieldEmail" placeholder="email@example.com" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Phone</label>
+              <input type="text" id="fieldPhone" placeholder="Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">LinkedIn URL</label>
+              <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Working Detail</label>
+              <textarea id="fieldWorkingDetails" placeholder="Current working details" rows="2" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC;min-height:80px;resize:vertical;"></textarea>
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Higher Studies</label>
+              <select id="fieldHigherStudies" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <option value="">Select</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group full-width higher-studies-details" id="higherStudiesDetails" style="display:none;margin-bottom:16px">
+            <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Higher Studies Details</label>
+            <input type="text" id="fieldHigherDetails" placeholder="University, Course, Year" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Entrepreneur</label>
+              <select id="fieldEntrepreneur" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <option value="">Select</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Government Job</label>
+              <select id="fieldGovtJob" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <option value="">Select</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Other Occupation</label>
+              <input type="text" id="fieldOtherOcc" placeholder="Other occupation if any" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Remarks</label>
+              <textarea id="fieldRemarks" placeholder="Additional remarks..." style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC;min-height:80px;resize:vertical;"></textarea>
+            </div>
+          </div>
+          <input type="hidden" id="fieldIndex" value="">
+          <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px">
+            <button type="button" class="btn btn-outline" id="saveDraftBtn">
+              <span class="spinner"></span>
+              <span class="btn-text"><i class="fas fa-save"></i> Save Draft</span>
+            </button>
+            <button type="button" class="btn btn-primary" id="submitRecordBtn">
+              <span class="spinner"></span>
+              <span class="btn-text"><i class="fas fa-check-circle"></i> Submit Record</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="cancelModalBtn" data-close="updateModal">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

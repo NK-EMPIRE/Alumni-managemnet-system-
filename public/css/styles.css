@@ -3228,3 +3228,12 @@ textarea.form-control {
     font-size: 1.5rem;
   }
 }
+
+/* Disable all animations and transitions globally for instant UI response */
+*, *::before, *::after {
+  transition: none !important;
+  animation: none !important;
+}
+.stagger-children > * {
+  opacity: 1 !important;
+}
