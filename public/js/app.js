@@ -173,4 +173,49 @@
   window.validatePhone = function(phone) {
     return /^[\+\d\s\-\(\)]{7,20}$/.test(phone);
   };
+
+  // --- UNIVERSAL DARK MODE SWITCH TOGGLE ---
+  function setupUniversalDarkMode() {
+    var rightContainer = document.querySelector('.navbar-right') || document.querySelector('.topbar-right');
+    if (!rightContainer) return;
+
+    var toggleBtn = document.createElement('button');
+    toggleBtn.id = 'themeToggleBtn';
+    toggleBtn.className = rightContainer.classList.contains('navbar-right') ? 'navbar-btn' : 'topbar-btn';
+    toggleBtn.title = 'Toggle Dark Mode';
+    toggleBtn.style.marginRight = '12px';
+    toggleBtn.style.display = 'inline-flex';
+    toggleBtn.style.alignItems = 'center';
+    toggleBtn.style.justifyContent = 'center';
+    toggleBtn.style.cursor = 'pointer';
+    toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+
+    // Insert before profile dropdown or notifications button
+    var refNode = rightContainer.querySelector('.dropdown') || rightContainer.querySelector('#notifBtn') || rightContainer.firstChild;
+    rightContainer.insertBefore(toggleBtn, refNode);
+
+    var currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    toggleBtn.addEventListener('click', function () {
+      if (document.body.classList.contains('dark-mode')) {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+        toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+      } else {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+        toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupUniversalDarkMode);
+  } else {
+    setupUniversalDarkMode();
+  }
 })();
