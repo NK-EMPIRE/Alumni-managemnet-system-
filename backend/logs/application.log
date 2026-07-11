@@ -308,3 +308,35 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-10 15:15:57.833"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-10 15:15:57.835"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-10 15:15:57.835"}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-12 00:05:49.970"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-12 00:05:49.974"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-12 00:05:49.975"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-12 00:05:49.975"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-12 00:06:19.325","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-12 00:07:08.452","userId":19}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:23.141","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.331","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.453","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.696","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.709","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.842","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.849","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:28.987","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.003","userId":22}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.232","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.243","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.313","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.315","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.507","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.525","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.648","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:20:29.655","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-12 00:26:03.512","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-12 00:30:45.597","userId":19}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-12 00:34:48.285","userId":20}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 00:36:08.023","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-12 00:36:14.184","userId":1}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-12 01:07:48.953"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-12 01:07:48.957"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-12 01:07:48.958"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-12 01:07:48.958"}

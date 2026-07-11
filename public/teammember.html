@@ -924,26 +924,27 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-        <div class="logo-icon">A</div>
+        <div class="sidebar-brand-icon" style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
         <div>
-            <h2>Alumni Hub</h2>
-            <span>Professional Network</span>
+            <h2 class="sidebar-brand-text" style="color:#fff;font-size:16px;font-weight:700;line-height:1.3;">AlumniMS</h2>
         </div>
     </div>
-    <div class="nav-section">Main Menu</div>
+    <div class="nav-section"><span class="nav-section-text">Main Menu</span></div>
     <a class="nav-item active" data-page="dashboard">
-        <i class="fas fa-th-large"></i> Dashboard
+        <i class="fas fa-th-large"></i> <span class="nav-item-text">Dashboard</span>
     </a>
     <a class="nav-item" data-page="records">
-        <i class="fas fa-users"></i> My Records
+        <i class="fas fa-users"></i> <span class="nav-item-text">My Records</span>
         <span class="badge">56</span>
     </a>
     <a class="nav-item" data-page="settings">
-        <i class="fas fa-cog"></i> Settings
+        <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
     </a>
-    <div class="nav-section">Account</div>
+    <div class="nav-section"><span class="nav-section-text">Account</span></div>
     <a class="nav-item" data-page="logout">
-        <i class="fas fa-sign-out-alt"></i> Logout
+        <i class="fas fa-sign-out-alt"></i> <span class="nav-item-text">Logout</span>
     </a>
 </div>
 
@@ -968,7 +969,7 @@
                 <div class="notif-dropdown" id="notifDropdown">
                     <div class="notif-dropdown-header">
                         <h4>Notifications</h4>
-                        <button id="markAllRead">Mark all as read</button>
+                        <button id="markAllRead" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
                     </div>
                     <div id="notifList">
                         <div class="notif-item">
@@ -1010,11 +1011,12 @@
     </div>
 
     <div class="content-wrapper">
-        <div class="page-header">
-            <div>
-                <h2>Team Member Dashboard</h2>
-                <p>Manage and update alumni professional details efficiently</p>
-            </div>
+        <div id="section-dashboard" class="content-section active">
+            <div class="page-header">
+                <div>
+                    <h2>Team Member Dashboard</h2>
+                    <p>Manage and update alumni professional details efficiently</p>
+                </div>
             <div class="breadcrumb">
                 <a href="#">Home</a>
                 <i class="fas fa-chevron-right" style="font-size:10px;"></i>
@@ -1105,6 +1107,68 @@
                 <div class="info" id="tableInfo">Showing 0 of 0 entries</div>
                 <div class="pagination" id="pagination"></div>
             </div>
+        </div>
+    </div> <!-- Close section-dashboard -->
+
+    <div id="section-settings" class="content-section" style="display:none;">
+        <div class="page-header">
+            <div>
+                <h2>Settings</h2>
+                <p>Manage your account settings and preferences.</p>
+            </div>
+            <div class="breadcrumb">
+                <a href="#">Home</a>
+                <i class="fas fa-chevron-right" style="font-size:10px;"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+        <div class="card" style="background:#fff;padding:24px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:28px;">
+          <div class="tabs" id="settingsTabs" style="display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid #E5E7EB;padding-bottom:10px;">
+            <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">General</button>
+            <button class="tab-item" data-tab="notifications" onclick="switchSettingsTab('notifications',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Notifications</button>
+            <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Security</button>
+          </div>
+          <div class="tab-content active" id="tab-general">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Your Name</label>
+              <input class="form-control" type="text" id="settingsName" value="Rahul" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Email Address</label>
+              <input class="form-control" type="email" id="settingsEmail" value="member@test.com" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Profile settings updated successfully!', 'success')" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+              <i class="fas fa-save"></i> Save Settings
+            </button>
+          </div>
+          <div class="tab-content" id="tab-notifications" style="display:none;">
+            <div class="form-group" style="margin-bottom:16px;display:flex;flex-direction:column;gap:12px;">
+              <label class="form-switch" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;color:var(--text-secondary);">
+                <input type="checkbox" checked style="width:16px;height:16px;">
+                Email alerts for daily target reminders
+              </label>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Notification preferences saved!', 'success')" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+              <i class="fas fa-save"></i> Save Preferences
+            </button>
+          </div>
+          <div class="tab-content" id="tab-security" style="display:none;">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Current Password</label>
+              <input class="form-control" type="password" value="password123" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">New Password</label>
+              <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Confirm Password</label>
+              <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Password changed successfully!', 'success')" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+              <i class="fas fa-save"></i> Update Password
+            </button>
+          </div>
         </div>
     </div>
 </div>

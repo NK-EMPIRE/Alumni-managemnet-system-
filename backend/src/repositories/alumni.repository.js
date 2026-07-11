@@ -249,10 +249,10 @@ async function getAssignmentsByMember(memberId, { page, limit, offset }) {
   return { data, totalCount, page, limit };
 }
 
-async function getAssignmentsByTeam(teamId, { page, limit, offset }) {
+async function getAssignmentsByLeader(leaderId, { page, limit, offset }) {
   const pool = await getPool();
   const request = pool.request()
-    .input('teamId', sql.Int, teamId)
+    .input('leaderId', sql.Int, leaderId)
     .input('offset', sql.Int, offset)
     .input('limit', sql.Int, limit);
 
@@ -269,7 +269,8 @@ async function getAssignmentsByTeam(teamId, { page, limit, offset }) {
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
       INNER JOIN Users u ON aa.member_id = u.user_id
-      WHERE aa.team_id = @teamId
+      INNER JOIN Teams t ON aa.team_id = t.team_id
+      WHERE t.leader_id = @leaderId
     )
     SELECT *, (SELECT COUNT(*) FROM TeamAssignments) AS total_count
     FROM TeamAssignments
@@ -405,7 +406,7 @@ module.exports = {
   createProfessionalInfo,
   getProfessionalHistory,
   getAssignmentsByMember,
-  getAssignmentsByTeam,
+  getAssignmentsByLeader,
   getPendingAssignmentsByTeam,
   updateAssignmentMember,
   updateAssignmentStatus,

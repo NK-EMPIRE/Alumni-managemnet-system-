@@ -358,20 +358,26 @@ ul {
 .sidebar-collapsed .sidebar-user-info,
 .sidebar-collapsed .sidebar-user-name,
 .sidebar-collapsed .sidebar-user-role,
-.sidebar-collapsed .sidebar-item .badge {
+.sidebar-collapsed .sidebar-item .badge,
+.sidebar-collapsed .nav-item-text,
+.sidebar-collapsed .nav-section-text,
+.sidebar-collapsed .nav-item .badge {
   opacity: 0;
   width: 0;
+  display: none !important;
   overflow: hidden;
 }
 
-.sidebar-collapsed .sidebar-item {
+.sidebar-collapsed .sidebar-item,
+.sidebar-collapsed .nav-item {
   justify-content: center;
   padding: 10px 0;
 }
 
 .sidebar-collapsed .sidebar-item i,
 .sidebar-collapsed .sidebar-item svg,
-.sidebar-collapsed .sidebar-item .icon {
+.sidebar-collapsed .sidebar-item .icon,
+.sidebar-collapsed .nav-item i {
   margin: 0;
 }
 
@@ -3344,4 +3350,100 @@ body.dark-mode .dropdown-item {
 body.dark-mode .notif-item:hover,
 body.dark-mode .dropdown-item:hover {
   background-color: #334155 !important;
+}
+
+/* ── Sidebar ── */
+body.dark-mode .sidebar,
+body.dark-mode .navbar {
+  background: #0B0F19 !important;
+  border-right-color: #334155 !important;
+}
+body.dark-mode .sidebar-item,
+body.dark-mode .nav-link {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .sidebar-item:hover,
+body.dark-mode .sidebar-item.active {
+  background: rgba(99,102,241,0.15) !important;
+  color: #818CF8 !important;
+}
+body.dark-mode .sidebar-section-title {
+  color: #64748B !important;
+}
+
+/* ── Content sections ── */
+body.dark-mode .content-section,
+body.dark-mode .dashboard-section {
+  color: #F8FAFC !important;
+}
+body.dark-mode .section-header h2,
+body.dark-mode .section-title {
+  color: #F8FAFC !important;
+}
+body.dark-mode .breadcrumb-item,
+body.dark-mode .breadcrumb-sep {
+  color: #94A3B8 !important;
+}
+
+/* ── Form labels & helpers ── */
+body.dark-mode label,
+body.dark-mode .form-label {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .form-text,
+body.dark-mode .text-muted {
+  color: #94A3B8 !important;
+}
+
+/* ── Badges ── */
+body.dark-mode .badge {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ── Pagination ── */
+body.dark-mode .pagination-item {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #CBD5E1 !important;
+}
+body.dark-mode .pagination-item.active {
+  background: #4F46E5 !important;
+  color: #fff !important;
+  border-color: #4F46E5 !important;
+}
+body.dark-mode .pagination-item:hover:not(:disabled) {
+  background: #334155 !important;
+}
+
+/* ── Settings tabs ── */
+body.dark-mode .settings-tab-btn {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .settings-tab-btn.active {
+  background: #4F46E5 !important;
+  color: #fff !important;
+}
+
+/* ── Avatar / profile initials ── */
+body.dark-mode .member-avatar,
+body.dark-mode .alumni-avatar {
+  background: linear-gradient(135deg, #4F46E5, #818CF8) !important;
+}
+
+/* ── Table row hover ── */
+body.dark-mode tbody tr:hover {
+  background: rgba(99,102,241,0.08) !important;
+}
+
+/* ── Status cards in member dashboard ── */
+body.dark-mode .status-card {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+/* ── Live clock widget ── */
+body.dark-mode #universalLiveClock {
+  color: #94A3B8 !important;
 }

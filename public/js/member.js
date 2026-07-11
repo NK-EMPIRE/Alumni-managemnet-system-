@@ -472,8 +472,9 @@
     }
 
     function handleUpdateClick(e) {
-        if (e.target.classList.contains('btn-update')) {
-            const idx = e.target.getAttribute('data-index');
+        var btn = e.target.closest('.btn-update');
+        if (btn) {
+            const idx = btn.getAttribute('data-index');
             openModal(idx);
         }
     }
@@ -501,10 +502,13 @@
             }
         });
         markAllRead.addEventListener('click', function () {
-            document.querySelectorAll('.notif-item .notif-dot').forEach(function (dot) {
-                dot.style.display = 'none';
-            });
-            showToast('All notifications marked as read', 'success');
+            var list = document.getElementById('notifList');
+            if (list) {
+                list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
+            }
+            var dot = document.querySelector('#notifBtn .notif-dot');
+            if (dot) dot.style.display = 'none';
+            showToast('All notifications cleared', 'success');
             notifDropdown.classList.remove('active');
         });
     }
@@ -515,20 +519,54 @@
         });
         document.querySelectorAll('.nav-item').forEach(function (item) {
             item.addEventListener('click', function () {
-                document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
-                item.classList.add('active');
-                if (item.getAttribute('data-page') === 'logout') {
+                var page = item.getAttribute('data-page');
+                if (page === 'logout') {
                     showToast('Logging out...', 'warning');
                     API.clearToken();
                     setTimeout(function () {
                         window.location.href = 'index.html';
                     }, 1500);
+                    return;
                 }
+                
+                document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+                item.classList.add('active');
+
+                // Toggle sections
+                var dashboardSection = document.getElementById('section-dashboard');
+                var settingsSection = document.getElementById('section-settings');
+                if (page === 'dashboard' || page === 'records') {
+                    if (dashboardSection) dashboardSection.style.display = 'block';
+                    if (settingsSection) settingsSection.style.display = 'none';
+                } else if (page === 'settings') {
+                    if (dashboardSection) dashboardSection.style.display = 'none';
+                    if (settingsSection) settingsSection.style.display = 'block';
+                }
+
                 if (window.innerWidth <= 992) {
                     sidebar.classList.remove('active');
                 }
             });
         });
+
+        window.switchSettingsTab = function(tabName, btn) {
+            var tabsContainer = btn.closest('.card') || btn.closest('.card-body');
+            tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
+                item.classList.remove('active');
+                item.style.fontWeight = 'normal';
+            });
+            tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            btn.classList.add('active');
+            btn.style.fontWeight = 'bold';
+            var target = document.getElementById('tab-' + tabName);
+            if (target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+        };
     }
 
     function initSessionTimeout() {

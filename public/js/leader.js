@@ -326,6 +326,19 @@
     document.getElementById('notifCount').textContent = unreadCount;
   }
 
+  window.clearAllNotifications = function() {
+    var list = document.getElementById('notifList');
+    if (list) {
+      list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No new notifications</div>';
+    }
+    var count = document.getElementById('notifCount');
+    if (count) {
+      count.textContent = '0';
+      count.style.display = 'none';
+    }
+    showToast('Notifications', 'All notifications cleared', 'success');
+  };
+
   function populateAssignModal() {
     var poolEl = document.getElementById('totalPoolCount');
     if (poolEl) poolEl.textContent = totalAlumni;
@@ -616,10 +629,19 @@
       currentPage = 1;
       populateTeamTable();
     });
-    document.getElementById('globalSearch').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        var val = this.value.trim();
-        if (val) showToast('Search', 'Searching for "' + val + '"', 'info');
+    document.getElementById('globalSearch').addEventListener('input', function () {
+      var val = this.value.trim();
+      var activeItem = document.querySelector('.sidebar-item.active');
+      var activePage = activeItem ? activeItem.getAttribute('data-page') : 'dashboard';
+      if (activePage === 'dashboard') {
+        var el = document.getElementById('memberSearch');
+        if (el) { el.value = val; populateTeamTable(); }
+      } else if (activePage === 'assignments') {
+        var el = document.getElementById('myAssignmentsSearch');
+        if (el) { el.value = val; renderMyAssignmentsTable(); }
+      } else if (activePage === 'reports') {
+        var el = document.getElementById('reportSearch');
+        if (el) { el.value = val; renderTeamReportTable(); }
       }
     });
   }
@@ -706,24 +728,47 @@
   }
 
   function setupExport() {
-    document.getElementById('exportReportBtn').addEventListener('click', function () {
-      showToast('Exporting', 'Generating team progress report...', 'info');
-      API.generateReport({ type: 'team_progress', format: 'pdf' }).then(function (res) {
-        if (res && res.success) {
-          showToast('Success', 'Report exported successfully as PDF.', 'success');
-          if (res.data && res.data.filePath) {
-            window.open(res.data.filePath, '_blank');
-          }
-        } else {
-          showToast('Error', res && res.message || 'Failed to export report.', 'danger');
+    var btn = document.getElementById('exportReportBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (!filteredReportData || filteredReportData.length === 0) {
+        showToast('Warning', 'No team progress data available to export.', 'warning');
+        return;
+      }
+      var csv = '\uFEFF';
+      csv += 'S.No,Alumni Name,Department,Batch,Assigned Member,Company,Designation,Status,Update Date\r\n';
+      filteredReportData.forEach(function (r, idx) {
+        var sno = idx + 1;
+        var name = '"' + (r.name || '').replace(/"/g, '""') + '"';
+        var dept = '"' + (r.department || '').replace(/"/g, '""') + '"';
+        var batch = '"' + (r.batch || '').replace(/"/g, '""') + '"';
+        var member = '"' + (r.assigned_to || r.assignedTo || r.teamMember || '').replace(/"/g, '""') + '"';
+        var company = '"' + (r.company || '').replace(/"/g, '""') + '"';
+        var designation = '"' + (r.designation || '').replace(/"/g, '""') + '"';
+        var status = '"' + (r.status || '').replace(/"/g, '""') + '"';
+        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
+        if (compDate !== '-') {
+          compDate = new Date(compDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         }
-      }).catch(function () {
-        showToast('Success', 'Report exported successfully as PDF.', 'success');
+        csv += sno + ',' + name + ',' + dept + ',' + batch + ',' + member + ',' + company + ',' + designation + ',' + status + ',"' + compDate + '"\r\n';
       });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'team_progress_report_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      showToast('Success', 'Report exported successfully as CSV.', 'success');
     });
-    document.getElementById('exportBtn').addEventListener('click', function () {
-      document.getElementById('exportReportBtn').click();
-    });
+    
+    var exp = document.getElementById('exportBtn');
+    if (exp) {
+      exp.addEventListener('click', function () {
+        btn.click();
+      });
+    }
   }
 
   function setupLockFeatures() {
@@ -1428,6 +1473,25 @@
       card.style.animationDelay = (idx * 0.08) + 's';
     });
   }
+
+  window.switchSettingsTab = function(tabName, btn) {
+    var tabsContainer = btn.closest('.card-body');
+    tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
+      item.classList.remove('active');
+      item.style.fontWeight = 'normal';
+    });
+    tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
+      content.style.display = 'none';
+      content.classList.remove('active');
+    });
+    btn.classList.add('active');
+    btn.style.fontWeight = 'bold';
+    var target = document.getElementById('tab-' + tabName);
+    if (target) {
+      target.style.display = 'block';
+      target.classList.add('active');
+    }
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -213,9 +213,55 @@
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupUniversalDarkMode);
-  } else {
+  function setupUniversalClock() {
+    var rightContainer = document.querySelector('.navbar-right') || document.querySelector('.topbar-right');
+    if (!rightContainer) return;
+
+    var clockDiv = document.createElement('div');
+    clockDiv.id = 'universalLiveClock';
+    clockDiv.style.fontSize = '0.85rem';
+    clockDiv.style.color = 'var(--text-muted)';
+    clockDiv.style.fontWeight = '500';
+    clockDiv.style.marginRight = '16px';
+    clockDiv.style.display = 'inline-flex';
+    clockDiv.style.alignItems = 'center';
+    clockDiv.style.gap = '8px';
+    clockDiv.innerHTML = '<i class="far fa-clock" style="color:var(--primary);"></i><span id="universalClockSpan">-</span>';
+
+    // Insert at the beginning of the container
+    rightContainer.insertBefore(clockDiv, rightContainer.firstChild);
+
+    function updateClock() {
+      var d = new Date();
+      var options = {
+        timeZone: 'Asia/Kolkata',
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      };
+      var span = document.getElementById('universalClockSpan');
+      if (span) {
+        span.textContent = d.toLocaleString('en-IN', options);
+      }
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  }
+
+  function initUniversalWidgets() {
     setupUniversalDarkMode();
+    setupUniversalClock();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUniversalWidgets);
+  } else {
+    initUniversalWidgets();
   }
 })();

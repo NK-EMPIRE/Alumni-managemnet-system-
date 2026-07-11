@@ -365,7 +365,10 @@
         </button>
         <div class="dropdown" id="notifDropdownContainer">
           <div class="dropdown-menu" id="notifDropdown">
-            <div class="dropdown-header">Notifications</div>
+            <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>Notifications</span>
+              <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
+            </div>
             <div id="notifList"></div>
           </div>
         </div>
@@ -677,13 +680,61 @@
       <div class="page-header fade-in">
         <div class="page-header-left">
           <h1>Settings</h1>
-          <p>Manage your account and preferences.</p>
+          <p>Manage your account settings and preferences.</p>
         </div>
       </div>
       <div class="card">
-        <div class="card-body" style="text-align:center;padding:48px;color:#64748B;">
-          <i class="fas fa-cog" style="font-size:3rem;margin-bottom:16px;color:#CBD5E1;"></i>
-          <p style="font-size:1rem;font-weight:500;">Settings will be displayed here.</p>
+        <div class="card-body">
+          <div class="tabs" id="settingsTabs" style="display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:10px;">
+            <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">General</button>
+            <button class="tab-item" data-tab="notifications" onclick="switchSettingsTab('notifications',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Notifications</button>
+            <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Security</button>
+          </div>
+          <div class="tab-content active" id="tab-general">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Your Name</label>
+              <input class="form-control" type="text" id="settingsName" value="Arun Rajan" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Email Address</label>
+              <input class="form-control" type="email" id="settingsEmail" value="leader@test.com" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+            </div>
+            <button class="btn btn-primary" onclick="Toast.success('Settings','Profile settings updated successfully!')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+              <i class="fas fa-save"></i> Save Settings
+            </button>
+          </div>
+          <div class="tab-content" id="tab-notifications" style="display:none;">
+            <div class="form-group" style="margin-bottom:16px;display:flex;flex-direction:column;gap:12px;">
+              <label class="form-switch" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;">
+                <input type="checkbox" checked style="width:16px;height:16px;">
+                Email alerts for member updates
+              </label>
+              <label class="form-switch" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;">
+                <input type="checkbox" checked style="width:16px;height:16px;">
+                Weekly progress reports
+              </label>
+            </div>
+            <button class="btn btn-primary" onclick="Toast.success('Settings','Notification preferences saved!')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+              <i class="fas fa-save"></i> Save Preferences
+            </button>
+          </div>
+          <div class="tab-content" id="tab-security" style="display:none;">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
+              <input class="form-control" type="password" value="password123" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
+              <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
+              <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+            </div>
+            <button class="btn btn-primary" onclick="Toast.success('Security','Password changed successfully!')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+              <i class="fas fa-save"></i> Update Password
+            </button>
+          </div>
         </div>
       </div>
     </section>
