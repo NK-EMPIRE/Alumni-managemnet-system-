@@ -340,3 +340,16 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-12 01:07:48.957"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-12 01:07:48.958"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-12 01:07:48.958"}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-12 01:10:06.750"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-12 01:10:06.754"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-12 01:10:06.755"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-12 01:10:06.756"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-12 01:21:33.339","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-12 01:24:23.431","userId":19}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-12 01:28:12.638","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-12 01:29:20.410","userId":21}
+{"ip":"::1","level":"info","loginId":"admin@alumini.edu","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-12 01:30:58.524"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-12 01:31:06.404","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-12 01:34:04.916","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-12 01:34:10.209","userId":1}
+{"duplicates":0,"errors":2,"fileName":"1783800343671-de26fc374dbcf87f.xlsx","imported":0,"level":"info","message":"[AUDIT] EXCEL_IMPORTED","timestamp":"2026-07-12 01:35:43.921","total":2,"userId":1}

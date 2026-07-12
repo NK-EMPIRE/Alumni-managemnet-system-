@@ -70,4 +70,36 @@ async function sendPasswordResetEmail(email, temporaryPassword) {
   });
 }
 
-module.exports = { sendEmail, sendPasswordResetEmail };
+async function sendAssignmentNotificationEmail(email, memberName, count, leaderName) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: Arial, sans-serif; padding: 24px; background: #f4f7fc;">
+      <div style="max-width: 560px; margin: 0 auto; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="color: #4F46E5; margin: 0;">AlumniMS</h2>
+          <p style="color: #64748B; font-size: 14px;">Alumni Management System</p>
+        </div>
+        <h3 style="color: #1E293B;">New Alumni Assigned to You</h3>
+        <p style="color: #475569; line-height: 1.6;">Hi <strong>${memberName}</strong>,</p>
+        <p style="color: #475569; line-height: 1.6;">You have been assigned <strong>${count}</strong> alumni record(s) to update by your team leader <strong>${leaderName}</strong>.</p>
+        <div style="background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 8px; padding: 16px; margin: 16px 0; text-align: center;">
+          <p style="color: #4F46E5; font-size: 24px; font-weight: 700; margin: 0;">${count} Records</p>
+          <p style="color: #6366F1; font-size: 13px; margin: 4px 0 0;">Pending your update</p>
+        </div>
+        <p style="color: #475569; font-size: 13px;">Please log in to the AlumniMS portal and update the alumni details at your earliest convenience.</p>
+        <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 24px 0;">
+        <p style="color: #94A3B8; font-size: 12px; text-align: center;">This is an automated message from AlumniMS. Do not reply.</p>
+      </div>
+    </body>
+    </html>
+  `;
+  return sendEmail({
+    to: email,
+    subject: 'AlumniMS - New Alumni Records Assigned to You',
+    html
+  });
+}
+
+module.exports = { sendEmail, sendPasswordResetEmail, sendAssignmentNotificationEmail };

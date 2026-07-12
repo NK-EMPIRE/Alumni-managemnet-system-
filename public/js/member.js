@@ -451,6 +451,9 @@
                 is_government_job: record.govtJob === 'Yes' ? 1 : 0
             };
             API.updateAlumni(record.id, updateData).then(function () {
+                if (record.assignment_id) {
+                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
+                }
                 return API.submitAlumni(record.id, updateData);
             }).then(function () {
                 doLocalSubmit();
@@ -593,6 +596,12 @@
             document.getElementById('memberName').textContent = user.name.split(' ')[0] || user.name;
             var avatar = document.querySelector('.profile-avatar');
             if (avatar) avatar.textContent = user.name.charAt(0).toUpperCase();
+            
+            // Populate General Settings with real user data
+            var settingsName = document.getElementById('settingsName');
+            var settingsEmail = document.getElementById('settingsEmail');
+            if (settingsName) settingsName.value = user.name;
+            if (settingsEmail && user.email) settingsEmail.value = user.email;
         }
     }
 
@@ -617,27 +626,32 @@
             var assigned = results[1];
             if (assigned && assigned.success && assigned.data && assigned.data.records) {
                 _apiAlumniData = assigned.data.records.map(function (a) {
+                    // Map assignment status: Pending/Draft/Completed
+                    var st = a.status || 'Pending';
                     return {
-                        id: a.id || Math.random(),
+                        id: a.alumni_id || a.id,
+                        alumni_id: a.alumni_id || a.id,
+                        assignment_id: a.assignment_id,
                         name: a.name || a.fullName || 'Unknown',
+                        register_no: a.register_no || '',
                         department: a.department || a.dept || '',
                         batch: a.batch || '',
                         company: a.company || '',
                         designation: a.designation || '',
-                        city: a.city || '',
+                        city: a.current_city || a.city || '',
                         state: a.state || '',
                         country: a.country || 'India',
                         email: a.email || '',
                         phone: a.phone || '',
-                        linkedin_profile: a.linkedin_profile || a.linkedin || '',
+                        linkedin_profile: a.linkedin_profile || '',
                         working_details: a.working_details || '',
-                        higherStudies: a.higherStudies || 'No',
-                        higherDetails: a.higherDetails || '',
-                        entrepreneur: a.entrepreneur || 'No',
-                        govtJob: a.govtJob || 'No',
-                        otherOcc: a.otherOcc || '',
+                        higherStudies: a.higher_studies || a.higherStudies || 'No',
+                        higherDetails: a.higher_details || a.higherDetails || '',
+                        entrepreneur: a.is_entrepreneur ? 'Yes' : (a.entrepreneur || 'No'),
+                        govtJob: a.is_government_job ? 'Yes' : (a.govtJob || 'No'),
+                        otherOcc: a.other_occupation || a.otherOcc || '',
                         remarks: a.remarks || '',
-                        status: a.status || 'Pending'
+                        status: st
                     };
                 });
                 alumniData = _apiAlumniData;

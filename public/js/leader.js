@@ -34,14 +34,7 @@
     { member: 'Amit Verma', action: 'resolved 3 data discrepancies in alumni records', time: '2 days ago', type: 'purple' }
   ];
 
-  var notifications = [
-    { icon: 'fa-check-circle', iconBg: '#D1FAE5', iconColor: '#10B981', title: 'Rahul Kumar completed 50 alumni', desc: 'Highest completion in the team', time: '1 hour ago', unread: true },
-    { icon: 'fa-exclamation-triangle', iconBg: '#FEF3C7', iconColor: '#F59E0B', title: 'Deepika Gupta behind schedule', desc: 'Only 50% completion rate', time: '3 hours ago', unread: true },
-    { icon: 'fa-user-plus', iconBg: '#DBEAFE', iconColor: '#2563EB', title: 'New alumni assigned to team', desc: '25 new profiles added to pool', time: '5 hours ago', unread: true },
-    { icon: 'fa-flag', iconBg: '#FEE2E2', iconColor: '#EF4444', title: 'Rohan Desai has 0% progress', desc: 'Needs immediate attention', time: '1 day ago', unread: true },
-    { icon: 'fa-file-export', iconBg: '#EDE9FE', iconColor: '#7C3AED', title: 'Weekly report generated', desc: 'Download available in Reports', time: '2 days ago', unread: false },
-    { icon: 'fa-check-circle', iconBg: '#D1FAE5', iconColor: '#10B981', title: 'Target milestone achieved', desc: 'Team crossed 60% overall progress', time: '3 days ago', unread: false }
-  ];
+  // No dummy notifications — real data loaded from API activities
 
   var currentPage = 1;
   var pageSize = 5;
@@ -308,10 +301,17 @@
 
   function populateNotifications() {
     var list = document.getElementById('notifList');
+    if (!list) return;
+    var notifSource = activities && activities.length > 0 ? activities : [];
+    if (notifSource.length === 0) {
+      list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No notifications</div>';
+      var nc = document.getElementById('notifCount');
+      if (nc) { nc.textContent = '0'; nc.style.display = 'none'; }
+      return;
+    }
     var html = '';
     var unreadCount = 0;
-    var notifSource = (_apiDataLoaded && activities.length > 0) ? activities : notifications;
-    notifSource.forEach(function (n, idx) {
+    notifSource.slice(0, 10).forEach(function (n, idx) {
       var isUnread = idx < 3;
       if (isUnread) unreadCount++;
       var bgColor = n.type === 'green' ? '#D1FAE5' : n.type === 'yellow' ? '#FEF3C7' : n.type === 'red' ? '#FEE2E2' : '#DBEAFE';
@@ -323,7 +323,8 @@
         '</div>';
     });
     list.innerHTML = html;
-    document.getElementById('notifCount').textContent = unreadCount;
+    var nc2 = document.getElementById('notifCount');
+    if (nc2) { nc2.textContent = unreadCount; nc2.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
   }
 
   window.clearAllNotifications = function() {
@@ -1375,6 +1376,12 @@
       avatarEls.forEach(function (el) { if (el) el.textContent = user.name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2); });
       var greeting = document.querySelector('.page-header p');
       if (greeting) greeting.textContent = 'Welcome back, ' + user.name.split(' ')[0] + '! Here\'s your team\'s progress overview.';
+      
+      // Populate General Settings fields
+      var settingsName = document.getElementById('settingsName');
+      var settingsEmail = document.getElementById('settingsEmail');
+      if (settingsName) settingsName.value = user.name;
+      if (settingsEmail && user.email) settingsEmail.value = user.email;
     }
   }
 

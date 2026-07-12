@@ -43,13 +43,7 @@ const dummyActivities = [
   { user: 'Admin User', action: 'generated monthly progress report', time: '1 day ago', avatar: 'AD' }
 ];
 
-const dummyNotifications = [
-  { text: 'Amit Verma completed 15 alumni updates', time: '2 min ago', unread: true },
-  { text: 'New team member Anjali Rao added', time: '15 min ago', unread: true },
-  { text: 'Assignment of 20 alumni to Rajesh Patel', time: '1 hour ago', unread: true },
-  { text: 'Pending updates: 8 records require review', time: '2 hours ago', unread: true },
-  { text: 'System backup completed successfully', time: '3 hours ago', unread: false }
-];
+// Real notifications drawn from audit logs — no dummy data
 
 const dummyDeptProgress = [
   { dept: 'CSE', completed: 320, total: 465, color: '#3B82F6' },
@@ -603,9 +597,29 @@ function populateTLRankings() {
 function populateNotifications() {
   var list = document.getElementById('notifList');
   if (!list) return;
+
+  // Use real audit log data when available
+  var notifs = [];
+  if (_apiAuditLogs && _apiAuditLogs.records && _apiAuditLogs.records.length > 0) {
+    notifs = _apiAuditLogs.records.slice(0, 10).map(function(r) {
+      return {
+        text: (r.username || 'System') + ' — ' + (r.action || '').replace(/_/g, ' ').toLowerCase(),
+        time: r.created_at ? new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
+        unread: true
+      };
+    });
+  }
+
+  if (notifs.length === 0) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No notifications</div>';
+    var count = document.querySelector('.notification-count');
+    if (count) { count.textContent = '0'; count.style.display = 'none'; }
+    return;
+  }
+
   var html = '';
-  dummyNotifications.forEach(function (n) {
-    html += '<button class="dropdown-item" style="flex-wrap:wrap;gap:4px;' + (n.unread ? 'background:#EFF6FF;' : '') + '" onclick="markNotifRead(this)">';
+  notifs.forEach(function (n) {
+    html += '<button class="dropdown-item" style="flex-wrap:wrap;gap:4px;' + (n.unread ? 'background:rgba(99,102,241,0.06);' : '') + '" onclick="markNotifRead(this)">';
     html += '<div style="display:flex;gap:10px;width:100%;align-items:flex-start;">';
     if (n.unread) html += '<span style="width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;"></span>';
     else html += '<span style="width:8px;height:8px;flex-shrink:0;"></span>';
@@ -613,6 +627,13 @@ function populateNotifications() {
     html += '</div></button>';
   });
   list.innerHTML = html;
+
+  var count = document.querySelector('.notification-count');
+  var unreadCount = notifs.filter(function(n) { return n.unread; }).length;
+  if (count) {
+    if (unreadCount > 0) { count.textContent = unreadCount; count.style.display = 'inline-flex'; }
+    else { count.textContent = '0'; count.style.display = 'none'; }
+  }
 }
 
 function markNotifRead(btn) {
@@ -987,15 +1008,15 @@ function submitAddTeamMember() {
       }
 
     function findOrCreateTeam() {
+        // Look up existing team by this specific leaderId (not name)
         if (_apiTeams && _apiTeams.records) {
-          var t = _apiTeams.records.find(function (x) { return x.leader_name === leaderName; });
+          var t = _apiTeams.records.find(function (x) { return x.leader_id === leaderId; });
           if (t) return Promise.resolve(t.team_id);
         }
-        return resolveLeaderId().then(function () {
-          return API.createTeam({ teamName: leaderName + "'s Team", leaderId: leaderId }).then(function (tr) {
-            if (tr && tr.success) return tr.data.team_id;
-            throw new Error('Team creation failed');
-          });
+        // Only create if no existing team found for this leader
+        return API.createTeam({ teamName: leaderName + "'s Team", leaderId: leaderId }).then(function (tr) {
+          if (tr && tr.success) return tr.data.team_id;
+          throw new Error('Team creation failed');
         });
       }
 
