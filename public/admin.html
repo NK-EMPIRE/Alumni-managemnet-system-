@@ -156,7 +156,7 @@
             <i class="fas fa-bell"></i>
             <span class="notification-count">5</span>
           </button>
-          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;right:auto;left:-120px;">
+          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;right:auto;left:-155px;">
             <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
               <span>Notifications</span>
               <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
@@ -983,6 +983,62 @@
       <div class="session-timeout-actions">
         <button class="btn btn-secondary" onclick="extendSession()">Stay Logged In</button>
         <button class="btn btn-danger" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Leader Detail Modal -->
+  <div class="modal-overlay" id="viewTLModal">
+    <div class="modal" style="max-width:500px;width:95vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-tie" style="color:var(--primary);margin-right:8px;"></i>Team Leader Details</h3>
+        <button class="modal-close" onclick="closeModal('viewTLModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
+          <div id="tlAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">A</div>
+          <div>
+            <h2 id="tlDetailName" style="margin:0;font-size:1.2rem;font-weight:600;">-</h2>
+            <p id="tlDetailDept" style="margin:2px 0 0 0;font-size:0.85rem;color:var(--text-muted);">-</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label><span id="tlDetailEmail" style="font-weight:500;">-</span></div>
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone</label><span id="tlDetailPhone" style="font-weight:500;">-</span></div>
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Members</label><span id="tlDetailMembers" style="font-weight:500;">-</span></div>
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned Alumni</label><span id="tlDetailAssigned" style="font-weight:500;">-</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('viewTLModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Member Detail Modal -->
+  <div class="modal-overlay" id="viewTMModal">
+    <div class="modal" style="max-width:500px;width:95vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-user" style="color:var(--primary);margin-right:8px;"></i>Team Member Details</h3>
+        <button class="modal-close" onclick="closeModal('viewTMModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
+          <div id="tmAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">A</div>
+          <div>
+            <h2 id="tmDetailName" style="margin:0;font-size:1.2rem;font-weight:600;">-</h2>
+            <p id="tmDetailDept" style="margin:2px 0 0 0;font-size:0.85rem;color:var(--text-muted);">-</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label><span id="tmDetailEmail" style="font-weight:500;">-</span></div>
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone</label><span id="tmDetailPhone" style="font-weight:500;">-</span></div>
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Team Leader</label><span id="tmDetailLeader" style="font-weight:500;">-</span></div>
+          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned Alumni</label><span id="tmDetailAssigned" style="font-weight:500;">-</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('viewTMModal')">Close</button>
       </div>
     </div>
   </div>

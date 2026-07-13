@@ -93,10 +93,10 @@
   };
 
   window.Toast = {
-    success: function(title, msg) { window.showToast(title, msg, 'success'); },
-    warning: function(title, msg) { window.showToast(title, msg, 'warning'); },
-    info: function(title, msg) { window.showToast(title, msg, 'info'); },
-    danger: function(title, msg) { window.showToast(title, msg, 'danger'); }
+    success: function (title, msg) { window.showToast(title, msg, 'success'); },
+    warning: function (title, msg) { window.showToast(title, msg, 'warning'); },
+    info: function (title, msg) { window.showToast(title, msg, 'info'); },
+    danger: function (title, msg) { window.showToast(title, msg, 'danger'); }
   };
 
   window.openModal = function (modalId) {
@@ -151,15 +151,15 @@
   }
 })();
 
-(function() {
-  window.clearAllErrors = function(modal) {
+(function () {
+  window.clearAllErrors = function (modal) {
     if (modal) {
-      modal.querySelectorAll('.form-error').forEach(function(el) { el.remove(); });
-      modal.querySelectorAll('.form-control.error').forEach(function(el) { el.classList.remove('error'); });
+      modal.querySelectorAll('.form-error').forEach(function (el) { el.remove(); });
+      modal.querySelectorAll('.form-control.error').forEach(function (el) { el.classList.remove('error'); });
     }
   };
 
-  window.showFieldError = function(input, message) {
+  window.showFieldError = function (input, message) {
     input.classList.add('error');
     var error = document.createElement('div');
     error.className = 'form-error';
@@ -167,15 +167,15 @@
     input.parentElement.appendChild(error);
   };
 
-  window.validateRequired = function(val) {
+  window.validateRequired = function (val) {
     return val && val.trim().length > 0;
   };
 
-  window.validateEmail = function(email) {
+  window.validateEmail = function (email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  window.validatePhone = function(phone) {
+  window.validatePhone = function (phone) {
     return /^[\+\d\s\-\(\)]{7,20}$/.test(phone);
   };
 
@@ -207,7 +207,7 @@
       }
     }
 
-     var currentTheme = localStorage.getItem('theme') || 'light';
+    var currentTheme = localStorage.getItem('theme') || 'light';
     if (currentTheme === 'dark') {
       document.body.classList.add('dark-mode');
       document.documentElement.classList.add('dark');
@@ -276,7 +276,7 @@
     if (saveGeneralBtn) {
       // Remove inline onclick
       saveGeneralBtn.removeAttribute('onclick');
-      saveGeneralBtn.addEventListener('click', function(e) {
+      saveGeneralBtn.addEventListener('click', function (e) {
         e.preventDefault();
         var nameInput = document.getElementById('settingsName');
         var emailInput = document.getElementById('settingsEmail');
@@ -300,7 +300,7 @@
         saveGeneralBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
         API.updateProfile(user.id, { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || ' ', email: email })
-          .then(function(res) {
+          .then(function (res) {
             if (res && res.success !== false) {
               // Update local user object
               user.name = name;
@@ -312,10 +312,10 @@
               if (window.Toast) Toast.error('Settings', res.message || 'Failed to update profile');
             }
           })
-          .catch(function(err) {
+          .catch(function (err) {
             if (window.Toast) Toast.error('Settings', err.message || 'Failed to update profile');
           })
-          .finally(function() {
+          .finally(function () {
             saveGeneralBtn.disabled = false;
             saveGeneralBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
           });
@@ -326,7 +326,7 @@
     var saveSecurityBtn = document.querySelector('#tab-security button.btn-primary');
     if (saveSecurityBtn) {
       saveSecurityBtn.removeAttribute('onclick');
-      saveSecurityBtn.addEventListener('click', function(e) {
+      saveSecurityBtn.addEventListener('click', function (e) {
         e.preventDefault();
         var passInputs = document.querySelectorAll('#tab-security input[type="password"]');
         if (passInputs.length < 3) return;
@@ -348,7 +348,7 @@
         saveSecurityBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
 
         API.changePassword(oldPassword, newPassword)
-          .then(function(res) {
+          .then(function (res) {
             if (res && res.success !== false) {
               if (window.Toast) Toast.success('Security', 'Password changed successfully!');
               else if (window.showToast) showToast('Password changed successfully!', 'success');
@@ -359,10 +359,10 @@
               if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
             }
           })
-          .catch(function(err) {
+          .catch(function (err) {
             if (window.Toast) Toast.error('Security', err.message || 'Failed to change password');
           })
-          .finally(function() {
+          .finally(function () {
             saveSecurityBtn.disabled = false;
             saveSecurityBtn.innerHTML = '<i class="fas fa-save"></i> Update Password';
           });
