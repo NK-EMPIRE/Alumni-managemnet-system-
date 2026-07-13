@@ -25,8 +25,6 @@
   var isSidebarCollapsed = true;
 
   var isDistributionLocked = false;
-  var savedLockState = localStorage.getItem('teamleader_distLocked');
-  if (savedLockState === 'true') isDistributionLocked = true;
 
   function getInitials(name) {
     return name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase();
@@ -55,6 +53,10 @@
   }
 
   function updateLockBadge() {
+    var bc = document.querySelector('.breadcrumb .current');
+    if (bc) {
+      bc.textContent = 'Team Leader Dashboard';
+    }
     var badge = document.getElementById('lockStatusBadge');
     if (!badge) return;
     var icon = badge.querySelector('.lock-icon');
@@ -69,26 +71,6 @@
       badge.style.borderColor = '#BBF7D0';
       if (icon) { icon.className = 'fas fa-lock-open lock-icon'; icon.style.color = '#10B981'; }
       if (text) { text.textContent = 'Distribution: Open'; text.style.color = '#166534'; }
-    }
-    var bc = document.querySelector('.breadcrumb .current');
-    if (bc) {
-      if (isDistributionLocked) {
-        bc.innerHTML = '<i class="fas fa-lock" style="margin-right:6px;color:#EF4444;font-size:0.7rem;"></i>Team Leader Dashboard';
-      } else {
-        bc.textContent = 'Team Leader Dashboard';
-      }
-    }
-    var assignBtn = document.getElementById('assignModalBtn');
-    if (assignBtn) {
-      if (isDistributionLocked) {
-        assignBtn.style.opacity = '0.5';
-        assignBtn.style.pointerEvents = 'none';
-        assignBtn.title = 'Distribution is locked';
-      } else {
-        assignBtn.style.opacity = '';
-        assignBtn.style.pointerEvents = '';
-        assignBtn.title = '';
-      }
     }
   }
 
@@ -767,100 +749,6 @@
   }
 
   function setupLockFeatures() {
-    var badge = document.getElementById('lockStatusBadge');
-    if (badge) {
-      badge.addEventListener('dblclick', function () {
-        if (!isDistributionLocked) return;
-        if (!_teamId) {
-          showToast('Error', 'No team found.', 'danger');
-          return;
-        }
-        API.unlockDistribution(_teamId).then(function (res) {
-          if (res && res.success !== false) {
-            isDistributionLocked = false;
-            localStorage.setItem('teamleader_distLocked', 'false');
-            updateLockBadge();
-            showToast('Unlocked', 'Distribution has been unlocked.', 'success');
-          } else {
-            showToast('Error', res.message || 'Failed to unlock distribution.', 'danger');
-          }
-        }).catch(function (err) {
-          showToast('Error', err.message || 'Failed to unlock distribution.', 'danger');
-        });
-      });
-    }
-
-    var lockBtn = document.getElementById('lockDistributionBtn');
-    if (lockBtn) {
-      lockBtn.addEventListener('click', function () {
-        if (isDistributionLocked) {
-          showToast('Already Locked', 'Distribution is already locked.', 'warning');
-          return;
-        }
-        if (!_teamId) {
-          showToast('Error', 'No team found. Cannot lock distribution.', 'danger');
-          return;
-        }
-        API.lockDistribution(_teamId).then(function (res) {
-          if (res && res.success !== false) {
-            isDistributionLocked = true;
-            localStorage.setItem('teamleader_distLocked', 'true');
-            updateLockBadge();
-            showToast('Locked', 'Distribution has been locked successfully.', 'success');
-          } else {
-            showToast('Error', res.message || 'Failed to lock distribution.', 'danger');
-          }
-        }).catch(function (err) {
-          showToast('Error', err.message || 'Failed to lock distribution.', 'danger');
-        });
-      });
-    }
-
-    var confirmBtn = document.getElementById('confirmLockBtn');
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', function () {
-        if (!_teamId) {
-          showToast('Error', 'No team found.', 'danger');
-          var modal = document.getElementById('lockConfirmModal');
-          if (modal) modal.classList.remove('show');
-          return;
-        }
-        API.lockDistribution(_teamId).then(function (res) {
-          if (res && res.success !== false) {
-            isDistributionLocked = true;
-            localStorage.setItem('teamleader_distLocked', 'true');
-            updateLockBadge();
-            var modal = document.getElementById('lockConfirmModal');
-            if (modal) modal.classList.remove('show');
-            showToast('Locked', 'Distribution has been locked successfully.', 'success');
-          } else {
-            showToast('Error', res.message || 'Failed to lock distribution.', 'danger');
-            var modal = document.getElementById('lockConfirmModal');
-            if (modal) modal.classList.remove('show');
-          }
-        }).catch(function (err) {
-          showToast('Error', err.message || 'Failed to lock distribution.', 'danger');
-          var modal = document.getElementById('lockConfirmModal');
-          if (modal) modal.classList.remove('show');
-        });
-      });
-    }
-
-    var cancelBtn = document.getElementById('cancelLockBtn');
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', function () {
-        var modal = document.getElementById('lockConfirmModal');
-        if (modal) modal.classList.remove('show');
-      });
-    }
-
-    var confirmModal = document.getElementById('lockConfirmModal');
-    if (confirmModal) {
-      confirmModal.addEventListener('click', function (e) {
-        if (e.target === this) this.classList.remove('show');
-      });
-    }
-
     updateLockBadge();
   }
 

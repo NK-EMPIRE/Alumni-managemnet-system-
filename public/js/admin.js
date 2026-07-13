@@ -879,6 +879,10 @@ function navigateTo(section, el) {
     target.classList.add('active');
   }
 
+  if (section === 'audit') {
+    fetchLatestAuditLogs(populateAuditLogTable);
+  }
+
   /* Update breadcrumb */
   var bc = document.getElementById('breadcrumb');
   if (bc) {
@@ -1767,58 +1771,72 @@ function initAuditHandlers() {
   }
 }
 
-function applyAuditFilters() {
-  var actionFilter = document.getElementById('auditActionFilter');
-  var roleFilter = document.getElementById('auditRoleFilter');
-  var dateFrom = document.getElementById('auditDateFrom');
-  var dateTo = document.getElementById('auditDateTo');
-
-  var actionVal = actionFilter ? actionFilter.value : 'all';
-  var roleVal = roleFilter ? roleFilter.value : 'all';
-  var fromVal = dateFrom ? dateFrom.value : '';
-  var toVal = dateTo ? dateTo.value : '';
-
-  var fullData;
-  if (_apiDataLoaded && _apiAuditLogs && _apiAuditLogs.records) {
-    fullData = _apiAuditLogs.records.map(function (item) {
-      var tsStr = '';
-      if (item.created_at) {
-        var d = new Date(item.created_at);
-        tsStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      }
-      return {
-        ts: tsStr,
-        user: item.username || '-',
-        role: item.role_name || '-',
-        action: item.action || '-',
-        target: item.target || '-',
-        ip: item.ip_address || '-',
-        status: item.status || 'Success',
-        created_at: item.created_at
-      };
-    });
-  } else {
-    fullData = auditLogs.slice();
-  }
-  auditState.filteredData = fullData.filter(function (item) {
-    var match = true;
-    if (actionVal !== 'all' && item.action !== actionVal) match = false;
-    if (roleVal !== 'all' && item.role !== roleVal) match = false;
-    if (fromVal) {
-      var fromDate = new Date(fromVal);
-      var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
-      if (itemDate < fromDate) match = false;
+function fetchLatestAuditLogs(callback) {
+  API.getAuditLogs({ page: 1, limit: 1000 }).then(function (res) {
+    if (res.success && res.data) {
+      _apiAuditLogs = res.data;
     }
-    if (toVal) {
-      var toDate = new Date(toVal);
-      toDate.setHours(23, 59, 59, 999);
-      var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
-      if (itemDate > toDate) match = false;
-    }
-    return match;
+    if (callback) callback();
+  }).catch(function (err) {
+    console.error('Failed to fetch latest audit logs:', err);
+    if (callback) callback();
   });
-  auditState.currentPage = 1;
-  renderAuditLogTable();
+}
+
+function applyAuditFilters() {
+  fetchLatestAuditLogs(function () {
+    var actionFilter = document.getElementById('auditActionFilter');
+    var roleFilter = document.getElementById('auditRoleFilter');
+    var dateFrom = document.getElementById('auditDateFrom');
+    var dateTo = document.getElementById('auditDateTo');
+
+    var actionVal = actionFilter ? actionFilter.value : 'all';
+    var roleVal = roleFilter ? roleFilter.value : 'all';
+    var fromVal = dateFrom ? dateFrom.value : '';
+    var toVal = dateTo ? dateTo.value : '';
+
+    var fullData;
+    if (_apiDataLoaded && _apiAuditLogs && _apiAuditLogs.records) {
+      fullData = _apiAuditLogs.records.map(function (item) {
+        var tsStr = '';
+        if (item.created_at) {
+          var d = new Date(item.created_at);
+          tsStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        return {
+          ts: tsStr,
+          user: item.username || '-',
+          role: item.role_name || '-',
+          action: item.action || '-',
+          target: item.target || '-',
+          ip: item.ip_address || '-',
+          status: item.status || 'Success',
+          created_at: item.created_at
+        };
+      });
+    } else {
+      fullData = auditLogs.slice();
+    }
+    auditState.filteredData = fullData.filter(function (item) {
+      var match = true;
+      if (actionVal !== 'all' && item.action !== actionVal) match = false;
+      if (roleVal !== 'all' && item.role !== roleVal) match = false;
+      if (fromVal) {
+        var fromDate = new Date(fromVal);
+        var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
+        if (itemDate < fromDate) match = false;
+      }
+      if (toVal) {
+        var toDate = new Date(toVal);
+        toDate.setHours(23, 59, 59, 999);
+        var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
+        if (itemDate > toDate) match = false;
+      }
+      return match;
+    });
+    auditState.currentPage = 1;
+    renderAuditLogTable();
+  });
 }
 
 function parseAuditDate(ts) {

@@ -364,7 +364,7 @@
           <span class="notification-count" id="notifCount">5</span>
         </button>
         <div class="dropdown" id="notifDropdownContainer">
-          <div class="dropdown-menu" id="notifDropdown" style="left:-155px;right:auto;">
+          <div class="dropdown-menu dropdown-menu-left" id="notifDropdown" style="width:340px;">
             <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
               <span>Notifications</span>
               <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
@@ -410,12 +410,37 @@
       </div>
 
     <section id="section-dashboard" class="content-section active">
-      <div id="lockStatusBadge" style="padding:12px 20px;display:inline-flex;align-items:center;gap:8px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;margin-bottom:18px;cursor:pointer;" title="Double-click to unlock">
-        <i class="fas fa-lock-open lock-icon" style="color:#10B981;"></i>
-        <span class="lock-text" style="font-weight:600;font-size:0.85rem;color:#166534;">Distribution: Open</span>
+      <div style="display:grid;grid-template-columns:1fr;gap:22px;margin-bottom:22px">
+        <div class="card">
+          <div class="card-header" style="padding: 12px 20px">
+            <h3 style="font-size: 0.95rem; font-weight: 600;"><i class="fas fa-bolt" style="color:#7C3AED;margin-right:8px"></i> Quick Actions</h3>
+          </div>
+          <div class="card-body" style="padding: 16px 20px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+              <div class="quick-action-btn" id="assignModalBtn" style="padding: 10px 14px">
+                <div class="icon-wrap" style="background:#DBEAFE;color:#2563EB;width:36px;height:36px;font-size:0.95rem">
+                  <i class="fas fa-user-plus"></i>
+                </div>
+                <span style="font-size:0.85rem;font-weight:500">Assign / Reassign Alumni</span>
+              </div>
+              <div class="quick-action-btn" id="refreshDataBtn" style="padding: 10px 14px">
+                <div class="icon-wrap" style="background:#D1FAE5;color:#10B981;width:36px;height:36px;font-size:0.95rem">
+                  <i class="fas fa-rotate"></i>
+                </div>
+                <span style="font-size:0.85rem;font-weight:500">Refresh Data</span>
+              </div>
+              <div class="quick-action-btn" id="exportReportBtn" style="padding: 10px 14px">
+                <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED;width:36px;height:36px;font-size:0.95rem">
+                  <i class="fas fa-file-pdf"></i>
+                </div>
+                <span style="font-size:0.85rem;font-weight:500">Export Report</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <section id="overviewCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;margin-bottom:28px"></section>
+      <section id="overviewCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;margin-bottom:22px"></section>
 
       <section style="margin-bottom:28px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
@@ -489,36 +514,6 @@
             </div>
             <div class="pagination-info" id="paginationInfo">Showing 1-8 of 8 members</div>
             <div class="pagination" id="pagination"></div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr;gap:22px;margin-bottom:28px">
-        <div class="card">
-          <div class="card-header">
-            <h3><i class="fas fa-bolt" style="color:#7C3AED;margin-right:8px"></i> Quick Actions</h3>
-          </div>
-          <div class="card-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-              <div class="quick-action-btn" id="assignModalBtn">
-                <div class="icon-wrap" style="background:#DBEAFE;color:#2563EB">
-                  <i class="fas fa-user-plus"></i>
-                </div>
-                <span>Assign / Reassign Alumni</span>
-              </div>
-              <div class="quick-action-btn" id="refreshDataBtn">
-                <div class="icon-wrap" style="background:#D1FAE5;color:#10B981">
-                  <i class="fas fa-rotate"></i>
-                </div>
-                <span>Refresh Data</span>
-              </div>
-              <div class="quick-action-btn" id="exportReportBtn">
-                <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED">
-                  <i class="fas fa-file-pdf"></i>
-                </div>
-                <span>Export Report</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -821,27 +816,7 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="lockConfirmModal">
-    <div class="modal" style="max-width:400px;">
-      <div class="modal-header">
-        <h3>Lock Distribution</h3>
-        <button class="modal-close" data-close="lockConfirmModal"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div style="text-align:center;padding:16px;">
-          <i class="fas fa-lock" style="font-size:3rem;color:#EF4444;margin-bottom:16px;"></i>
-          <p style="font-size:0.95rem;color:#1E293B;margin-bottom:8px;font-weight:500;">Are you sure you want to lock the distribution?</p>
-          <p style="font-size:0.85rem;color:#64748B;">Once locked, no changes can be made to team assignments. This action cannot be undone.</p>
-        </div>
-      </div>
-      <div class="modal-footer" style="justify-content:center;gap:12px;">
-        <button class="btn btn-outline" id="cancelLockBtn">Cancel</button>
-        <button class="btn btn-danger" id="confirmLockBtn">
-          <i class="fas fa-lock"></i> Yes, Lock Distribution
-        </button>
-      </div>
-    </div>
-  </div>
+
 
   <div class="modal-overlay" id="memberDetailModalOverlay">
     <div class="modal modal-xl">

@@ -195,9 +195,9 @@
     toggleBtn.style.cursor = 'pointer';
     toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
 
-    var notifBtn = rightContainer.querySelector('#notifBtn');
-    if (notifBtn && notifBtn.parentNode === rightContainer) {
-      rightContainer.insertBefore(toggleBtn, notifBtn.nextSibling);
+    var refNode = rightContainer.querySelector('.dropdown') || rightContainer.querySelector('#notifBtn') || rightContainer.firstChild;
+    if (refNode && refNode.parentNode === rightContainer) {
+      rightContainer.insertBefore(toggleBtn, refNode.nextSibling);
     } else {
       var refNode = rightContainer.querySelector('.dropdown') || rightContainer.firstChild;
       if (refNode && refNode.parentNode === rightContainer) {
