@@ -15,12 +15,12 @@ async function runSetup(req, res, next) {
 
     if (existingTables.length > 0) {
       var migrations = [];
-      var colCheck = await pool.request().query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Alumni' AND COLUMN_NAME = 'date_of_birth'");
+      var colCheck = await pool.request().query("SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'date_of_birth'");
       if (colCheck.recordset.length === 0) {
         await pool.request().query("ALTER TABLE Alumni ADD date_of_birth VARCHAR(20)");
         migrations.push('Added date_of_birth column to Alumni');
       }
-      var deptCheck = await pool.request().query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'department'");
+      var deptCheck = await pool.request().query("SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'department'");
       if (deptCheck.recordset.length === 0) {
         await pool.request().query("ALTER TABLE Users ADD department VARCHAR(100)");
         migrations.push('Added department column to Users');

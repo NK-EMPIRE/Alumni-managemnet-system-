@@ -67,6 +67,7 @@ async function processExcelImport(filePath, currentUser) {
   const newRows = [];
   let duplicateCount = 0;
   let mergedCount = 0;
+  let skippedCount = 0;
 
   for (const row of validRows) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
@@ -95,6 +96,8 @@ async function processExcelImport(filePath, currentUser) {
       if (Object.keys(fieldsToUpdate).length > 0) {
         await uploadRepository.updateAlumniFields(existing.alumni_id, fieldsToUpdate);
         mergedCount++;
+      } else {
+        skippedCount++;
       }
       duplicateCount++;
     } else {
@@ -117,6 +120,8 @@ async function processExcelImport(filePath, currentUser) {
     fileName: filePath.split('\\').pop().split('/').pop(),
     totalRows,
     imported: newRows.length,
+    merged: mergedCount,
+    skipped: skippedCount,
     duplicates: duplicateCount,
     errors: invalidRows.length,
     errorDetails: errorSummary,
@@ -127,6 +132,8 @@ async function processExcelImport(filePath, currentUser) {
   logger.auditLog('EXCEL_IMPORTED', {
     fileName: filePath.split('\\').pop().split('/').pop(),
     imported: newRows.length,
+    merged: mergedCount,
+    skipped: skippedCount,
     duplicates: duplicateCount,
     errors: invalidRows.length,
     total: totalRows,
@@ -135,6 +142,8 @@ async function processExcelImport(filePath, currentUser) {
 
   return {
     imported: newRows.length,
+    merged: mergedCount,
+    skipped: skippedCount,
     duplicates: duplicateCount,
     errors: invalidRows.length,
     total: totalRows

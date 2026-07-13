@@ -56,12 +56,12 @@ const dummyBatchProgress = [
     ──────────────────────────────────────────────────────────── */
 
 var importHistory = [
-  { file: 'alumni_batch_2023.xlsx', imported: 245, duplicates: 12, errors: 3, by: 'Admin User', date: '05 Jul 2026', status: 'Completed' },
-  { file: 'cse_alumni_2022.xlsx', imported: 180, duplicates: 5, errors: 1, by: 'Admin User', date: '28 Jun 2026', status: 'Completed' },
-  { file: 'ece_alumni_update.csv', imported: 92, duplicates: 8, errors: 0, by: 'Admin User', date: '15 Jun 2026', status: 'Completed' },
-  { file: 'mech_batch_2021.xlsx', imported: 156, duplicates: 3, errors: 2, by: 'Admin User', date: '01 Jun 2026', status: 'Completed' },
-  { file: 'full_alumni_export.csv', imported: 620, duplicates: 45, errors: 7, by: 'Admin User', date: '20 May 2026', status: 'Completed' },
-  { file: 'batch_2020_update.xlsx', imported: 0, duplicates: 0, errors: 0, by: 'Admin User', date: '10 May 2026', status: 'Failed' }
+  { file: 'alumni_batch_2023.xlsx', imported: 200, merged: 45, skipped: 3, duplicates: 12, errors: 3, by: 'Admin User', date: '05 Jul 2026', status: 'Completed' },
+  { file: 'cse_alumni_2022.xlsx', imported: 150, merged: 30, skipped: 1, duplicates: 5, errors: 1, by: 'Admin User', date: '28 Jun 2026', status: 'Completed' },
+  { file: 'ece_alumni_update.csv', imported: 60, merged: 32, skipped: 0, duplicates: 8, errors: 0, by: 'Admin User', date: '15 Jun 2026', status: 'Completed' },
+  { file: 'mech_batch_2021.xlsx', imported: 120, merged: 36, skipped: 2, duplicates: 3, errors: 2, by: 'Admin User', date: '01 Jun 2026', status: 'Completed' },
+  { file: 'full_alumni_export.csv', imported: 400, merged: 220, skipped: 7, duplicates: 45, errors: 7, by: 'Admin User', date: '20 May 2026', status: 'Completed' },
+  { file: 'batch_2020_update.xlsx', imported: 0, merged: 0, skipped: 0, duplicates: 0, errors: 0, by: 'Admin User', date: '10 May 2026', status: 'Failed' }
 ];
 
 var auditLogs = [];
@@ -605,17 +605,23 @@ function populateNotifications() {
   var list = document.getElementById('notifList');
   if (!list) return;
 
+  var cleared = JSON.parse(localStorage.getItem('cleared_notifications_admin') || '[]');
+
   // Use real audit log data when available
-  var notifs = [];
+  var rawNotifs = [];
   if (_apiAuditLogs && _apiAuditLogs.records && _apiAuditLogs.records.length > 0) {
-    notifs = _apiAuditLogs.records.slice(0, 10).map(function(r) {
+    rawNotifs = _apiAuditLogs.records.slice(0, 10).map(function(r) {
+      var nid = 'al_' + (r.audit_id || r.created_at + '_' + r.action);
       return {
+        id: nid,
         text: (r.username || 'System') + ' — ' + (r.action || '').replace(/_/g, ' ').toLowerCase(),
         time: r.created_at ? new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
         unread: true
       };
     });
   }
+
+  var notifs = rawNotifs.filter(function(n) { return cleared.indexOf(n.id) === -1; });
 
   if (notifs.length === 0) {
     list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No notifications</div>';
@@ -626,7 +632,7 @@ function populateNotifications() {
 
   var html = '';
   notifs.forEach(function (n) {
-    html += '<button class="dropdown-item" style="flex-wrap:wrap;gap:4px;' + (n.unread ? 'background:rgba(99,102,241,0.06);' : '') + '" onclick="markNotifRead(this)">';
+    html += '<button class="dropdown-item" data-nid="' + n.id + '" style="flex-wrap:wrap;gap:4px;' + (n.unread ? 'background:rgba(99,102,241,0.06);' : '') + '" onclick="markNotifRead(this)">';
     html += '<div style="display:flex;gap:10px;width:100%;align-items:flex-start;">';
     if (n.unread) html += '<span style="width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;"></span>';
     else html += '<span style="width:8px;height:8px;flex-shrink:0;"></span>';
@@ -644,9 +650,18 @@ function populateNotifications() {
 }
 
 function markNotifRead(btn) {
+  var nid = btn.getAttribute('data-nid');
+  if (nid) {
+    var cleared = JSON.parse(localStorage.getItem('cleared_notifications_admin') || '[]');
+    if (cleared.indexOf(nid) === -1) {
+      cleared.push(nid);
+      localStorage.setItem('cleared_notifications_admin', JSON.stringify(cleared));
+    }
+  }
   btn.style.background = 'transparent';
   var dot = btn.querySelector('span:first-child');
   if (dot) dot.style.background = 'transparent';
+  btn.querySelector('[data-nid]');
   var count = document.querySelector('.notification-count');
   if (count) {
     var c = parseInt(count.textContent);
@@ -656,6 +671,17 @@ function markNotifRead(btn) {
 }
 
 window.clearAllNotifications = function() {
+  // Clear all non-dismissed notification IDs (save all current IDs as dismissed)
+  var notifButtons = document.querySelectorAll('#notifList .dropdown-item[data-nid]');
+  var cleared = JSON.parse(localStorage.getItem('cleared_notifications_admin') || '[]');
+  notifButtons.forEach(function(btn) {
+    var nid = btn.getAttribute('data-nid');
+    if (nid && cleared.indexOf(nid) === -1) {
+      cleared.push(nid);
+    }
+  });
+  localStorage.setItem('cleared_notifications_admin', JSON.stringify(cleared));
+
   var list = document.getElementById('notifList');
   if (list) {
     list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No new notifications</div>';
@@ -1467,7 +1493,7 @@ function initImportHandlers() {
       var pc = document.getElementById('importPreviewContainer');
       if (pc) pc.style.display = 'none';
       if (res.success) {
-        var msg = 'Imported: ' + res.data.imported + ' records. Duplicates: ' + res.data.duplicates + ', Errors: ' + res.data.errors;
+        var msg = 'Imported: ' + res.data.imported + ', Merged: ' + (res.data.merged || 0) + ', Skipped: ' + (res.data.skipped || 0) + ', Duplicates: ' + res.data.duplicates + ', Errors: ' + res.data.errors;
         if (res.data.errors > 0 && res.data.errorDetails) {
           msg += '. Check import history for details.';
         }
@@ -1504,7 +1530,18 @@ function populateImportHistory() {
   var data;
   if (_apiDataLoaded && _apiImportHistory && _apiImportHistory.records) {
     data = _apiImportHistory.records.map(function (h) {
-      return { file: h.file_name || h.file || h.fileName || '-', imported: h.imported || h.recordsImported || 0, duplicates: h.duplicates || h.duplicatesSkipped || 0, errors: h.errors || 0, by: h.importer_name || h.by || h.importedBy || '-', date: h.created_at || h.date || h.importedAt || '-', status: h.status || 'Completed', errorDetails: h.error_details || null };
+      return {
+        file: h.file_name || h.file || h.fileName || '-',
+        imported: h.imported || h.recordsImported || 0,
+        merged: h.merged || 0,
+        skipped: h.skipped || 0,
+        duplicates: h.duplicates || h.duplicatesSkipped || 0,
+        errors: h.errors || 0,
+        by: h.importer_name || h.by || h.importedBy || '-',
+        date: h.created_at || h.date || h.importedAt || '-',
+        status: h.status || 'Completed',
+        errorDetails: h.error_details || null
+      };
     });
   } else {
     data = importHistory;
@@ -1518,6 +1555,8 @@ function populateImportHistory() {
     html += '<td>' + (i + 1) + '</td>';
     html += '<td>' + item.file + '</td>';
     html += '<td>' + item.imported + '</td>';
+    html += '<td>' + (item.merged || 0) + '</td>';
+    html += '<td>' + (item.skipped || 0) + '</td>';
     html += '<td>' + item.duplicates + '</td>';
     var errBtn = '';
     if (item.errors > 0) {

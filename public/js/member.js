@@ -255,7 +255,7 @@
         const record = alumniData.find(function (r) { return r.id === parseInt(index, 10); });
         if (!record) return;
 
-        fieldIndex.value = record.id;
+        fieldIndex.value = record.id || '';
         modalTitle.textContent = record.name;
         modalSubtitle.textContent = record.department + ' (' + record.batch + ')';
         modalAvatar.textContent = record.name.charAt(0).toUpperCase();

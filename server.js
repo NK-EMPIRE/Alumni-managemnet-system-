@@ -111,7 +111,28 @@ async function startServer() {
         END
       `);
 
-      logger.info('Migrations: verified and updated Users and Alumni columns successfully');
+      // Migrate ImportHistory table columns
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns
+          WHERE object_id = OBJECT_ID('dbo.ImportHistory') AND name = 'merged'
+        )
+        BEGIN
+          ALTER TABLE dbo.ImportHistory ADD merged INT DEFAULT 0;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns
+          WHERE object_id = OBJECT_ID('dbo.ImportHistory') AND name = 'skipped'
+        )
+        BEGIN
+          ALTER TABLE dbo.ImportHistory ADD skipped INT DEFAULT 0;
+        END
+      `);
+
+      logger.info('Migrations: verified and updated Users, Alumni, and ImportHistory columns successfully');
     } catch (migErr) {
       logger.warn('Migration check failed: ' + migErr.message);
     }
