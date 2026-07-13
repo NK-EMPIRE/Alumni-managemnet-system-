@@ -5,7 +5,7 @@ async function findAll({ page, limit, offset, action, role, dateFrom, dateTo }) 
   let countQuery = 'SELECT COUNT(*) AS total FROM AuditLogs WHERE 1=1';
   let dataQuery = `
     SELECT
-      log_id, user_id, username, role_name, action, target,
+      audit_id, user_id, username, role_name, action, target,
       description, ip_address, user_agent, status, created_at
     FROM AuditLogs WHERE 1=1`;
   const inputs = [];
