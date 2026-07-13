@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,11 +19,13 @@
   <!-- Google Fonts - Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
   <!-- ============================================================
@@ -60,13 +63,15 @@
         <i class="fas fa-th-large"></i>
         <span class="sidebar-item-text">Dashboard</span>
       </a>
-      <a class="sidebar-item has-sub" data-section="teamLeaders" onclick="toggleSubmenu(this);navigateTo('teamLeaders', this)">
+      <a class="sidebar-item has-sub" data-section="teamLeaders"
+        onclick="toggleSubmenu(this);navigateTo('teamLeaders', this)">
         <i class="fas fa-user-tie"></i>
         <span class="sidebar-item-text">Team Leaders</span>
         <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
-        <a class="sidebar-item sub-item" data-section="teamLeaders" data-sub="viewAll" onclick="navigateTo('teamLeaders', this)">
+        <a class="sidebar-item sub-item" data-section="teamLeaders" data-sub="viewAll"
+          onclick="navigateTo('teamLeaders', this)">
           <i class="fas fa-list"></i>
           <span class="sidebar-item-text">View All</span>
         </a>
@@ -75,13 +80,15 @@
           <span class="sidebar-item-text">Add New</span>
         </a>
       </div>
-      <a class="sidebar-item has-sub" data-section="teamMembers" onclick="toggleSubmenu(this);navigateTo('teamMembers', this)">
+      <a class="sidebar-item has-sub" data-section="teamMembers"
+        onclick="toggleSubmenu(this);navigateTo('teamMembers', this)">
         <i class="fas fa-users"></i>
         <span class="sidebar-item-text">Team Members</span>
         <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
-        <a class="sidebar-item sub-item" data-section="teamMembers" data-sub="viewAll" onclick="navigateTo('teamMembers', this)">
+        <a class="sidebar-item sub-item" data-section="teamMembers" data-sub="viewAll"
+          onclick="navigateTo('teamMembers', this)">
           <i class="fas fa-list"></i>
           <span class="sidebar-item-text">View All</span>
         </a>
@@ -144,7 +151,8 @@
         </button>
         <div>
           <div class="breadcrumb" id="breadcrumb">
-            <a href="#" onclick="event.preventDefault();navigateTo('dashboard',document.querySelector('[data-section=dashboard]'))">Home</a>
+            <a href="#"
+              onclick="event.preventDefault();navigateTo('dashboard',document.querySelector('[data-section=dashboard]'))">Home</a>
             <span class="separator"><i class="fas fa-chevron-right"></i></span>
             <span class="current">Dashboard</span>
           </div>
@@ -156,14 +164,17 @@
             <i class="fas fa-bell"></i>
             <span class="notification-count">5</span>
           </button>
-          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;right:auto;left:-155px;">
+          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;">
             <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
               <span>Notifications</span>
-              <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
+              <button onclick="clearAllNotifications()"
+                style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear
+                All</button>
             </div>
             <div id="notifList"></div>
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item" style="justify-content:center;color:var(--primary);font-weight:500;" onclick="showAllNotifications()">
+            <button class="dropdown-item" style="justify-content:center;color:var(--primary);font-weight:500;"
+              onclick="showAllNotifications()">
               View All Notifications
             </button>
           </div>
@@ -278,12 +289,14 @@
           </div>
           <div class="card-body" style="padding:0;">
             <!-- Filters -->
-            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
+            <div
+              style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
               <div class="search-bar" style="max-width:280px;flex:1;">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search alumni..." id="tableSearch" oninput="filterTable()">
               </div>
-              <select class="form-control form-select" id="filterDepartment" style="width:140px;" onchange="filterTable()">
+              <select class="form-control form-select" id="filterDepartment" style="width:140px;"
+                onchange="filterTable()">
                 <option value="">All Depts</option>
                 <option value="CSE">CSE</option>
                 <option value="ECE">ECE</option>
@@ -325,10 +338,12 @@
               </table>
             </div>
             <!-- Pagination -->
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 22px;border-top:1px solid var(--border);">
+            <div
+              style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 22px;border-top:1px solid var(--border);">
               <div style="display:flex;align-items:center;gap:8px;">
                 <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
-                <select class="form-control" id="rowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;" onchange="changeRowsPerPage(this.value)">
+                <select class="form-control" id="rowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;"
+                  onchange="changeRowsPerPage(this.value)">
                   <option value="5">5</option>
                   <option value="10">10</option>
                   <option value="25">25</option>
@@ -356,7 +371,8 @@
         </div>
         <div class="card fade-in-up">
           <div class="card-body" style="padding:0;">
-            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
+            <div
+              style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
               <div class="search-bar" style="max-width:280px;flex:1;">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search team leaders..." id="tlSearch" oninput="filterTeamLeaders()">
@@ -396,7 +412,8 @@
         </div>
         <div class="card fade-in-up">
           <div class="card-body" style="padding:0;">
-            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
+            <div
+              style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
               <div class="search-bar" style="max-width:280px;flex:1;">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search team members..." id="tmSearch" oninput="filterTeamMembers()">
@@ -470,7 +487,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div class="card fade-in-up">
             <div class="card-header">
-              <h3><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Department Progress</h3>
+              <h3><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Department Progress
+              </h3>
             </div>
             <div class="card-body" id="deptProgressList"></div>
           </div>
@@ -494,22 +512,27 @@
         <div class="card fade-in-up">
           <div class="card-body">
             <div class="tabs" id="settingsTabs">
-              <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)">General</button>
-              <button class="tab-item" data-tab="notifications" onclick="switchSettingsTab('notifications',this)">Notifications</button>
-              <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)">Security</button>
+              <button class="tab-item active" data-tab="general"
+                onclick="switchSettingsTab('general',this)">General</button>
+              <button class="tab-item" data-tab="notifications"
+                onclick="switchSettingsTab('notifications',this)">Notifications</button>
+              <button class="tab-item" data-tab="security"
+                onclick="switchSettingsTab('security',this)">Security</button>
               <button class="tab-item" data-tab="backup" onclick="switchSettingsTab('backup',this)">Backup</button>
             </div>
             <div class="tab-content active" id="tab-general">
               <div class="form-group">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">System Name</label>
-                <input class="form-control" type="text" value="Alumni Professional Details Update Management System" style="max-width:400px;">
+                <input class="form-control" type="text" value="Alumni Professional Details Update Management System"
+                  style="max-width:400px;">
               </div>
               <div class="form-group">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Admin Email</label>
                 <input class="form-control" type="email" value="admin@alumnims.edu" style="max-width:400px;">
               </div>
               <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Records Per Page</label>
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Records Per
+                  Page</label>
                 <select class="form-control form-select" style="max-width:200px;">
                   <option>5</option>
                   <option selected>10</option>
@@ -517,7 +540,8 @@
                   <option>50</option>
                 </select>
               </div>
-              <button class="btn btn-primary" onclick="Toast.success('Settings','General settings saved successfully!')">
+              <button class="btn btn-primary"
+                onclick="Toast.success('Settings','General settings saved successfully!')">
                 <i class="fas fa-save"></i> Save Settings
               </button>
             </div>
@@ -542,7 +566,8 @@
             </div>
             <div class="tab-content" id="tab-security">
               <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current
+                  Password</label>
                 <input class="form-control" type="password" value="password123" style="max-width:400px;">
               </div>
               <div class="form-group">
@@ -550,7 +575,8 @@
                 <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;">
               </div>
               <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm
+                  Password</label>
                 <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;">
               </div>
               <button class="btn btn-primary" onclick="Toast.success('Security','Password changed successfully!')">
@@ -627,10 +653,13 @@
         <!-- Import Form Card -->
         <div class="card" style="padding:32px;margin-bottom:24px;">
           <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:8px;">Upload Excel File</h3>
-          <p style="font-size:0.85rem;color:#64748B;margin-bottom:24px;">Upload an Excel file (.xlsx or .csv) containing alumni records. Maximum file size: 50 MB.</p>
-          
-          <div class="upload-zone" id="uploadZone" style="border:2px dashed #CBD5E1;border-radius:12px;padding:48px;text-align:center;background:#F8FAFC;cursor:pointer;transition:all 0.3s;">
-            <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#2563EB;margin-bottom:16px;display:block;"></i>
+          <p style="font-size:0.85rem;color:#64748B;margin-bottom:24px;">Upload an Excel file (.xlsx or .csv) containing
+            alumni records. Maximum file size: 50 MB.</p>
+
+          <div class="upload-zone" id="uploadZone"
+            style="border:2px dashed #CBD5E1;border-radius:12px;padding:48px;text-align:center;background:#F8FAFC;cursor:pointer;transition:all 0.3s;">
+            <i class="fas fa-cloud-upload-alt"
+              style="font-size:3rem;color:#2563EB;margin-bottom:16px;display:block;"></i>
             <h4 style="font-size:1rem;color:#1E293B;margin-bottom:8px;font-weight:600;">Drag & drop your file here</h4>
             <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:16px;">or click to browse files</p>
             <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
@@ -666,7 +695,8 @@
 
         <!-- Import History Table -->
         <div class="card" style="padding:24px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div
+            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
             <h3 style="font-size:1rem;font-weight:600;color:#1E293B;">Import History</h3>
           </div>
           <div class="table-container">
@@ -704,7 +734,8 @@
         <div class="card" style="padding:20px;margin-bottom:20px;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
             <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Action Type</label>
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Action
+                Type</label>
               <select class="form-control" id="auditActionFilter">
                 <option value="all">All Actions</option>
                 <option value="login">Login</option>
@@ -718,7 +749,8 @@
               </select>
             </div>
             <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">User Role</label>
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">User
+                Role</label>
               <select class="form-control" id="auditRoleFilter">
                 <option value="all">All Roles</option>
                 <option value="ADMIN">Admin</option>
@@ -727,14 +759,16 @@
               </select>
             </div>
             <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Date Range</label>
+              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Date
+                Range</label>
               <input type="date" class="form-control" id="auditDateFrom">
             </div>
             <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">&nbsp;</label>
+              <label
+                style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">&nbsp;</label>
               <input type="date" class="form-control" id="auditDateTo">
             </div>
-            <div style="align-self:flex-end;">
+            <div>
               <button class="btn btn-primary" id="auditFilterBtn"><i class="fas fa-filter"></i> Apply</button>
               <button class="btn btn-outline" id="auditResetBtn"><i class="fas fa-undo"></i> Reset</button>
             </div>
@@ -767,22 +801,29 @@
       </section>
 
       <!-- ─── QUICK ACTIONS ─── -->
-      <div style="position:fixed;bottom:24px;right:24px;z-index:1020;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+      <div
+        style="position:fixed;bottom:24px;right:24px;z-index:1020;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
         <div id="quickActionMenu" style="display:none;flex-direction:column;gap:8px;margin-bottom:8px;">
-          <button class="btn btn-primary btn-sm" onclick="openModal('addTeamLeaderModal')" style="border-radius:50px;box-shadow:var(--shadow-md);">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addTeamLeaderModal')"
+            style="border-radius:50px;box-shadow:var(--shadow-md);">
             <i class="fas fa-user-tie"></i> Add Team Leader
           </button>
-          <button class="btn btn-success btn-sm" onclick="openModal('addTeamMemberModal')" style="border-radius:50px;box-shadow:var(--shadow-md);">
+          <button class="btn btn-success btn-sm" onclick="openModal('addTeamMemberModal')"
+            style="border-radius:50px;box-shadow:var(--shadow-md);">
             <i class="fas fa-user-plus"></i> Add Team Member
           </button>
-          <button class="btn btn-warning btn-sm" onclick="openModal('assignAlumniModal')" style="border-radius:50px;box-shadow:var(--shadow-md);color:#fff;">
+          <button class="btn btn-warning btn-sm" onclick="openModal('assignAlumniModal')"
+            style="border-radius:50px;box-shadow:var(--shadow-md);color:#fff;">
             <i class="fas fa-user-graduate"></i> Assign Alumni
           </button>
-          <button class="btn btn-secondary btn-sm" onclick="navigateTo('audit',document.querySelector('[data-section=audit]'))" style="border-radius:50px;box-shadow:var(--shadow-md);">
+          <button class="btn btn-secondary btn-sm"
+            onclick="navigateTo('audit',document.querySelector('[data-section=audit]'))"
+            style="border-radius:50px;box-shadow:var(--shadow-md);">
             <i class="fas fa-history"></i> View Audit Logs
           </button>
         </div>
-        <button class="btn btn-primary" id="fabButton" onclick="toggleQuickActions()" style="width:52px;height:52px;border-radius:50%;padding:0;box-shadow:var(--shadow-lg);font-size:1.4rem;">
+        <button class="btn btn-primary" id="fabButton" onclick="toggleQuickActions()"
+          style="width:52px;height:52px;border-radius:50%;padding:0;box-shadow:var(--shadow-lg);font-size:1.4rem;">
           <i class="fas fa-plus" id="fabIcon"></i>
         </button>
       </div>
@@ -792,7 +833,8 @@
     <!-- ============================================================
          FOOTER
          ============================================================ -->
-    <footer style="text-align:center;padding:20px 32px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-muted);background:var(--bg-white);">
+    <footer
+      style="text-align:center;padding:20px 32px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-muted);background:var(--bg-white);">
       <p style="margin:0;">
         &copy; 2026 Alumni Professional Details Update Management System. All rights reserved.
         <span style="display:inline-block;margin:0 8px;">|</span>
@@ -925,7 +967,8 @@
           <label class="floating-label">Select Team Leader <span style="color:var(--danger);">*</span></label>
         </div>
         <div class="form-group">
-          <input class="form-control" type="number" id="assignCount" placeholder="Number of Alumni" min="1" max="500" required>
+          <input class="form-control" type="number" id="assignCount" placeholder="Number of Alumni" min="1" max="500"
+            required>
           <label class="floating-label">Number of Alumni <span style="color:var(--danger);">*</span></label>
         </div>
         <div class="form-group">
@@ -934,7 +977,8 @@
           </select>
           <label class="floating-label">Batch Filter</label>
         </div>
-        <div style="background:var(--bg-light);padding:12px 16px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-muted);">
+        <div
+          style="background:var(--bg-light);padding:12px 16px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-muted);">
           <i class="fas fa-info-circle" style="color:var(--primary);margin-right:6px;"></i>
           Only unassigned alumni matching the filter will be assigned.
         </div>
@@ -975,18 +1019,29 @@
         <button class="modal-close" onclick="closeModal('viewTLModal')">&times;</button>
       </div>
       <div class="modal-body" style="padding:24px;">
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
-          <div id="tlAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">A</div>
+        <div
+          style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
+          <div id="tlAvatar"
+            style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">
+            A</div>
           <div>
             <h2 id="tlDetailName" style="margin:0;font-size:1.2rem;font-weight:600;">-</h2>
             <p id="tlDetailDept" style="margin:2px 0 0 0;font-size:0.85rem;color:var(--text-muted);">-</p>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label><span id="tlDetailEmail" style="font-weight:500;">-</span></div>
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone</label><span id="tlDetailPhone" style="font-weight:500;">-</span></div>
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Members</label><span id="tlDetailMembers" style="font-weight:500;">-</span></div>
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned Alumni</label><span id="tlDetailAssigned" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label><span
+              id="tlDetailEmail" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone</label><span
+              id="tlDetailPhone" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Members</label><span
+              id="tlDetailMembers" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned
+              Alumni</label><span id="tlDetailAssigned" style="font-weight:500;">-</span></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1003,18 +1058,29 @@
         <button class="modal-close" onclick="closeModal('viewTMModal')">&times;</button>
       </div>
       <div class="modal-body" style="padding:24px;">
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
-          <div id="tmAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">A</div>
+        <div
+          style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
+          <div id="tmAvatar"
+            style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">
+            A</div>
           <div>
             <h2 id="tmDetailName" style="margin:0;font-size:1.2rem;font-weight:600;">-</h2>
             <p id="tmDetailDept" style="margin:2px 0 0 0;font-size:0.85rem;color:var(--text-muted);">-</p>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label><span id="tmDetailEmail" style="font-weight:500;">-</span></div>
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone</label><span id="tmDetailPhone" style="font-weight:500;">-</span></div>
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Team Leader</label><span id="tmDetailLeader" style="font-weight:500;">-</span></div>
-          <div><label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned Alumni</label><span id="tmDetailAssigned" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label><span
+              id="tmDetailEmail" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone</label><span
+              id="tmDetailPhone" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Team
+              Leader</label><span id="tmDetailLeader" style="font-weight:500;">-</span></div>
+          <div><label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned
+              Alumni</label><span id="tmDetailAssigned" style="font-weight:500;">-</span></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1027,76 +1093,107 @@
   <div class="modal-overlay" id="viewAlumniModal">
     <div class="modal modal-lg" style="max-width:800px;width:95vw;">
       <div class="modal-header">
-        <h3><i class="fas fa-user-graduate" style="color:var(--primary);margin-right:8px;"></i>Alumni Profile Details</h3>
+        <h3><i class="fas fa-user-graduate" style="color:var(--primary);margin-right:8px;"></i>Alumni Profile Details
+        </h3>
         <button class="modal-close" onclick="closeModal('viewAlumniModal')">&times;</button>
       </div>
       <div class="modal-body" style="padding:20px;max-height:70vh;overflow-y:auto;">
-        <div style="display:flex;align-items:center;gap:15px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:15px;">
-          <div id="vAlumniAvatar" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;">A</div>
+        <div
+          style="display:flex;align-items:center;gap:15px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:15px;">
+          <div id="vAlumniAvatar"
+            style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;">
+            A</div>
           <div>
             <h2 id="vAlumniName" style="margin:0;font-size:1.4rem;font-weight:600;">John Doe</h2>
             <p id="vAlumniMeta" style="margin:2px 0 0 0;font-size:0.9rem;color:var(--text-muted);">CSE | Batch 2022</p>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:20px;margin-bottom:20px;">
+        <div
+          style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:20px;margin-bottom:20px;">
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Register Number</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Register
+              Number</label>
             <span id="vAlumniRegNo" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Gender</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Gender</label>
             <span id="vAlumniGender" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Date of Birth</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Date
+              of Birth</label>
             <span id="vAlumniDOB" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email Address</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Email
+              Address</label>
             <span id="vAlumniEmail" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone Number</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone
+              Number</label>
             <span id="vAlumniPhone" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">LinkedIn Profile</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">LinkedIn
+              Profile</label>
             <a id="vAlumniLinkedIn" href="#" target="_blank" style="color:var(--primary);font-weight:500;">-</a>
           </div>
         </div>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:20px 0;">
-        <h4 style="margin-bottom:12px;font-weight:600;color:var(--primary);"><i class="fas fa-briefcase"></i> Professional Details</h4>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:20px;margin-bottom:20px;">
+        <h4 style="margin-bottom:12px;font-weight:600;color:var(--primary);"><i class="fas fa-briefcase"></i>
+          Professional Details</h4>
+        <div
+          style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:20px;margin-bottom:20px;">
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Company</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Company</label>
             <span id="vAlumniCompany" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Designation</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Designation</label>
             <span id="vAlumniDesignation" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Current City</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Current
+              City</label>
             <span id="vAlumniCity" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">State & Country</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">State
+              & Country</label>
             <span id="vAlumniStateCountry" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Working Details</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Working
+              Details</label>
             <span id="vAlumniWorkingDetails" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Higher Studies</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Higher
+              Studies</label>
             <span id="vAlumniHigherStudies" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Entrepreneur</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Entrepreneur</label>
             <span id="vAlumniEntrepreneur" style="font-weight:500;">-</span>
           </div>
           <div>
-            <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Government Job</label>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Government
+              Job</label>
             <span id="vAlumniGovtJob" style="font-weight:500;">-</span>
           </div>
         </div>
@@ -1123,4 +1220,5 @@
   </script>
   <script src="js/admin.js"></script>
 </body>
+
 </html>
