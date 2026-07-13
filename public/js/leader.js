@@ -4,6 +4,7 @@
   var totalAlumni = 450;
   var totalCompleted = 292;
   var totalPending = 158;
+  var totalDraft = 0;
 
   var _apiDashboardData = null;
   var _apiAssignedAlumni = null;
@@ -96,6 +97,7 @@
       { icon: 'fa-user-graduate', color: 'blue', value: totalAlumni, label: 'Assigned Alumni', change: '+12 this week', changeDir: 'up' },
       { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '+8 this week', changeDir: 'up' },
       { icon: 'fa-clock', color: 'yellow', value: totalPending, label: 'Pending', change: '-3 this week', changeDir: 'down' },
+      { icon: 'fa-file-alt', color: 'blue', value: totalDraft, label: 'In Draft', change: '0 this week', changeDir: 'up' },
       { icon: 'fa-users', color: 'purple', value: teamMembers.length, label: 'Team Members', change: '0 this week', changeDir: 'up' }
     ];
     var html = '';
@@ -109,7 +111,7 @@
         '</div></div>';
     });
 
-    var overallProgress = Math.round((totalCompleted / totalAlumni) * 100);
+    var overallProgress = totalAlumni > 0 ? Math.round((totalCompleted / totalAlumni) * 100) : 0;
     var circumference = 2 * Math.PI * 38;
     var offset = circumference - (overallProgress / 100) * circumference;
     var ringColorClass = overallProgress >= 75 ? 'green' : overallProgress >= 50 ? '' : 'yellow';
@@ -1298,6 +1300,7 @@
         else if (_apiDashboardData.completed !== undefined) totalCompleted = _apiDashboardData.completed;
         if (_apiDashboardData.totalPending !== undefined) totalPending = _apiDashboardData.totalPending;
         else if (_apiDashboardData.pending !== undefined) totalPending = _apiDashboardData.pending;
+        if (_apiDashboardData.draft !== undefined) totalDraft = _apiDashboardData.draft;
         if (_apiDashboardData.teamMembers && _apiDashboardData.teamMembers.length > 0) {
           teamMembers = _apiDashboardData.teamMembers.map(function (m, idx) {
             var initials = (m.name || '?').split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);

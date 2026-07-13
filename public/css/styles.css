@@ -3898,3 +3898,15 @@ body.dark-mode .topbar-btn:hover {
 body.dark-mode #lockStatusBadge span {
   color: inherit !important;
 }
+
+body.dark-mode .stat-card-change.up {
+  color: #34D399 !important;
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+body.dark-mode .stat-card-change.down {
+  color: #FCA5A5 !important;
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
