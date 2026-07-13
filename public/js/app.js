@@ -261,7 +261,6 @@
 
   function initUniversalWidgets() {
     setupUniversalDarkMode();
-    setupUniversalClock();
   }
 
   if (document.readyState === 'loading') {

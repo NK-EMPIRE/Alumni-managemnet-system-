@@ -183,11 +183,14 @@ function fetchAllData() {
    4. DATE HELPER
    ──────────────────────────────────────────────────────────── */
 function setCurrentDate() {
-  var el = document.getElementById('currentDate');
-  if (!el) return;
+  var dateEl = document.getElementById('currentDate');
+  var timeEl = document.getElementById('currentTime');
+  if (!dateEl && !timeEl) return;
   var now = new Date();
-  var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  el.textContent = now.toLocaleDateString('en-IN', options);
+  var dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  var timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+  if (dateEl) dateEl.textContent = now.toLocaleDateString('en-IN', dateOptions);
+  if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-IN', timeOptions);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -1796,24 +1799,34 @@ function showReportModal(title, columns, rows) {
 }
 
 window.viewAlumniDetails = function(id) {
-  var records = [];
-  if (_apiAlumni && Array.isArray(_apiAlumni.records)) {
-    records = _apiAlumni.records;
-  }
-  var record = records.find(function(r) { return (r.alumni_id || r.id) == id; });
-  if (record) {
-    populateViewModal(record);
-    return;
-  }
-  // Not in cached records - fetch directly
   API.getAlumniById(id).then(function(res) {
     if (res && res.success && res.data) {
       populateViewModal(res.data);
     } else {
-      Toast.error('View Details', 'Alumni record not found');
+      // Fallback to cached data
+      var records = [];
+      if (_apiAlumni && Array.isArray(_apiAlumni.records)) {
+        records = _apiAlumni.records;
+      }
+      var record = records.find(function(r) { return (r.alumni_id || r.id) == id; });
+      if (record) {
+        populateViewModal(record);
+      } else {
+        Toast.error('View Details', 'Alumni record not found');
+      }
     }
   }).catch(function() {
-    Toast.error('View Details', 'Failed to load alumni details');
+    // Fallback to cached data on error
+    var records = [];
+    if (_apiAlumni && Array.isArray(_apiAlumni.records)) {
+      records = _apiAlumni.records;
+    }
+    var record = records.find(function(r) { return (r.alumni_id || r.id) == id; });
+    if (record) {
+      populateViewModal(record);
+    } else {
+      Toast.error('View Details', 'Failed to load alumni details');
+    }
   });
 };
 

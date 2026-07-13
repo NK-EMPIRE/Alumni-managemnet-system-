@@ -151,10 +151,6 @@
         </div>
       </div>
       <div class="navbar-right">
-        <div class="navbar-search">
-          <i class="fas fa-search search-icon"></i>
-          <input type="text" placeholder="Search anything..." id="globalSearch" oninput="handleGlobalSearch(this.value)">
-        </div>
         <div class="dropdown" id="notifDropdown">
           <button class="navbar-btn" onclick="toggleNotifications(event)">
             <i class="fas fa-bell"></i>
@@ -169,27 +165,6 @@
             <div class="dropdown-divider"></div>
             <button class="dropdown-item" style="justify-content:center;color:var(--primary);font-weight:500;" onclick="showAllNotifications()">
               View All Notifications
-            </button>
-          </div>
-        </div>
-        <div class="dropdown" id="profileDropdown">
-          <button class="navbar-profile" onclick="toggleProfileDropdown(event)">
-            <div class="navbar-profile-avatar" style="background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.85rem;">
-              AD
-            </div>
-            <span class="navbar-profile-name" id="navbarProfileName">Admin</span>
-            <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#94A3B8;"></i>
-          </button>
-          <div class="dropdown-menu" id="profileMenu">
-            <button class="dropdown-item" onclick="Toast.info('Profile','View profile page')">
-              <i class="fas fa-user"></i> View Profile
-            </button>
-            <button class="dropdown-item" onclick="navigateTo('settings',document.querySelector('[data-section=settings]'))">
-              <i class="fas fa-cog"></i> Settings
-            </button>
-            <div class="dropdown-divider"></div>
-            <button class="dropdown-item danger" onclick="handleLogout()">
-              <i class="fas fa-sign-out-alt"></i> Logout
             </button>
           </div>
         </div>
@@ -210,11 +185,15 @@
             <h1>Dashboard</h1>
             <p>Welcome back! Here is what is happening with your alumni data today.</p>
           </div>
-          <div>
-            <span style="font-size:0.85rem;color:var(--text-muted);">
+          <div style="text-align:right;">
+            <div style="font-size:0.85rem;color:var(--text-muted);">
               <i class="far fa-calendar-alt" style="margin-right:6px;"></i>
               <span id="currentDate"></span>
-            </span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">
+              <i class="far fa-clock" style="margin-right:4px;"></i>
+              <span id="currentTime"></span>
+            </div>
           </div>
         </div>
 

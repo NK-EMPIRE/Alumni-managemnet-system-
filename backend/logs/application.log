@@ -398,3 +398,28 @@
 {"level":"warn","message":"Email not configured. Skipping email send.","subject":"AlumniMS - New Alumni Records Assigned to You","timestamp":"2026-07-13 03:31:23.992","to":"member@test.com"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 03:31:27.388","userId":3}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 03:58:32.466","userId":21}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 09:48:30.653"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 09:48:30.658"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 09:48:30.658"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 09:48:30.659"}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 09:57:16.933"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 09:57:16.938"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 09:57:16.938"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 09:57:16.939"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-13 09:59:07.200","userId":1}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 10:06:56.903"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 10:06:56.908"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 10:06:56.909"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 10:06:56.909"}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 10:11:02.815"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 10:11:02.819"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 10:11:02.819"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 10:11:02.820"}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 10:19:00.649"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 10:19:00.654"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 10:19:00.654"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 10:19:00.654"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-13 10:35:09.595","userId":1}
+{"duplicates":68,"errors":53,"fileName":"1783919128510-e156c887018a7236.xlsx","imported":1,"level":"info","message":"[AUDIT] EXCEL_IMPORTED","timestamp":"2026-07-13 10:35:36.241","total":122,"userId":1}
+{"level":"warn","message":"Email not configured. Skipping email send.","subject":"AlumniMS - New Alumni Records Assigned to You","timestamp":"2026-07-13 10:36:37.355","to":"ert@gmail.com"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-13 10:37:09.021","userId":19}
