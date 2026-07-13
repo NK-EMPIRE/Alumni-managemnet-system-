@@ -37,7 +37,6 @@
     const markAllRead = document.getElementById('markAllRead');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
-    const globalSearch = document.getElementById('globalSearch');
     const todayCountEl = document.getElementById('todayCount');
 
     const departments = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
@@ -564,7 +563,7 @@
                 // Toggle sections
                 var dashboardSection = document.getElementById('section-dashboard');
                 var settingsSection = document.getElementById('section-settings');
-                if (page === 'dashboard' || page === 'records') {
+                if (page === 'dashboard') {
                     if (dashboardSection) dashboardSection.style.display = 'block';
                     if (settingsSection) settingsSection.style.display = 'none';
                 } else if (page === 'settings') {
@@ -620,8 +619,7 @@
         var user = API.getUser();
         if (user && user.name) {
             document.getElementById('memberName').textContent = user.name.split(' ')[0] || user.name;
-            var avatar = document.querySelector('.profile-avatar');
-            if (avatar) avatar.textContent = user.name.charAt(0).toUpperCase();
+
             
             // Populate General Settings with real user data
             var settingsName = document.getElementById('settingsName');
@@ -753,11 +751,7 @@
             renderTable();
         });
 
-        globalSearch.addEventListener('input', function () {
-            tableSearch.value = globalSearch.value;
-            currentPage = 1;
-            renderTable();
-        });
+
 
         recordsBody.addEventListener('click', handleUpdateClick);
 

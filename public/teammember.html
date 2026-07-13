@@ -174,33 +174,7 @@
             align-items: center;
             gap: 20px;
         }
-        .search-box {
-            position: relative;
-            width: 320px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 10px 16px 10px 42px;
-            border: 1px solid var(--border-color);
-            border-radius: 50px;
-            font-size: 13px;
-            background: #F9FAFB;
-            transition: var(--transition);
-            outline: none;
-        }
-        .search-box input:focus {
-            border-color: var(--primary);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(79,70,229,0.08);
-        }
-        .search-box i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            font-size: 14px;
-        }
+
         .topbar-btn {
             width: 40px;
             height: 40px;
@@ -230,24 +204,7 @@
             right: 8px;
             border: 2px solid #fff;
         }
-        .profile-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .profile-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 16px rgba(79,70,229,0.3);
-        }
+
 
         .content-wrapper {
             padding: 28px 32px;
@@ -915,9 +872,7 @@
             .content-wrapper {
                 padding: 16px;
             }
-            .search-box {
-                width: 200px;
-            }
+
         }
         
         /* Sidebar Collapse support */
@@ -948,27 +903,30 @@
         body.sidebar-collapsed .nav-item .badge {
             display: none !important;
         }
+        body.sidebar-collapsed .sidebar-brand-left {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-        <div class="sidebar-brand-icon" style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;">
-            <i class="fas fa-graduation-cap"></i>
+    <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 20px;">
+        <div class="sidebar-brand-left" style="display: flex; align-items: center; gap: 12px;">
+            <div class="sidebar-brand-icon" style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink: 0;">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h2 class="sidebar-brand-text" style="color:#fff;font-size:16px;font-weight:700;line-height:1.3; margin: 0;">AlumniMS</h2>
         </div>
-        <div>
-            <h2 class="sidebar-brand-text" style="color:#fff;font-size:16px;font-weight:700;line-height:1.3;">AlumniMS</h2>
-        </div>
+        <button class="topbar-btn" id="sidebarToggle" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: var(--transition);">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
     <div class="nav-section"><span class="nav-section-text">Main Menu</span></div>
     <a class="nav-item active" data-page="dashboard">
         <i class="fas fa-th-large"></i> <span class="nav-item-text">Dashboard</span>
     </a>
-    <a class="nav-item" data-page="records">
-        <i class="fas fa-users"></i> <span class="nav-item-text">My Records</span>
-        <span class="badge">56</span>
-    </a>
+
     <a class="nav-item" data-page="settings">
         <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
     </a>
@@ -981,16 +939,10 @@
 <div class="main-content">
     <div class="topbar">
         <div class="topbar-left">
-            <button class="topbar-btn" id="sidebarToggle">
-                <i class="fas fa-bars"></i>
-            </button>
             <h1>Welcome, <span id="memberName">Rahul</span></h1>
         </div>
         <div class="topbar-right">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="globalSearch" placeholder="Search alumni, departments, companies...">
-            </div>
+
             <div style="position:relative;">
                 <button class="topbar-btn" id="notifBtn">
                     <i class="fas fa-bell"></i>
@@ -1036,7 +988,7 @@
                     </div>
                 </div>
             </div>
-            <div class="profile-avatar" title="Profile">R</div>
+
         </div>
     </div>
 
