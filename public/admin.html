@@ -36,7 +36,7 @@
   <!-- ============================================================
        SIDEBAR OVERLAY (mobile)
        ============================================================ -->
-  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
   <!-- ============================================================
        SIDEBAR
@@ -49,7 +49,7 @@
         </div>
         <span class="sidebar-brand-text">AlumniMS</span>
       </div>
-      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
         <i class="fas fa-bars"></i>
       </button>
     </div>
@@ -139,7 +139,7 @@
          ============================================================ -->
     <header class="top-navbar" id="topNavbar">
       <div class="navbar-left">
-        <button class="navbar-hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()">
+        <button class="navbar-hamburger" id="hamburgerBtn">
           <i class="fas fa-bars"></i>
         </button>
         <div>
@@ -963,7 +963,7 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('assignAlumniModal')">Cancel</button>
         <button class="btn btn-primary" id="assignSubmitBtn" onclick="submitAssignAlumni()">
-          <i class="fas fa-check"></i> Assign
+          Assign
         </button>
       </div>
     </div>

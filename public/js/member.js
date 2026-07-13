@@ -285,12 +285,12 @@
         saveDraftBtn.disabled = false;
         submitRecordBtn.classList.remove('loading');
         submitRecordBtn.disabled = false;
-        updateModal.classList.add('active');
+        updateModal.classList.add('show');
         document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
-        updateModal.classList.remove('active');
+        updateModal.classList.remove('show');
         document.body.style.overflow = '';
         saveDraftBtn.classList.remove('loading');
         saveDraftBtn.disabled = false;
@@ -392,7 +392,16 @@
                 email: record.email,
                 phone: record.phone,
                 working_details: record.working_details,
-                linkedin_profile: record.linkedin_profile
+                linkedin_profile: record.linkedin_profile,
+                linkedin_url: record.linkedin_profile,
+                current_city: record.city,
+                state: record.state,
+                country: record.country,
+                higher_studies: record.higherStudies,
+                is_entrepreneur: record.entrepreneur === 'Yes',
+                is_government_job: record.govtJob === 'Yes',
+                other_occupation: record.otherOcc,
+                remarks: record.remarks
             };
             API.saveAlumniDraft(record.id, draftData).then(function () {
                 doLocalSave();
@@ -431,7 +440,7 @@
 
         if (_apiDataLoaded && record && record.id) {
             readFormValues(record);
-            var updateData = {
+            var submitData = {
                 name: record.name,
                 department: record.department,
                 batch: record.batch,
@@ -450,11 +459,11 @@
                 is_entrepreneur: record.entrepreneur === 'Yes' ? 1 : 0,
                 is_government_job: record.govtJob === 'Yes' ? 1 : 0
             };
-            API.updateAlumni(record.id, updateData).then(function () {
+            // submitAlumni is allowed for MEMBERs (PATCH /:alumniId/submit)
+            API.submitAlumni(record.id, submitData).then(function () {
                 if (record.assignment_id) {
                     return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
                 }
-                return API.submitAlumni(record.id, updateData);
             }).then(function () {
                 doLocalSubmit();
             }).catch(function () {
@@ -483,13 +492,13 @@
     }
 
     function handleModalClose(e) {
-        if (e.target === updateModal || e.target === modalClose || e.target === cancelModalBtn) {
+        if (e.target === updateModal || e.target === modalClose || e.target.closest('#modalClose') || e.target.closest('#cancelModalBtn')) {
             closeModal();
         }
     }
 
     function handleKeyboard(e) {
-        if (e.key === 'Escape' && updateModal.classList.contains('active')) {
+        if (e.key === 'Escape' && updateModal.classList.contains('show')) {
             closeModal();
         }
     }
@@ -517,9 +526,6 @@
     }
 
     function initSidebar() {
-        sidebarToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('active');
-        });
         document.querySelectorAll('.nav-item').forEach(function (item) {
             item.addEventListener('click', function () {
                 var page = item.getAttribute('data-page');

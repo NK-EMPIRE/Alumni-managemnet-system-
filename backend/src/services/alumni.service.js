@@ -68,11 +68,37 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
     throw new NotFoundError('Alumni');
   }
 
+  // Update Alumni table basic fields from submitted info
+  const alumniUpdate = {
+    company: info.company || null,
+    designation: info.designation || null,
+    email: info.email || null,
+    phone: info.phone || null,
+    working_details: info.working_details || null,
+    linkedin_profile: info.linkedin_url || info.linkedin_profile || null
+  };
+  await alumniRepository.update(alumniId, alumniUpdate);
+
   const professionalInfo = await alumniRepository.createProfessionalInfo({
     ...info,
     alumni_id: alumniId,
     updated_by: currentUser.userId
   });
+
+  // Auto-complete assignment when submitting
+  const pool = await getPool();
+  const assignmentResult = await pool.request()
+    .input('alumniId', sql.Int, alumniId)
+    .input('memberId', sql.Int, currentUser.userId)
+    .query(`
+      SELECT assignment_id FROM AlumniAssignments
+      WHERE alumni_id = @alumniId AND member_id = @memberId
+    `);
+
+  if (assignmentResult.recordset.length > 0) {
+    const assignmentId = assignmentResult.recordset[0].assignment_id;
+    await alumniRepository.updateAssignmentStatus(assignmentId, 'Completed');
+  }
 
   await createAuditLog({
     userId: currentUser.userId,
@@ -121,7 +147,39 @@ async function saveDraft(alumniId, data, currentUser) {
     throw new NotFoundError('Alumni');
   }
 
-  await alumniRepository.update(alumniId, data);
+  // Map linkedin_url -> linkedin_profile for Alumni table update
+  const repoData = { ...data };
+  if (data.linkedin_url !== undefined && data.linkedin_profile === undefined) {
+    repoData.linkedin_profile = data.linkedin_url;
+  }
+
+  // Update Alumni table (basic fields that exist in Alumni table)
+  await alumniRepository.update(alumniId, repoData);
+
+  // Also save professional info data to ProfessionalInformation table
+  try {
+    await alumniRepository.createProfessionalInfo({
+      alumni_id: parseInt(alumniId),
+      company: data.company || alumni.company || null,
+      designation: data.designation || alumni.designation || null,
+      current_city: data.current_city || null,
+      state: data.state || null,
+      country: data.country || null,
+      email: data.email || alumni.email || null,
+      phone: data.phone || alumni.phone || null,
+      linkedin_url: data.linkedin_url || data.linkedin_profile || alumni.linkedin_profile || null,
+      higher_studies: data.higher_studies || null,
+      is_entrepreneur: data.is_entrepreneur === true || data.is_entrepreneur === 'Yes' ? 1 : 0,
+      is_government_job: data.is_government_job === true || data.is_government_job === 'Yes' ? 1 : 0,
+      other_occupation: data.other_occupation || data.otherOcc || null,
+      remarks: data.remarks || null,
+      working_details: data.working_details || null,
+      updated_by: currentUser.userId
+    });
+  } catch (piErr) {
+    // Don't fail the draft save if professional info fails
+    console.error('Failed to save professional info on draft:', piErr.message);
+  }
 
   const pool = await getPool();
   const assignmentResult = await pool.request()
