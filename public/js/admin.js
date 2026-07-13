@@ -280,7 +280,14 @@ function populateTable() {
         company: a.company || '',
         leader: a.assignedTo || a.leader || '',
         status: a.status || 'Pending',
-        progress: a.progress || (a.status === 'Completed' ? 100 : a.status === 'Pending' ? 0 : Math.round(Math.random() * 80 + 10))
+        progress: (function(rec) {
+          if (rec.status === 'Completed') return 100;
+          if (rec.status === 'Pending') return 0;
+          var fields = ['company', 'designation', 'email', 'phone', 'working_details', 'linkedin_profile'];
+          var filled = 0;
+          fields.forEach(function(f) { if (rec[f] && String(rec[f]).trim() !== '') filled++; });
+          return Math.round((filled / fields.length) * 100);
+        })(a)
       };
     });
   } else {
@@ -404,7 +411,14 @@ function filterTable() {
       company: a.company || '',
       leader: a.assignedTo || a.leader || '',
       status: a.status || 'Pending',
-      progress: a.progress || (a.status === 'Completed' ? 100 : a.status === 'Pending' ? 0 : Math.round(Math.random() * 80 + 10))
+      progress: (function(rec) {
+        if (rec.status === 'Completed') return 100;
+        if (rec.status === 'Pending') return 0;
+        var fields = ['company', 'designation', 'email', 'phone', 'working_details', 'linkedin_profile'];
+        var filled = 0;
+        fields.forEach(function(f) { if (rec[f] && String(rec[f]).trim() !== '') filled++; });
+        return Math.round((filled / fields.length) * 100);
+      })(a)
     };
   }) : [];
 

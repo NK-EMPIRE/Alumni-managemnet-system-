@@ -262,8 +262,8 @@
     var apiAlumni = [];
     if (_apiDataLoaded && _apiAssignedAlumni && _apiAssignedAlumni.records) {
       apiAlumni = _apiAssignedAlumni.records.filter(function (a) {
-        var assignedName = a.assignedTo || a.teamMember || '';
-        return assignedName.indexOf(member.name) !== -1;
+        var assignedName = a.assigned_to || a.assignedTo || a.teamMember || '';
+        return assignedName.toLowerCase().indexOf(member.name.toLowerCase()) !== -1;
       });
     }
 
@@ -302,29 +302,39 @@
   function populateNotifications() {
     var list = document.getElementById('notifList');
     if (!list) return;
-    var notifSource = activities && activities.length > 0 ? activities : [];
-    if (notifSource.length === 0) {
+
+    var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
+    // Filter completed or draft records as notifications
+    var updatedRecords = records.filter(function (r) { return r.status === 'Completed' || r.status === 'Draft'; });
+    var nc = document.getElementById('notifCount');
+
+    if (updatedRecords.length === 0) {
       list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No notifications</div>';
-      var nc = document.getElementById('notifCount');
       if (nc) { nc.textContent = '0'; nc.style.display = 'none'; }
       return;
     }
+
     var html = '';
     var unreadCount = 0;
-    notifSource.slice(0, 10).forEach(function (n, idx) {
-      var isUnread = idx < 3;
+    // Show top 5 recent updates
+    updatedRecords.slice(0, 5).forEach(function (r, idx) {
+      var isUnread = idx < 3; // treat first 3 as unread
       if (isUnread) unreadCount++;
-      var bgColor = n.type === 'green' ? '#D1FAE5' : n.type === 'yellow' ? '#FEF3C7' : n.type === 'red' ? '#FEE2E2' : '#DBEAFE';
-      var iconColor = n.type === 'green' ? '#10B981' : n.type === 'yellow' ? '#F59E0B' : n.type === 'red' ? '#EF4444' : '#2563EB';
-      var icon = n.type === 'green' ? 'fa-check-circle' : n.type === 'red' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-      html += '<div class="notification-item ' + (isUnread ? 'unread' : '') + '">' +
-        '<div class="notif-icon" style="background:' + bgColor + ';color:' + iconColor + '"><i class="fas ' + icon + '"></i></div>' +
-        '<div class="notif-text"><h5>' + (n.member || 'System') + '</h5><p>' + n.action + '</p><div class="notif-time">' + n.time + '</div></div>' +
-        '</div>';
+      var memberName = r.assigned_to || r.assignedTo || r.teamMember || 'A team member';
+      var text = memberName + ' marked ' + r.name + ' as ' + r.status;
+      var bgColor = r.status === 'Completed' ? '#D1FAE5' : '#FEF3C7';
+      var iconColor = r.status === 'Completed' ? '#10B981' : '#F59E0B';
+      var icon = r.status === 'Completed' ? 'fa-check-circle' : 'fa-pen';
+
+      html += '<div class="notification-item ' + (isUnread ? 'unread' : '') + '" style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:' + bgColor + ';display:flex;align-items:center;justify-content:center;color:' + iconColor + ';flex-shrink:0;"><i class="fas ' + icon + '"></i></div>' +
+        '<div style="flex:1;">' +
+        '<h5 style="margin:0 0 2px 0;font-size:0.85rem;color:#1E293B;font-weight:600">' + r.status + ' Update</h5>' +
+        '<p style="margin:0;font-size:0.8rem;color:#64748B;line-height:1.4">' + text + '</p>' +
+        '</div></div>';
     });
     list.innerHTML = html;
-    var nc2 = document.getElementById('notifCount');
-    if (nc2) { nc2.textContent = unreadCount; nc2.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
+    if (nc) { nc.textContent = unreadCount; nc.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
   }
 
   window.clearAllNotifications = function() {
@@ -927,7 +937,7 @@
           '<td>' + (r.company || '-') + '</td>' +
           '<td>' + (r.designation || '-') + '</td>' +
           '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
-          '<td style="text-align:center"><button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '" ' + (isCompleted ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '') + '><i class="fas fa-edit"></i> ' + (isCompleted ? 'Done' : 'Update') + '</button></td>' +
+          '<td style="text-align:center"><button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button></td>' +
           '</tr>';
       });
       tbody.innerHTML = html;
@@ -964,6 +974,17 @@
   // --- UPDATE MODAL MANAGEMENT (For Leader Assignments Update) ---
   var currentSelectedAlumniId = null;
 
+  function ensureOptionExists(selectEl, val) {
+    if (!val) return;
+    for (var i = 0; i < selectEl.options.length; i++) {
+      if (selectEl.options[i].value === val) return;
+    }
+    var opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = val;
+    selectEl.appendChild(opt);
+  }
+
   function openUpdateModal(alumniId) {
     currentSelectedAlumniId = alumniId;
     var overlay = document.getElementById('updateModal');
@@ -990,9 +1011,14 @@
         statusBadge.className = 'status-badge ' + badgeClass;
         statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
 
+        var deptEl = document.getElementById('fieldDept');
+        var batchEl = document.getElementById('fieldBatch');
+        ensureOptionExists(deptEl, record.department);
+        ensureOptionExists(batchEl, record.batch);
+
         document.getElementById('fieldName').value = record.name || '';
-        document.getElementById('fieldDept').value = record.department || '';
-        document.getElementById('fieldBatch').value = record.batch || '';
+        deptEl.value = record.department || '';
+        batchEl.value = record.batch || '';
         document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
         document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
         document.getElementById('fieldCity').value = record.current_city || '';
@@ -1045,7 +1071,7 @@
 
   function validateForm() {
     var isValid = true;
-    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany'];
+    var required = ['fieldName', 'fieldDept', 'fieldBatch'];
     required.forEach(function (id) {
       var el = document.getElementById(id);
       if (!el.value || el.value.trim() === '') {
@@ -1454,6 +1480,32 @@
     document.getElementById('reportSearch').addEventListener('input', renderTeamReportTable);
     document.getElementById('reportUserFilter').addEventListener('change', renderTeamReportTable);
     document.getElementById('reportStatusFilter').addEventListener('change', renderTeamReportTable);
+
+    // Bind rows per page dropdown listeners
+    var rppSelect = document.getElementById('rowsPerPageSelect');
+    if (rppSelect) {
+      rppSelect.addEventListener('change', function () {
+        pageSize = parseInt(this.value, 10);
+        currentPage = 1;
+        populateTeamTable();
+      });
+    }
+    var myRppSelect = document.getElementById('myAssignmentsRowsPerPageSelect');
+    if (myRppSelect) {
+      myRppSelect.addEventListener('change', function () {
+        myPageSize = parseInt(this.value, 10);
+        myCurrentPage = 1;
+        renderMyAssignmentsTable();
+      });
+    }
+    var reportRppSelect = document.getElementById('reportRowsPerPageSelect');
+    if (reportRppSelect) {
+      reportRppSelect.addEventListener('change', function () {
+        reportPageSize = parseInt(this.value, 10);
+        reportCurrentPage = 1;
+        renderTeamReportTable();
+      });
+    }
 
     setTimeout(function () {
       document.getElementById('loadingScreen').classList.add('hide');

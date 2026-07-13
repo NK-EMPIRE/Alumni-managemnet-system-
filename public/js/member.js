@@ -4,7 +4,7 @@
     let alumniData = [];
     let filteredData = [];
     let currentPage = 1;
-    const rowsPerPage = 10;
+    let rowsPerPage = 10;
     let todayUpdateCount = 0;
     let sessionTimeout = null;
     let _apiMemberData = null;
@@ -155,7 +155,7 @@
                     '<td>' + r.company + '</td>' +
                     '<td>' + r.designation + '</td>' +
                     '<td><span class="status-badge ' + badgeClass + '"><i class="fas ' + badgeIcon + '"></i> ' + r.status + '</span></td>' +
-                    '<td><button class="btn-update" data-index="' + r.id + '" ' + (isCompleted ? 'disabled' : '') + '><i class="fas fa-edit"></i> ' + (isCompleted ? 'Done' : 'Update') + '</button></td>' +
+                    '<td><button class="btn-update" data-index="' + r.id + '"><i class="fas fa-edit"></i> Update</button></td>' +
                     '</tr>';
             }
             recordsBody.innerHTML = html;
@@ -240,6 +240,17 @@
         record.remarks = document.getElementById('fieldRemarks').value.trim();
     }
 
+    function ensureOptionExists(selectEl, val) {
+        if (!val) return;
+        for (let i = 0; i < selectEl.options.length; i++) {
+            if (selectEl.options[i].value === val) return;
+        }
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        selectEl.appendChild(opt);
+    }
+
     function openModal(index) {
         const record = alumniData.find(function (r) { return r.id === parseInt(index, 10); });
         if (!record) return;
@@ -255,9 +266,14 @@
         modalStatusBadge.className = 'status-badge ' + badgeClass;
         modalStatusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + record.status;
 
+        const deptEl = document.getElementById('fieldDept');
+        const batchEl = document.getElementById('fieldBatch');
+        ensureOptionExists(deptEl, record.department);
+        ensureOptionExists(batchEl, record.batch);
+
         document.getElementById('fieldName').value = record.name;
-        document.getElementById('fieldDept').value = record.department;
-        document.getElementById('fieldBatch').value = record.batch;
+        deptEl.value = record.department || '';
+        batchEl.value = record.batch || '';
         document.getElementById('fieldCompany').value = record.company;
         document.getElementById('fieldDesignation').value = record.designation;
         document.getElementById('fieldCity').value = record.city;
@@ -315,8 +331,7 @@
         const fields = [
             { id: 'fieldName', errorId: 'errorName', label: 'Name' },
             { id: 'fieldDept', errorId: 'errorDept', label: 'Department' },
-            { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' },
-            { id: 'fieldCompany', errorId: 'errorCompany', label: 'Company' }
+            { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' }
         ];
 
         fields.forEach(function (f) {
@@ -611,6 +626,40 @@
         }
     }
 
+    function populateNotifications() {
+        var list = document.getElementById('notifList');
+        if (!list) return;
+        
+        var pendingRecords = alumniData.filter(function(r) { return r.status === 'Pending' || r.status === 'Draft'; });
+        var dot = document.querySelector('#notifBtn .notif-dot');
+        
+        if (pendingRecords.length === 0) {
+            list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
+            if (dot) dot.style.display = 'none';
+            return;
+        }
+        
+        if (dot) {
+            dot.style.display = 'block';
+        }
+        
+        var html = '';
+        pendingRecords.slice(0, 5).forEach(function(r) {
+            var iconClass = r.status === 'Draft' ? 'orange' : 'blue';
+            var icon = r.status === 'Draft' ? 'fa-pen' : 'fa-clock';
+            var text = r.status === 'Draft' ? 'Draft saved: ' + r.name : 'Pending update: ' + r.name;
+            html += '<div class="notif-item">' +
+                '<div class="notif-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
+                '<div class="notif-text">' +
+                '<p>' + text + '</p>' +
+                '<span>Action required</span>' +
+                '</div>' +
+                '<span class="notif-dot"></span>' +
+                '</div>';
+        });
+        list.innerHTML = html;
+    }
+
     function fetchMemberData() {
         Promise.all([
             API.getMemberDashboard().catch(function () { return null; }),
@@ -632,7 +681,6 @@
             var assigned = results[1];
             if (assigned && assigned.success && assigned.data && assigned.data.records) {
                 _apiAlumniData = assigned.data.records.map(function (a) {
-                    // Map assignment status: Pending/Draft/Completed
                     var st = a.status || 'Pending';
                     return {
                         id: a.alumni_id || a.id,
@@ -665,9 +713,11 @@
                 alumniData = buildAlumniData();
             }
             renderTable();
+            populateNotifications();
         }).catch(function () {
             alumniData = buildAlumniData();
             renderTable();
+            populateNotifications();
         });
     }
 
@@ -713,6 +763,15 @@
         updateModal.addEventListener('click', handleModalClose);
 
         document.addEventListener('keydown', handleKeyboard);
+
+        var rppSelect = document.getElementById('rowsPerPageSelect');
+        if (rppSelect) {
+            rppSelect.addEventListener('change', function () {
+                rowsPerPage = parseInt(this.value, 10);
+                currentPage = 1;
+                renderTable();
+            });
+        }
 
         initNotifications();
         initSidebar();

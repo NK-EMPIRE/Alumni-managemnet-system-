@@ -538,7 +538,7 @@
             align-items: center;
             padding: 20px;
         }
-        .modal-overlay.active {
+        .modal-overlay.show {
             display: flex;
         }
         .modal {
@@ -1103,10 +1103,20 @@
                     <tbody id="recordsBody"></tbody>
                 </table>
             </div>
-            <div class="table-footer">
-                <div class="info" id="tableInfo">Showing 0 of 0 entries</div>
-                <div class="pagination" id="pagination"></div>
-            </div>
+             <div class="table-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                 <div style="display:flex;align-items:center;gap:8px;">
+                     <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
+                     <select class="form-control" id="rowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid var(--border-color);border-radius:6px;background:#fff;outline:none;">
+                         <option value="5">5</option>
+                         <option value="10" selected>10</option>
+                         <option value="25">25</option>
+                         <option value="50">50</option>
+                         <option value="100">100</option>
+                     </select>
+                 </div>
+                 <div class="info" id="tableInfo">Showing 0 of 0 entries</div>
+                 <div class="pagination" id="pagination"></div>
+             </div>
         </div>
     </div> <!-- Close section-dashboard -->
 
@@ -1226,9 +1236,8 @@
                         <div class="error-text" id="errorBatch">Batch is required</div>
                     </div>
                     <div class="form-group">
-                        <label>Company <span class="required">*</span></label>
+                        <label>Company</label>
                         <input type="text" id="fieldCompany" placeholder="Current company">
-                        <div class="error-text" id="errorCompany">Company is required</div>
                     </div>
                 </div>
                 <div class="form-row">

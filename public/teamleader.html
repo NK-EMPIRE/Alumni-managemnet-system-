@@ -478,6 +478,15 @@
             </table>
           </div>
           <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
+              <select class="form-control" id="rowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid #E2E8F0;border-radius:6px;background:#fff;outline:none;">
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
             <div class="pagination-info" id="paginationInfo">Showing 1-8 of 8 members</div>
             <div class="pagination" id="pagination"></div>
           </div>
@@ -559,6 +568,15 @@
             </table>
           </div>
           <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
+              <select class="form-control" id="myAssignmentsRowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid #E2E8F0;border-radius:6px;background:#fff;outline:none;">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
             <div class="pagination-info" id="myAssignmentsPaginationInfo">Showing 0 of 0 assignments</div>
             <div class="pagination" id="myAssignmentsPagination"></div>
           </div>
@@ -669,6 +687,15 @@
             </table>
           </div>
           <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
+              <select class="form-control" id="reportRowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid #E2E8F0;border-radius:6px;background:#fff;outline:none;">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
             <div class="pagination-info" id="reportPaginationInfo">Showing 0 of 0 entries</div>
             <div class="pagination" id="reportPagination"></div>
           </div>
@@ -915,9 +942,8 @@
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company <span class="required" style="color:#EF4444">*</span></label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company</label>
               <input type="text" id="fieldCompany" placeholder="Current company" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">

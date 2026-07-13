@@ -195,9 +195,12 @@
     toggleBtn.style.cursor = 'pointer';
     toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
 
-    // Insert before profile dropdown or notifications button
     var refNode = rightContainer.querySelector('.dropdown') || rightContainer.querySelector('#notifBtn') || rightContainer.firstChild;
-    rightContainer.insertBefore(toggleBtn, refNode);
+    if (refNode && refNode.parentNode === rightContainer) {
+      rightContainer.insertBefore(toggleBtn, refNode);
+    } else {
+      rightContainer.appendChild(toggleBtn);
+    }
 
     var currentTheme = localStorage.getItem('theme') || 'light';
     if (currentTheme === 'dark') {
@@ -259,8 +262,110 @@
     setInterval(updateClock, 1000);
   }
 
+  function setupGlobalSettings() {
+    // 1. General Settings
+    var saveGeneralBtn = document.querySelector('#tab-general button.btn-primary');
+    if (saveGeneralBtn) {
+      // Remove inline onclick
+      saveGeneralBtn.removeAttribute('onclick');
+      saveGeneralBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var nameInput = document.getElementById('settingsName');
+        var emailInput = document.getElementById('settingsEmail');
+        if (!nameInput || !emailInput) return;
+        var name = nameInput.value.trim();
+        var email = emailInput.value.trim();
+
+        if (!name || !email) {
+          if (window.Toast) Toast.error('Settings', 'Name and Email are required');
+          else alert('Name and Email are required');
+          return;
+        }
+
+        var user = API.getUser();
+        if (!user || !user.id) {
+          if (window.Toast) Toast.error('Settings', 'User session not found');
+          return;
+        }
+
+        saveGeneralBtn.disabled = true;
+        saveGeneralBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        API.updateProfile(user.id, { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || ' ', email: email })
+          .then(function(res) {
+            if (res && res.success !== false) {
+              // Update local user object
+              user.name = name;
+              user.email = email;
+              localStorage.setItem('user', JSON.stringify(user));
+              if (window.Toast) Toast.success('Settings', 'Profile settings updated successfully!');
+              else if (window.showToast) showToast('Profile settings updated successfully!', 'success');
+            } else {
+              if (window.Toast) Toast.error('Settings', res.message || 'Failed to update profile');
+            }
+          })
+          .catch(function(err) {
+            if (window.Toast) Toast.error('Settings', err.message || 'Failed to update profile');
+          })
+          .finally(function() {
+            saveGeneralBtn.disabled = false;
+            saveGeneralBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+          });
+      });
+    }
+
+    // 2. Security / Password Settings
+    var saveSecurityBtn = document.querySelector('#tab-security button.btn-primary');
+    if (saveSecurityBtn) {
+      saveSecurityBtn.removeAttribute('onclick');
+      saveSecurityBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var passInputs = document.querySelectorAll('#tab-security input[type="password"]');
+        if (passInputs.length < 3) return;
+        var oldPassword = passInputs[0].value;
+        var newPassword = passInputs[1].value;
+        var confirmPassword = passInputs[2].value;
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+          if (window.Toast) Toast.error('Security', 'All fields are required');
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          if (window.Toast) Toast.error('Security', 'New passwords do not match');
+          return;
+        }
+
+        saveSecurityBtn.disabled = true;
+        saveSecurityBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+        API.changePassword(oldPassword, newPassword)
+          .then(function(res) {
+            if (res && res.success !== false) {
+              if (window.Toast) Toast.success('Security', 'Password changed successfully!');
+              else if (window.showToast) showToast('Password changed successfully!', 'success');
+              passInputs[0].value = '';
+              passInputs[1].value = '';
+              passInputs[2].value = '';
+            } else {
+              if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
+            }
+          })
+          .catch(function(err) {
+            if (window.Toast) Toast.error('Security', err.message || 'Failed to change password');
+          })
+          .finally(function() {
+            saveSecurityBtn.disabled = false;
+            saveSecurityBtn.innerHTML = '<i class="fas fa-save"></i> Update Password';
+          });
+      });
+    }
+  }
+
   function initUniversalWidgets() {
     setupUniversalDarkMode();
+    // Wait for other scripts to populate settings values before binding settings tab handlers
+    setTimeout(setupGlobalSettings, 200);
   }
 
   if (document.readyState === 'loading') {
