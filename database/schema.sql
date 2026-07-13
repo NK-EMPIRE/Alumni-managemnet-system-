@@ -316,3 +316,7 @@ BEGIN
 END
 
 PRINT 'Database schema created successfully!';
+
+
+alter table Alumni
+add father_name varchar(255);

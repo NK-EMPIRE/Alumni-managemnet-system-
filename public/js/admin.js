@@ -448,6 +448,62 @@ function getVal(id) {
 /* ────────────────────────────────────────────────────────────
    9. TEAM LEADERS TABLE
    ──────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────
+    Helper: View Team Leader Details
+   ──────────────────────────────────────────────────────────── */
+function viewTeamLeaderDetails(name) {
+  var data;
+  if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
+    data = _apiUsers.records;
+  } else {
+    data = dummyTeamLeaders;
+  }
+  var tl = null;
+  for (var i = 0; i < data.length; i++) {
+    var n = data[i].name || (data[i].first_name + ' ' + (data[i].last_name || ''));
+    if (n === name) { tl = data[i]; break; }
+  }
+  if (!tl) { Toast.error('Error', 'Team Leader not found'); return; }
+  var tlName = tl.name || n;
+  var initials = tlName.split(' ').map(function(w){return w[0]}).join('').toUpperCase().slice(0,2);
+  document.getElementById('tlAvatar').textContent = initials;
+  document.getElementById('tlDetailName').textContent = tlName;
+  document.getElementById('tlDetailDept').textContent = tl.dept || tl.department || '-';
+  document.getElementById('tlDetailEmail').textContent = tl.email || '-';
+  document.getElementById('tlDetailPhone').textContent = tl.phone || '-';
+  document.getElementById('tlDetailMembers').textContent = tl.members || tl.member_count || 0;
+  document.getElementById('tlDetailAssigned').textContent = tl.assigned || tl.assigned_count || 0;
+  openModal('viewTLModal');
+}
+
+/* ────────────────────────────────────────────────────────────
+    Helper: View Team Member Details
+   ──────────────────────────────────────────────────────────── */
+function viewTeamMemberDetails(name) {
+  var data;
+  if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
+    data = _apiMembers.records;
+  } else {
+    data = dummyTeamMembers;
+  }
+  var tm = null;
+  for (var i = 0; i < data.length; i++) {
+    var n = data[i].name || (data[i].first_name + ' ' + (data[i].last_name || ''));
+    if (n === name) { tm = data[i]; break; }
+  }
+  if (!tm) { Toast.error('Error', 'Team Member not found'); return; }
+  var tmName = tm.name || n;
+  var initials = tmName.split(' ').map(function(w){return w[0]}).join('').toUpperCase().slice(0,2);
+  document.getElementById('tmAvatar').textContent = initials;
+  document.getElementById('tmDetailName').textContent = tmName;
+  document.getElementById('tmDetailDept').textContent = tm.dept || tm.department || '-';
+  document.getElementById('tmDetailEmail').textContent = tm.email || '-';
+  document.getElementById('tmDetailPhone').textContent = tm.phone || '-';
+  document.getElementById('tmDetailLeader').textContent = tm.leader || tm.team_leader_name || '-';
+  document.getElementById('tmDetailAssigned').textContent = tm.assigned || tm.assigned_count || 0;
+  openModal('viewTMModal');
+}
+
 function populateTeamLeadersTable() {
   var tbody = document.getElementById('tlBody');
   if (!tbody) return;
@@ -470,7 +526,7 @@ function populateTeamLeadersTable() {
     html += '<td>' + tl.dept + '</td>';
     html += '<td>' + tl.members + '</td>';
     html += '<td>' + tl.assigned + '</td>';
-    html += '<td><button class="btn btn-sm btn-outline" onclick="Toast.info(\'Team Leader\',\'Viewing ' + tl.name + '\')"><i class="fas fa-eye"></i></button></td>';
+    html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamLeaderDetails(\'' + tl.name + '\')"><i class="fas fa-eye"></i></button></td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
@@ -501,7 +557,7 @@ function populateTeamMembersTable() {
     html += '<td>' + tm.dept + '</td>';
     html += '<td>' + tm.leader + '</td>';
     html += '<td>' + tm.assigned + '</td>';
-    html += '<td><button class="btn btn-sm btn-outline" onclick="Toast.info(\'Team Member\',\'Viewing ' + tm.name + '\')"><i class="fas fa-eye"></i></button></td>';
+    html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamMemberDetails(\'' + tm.name + '\')"><i class="fas fa-eye"></i></button></td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;

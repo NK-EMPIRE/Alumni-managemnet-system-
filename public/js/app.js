@@ -197,7 +197,7 @@
 
     var refNode = rightContainer.querySelector('.dropdown') || rightContainer.querySelector('#notifBtn') || rightContainer.firstChild;
     if (refNode && refNode.parentNode === rightContainer) {
-      rightContainer.insertBefore(toggleBtn, refNode);
+      rightContainer.insertBefore(toggleBtn, refNode.nextSibling);
     } else {
       rightContainer.appendChild(toggleBtn);
     }
