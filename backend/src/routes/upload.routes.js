@@ -12,27 +12,27 @@ router.use(authenticate);
 
 router.post(
   '/import',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.LEADER),
   upload.single('file'),
   uploadController.uploadExcel
 );
 
 router.post(
   '/preview',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.LEADER),
   upload.single('file'),
   uploadController.previewExcel
 );
 
 router.get(
   '/history',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.LEADER),
   uploadController.getImportHistory
 );
 
 router.get(
   '/template',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.LEADER),
   uploadController.downloadTemplate
 );
 
