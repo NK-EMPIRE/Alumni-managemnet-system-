@@ -398,6 +398,7 @@
 {"level":"warn","message":"Email not configured. Skipping email send.","subject":"AlumniMS - New Alumni Records Assigned to You","timestamp":"2026-07-13 03:31:23.992","to":"member@test.com"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 03:31:27.388","userId":3}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 03:58:32.466","userId":21}
+<<<<<<< Updated upstream
 {"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 09:48:30.653"}
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 09:48:30.658"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 09:48:30.658"}
@@ -423,3 +424,32 @@
 {"duplicates":68,"errors":53,"fileName":"1783919128510-e156c887018a7236.xlsx","imported":1,"level":"info","message":"[AUDIT] EXCEL_IMPORTED","timestamp":"2026-07-13 10:35:36.241","total":122,"userId":1}
 {"level":"warn","message":"Email not configured. Skipping email send.","subject":"AlumniMS - New Alumni Records Assigned to You","timestamp":"2026-07-13 10:36:37.355","to":"ert@gmail.com"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-13 10:37:09.021","userId":19}
+=======
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 09:48:39.460"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 09:48:39.464"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 09:48:39.465"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 09:48:39.465"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 09:48:56.668","userId":21}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 09:52:23.470"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 09:52:23.479"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 09:52:23.479"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 09:52:23.480"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-13 09:58:06.944","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 09:58:16.991","userId":21}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 10:05:56.004"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 10:05:56.010"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 10:05:56.010"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 10:05:56.011"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 10:06:09.087","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-13 10:16:36.608","userId":19}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-13 10:22:57.649","userId":1}
+{"error":"Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","ip":"::1","level":"error","message":"GET /api/v1/dashboard/admin","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:631:26)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","timestamp":"2026-07-13 10:23:37.633","userId":1}
+{"level":"error","message":"UNEXPECTED: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:631:26)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","timestamp":"2026-07-13 10:23:37.754"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-13 10:23:51.717","userId":1}
+{"level":"info","message":"Migrations: verified and updated Users and Alumni columns successfully","timestamp":"2026-07-13 10:39:54.967"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-13 10:39:54.973"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-13 10:39:54.974"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-13 10:39:54.974"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-13 10:40:11.701","userId":21}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-13 10:41:44.779","userId":19}
+>>>>>>> Stashed changes

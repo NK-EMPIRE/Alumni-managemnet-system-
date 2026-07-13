@@ -3447,3 +3447,92 @@ body.dark-mode .status-card {
 body.dark-mode #universalLiveClock {
   color: #94A3B8 !important;
 }
+
+/* ── COMPREHENSIVE DARK MODE OVERRIDES (FIX WHITE REFLECTIONS) ── */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode .modal-header h3,
+body.dark-mode .modal-header-left h3,
+body.dark-mode #modalTitle {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode p,
+body.dark-mode span,
+body.dark-mode .modal-subtitle,
+body.dark-mode #modalSubtitle {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode .modal,
+body.dark-mode .modal-content {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode .modal-body,
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .detail-row,
+body.dark-mode .info-row,
+body.dark-mode .profile-detail-item {
+  border-color: #334155 !important;
+  background-color: #1E293B !important;
+}
+
+body.dark-mode .info-label {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .info-value {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .card,
+body.dark-mode .stat-card,
+body.dark-mode .card-body,
+body.dark-mode .table-card {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .card-header,
+body.dark-mode .card-footer {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode table,
+body.dark-mode th,
+body.dark-mode td {
+  border-color: #334155 !important;
+}
+
+body.dark-mode tbody tr {
+  background-color: #1E293B !important;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
