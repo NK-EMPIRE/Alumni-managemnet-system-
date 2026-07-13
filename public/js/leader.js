@@ -326,11 +326,11 @@
       var iconColor = r.status === 'Completed' ? '#10B981' : '#F59E0B';
       var icon = r.status === 'Completed' ? 'fa-check-circle' : 'fa-pen';
 
-      html += '<div class="notification-item ' + (isUnread ? 'unread' : '') + '" style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;">' +
-        '<div style="width:32px;height:32px;border-radius:50%;background:' + bgColor + ';display:flex;align-items:center;justify-content:center;color:' + iconColor + ';flex-shrink:0;"><i class="fas ' + icon + '"></i></div>' +
-        '<div style="flex:1;">' +
-        '<h5 style="margin:0 0 2px 0;font-size:0.85rem;color:#1E293B;font-weight:600">' + r.status + ' Update</h5>' +
-        '<p style="margin:0;font-size:0.8rem;color:#64748B;line-height:1.4">' + text + '</p>' +
+      html += '<div class="notification-item ' + (isUnread ? 'unread' : '') + '">' +
+        '<div class="notif-icon" style="background:' + bgColor + ';color:' + iconColor + ';"><i class="fas ' + icon + '"></i></div>' +
+        '<div class="notif-text">' +
+        '<h5>' + r.status + ' Update</h5>' +
+        '<p>' + text + '</p>' +
         '</div></div>';
     });
     list.innerHTML = html;
@@ -550,10 +550,6 @@
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
-        if (body.classList.contains('sidebar-collapsed') && window.innerWidth >= 1024) {
-          body.classList.remove('sidebar-collapsed');
-          isSidebarCollapsed = false;
-        }
         if (window.innerWidth < 1024) {
           var sidebar = document.getElementById('sidebar');
           var overlay = document.getElementById('sidebarOverlay');

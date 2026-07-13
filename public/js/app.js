@@ -202,19 +202,22 @@
       rightContainer.appendChild(toggleBtn);
     }
 
-    var currentTheme = localStorage.getItem('theme') || 'light';
+     var currentTheme = localStorage.getItem('theme') || 'light';
     if (currentTheme === 'dark') {
       document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark');
       toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
     }
 
     toggleBtn.addEventListener('click', function () {
       if (document.body.classList.contains('dark-mode')) {
         document.body.classList.remove('dark-mode');
+        document.documentElement.classList.remove('dark');
         localStorage.setItem('theme', 'light');
         toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
       } else {
         document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
         toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
       }

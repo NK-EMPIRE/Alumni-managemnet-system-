@@ -3536,3 +3536,85 @@ body.dark-mode textarea {
   border-color: #334155 !important;
 }
 
+/* ── Dark Mode Badge Color Override ── */
+body.dark-mode .badge-success,
+body.dark-mode .status-badge.completed {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34D399 !important;
+}
+body.dark-mode .badge-warning,
+body.dark-mode .status-badge.draft {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #FBBF24 !important;
+}
+body.dark-mode .badge-danger,
+body.dark-mode .status-badge.pending {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #FCA5A5 !important;
+}
+body.dark-mode .badge-info {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60A5FA !important;
+}
+body.dark-mode .badge-primary {
+  background-color: rgba(79, 70, 229, 0.15) !important;
+  background: rgba(79, 70, 229, 0.15) !important;
+  color: #818CF8 !important;
+}
+body.dark-mode .badge-light {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #94A3B8 !important;
+}
+body.dark-mode .badge-purple {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+  background: rgba(139, 92, 246, 0.15) !important;
+  color: #A78BFA !important;
+}
+
+/* ── Drag & Drop / Upload Zone overrides ── */
+body.dark-mode .upload-zone,
+body.dark-mode #uploadZone {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+/* ── Inline Style Overrides ── */
+body.dark-mode [style*="color:#1E293B"],
+body.dark-mode [style*="color: #1E293B"],
+body.dark-mode [style*="color:#0F172A"],
+body.dark-mode [style*="color: #0F172A"] {
+  color: #F8FAFC !important;
+}
+body.dark-mode [style*="color:#64748B"],
+body.dark-mode [style*="color: #64748B"] {
+  color: #CBD5E1 !important;
+}
+body.dark-mode [style*="background:#F8FAFC"],
+body.dark-mode [style*="background: #F8FAFC"] {
+  background-color: #0F172A !important;
+  background: #0F172A !important;
+}
+body.dark-mode [style*="background:#FFFBEB"],
+body.dark-mode [style*="background: #FFFBEB"] {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #FBBF24 !important;
+}
+body.dark-mode [style*="background:#F0FDF4"],
+body.dark-mode [style*="background: #F0FDF4"] {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+body.dark-mode [style*="background:#FEF2F2"],
+body.dark-mode [style*="background: #FEF2F2"] {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
