@@ -394,6 +394,7 @@ function filterTable() {
 
   var source = (_apiDataLoaded && _apiAlumni && _apiAlumni.records) ? _apiAlumni.records.map(function (a) {
     return {
+      id: a.alumni_id || a.id,
       name: a.name || a.fullName || 'Unknown',
       dept: a.department || a.dept || '',
       batch: a.batch || '',
@@ -1795,15 +1796,28 @@ function showReportModal(title, columns, rows) {
 }
 
 window.viewAlumniDetails = function(id) {
-  if (!_apiAlumni || !_apiAlumni.records) {
-    Toast.error('View Details', 'Alumni data not loaded');
+  var records = [];
+  if (_apiAlumni && Array.isArray(_apiAlumni.records)) {
+    records = _apiAlumni.records;
+  }
+  var record = records.find(function(r) { return (r.alumni_id || r.id) == id; });
+  if (record) {
+    populateViewModal(record);
     return;
   }
-  var record = _apiAlumni.records.find(function(r) { return (r.alumni_id || r.id) == id; });
-  if (!record) {
-    Toast.error('View Details', 'Alumni record not found');
-    return;
-  }
+  // Not in cached records - fetch directly
+  API.getAlumniById(id).then(function(res) {
+    if (res && res.success && res.data) {
+      populateViewModal(res.data);
+    } else {
+      Toast.error('View Details', 'Alumni record not found');
+    }
+  }).catch(function() {
+    Toast.error('View Details', 'Failed to load alumni details');
+  });
+};
+
+function populateViewModal(record) {
   
   document.getElementById('vAlumniName').innerText = record.name || '-';
   document.getElementById('vAlumniMeta').innerText = (record.department || record.dept || '-') + ' | Batch ' + (record.batch || '-');
@@ -1838,7 +1852,7 @@ window.viewAlumniDetails = function(id) {
   avatar.innerText = initials;
 
   openModal('viewAlumniModal');
-};
+}
 
 window.handleGlobalSearch = function(val) {
   var activeItem = document.querySelector('.sidebar-item.active');

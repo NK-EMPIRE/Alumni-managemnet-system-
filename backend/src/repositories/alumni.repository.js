@@ -2,7 +2,7 @@ const { sql, getPool } = require('../config/database');
 
 const ALLOWED_UPDATE_FIELDS = [
   'name', 'gender', 'batch', 'department', 'email', 'phone',
-  'company', 'designation', 'working_details', 'linkedin_profile'
+  'company', 'designation', 'working_details', 'linkedin_profile', 'date_of_birth'
 ];
 
 const FIELD_TYPES = {
@@ -15,7 +15,8 @@ const FIELD_TYPES = {
   company: sql.NVarChar(200),
   designation: sql.NVarChar(200),
   working_details: sql.NVarChar(500),
-  linkedin_profile: sql.NVarChar(255)
+  linkedin_profile: sql.NVarChar(255),
+  date_of_birth: sql.NVarChar(20)
 };
 
 async function findAll({ page, limit, offset, search, department, batch, status }) {
@@ -190,10 +191,22 @@ async function createProfessionalInfo(data) {
   updateReq.input('alumniId', sql.Int, data.alumni_id);
   updateReq.input('company', sql.NVarChar(200), data.company);
   updateReq.input('designation', sql.NVarChar(200), data.designation);
+  updateReq.input('email', sql.NVarChar(150), data.email);
+  updateReq.input('phone', sql.NVarChar(20), data.phone);
+  updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
+  updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
+  updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
   await updateReq.query(`
     UPDATE Alumni
-    SET company = @company, designation = @designation,
-        is_updated = 1, updated_date = GETUTCDATE()
+    SET company = @company,
+        designation = @designation,
+        email = @email,
+        phone = @phone,
+        working_details = @workingDetails,
+        linkedin_profile = @linkedinProfile,
+        date_of_birth = COALESCE(@dateOfBirth, date_of_birth),
+        is_updated = 1,
+        updated_date = GETUTCDATE()
     WHERE alumni_id = @alumniId
   `);
 

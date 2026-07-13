@@ -9,8 +9,13 @@
 
   if (sidebarToggle) {
     sidebarToggle.addEventListener('click', function () {
-      document.body.classList.toggle('sidebar-collapsed');
-      localStorage.setItem('sidebar_collapsed', document.body.classList.contains('sidebar-collapsed'));
+      if (window.innerWidth < 1024) {
+        if (sidebar) sidebar.classList.toggle('mobile-open');
+        if (sidebarOverlay) sidebarOverlay.classList.toggle('show');
+      } else {
+        document.body.classList.toggle('sidebar-collapsed');
+        localStorage.setItem('sidebar_collapsed', document.body.classList.contains('sidebar-collapsed'));
+      }
     });
   }
 

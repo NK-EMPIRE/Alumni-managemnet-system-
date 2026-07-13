@@ -523,25 +523,7 @@
   }
 
   function setupSidebar() {
-    var toggleBtn = document.getElementById('sidebarToggle');
-    var hamburger = document.getElementById('hamburgerBtn');
-    var overlay = document.getElementById('sidebarOverlay');
     var body = document.body;
-
-    toggleBtn.addEventListener('click', function () {
-      body.classList.toggle('sidebar-collapsed');
-      isSidebarCollapsed = body.classList.contains('sidebar-collapsed');
-    });
-
-    hamburger.addEventListener('click', function () {
-      document.getElementById('sidebar').classList.toggle('mobile-open');
-      overlay.classList.toggle('show');
-    });
-
-    overlay.addEventListener('click', function () {
-      document.getElementById('sidebar').classList.remove('mobile-open');
-      overlay.classList.remove('show');
-    });
 
     document.querySelectorAll('.sidebar-item').forEach(function (item) {
       item.addEventListener('click', function (e) {
@@ -563,8 +545,10 @@
           isSidebarCollapsed = false;
         }
         if (window.innerWidth < 1024) {
-          document.getElementById('sidebar').classList.remove('mobile-open');
-          overlay.classList.remove('show');
+          var sidebar = document.getElementById('sidebar');
+          var overlay = document.getElementById('sidebarOverlay');
+          if (sidebar) sidebar.classList.remove('mobile-open');
+          if (overlay) overlay.classList.remove('show');
         }
       });
     });
