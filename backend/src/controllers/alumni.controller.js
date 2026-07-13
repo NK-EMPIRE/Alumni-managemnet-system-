@@ -36,8 +36,8 @@ const submitProfessionalInfo = asyncHandler(async (req, res) => {
 
 const getMyAssignments = asyncHandler(async (req, res) => {
   const currentUser = req.user;
-  const { page, limit, status } = req.query;
-  const result = await alumniService.getMyAssignments(currentUser.userId, currentUser.role, { page, limit });
+  const { page, limit, onlyMe } = req.query;
+  const result = await alumniService.getMyAssignments(currentUser.userId, currentUser.role, { page, limit, onlyMe: onlyMe === 'true' });
   paginated(res, result.data, result.totalCount, result.page, result.limit, 'Assignments retrieved successfully');
 });
 

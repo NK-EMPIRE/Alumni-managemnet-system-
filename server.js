@@ -69,13 +69,51 @@ async function startServer() {
   try {
     const pool = await connectDB();
     try {
-      var colCheck = await pool.request().query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'department'");
-      if (colCheck.recordset.length === 0) {
-        await pool.request().query("ALTER TABLE Users ADD department VARCHAR(100)");
-        logger.info('Migrations: added department column to Users');
-      }
+      // Migrate Users table column
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'department'
+        )
+        BEGIN
+          ALTER TABLE dbo.Users ADD department VARCHAR(100) NULL;
+        END
+      `);
+
+      // Migrate Alumni table columns
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'date_of_birth'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD date_of_birth VARCHAR(20) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'working_details'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD working_details VARCHAR(500) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'linkedin_profile'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD linkedin_profile VARCHAR(255) NULL;
+        END
+      `);
+
+      logger.info('Migrations: verified and updated Users and Alumni columns successfully');
     } catch (migErr) {
-      logger.warn('Migration check failed (may already exist): ' + migErr.message);
+      logger.warn('Migration check failed: ' + migErr.message);
     }
     app.listen(PORT, () => {
       logger.info(`Server running on http://localhost:${PORT}`);

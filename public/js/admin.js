@@ -43,13 +43,7 @@ const dummyActivities = [
   { user: 'Admin User', action: 'generated monthly progress report', time: '1 day ago', avatar: 'AD' }
 ];
 
-const dummyNotifications = [
-  { text: 'Amit Verma completed 15 alumni updates', time: '2 min ago', unread: true },
-  { text: 'New team member Anjali Rao added', time: '15 min ago', unread: true },
-  { text: 'Assignment of 20 alumni to Rajesh Patel', time: '1 hour ago', unread: true },
-  { text: 'Pending updates: 8 records require review', time: '2 hours ago', unread: true },
-  { text: 'System backup completed successfully', time: '3 hours ago', unread: false }
-];
+// Real notifications drawn from audit logs — no dummy data
 
 const dummyDeptProgress = [
   { dept: 'CSE', completed: 320, total: 465, color: '#3B82F6' },
@@ -276,6 +270,7 @@ function populateTable() {
   if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
     state.filteredData = _apiAlumni.records.map(function (a) {
       return {
+        id: a.alumni_id || a.id,
         name: a.name || a.fullName || 'Unknown',
         dept: a.department || a.dept || '',
         batch: a.batch || '',
@@ -322,7 +317,7 @@ function renderTable() {
     html += '<td>' + item.leader + '</td>';
     html += '<td>' + statusBadge + '</td>';
     html += '<td><div class="progress-label" style="margin-bottom:2px;"><span></span><span>' + item.progress + '%</span></div><div class="progress"><div class="progress-bar ' + progressColor + '" style="width:' + item.progress + '%;"></div></div></td>';
-    html += '<td><button class="btn btn-sm btn-outline" onclick="Toast.info(\'View\',\'Viewing details for ' + item.name + '\')"><i class="fas fa-eye"></i></button></td>';
+    html += '<td><button class="btn btn-sm btn-outline" onclick="viewAlumniDetails(' + item.id + ')"><i class="fas fa-eye"></i></button></td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
@@ -602,9 +597,29 @@ function populateTLRankings() {
 function populateNotifications() {
   var list = document.getElementById('notifList');
   if (!list) return;
+
+  // Use real audit log data when available
+  var notifs = [];
+  if (_apiAuditLogs && _apiAuditLogs.records && _apiAuditLogs.records.length > 0) {
+    notifs = _apiAuditLogs.records.slice(0, 10).map(function(r) {
+      return {
+        text: (r.username || 'System') + ' — ' + (r.action || '').replace(/_/g, ' ').toLowerCase(),
+        time: r.created_at ? new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
+        unread: true
+      };
+    });
+  }
+
+  if (notifs.length === 0) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No notifications</div>';
+    var count = document.querySelector('.notification-count');
+    if (count) { count.textContent = '0'; count.style.display = 'none'; }
+    return;
+  }
+
   var html = '';
-  dummyNotifications.forEach(function (n) {
-    html += '<button class="dropdown-item" style="flex-wrap:wrap;gap:4px;' + (n.unread ? 'background:#EFF6FF;' : '') + '" onclick="markNotifRead(this)">';
+  notifs.forEach(function (n) {
+    html += '<button class="dropdown-item" style="flex-wrap:wrap;gap:4px;' + (n.unread ? 'background:rgba(99,102,241,0.06);' : '') + '" onclick="markNotifRead(this)">';
     html += '<div style="display:flex;gap:10px;width:100%;align-items:flex-start;">';
     if (n.unread) html += '<span style="width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;"></span>';
     else html += '<span style="width:8px;height:8px;flex-shrink:0;"></span>';
@@ -612,6 +627,13 @@ function populateNotifications() {
     html += '</div></button>';
   });
   list.innerHTML = html;
+
+  var count = document.querySelector('.notification-count');
+  var unreadCount = notifs.filter(function(n) { return n.unread; }).length;
+  if (count) {
+    if (unreadCount > 0) { count.textContent = unreadCount; count.style.display = 'inline-flex'; }
+    else { count.textContent = '0'; count.style.display = 'none'; }
+  }
 }
 
 function markNotifRead(btn) {
@@ -625,6 +647,19 @@ function markNotifRead(btn) {
     if (c - 1 <= 0) count.style.display = 'none';
   }
 }
+
+window.clearAllNotifications = function() {
+  var list = document.getElementById('notifList');
+  if (list) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No new notifications</div>';
+  }
+  var count = document.querySelector('.notification-count');
+  if (count) {
+    count.textContent = '0';
+    count.style.display = 'none';
+  }
+  Toast.success('Notifications', 'All notifications cleared');
+};
 
 function showAllNotifications() {
   closeDropdown('notifMenu');
@@ -973,15 +1008,15 @@ function submitAddTeamMember() {
       }
 
     function findOrCreateTeam() {
+        // Look up existing team by this specific leaderId (not name)
         if (_apiTeams && _apiTeams.records) {
-          var t = _apiTeams.records.find(function (x) { return x.leader_name === leaderName; });
+          var t = _apiTeams.records.find(function (x) { return x.leader_id === leaderId; });
           if (t) return Promise.resolve(t.team_id);
         }
-        return resolveLeaderId().then(function () {
-          return API.createTeam({ teamName: leaderName + "'s Team", leaderId: leaderId }).then(function (tr) {
-            if (tr && tr.success) return tr.data.team_id;
-            throw new Error('Team creation failed');
-          });
+        // Only create if no existing team found for this leader
+        return API.createTeam({ teamName: leaderName + "'s Team", leaderId: leaderId }).then(function (tr) {
+          if (tr && tr.success) return tr.data.team_id;
+          throw new Error('Team creation failed');
         });
       }
 
@@ -1484,7 +1519,7 @@ function populateAuditLogTable() {
       var tsStr = '';
       if (item.created_at) {
         var d = new Date(item.created_at);
-        tsStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        tsStr = d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
       }
       return {
         ts: tsStr,
@@ -1756,6 +1791,66 @@ function showReportModal(title, columns, rows) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
-    Toast.success('Export', t + ' exported successfully');
   };
 }
+
+window.viewAlumniDetails = function(id) {
+  if (!_apiAlumni || !_apiAlumni.records) {
+    Toast.error('View Details', 'Alumni data not loaded');
+    return;
+  }
+  var record = _apiAlumni.records.find(function(r) { return (r.alumni_id || r.id) == id; });
+  if (!record) {
+    Toast.error('View Details', 'Alumni record not found');
+    return;
+  }
+  
+  document.getElementById('vAlumniName').innerText = record.name || '-';
+  document.getElementById('vAlumniMeta').innerText = (record.department || record.dept || '-') + ' | Batch ' + (record.batch || '-');
+  document.getElementById('vAlumniRegNo').innerText = record.register_no || record.registerNo || '-';
+  document.getElementById('vAlumniGender').innerText = record.gender || '-';
+  document.getElementById('vAlumniDOB').innerText = record.date_of_birth || record.dob || '-';
+  document.getElementById('vAlumniEmail').innerText = record.email || '-';
+  document.getElementById('vAlumniPhone').innerText = record.phone || '-';
+  
+  var li = document.getElementById('vAlumniLinkedIn');
+  if (record.linkedin_profile || record.linkedin) {
+    var url = record.linkedin_profile || record.linkedin;
+    li.innerText = url;
+    li.href = url.startsWith('http') ? url : 'https://' + url;
+    li.style.display = 'inline';
+  } else {
+    li.innerText = '-';
+    li.href = '#';
+  }
+  
+  document.getElementById('vAlumniCompany').innerText = record.company || '-';
+  document.getElementById('vAlumniDesignation').innerText = record.designation || '-';
+  document.getElementById('vAlumniCity').innerText = record.current_city || record.city || '-';
+  document.getElementById('vAlumniStateCountry').innerText = (record.state || '-') + ', ' + (record.country || '-');
+  document.getElementById('vAlumniWorkingDetails').innerText = record.working_details || '-';
+  document.getElementById('vAlumniHigherStudies').innerText = record.higher_studies || record.higherStudies || '-';
+  document.getElementById('vAlumniEntrepreneur').innerText = record.entrepreneur || '-';
+  document.getElementById('vAlumniGovtJob').innerText = record.govt_job || record.govtJob || '-';
+  
+  var avatar = document.getElementById('vAlumniAvatar');
+  var initials = (record.name || 'A').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+  avatar.innerText = initials;
+
+  openModal('viewAlumniModal');
+};
+
+window.handleGlobalSearch = function(val) {
+  var activeItem = document.querySelector('.sidebar-item.active');
+  var activeSection = activeItem ? (activeItem.getAttribute('data-section') || 'dashboard') : 'dashboard';
+  if (activeSection === 'alumni' || activeSection === 'dashboard') {
+    var ts = document.getElementById('tableSearch');
+    if (ts) { ts.value = val; filterTable(); }
+  } else if (activeSection === 'teamLeaders') {
+    var ts = document.getElementById('tlSearch');
+    if (ts) { ts.value = val; filterTeamLeaders(); }
+  } else if (activeSection === 'teamMembers') {
+    var ts = document.getElementById('tmSearch');
+    if (ts) { ts.value = val; filterTeamMembers(); }
+  }
+};

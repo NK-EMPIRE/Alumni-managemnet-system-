@@ -1,6 +1,7 @@
 const { sql, getPool } = require('../config/database');
 const { createAuditLog } = require('../helpers/audit');
 const { NotFoundError, AppError } = require('../middleware/errorHandler');
+const { sendAssignmentNotificationEmail } = require('../helpers/email');
 
 async function assignAlumni(teamId, currentUser, filters) {
   filters = filters || {};
@@ -112,6 +113,31 @@ async function assignAlumni(teamId, currentUser, filters) {
       (filters.batch ? ` (batch: ${filters.batch})` : '') +
       (filters.department ? ` (dept: ${filters.department})` : '')
   });
+
+  // Send email notifications to each member (non-blocking)
+  try {
+    const leaderName = `${currentUser.firstName} ${currentUser.lastName}`;
+    // Get member emails
+    const emailReq = pool.request().input('teamId', sql.Int, teamId);
+    const emailResult = await emailReq.query(`
+      SELECT u.user_id, u.email, u.first_name, u.last_name
+      FROM TeamMembers tm
+      JOIN Users u ON u.user_id = tm.user_id
+      WHERE tm.team_id = @teamId
+    `);
+    const memberEmailMap = {};
+    emailResult.recordset.forEach(function(m) {
+      memberEmailMap[m.user_id] = { email: m.email, name: m.first_name + ' ' + m.last_name, count: 0 };
+    });
+    assignments.forEach(function(a) {
+      if (memberEmailMap[a.memberId]) memberEmailMap[a.memberId].count++;
+    });
+    Object.values(memberEmailMap).forEach(function(m) {
+      if (m.count > 0 && m.email) {
+        sendAssignmentNotificationEmail(m.email, m.name, m.count, leaderName).catch(function() {});
+      }
+    });
+  } catch (e) { /* email errors are non-fatal */ }
 
   return {
     assigned: assignments.length,

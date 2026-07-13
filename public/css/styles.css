@@ -349,7 +349,7 @@ ul {
 
 /* Sidebar collapsed state (desktop) */
 .sidebar-collapsed .sidebar {
-  width: var(--sidebar-collapsed);
+  width: var(--sidebar-collapsed) !important;
 }
 
 .sidebar-collapsed .sidebar-brand-text,
@@ -358,20 +358,26 @@ ul {
 .sidebar-collapsed .sidebar-user-info,
 .sidebar-collapsed .sidebar-user-name,
 .sidebar-collapsed .sidebar-user-role,
-.sidebar-collapsed .sidebar-item .badge {
+.sidebar-collapsed .sidebar-item .badge,
+.sidebar-collapsed .nav-item-text,
+.sidebar-collapsed .nav-section-text,
+.sidebar-collapsed .nav-item .badge {
   opacity: 0;
   width: 0;
+  display: none !important;
   overflow: hidden;
 }
 
-.sidebar-collapsed .sidebar-item {
+.sidebar-collapsed .sidebar-item,
+.sidebar-collapsed .nav-item {
   justify-content: center;
   padding: 10px 0;
 }
 
 .sidebar-collapsed .sidebar-item i,
 .sidebar-collapsed .sidebar-item svg,
-.sidebar-collapsed .sidebar-item .icon {
+.sidebar-collapsed .sidebar-item .icon,
+.sidebar-collapsed .nav-item i {
   margin: 0;
 }
 
@@ -444,8 +450,9 @@ ul {
   transition: margin-left var(--transition-speed) ease;
 }
 
-.sidebar-collapsed .page-wrapper {
-  margin-left: var(--sidebar-collapsed);
+.sidebar-collapsed .page-wrapper,
+.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-collapsed) !important;
 }
 
 .page-content {
@@ -3227,4 +3234,216 @@ textarea.form-control {
     height: 60px;
     font-size: 1.5rem;
   }
+}
+
+/* Disable all animations and transitions globally for instant UI response */
+*, *::before, *::after {
+  transition: none !important;
+  animation: none !important;
+}
+.stagger-children > * {
+  opacity: 1 !important;
+}
+
+/* ────────────────────────────────────────────────────────────
+   DARK MODE COMPONENT OVERRIDES
+   ──────────────────────────────────────────────────────────── */
+body.dark-mode {
+  /* Admin & Team Leader variables */
+  --bg-white: #1E293B;
+  --bg-light: #0F172A;
+  --text-dark: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border: #334155;
+  --secondary: #0B0F19;
+
+  /* Team Member variables */
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border-color: #334155;
+  --bg-sidebar: #0B0F19;
+  
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .top-navbar,
+body.dark-mode .topbar {
+  background: #1E293B !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .page-wrapper,
+body.dark-mode .main-content {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .card,
+body.dark-mode .stat-card,
+body.dark-mode .quick-action-btn,
+body.dark-mode .dropdown-menu,
+body.dark-mode .modal-content,
+body.dark-mode .table-card {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode .card-value,
+body.dark-mode .quick-action-btn span,
+body.dark-mode .modal-header h3,
+body.dark-mode .modal-header h4 {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode th {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode td {
+  border-bottom-color: #334155 !important;
+  color: #E2E8F0 !important;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+  border-color: #334155 !important;
+  background-color: #1E293B !important;
+}
+
+body.dark-mode .toast {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+body.dark-mode .topbar-btn,
+body.dark-mode .navbar-btn {
+  background: #334155 !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .notif-dropdown,
+body.dark-mode .dropdown-menu {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .notif-item,
+body.dark-mode .dropdown-item {
+  border-bottom-color: #334155 !important;
+  color: #E2E8F0 !important;
+}
+
+body.dark-mode .notif-item:hover,
+body.dark-mode .dropdown-item:hover {
+  background-color: #334155 !important;
+}
+
+/* ── Sidebar ── */
+body.dark-mode .sidebar,
+body.dark-mode .navbar {
+  background: #0B0F19 !important;
+  border-right-color: #334155 !important;
+}
+body.dark-mode .sidebar-item,
+body.dark-mode .nav-link {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .sidebar-item:hover,
+body.dark-mode .sidebar-item.active {
+  background: rgba(99,102,241,0.15) !important;
+  color: #818CF8 !important;
+}
+body.dark-mode .sidebar-section-title {
+  color: #64748B !important;
+}
+
+/* ── Content sections ── */
+body.dark-mode .content-section,
+body.dark-mode .dashboard-section {
+  color: #F8FAFC !important;
+}
+body.dark-mode .section-header h2,
+body.dark-mode .section-title {
+  color: #F8FAFC !important;
+}
+body.dark-mode .breadcrumb-item,
+body.dark-mode .breadcrumb-sep {
+  color: #94A3B8 !important;
+}
+
+/* ── Form labels & helpers ── */
+body.dark-mode label,
+body.dark-mode .form-label {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .form-text,
+body.dark-mode .text-muted {
+  color: #94A3B8 !important;
+}
+
+/* ── Badges ── */
+body.dark-mode .badge {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ── Pagination ── */
+body.dark-mode .pagination-item {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #CBD5E1 !important;
+}
+body.dark-mode .pagination-item.active {
+  background: #4F46E5 !important;
+  color: #fff !important;
+  border-color: #4F46E5 !important;
+}
+body.dark-mode .pagination-item:hover:not(:disabled) {
+  background: #334155 !important;
+}
+
+/* ── Settings tabs ── */
+body.dark-mode .settings-tab-btn {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .settings-tab-btn.active {
+  background: #4F46E5 !important;
+  color: #fff !important;
+}
+
+/* ── Avatar / profile initials ── */
+body.dark-mode .member-avatar,
+body.dark-mode .alumni-avatar {
+  background: linear-gradient(135deg, #4F46E5, #818CF8) !important;
+}
+
+/* ── Table row hover ── */
+body.dark-mode tbody tr:hover {
+  background: rgba(99,102,241,0.08) !important;
+}
+
+/* ── Status cards in member dashboard ── */
+body.dark-mode .status-card {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+/* ── Live clock widget ── */
+body.dark-mode #universalLiveClock {
+  color: #94A3B8 !important;
 }

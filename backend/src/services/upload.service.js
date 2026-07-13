@@ -32,18 +32,14 @@ async function processExcelImport(filePath, currentUser) {
     var department = row.department || row.dept || row.depart || row.branch || row.stream || row.course || null;
     var batch = row.batch || row.year || row.batch_year || row.batchyear || row.passing_year || row.passingyear || null;
 
-    if (!registerNo || !name || !department || !batch) {
-      var missing = [];
-      if (!registerNo) missing.push('Reg.No');
-      if (!name) missing.push('Name');
-      if (!department) missing.push('Course');
-      if (!batch) missing.push('Year');
-      invalidRows.push({ row: raw, reason: 'Row ' + (invalidRows.length + validRows.length + 1) + ': Missing ' + missing.join(', ') + '. Columns found: ' + Object.keys(raw).join('|') });
+    // Skip only if no register number
+    if (!registerNo || String(registerNo).trim() === '' || String(registerNo).trim().toLowerCase() === 'null') {
+      invalidRows.push({ row: raw, reason: 'Row ' + (invalidRows.length + validRows.length + 1) + ': Missing Reg.No. Columns found: ' + Object.keys(raw).join('|') });
       continue;
     }
 
     var lastName = row.last_name || row.lastname || row.surname || null;
-    var fullName = lastName ? (name + ' ' + lastName).trim() : name;
+    var fullName = name ? (lastName ? (name + ' ' + lastName).trim() : String(name).trim()) : null;
 
     var dateOfBirth = row.date_of_birth || row.dob || row.birth_date || row.birthdate || row.dateofbirth || null;
     var workingDetails = row.working_detail || row.working_details || row.work_detail || row.workdetails || null;
@@ -57,8 +53,8 @@ async function processExcelImport(filePath, currentUser) {
       name: fullName,
       email: email ? String(email).trim() : null,
       phone: phone ? String(phone).trim() : null,
-      department: String(department).trim(),
-      batch: String(batch).trim(),
+      department: department ? String(department).trim() : null,
+      batch: batch ? String(batch).trim() : null,
       gender: gender,
       dateOfBirth: dateOfBirth ? String(dateOfBirth).trim() : null,
       workingDetails: workingDetails ? String(workingDetails).trim() : null,
@@ -70,12 +66,43 @@ async function processExcelImport(filePath, currentUser) {
 
   const newRows = [];
   let duplicateCount = 0;
+  let mergedCount = 0;
 
   for (const row of validRows) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
+      // Merge: update any non-null incoming field into the existing record
+      const fieldsToUpdate = {};
+      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation'];
+      
+      checkFields.forEach(f => {
+        const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
+                        f === 'workingDetails' ? 'working_details' :
+                        f === 'linkedinProfile' ? 'linkedin_profile' :
+                        f.replace(/([A-Z])/g, '_$1').toLowerCase();
+
+        const incomingVal = row[f];
+        const existingVal = existing[dbField];
+
+        // Update if incoming has value and is different from existing (or existing is null)
+        if (incomingVal !== null && incomingVal !== undefined && String(incomingVal).trim() !== '') {
+          if (existingVal === null || existingVal === undefined || String(existingVal).trim() === '' || String(existingVal).trim() !== String(incomingVal).trim()) {
+            fieldsToUpdate[dbField] = String(incomingVal).trim();
+          }
+        }
+      });
+
+      if (Object.keys(fieldsToUpdate).length > 0) {
+        await uploadRepository.updateAlumniFields(existing.alumni_id, fieldsToUpdate);
+        mergedCount++;
+      }
       duplicateCount++;
     } else {
+      // For new inserts, require name, department, batch
+      if (!row.name || !row.department || !row.batch) {
+        invalidRows.push({ row: { register_no: row.registerNo }, reason: 'New record ' + row.registerNo + ': Missing required fields (Name/Dept/Batch) for insert.' });
+        continue;
+      }
       newRows.push(row);
     }
   }

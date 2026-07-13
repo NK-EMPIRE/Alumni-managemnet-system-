@@ -8,4 +8,4 @@ const token = jwt.sign(
   { expiresIn: '8h' }
 );
 console.log("TOKEN:" + token);
-console.log("USER:" + JSON.stringify({ userId: 19, first_name: 'ert', email: 'ert@gmail.com', role: 'LEADER' }));
+console.log("USER:" + JSON.stringify({ id: 19, name: 'ert', email: 'ert@gmail.com', role: 'LEADER' }));

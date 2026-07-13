@@ -34,14 +34,7 @@
     { member: 'Amit Verma', action: 'resolved 3 data discrepancies in alumni records', time: '2 days ago', type: 'purple' }
   ];
 
-  var notifications = [
-    { icon: 'fa-check-circle', iconBg: '#D1FAE5', iconColor: '#10B981', title: 'Rahul Kumar completed 50 alumni', desc: 'Highest completion in the team', time: '1 hour ago', unread: true },
-    { icon: 'fa-exclamation-triangle', iconBg: '#FEF3C7', iconColor: '#F59E0B', title: 'Deepika Gupta behind schedule', desc: 'Only 50% completion rate', time: '3 hours ago', unread: true },
-    { icon: 'fa-user-plus', iconBg: '#DBEAFE', iconColor: '#2563EB', title: 'New alumni assigned to team', desc: '25 new profiles added to pool', time: '5 hours ago', unread: true },
-    { icon: 'fa-flag', iconBg: '#FEE2E2', iconColor: '#EF4444', title: 'Rohan Desai has 0% progress', desc: 'Needs immediate attention', time: '1 day ago', unread: true },
-    { icon: 'fa-file-export', iconBg: '#EDE9FE', iconColor: '#7C3AED', title: 'Weekly report generated', desc: 'Download available in Reports', time: '2 days ago', unread: false },
-    { icon: 'fa-check-circle', iconBg: '#D1FAE5', iconColor: '#10B981', title: 'Target milestone achieved', desc: 'Team crossed 60% overall progress', time: '3 days ago', unread: false }
-  ];
+  // No dummy notifications — real data loaded from API activities
 
   var currentPage = 1;
   var pageSize = 5;
@@ -173,6 +166,7 @@
       '</div></div>';
 
     container.innerHTML = html;
+    container.style.marginBottom = html ? '28px' : '0';
   }
 
   function populateTeamTable() {
@@ -307,10 +301,17 @@
 
   function populateNotifications() {
     var list = document.getElementById('notifList');
+    if (!list) return;
+    var notifSource = activities && activities.length > 0 ? activities : [];
+    if (notifSource.length === 0) {
+      list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No notifications</div>';
+      var nc = document.getElementById('notifCount');
+      if (nc) { nc.textContent = '0'; nc.style.display = 'none'; }
+      return;
+    }
     var html = '';
     var unreadCount = 0;
-    var notifSource = (_apiDataLoaded && activities.length > 0) ? activities : notifications;
-    notifSource.forEach(function (n, idx) {
+    notifSource.slice(0, 10).forEach(function (n, idx) {
       var isUnread = idx < 3;
       if (isUnread) unreadCount++;
       var bgColor = n.type === 'green' ? '#D1FAE5' : n.type === 'yellow' ? '#FEF3C7' : n.type === 'red' ? '#FEE2E2' : '#DBEAFE';
@@ -322,8 +323,22 @@
         '</div>';
     });
     list.innerHTML = html;
-    document.getElementById('notifCount').textContent = unreadCount;
+    var nc2 = document.getElementById('notifCount');
+    if (nc2) { nc2.textContent = unreadCount; nc2.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
   }
+
+  window.clearAllNotifications = function() {
+    var list = document.getElementById('notifList');
+    if (list) {
+      list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No new notifications</div>';
+    }
+    var count = document.getElementById('notifCount');
+    if (count) {
+      count.textContent = '0';
+      count.style.display = 'none';
+    }
+    showToast('Notifications', 'All notifications cleared', 'success');
+  };
 
   function populateAssignModal() {
     var poolEl = document.getElementById('totalPoolCount');
@@ -615,10 +630,19 @@
       currentPage = 1;
       populateTeamTable();
     });
-    document.getElementById('globalSearch').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        var val = this.value.trim();
-        if (val) showToast('Search', 'Searching for "' + val + '"', 'info');
+    document.getElementById('globalSearch').addEventListener('input', function () {
+      var val = this.value.trim();
+      var activeItem = document.querySelector('.sidebar-item.active');
+      var activePage = activeItem ? activeItem.getAttribute('data-page') : 'dashboard';
+      if (activePage === 'dashboard') {
+        var el = document.getElementById('memberSearch');
+        if (el) { el.value = val; populateTeamTable(); }
+      } else if (activePage === 'assignments') {
+        var el = document.getElementById('myAssignmentsSearch');
+        if (el) { el.value = val; renderMyAssignmentsTable(); }
+      } else if (activePage === 'reports') {
+        var el = document.getElementById('reportSearch');
+        if (el) { el.value = val; renderTeamReportTable(); }
       }
     });
   }
@@ -705,24 +729,47 @@
   }
 
   function setupExport() {
-    document.getElementById('exportReportBtn').addEventListener('click', function () {
-      showToast('Exporting', 'Generating team progress report...', 'info');
-      API.generateReport({ type: 'team_progress', format: 'pdf' }).then(function (res) {
-        if (res && res.success) {
-          showToast('Success', 'Report exported successfully as PDF.', 'success');
-          if (res.data && res.data.filePath) {
-            window.open(res.data.filePath, '_blank');
-          }
-        } else {
-          showToast('Error', res && res.message || 'Failed to export report.', 'danger');
+    var btn = document.getElementById('exportReportBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (!filteredReportData || filteredReportData.length === 0) {
+        showToast('Warning', 'No team progress data available to export.', 'warning');
+        return;
+      }
+      var csv = '\uFEFF';
+      csv += 'S.No,Alumni Name,Department,Batch,Assigned Member,Company,Designation,Status,Update Date\r\n';
+      filteredReportData.forEach(function (r, idx) {
+        var sno = idx + 1;
+        var name = '"' + (r.name || '').replace(/"/g, '""') + '"';
+        var dept = '"' + (r.department || '').replace(/"/g, '""') + '"';
+        var batch = '"' + (r.batch || '').replace(/"/g, '""') + '"';
+        var member = '"' + (r.assigned_to || r.assignedTo || r.teamMember || '').replace(/"/g, '""') + '"';
+        var company = '"' + (r.company || '').replace(/"/g, '""') + '"';
+        var designation = '"' + (r.designation || '').replace(/"/g, '""') + '"';
+        var status = '"' + (r.status || '').replace(/"/g, '""') + '"';
+        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
+        if (compDate !== '-') {
+          compDate = new Date(compDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         }
-      }).catch(function () {
-        showToast('Success', 'Report exported successfully as PDF.', 'success');
+        csv += sno + ',' + name + ',' + dept + ',' + batch + ',' + member + ',' + company + ',' + designation + ',' + status + ',"' + compDate + '"\r\n';
       });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'team_progress_report_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      showToast('Success', 'Report exported successfully as CSV.', 'success');
     });
-    document.getElementById('exportBtn').addEventListener('click', function () {
-      document.getElementById('exportReportBtn').click();
-    });
+    
+    var exp = document.getElementById('exportBtn');
+    if (exp) {
+      exp.addEventListener('click', function () {
+        btn.click();
+      });
+    }
   }
 
   function setupLockFeatures() {
@@ -749,59 +796,76 @@
       });
     }
 
-    document.getElementById('lockDistributionBtn').addEventListener('click', function () {
-      if (isDistributionLocked) {
-        showToast('Already Locked', 'Distribution is already locked.', 'warning');
-        return;
-      }
-      if (!_teamId) {
-        showToast('Error', 'No team found. Cannot lock distribution.', 'danger');
-        return;
-      }
-      API.lockDistribution(_teamId).then(function (res) {
-        if (res && res.success !== false) {
-          isDistributionLocked = true;
-          localStorage.setItem('teamleader_distLocked', 'true');
-          updateLockBadge();
-          showToast('Locked', 'Distribution has been locked successfully.', 'success');
-        } else {
-          showToast('Error', res.message || 'Failed to lock distribution.', 'danger');
+    var lockBtn = document.getElementById('lockDistributionBtn');
+    if (lockBtn) {
+      lockBtn.addEventListener('click', function () {
+        if (isDistributionLocked) {
+          showToast('Already Locked', 'Distribution is already locked.', 'warning');
+          return;
         }
-      }).catch(function (err) {
-        showToast('Error', err.message || 'Failed to lock distribution.', 'danger');
-      });
-    });
-
-    document.getElementById('confirmLockBtn').addEventListener('click', function () {
-      if (!_teamId) {
-        showToast('Error', 'No team found.', 'danger');
-        document.getElementById('lockConfirmModal').classList.remove('show');
-        return;
-      }
-      API.lockDistribution(_teamId).then(function (res) {
-        if (res && res.success !== false) {
-          isDistributionLocked = true;
-          localStorage.setItem('teamleader_distLocked', 'true');
-          updateLockBadge();
-          document.getElementById('lockConfirmModal').classList.remove('show');
-          showToast('Locked', 'Distribution has been locked successfully.', 'success');
-        } else {
-          showToast('Error', res.message || 'Failed to lock distribution.', 'danger');
-          document.getElementById('lockConfirmModal').classList.remove('show');
+        if (!_teamId) {
+          showToast('Error', 'No team found. Cannot lock distribution.', 'danger');
+          return;
         }
-      }).catch(function (err) {
-        showToast('Error', err.message || 'Failed to lock distribution.', 'danger');
-        document.getElementById('lockConfirmModal').classList.remove('show');
+        API.lockDistribution(_teamId).then(function (res) {
+          if (res && res.success !== false) {
+            isDistributionLocked = true;
+            localStorage.setItem('teamleader_distLocked', 'true');
+            updateLockBadge();
+            showToast('Locked', 'Distribution has been locked successfully.', 'success');
+          } else {
+            showToast('Error', res.message || 'Failed to lock distribution.', 'danger');
+          }
+        }).catch(function (err) {
+          showToast('Error', err.message || 'Failed to lock distribution.', 'danger');
+        });
       });
-    });
+    }
 
-    document.getElementById('cancelLockBtn').addEventListener('click', function () {
-      document.getElementById('lockConfirmModal').classList.remove('show');
-    });
+    var confirmBtn = document.getElementById('confirmLockBtn');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', function () {
+        if (!_teamId) {
+          showToast('Error', 'No team found.', 'danger');
+          var modal = document.getElementById('lockConfirmModal');
+          if (modal) modal.classList.remove('show');
+          return;
+        }
+        API.lockDistribution(_teamId).then(function (res) {
+          if (res && res.success !== false) {
+            isDistributionLocked = true;
+            localStorage.setItem('teamleader_distLocked', 'true');
+            updateLockBadge();
+            var modal = document.getElementById('lockConfirmModal');
+            if (modal) modal.classList.remove('show');
+            showToast('Locked', 'Distribution has been locked successfully.', 'success');
+          } else {
+            showToast('Error', res.message || 'Failed to lock distribution.', 'danger');
+            var modal = document.getElementById('lockConfirmModal');
+            if (modal) modal.classList.remove('show');
+          }
+        }).catch(function (err) {
+          showToast('Error', err.message || 'Failed to lock distribution.', 'danger');
+          var modal = document.getElementById('lockConfirmModal');
+          if (modal) modal.classList.remove('show');
+        });
+      });
+    }
 
-    document.getElementById('lockConfirmModal').addEventListener('click', function (e) {
-      if (e.target === this) this.classList.remove('show');
-    });
+    var cancelBtn = document.getElementById('cancelLockBtn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function () {
+        var modal = document.getElementById('lockConfirmModal');
+        if (modal) modal.classList.remove('show');
+      });
+    }
+
+    var confirmModal = document.getElementById('lockConfirmModal');
+    if (confirmModal) {
+      confirmModal.addEventListener('click', function (e) {
+        if (e.target === this) this.classList.remove('show');
+      });
+    }
 
     updateLockBadge();
   }
@@ -815,6 +879,443 @@
       completionChart.data.datasets[0].data = [totalCompleted, totalPending, 0];
       completionChart.update();
     }
+  }
+
+  // --- MY ASSIGNMENTS SECTION (Update alumni details) ---
+  var myAssignmentsData = [];
+  var myFilteredAssignments = [];
+  var myCurrentPage = 1;
+  var myPageSize = 10;
+
+  function loadMyAssignments() {
+    var tbody = document.getElementById('myAssignmentsTableBody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading assignments...</td></tr>';
+    
+    API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 100 }).then(function (res) {
+      if (res && res.success) {
+        myAssignmentsData = res.data.records || res.data || [];
+        renderMyAssignmentsTable();
+      } else {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Failed to load assignments.</td></tr>';
+      }
+    }).catch(function (err) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Error: ' + err.message + '</td></tr>';
+    });
+  }
+
+  function renderMyAssignmentsTable() {
+    var searchVal = (document.getElementById('myAssignmentsSearch').value || '').toLowerCase().trim();
+    var statusVal = document.getElementById('myAssignmentsStatusFilter').value;
+
+    myFilteredAssignments = myAssignmentsData.filter(function (r) {
+      var matchSearch = !searchVal ||
+        (r.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.department || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.batch || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.company || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.designation || '').toLowerCase().indexOf(searchVal) !== -1;
+      var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
+      return matchSearch && matchStatus;
+    });
+
+    var totalPages = Math.max(1, Math.ceil(myFilteredAssignments.length / myPageSize));
+    if (myCurrentPage > totalPages) myCurrentPage = totalPages;
+    var start = (myCurrentPage - 1) * myPageSize;
+    var end = Math.min(start + myPageSize, myFilteredAssignments.length);
+    var pageData = myFilteredAssignments.slice(start, end);
+
+    var tbody = document.getElementById('myAssignmentsTableBody');
+    if (pageData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.4"></i>No assignments found.</td></tr>';
+    } else {
+      var html = '';
+      pageData.forEach(function (r, idx) {
+        var sno = start + idx + 1;
+        var status = r.status || 'Pending';
+        var isCompleted = status === 'Completed';
+        var isDraft = status === 'Draft';
+        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
+        html += '<tr>' +
+          '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
+          '<td><strong>' + (r.name || '-') + '</strong></td>' +
+          '<td>' + (r.department || '-') + '</td>' +
+          '<td>' + (r.batch || '-') + '</td>' +
+          '<td>' + (r.company || '-') + '</td>' +
+          '<td>' + (r.designation || '-') + '</td>' +
+          '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
+          '<td style="text-align:center"><button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '" ' + (isCompleted ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '') + '><i class="fas fa-edit"></i> ' + (isCompleted ? 'Done' : 'Update') + '</button></td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      tbody.querySelectorAll('.update-alumni-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = this.getAttribute('data-id');
+          openUpdateModal(id);
+        });
+      });
+    }
+
+    document.getElementById('myAssignmentsPaginationInfo').textContent = 'Showing ' + (myFilteredAssignments.length > 0 ? (start + 1) + '-' + end : '0') + ' of ' + myFilteredAssignments.length + ' assignments';
+
+    var pagContainer = document.getElementById('myAssignmentsPagination');
+    var pagHtml = '';
+    pagHtml += '<button class="pagination-item" data-page="prev" ' + (myCurrentPage <= 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
+    for (var i = 1; i <= totalPages; i++) {
+      pagHtml += '<button class="pagination-item ' + (i === myCurrentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button>';
+    }
+    pagHtml += '<button class="pagination-item" data-page="next" ' + (myCurrentPage >= totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
+    pagContainer.innerHTML = pagHtml;
+
+    pagContainer.querySelectorAll('.pagination-item').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var page = this.getAttribute('data-page');
+        if (page === 'prev' && myCurrentPage > 1) { myCurrentPage--; renderMyAssignmentsTable(); }
+        else if (page === 'next' && myCurrentPage < totalPages) { myCurrentPage++; renderMyAssignmentsTable(); }
+        else if (page !== 'prev' && page !== 'next') { myCurrentPage = parseInt(page); renderMyAssignmentsTable(); }
+      });
+    });
+  }
+
+  // --- UPDATE MODAL MANAGEMENT (For Leader Assignments Update) ---
+  var currentSelectedAlumniId = null;
+
+  function openUpdateModal(alumniId) {
+    currentSelectedAlumniId = alumniId;
+    var overlay = document.getElementById('updateModal');
+    
+    // Clear old errors
+    document.querySelectorAll('#updateForm input, #updateForm select').forEach(function (el) { el.classList.remove('error'); });
+    document.querySelectorAll('#updateForm .error-text').forEach(function (el) { el.style.display = 'none'; });
+
+    // Fetch latest details
+    API.getAlumniById(alumniId).then(function (res) {
+      if (res && res.success) {
+        var record = res.data;
+        document.getElementById('modalTitle').textContent = record.name || 'Update Profile';
+        document.getElementById('modalSubtitle').textContent = (record.department || '') + ' (' + (record.batch || '') + ')';
+        document.getElementById('modalAvatar').textContent = (record.name || 'A').charAt(0).toUpperCase();
+        
+        var status = record.assignment_status || 'Pending';
+        var isCompleted = status === 'Completed';
+        var isDraft = status === 'Draft';
+        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
+        var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
+        
+        var statusBadge = document.getElementById('modalStatusBadge');
+        statusBadge.className = 'status-badge ' + badgeClass;
+        statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
+
+        document.getElementById('fieldName').value = record.name || '';
+        document.getElementById('fieldDept').value = record.department || '';
+        document.getElementById('fieldBatch').value = record.batch || '';
+        document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
+        document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
+        document.getElementById('fieldCity').value = record.current_city || '';
+        document.getElementById('fieldState').value = record.state || '';
+        document.getElementById('fieldCountry').value = record.country || '';
+        document.getElementById('fieldEmail').value = record.email || record.pi_email || '';
+        document.getElementById('fieldPhone').value = record.phone || record.pi_phone || '';
+        document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
+        document.getElementById('fieldWorkingDetails').value = record.working_details || '';
+        document.getElementById('fieldHigherStudies').value = record.higher_studies || '';
+        document.getElementById('fieldHigherDetails').value = record.higher_studies_details || '';
+        document.getElementById('fieldEntrepreneur').value = record.is_entrepreneur ? 'Yes' : 'No';
+        document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
+        document.getElementById('fieldOtherOcc').value = record.other_occupation || '';
+        document.getElementById('fieldRemarks').value = record.remarks || '';
+
+        if (record.higher_studies === 'Yes') {
+          document.getElementById('higherStudiesDetails').style.display = 'block';
+        } else {
+          document.getElementById('higherStudiesDetails').style.display = 'none';
+        }
+
+        overlay.classList.add('show');
+      }
+    });
+  }
+
+  function readFormValues() {
+    return {
+      name: document.getElementById('fieldName').value.trim(),
+      department: document.getElementById('fieldDept').value,
+      batch: document.getElementById('fieldBatch').value,
+      company: document.getElementById('fieldCompany').value.trim(),
+      designation: document.getElementById('fieldDesignation').value.trim(),
+      current_city: document.getElementById('fieldCity').value.trim(),
+      state: document.getElementById('fieldState').value.trim(),
+      country: document.getElementById('fieldCountry').value.trim(),
+      email: document.getElementById('fieldEmail').value.trim(),
+      phone: document.getElementById('fieldPhone').value.trim(),
+      linkedin_url: document.getElementById('fieldLinkedin').value.trim(),
+      working_details: document.getElementById('fieldWorkingDetails').value.trim(),
+      higher_studies: document.getElementById('fieldHigherStudies').value,
+      higher_studies_details: document.getElementById('fieldHigherDetails').value.trim(),
+      is_entrepreneur: document.getElementById('fieldEntrepreneur').value === 'Yes',
+      is_government_job: document.getElementById('fieldGovtJob').value === 'Yes',
+      other_occupation: document.getElementById('fieldOtherOcc').value.trim(),
+      remarks: document.getElementById('fieldRemarks').value.trim()
+    };
+  }
+
+  function validateForm() {
+    var isValid = true;
+    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany'];
+    required.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el.value || el.value.trim() === '') {
+        el.classList.add('error');
+        isValid = false;
+      } else {
+        el.classList.remove('error');
+      }
+    });
+    return isValid;
+  }
+
+  function setupUpdateModalEvents() {
+    var select = document.getElementById('fieldHigherStudies');
+    if (select) {
+      select.addEventListener('change', function () {
+        document.getElementById('higherStudiesDetails').style.display = this.value === 'Yes' ? 'block' : 'none';
+      });
+    }
+
+    document.getElementById('saveDraftBtn').addEventListener('click', function () {
+      var draftBtn = this;
+      draftBtn.disabled = true;
+      var data = readFormValues();
+      API.saveAlumniDraft(currentSelectedAlumniId, data).then(function (res) {
+        showToast('Success', 'Draft saved successfully.', 'success');
+        document.getElementById('updateModal').classList.remove('show');
+        loadMyAssignments();
+      }).catch(function (err) {
+        showToast('Error', err.message || 'Failed to save draft.', 'danger');
+      }).finally(function () {
+        draftBtn.disabled = false;
+      });
+    });
+
+    document.getElementById('submitRecordBtn').addEventListener('click', function () {
+      if (!validateForm()) {
+        showToast('Validation Error', 'Please fill in all required fields.', 'danger');
+        return;
+      }
+      var submitBtn = this;
+      submitBtn.disabled = true;
+      var data = readFormValues();
+      API.submitAlumni(currentSelectedAlumniId, data).then(function (res) {
+        showToast('Success', 'Record submitted successfully.', 'success');
+        document.getElementById('updateModal').classList.remove('show');
+        loadMyAssignments();
+        fetchLeaderData();
+      }).catch(function (err) {
+        showToast('Error', err.message || 'Failed to submit record.', 'danger');
+      }).finally(function () {
+        submitBtn.disabled = false;
+      });
+    });
+  }
+
+  // --- REAL-TIME TEAM PROGRESS SECTION ---
+  var realtimeMemberChart = null;
+  var realtimeCompletionChart = null;
+
+  function loadTeamProgress() {
+    // Populate detailed realtime table
+    var tbody = document.getElementById('realtimeProgressTableBody');
+    if (teamMembers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">No progress details.</td></tr>';
+      return;
+    }
+    var rows = '';
+    teamMembers.forEach(function (m, idx) {
+      var statusClass = m.status === 'On Track' ? 'badge-success' : m.status === 'Behind' ? 'badge-warning' : 'badge-danger';
+      var barClass = m.progress >= 75 ? 'green' : m.progress >= 50 ? '' : 'red';
+      var sno = idx + 1;
+      rows += '<tr>' +
+        '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
+        '<td><div style="display:flex;align-items:center;gap:10px"><div class="member-avatar" style="background:' + m.color + '">' + m.initials + '</div><span style="font-weight:500">' + m.name + '</span></div></td>' +
+        '<td style="text-align:center;font-weight:600">' + m.assigned + '</td>' +
+        '<td style="text-align:center;font-weight:600;color:#10B981">' + m.completed + '</td>' +
+        '<td style="text-align:center;font-weight:600;color:' + (m.pending > 20 ? '#EF4444' : '#F59E0B') + '">' + m.pending + '</td>' +
+        '<td><div style="display:flex;align-items:center;gap:10px"><div class="progress" style="flex:1"><div class="progress-bar ' + barClass + '" style="width:' + m.progress + '%"></div></div><span style="font-size:0.75rem;font-weight:600;color:#64748B;min-width:36px;text-align:right">' + m.progress + '%</span></div></td>' +
+        '<td><span class="badge ' + statusClass + '">' + m.status + '</span></td>' +
+        '<td style="font-size:0.8rem;color:#64748B">' + m.lastActivity + '</td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = rows;
+
+    // Render Progress Page Charts
+    if (typeof Chart === 'undefined') return;
+    var memberCanvas = document.getElementById('realtimeMemberChart');
+    if (memberCanvas) {
+      var memberCtx = memberCanvas.getContext('2d');
+      var memberLabels = teamMembers.map(function (m) { return m.name.split(' ')[0]; });
+      var memberData = teamMembers.map(function (m) { return m.progress; });
+      var memberColors = teamMembers.map(function (m) { return m.color; });
+
+      if (realtimeMemberChart) realtimeMemberChart.destroy();
+      realtimeMemberChart = new Chart(memberCtx, {
+        type: 'bar',
+        data: {
+          labels: memberLabels,
+          datasets: [{
+            label: 'Progress (%)',
+            data: memberData,
+            backgroundColor: memberColors.map(function (c) { return c + 'CC'; }),
+            borderColor: memberColors,
+            borderWidth: 2,
+            borderRadius: 6,
+            barPercentage: 0.6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, max: 100 }, x: { grid: { display: false } } }
+        }
+      });
+    }
+
+    var completionCanvas = document.getElementById('realtimeCompletionChart');
+    if (completionCanvas) {
+      var completionCtx = completionCanvas.getContext('2d');
+      if (realtimeCompletionChart) realtimeCompletionChart.destroy();
+      realtimeCompletionChart = new Chart(completionCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Pending'],
+          datasets: [{
+            data: [totalCompleted, totalPending],
+            backgroundColor: ['#10B981', '#F59E0B'],
+            borderWidth: 0,
+            hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+  }
+
+  // --- TEAM REPORT SECTION (Read-only update viewing) ---
+  var reportData = [];
+  var filteredReportData = [];
+  var reportCurrentPage = 1;
+  var reportPageSize = 10;
+
+  function loadTeamReport() {
+    var tbody = document.getElementById('teamReportTableBody');
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading report history...</td></tr>';
+    
+    API.getAssignedAlumni({ onlyMe: false, page: 1, limit: 100 }).then(function (res) {
+      if (res && res.success) {
+        reportData = res.data.records || res.data || [];
+        populateReportUserFilter();
+        renderTeamReportTable();
+      } else {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Failed to load report history.</td></tr>';
+      }
+    }).catch(function (err) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Error: ' + err.message + '</td></tr>';
+    });
+  }
+
+  function populateReportUserFilter() {
+    var select = document.getElementById('reportUserFilter');
+    if (!select) return;
+    
+    var users = {};
+    reportData.forEach(function (r) {
+      var name = r.assigned_to || r.assignedTo || r.teamMember || '';
+      if (name) users[name] = true;
+    });
+
+    var html = '<option value="all">All Members</option>';
+    Object.keys(users).sort().forEach(function (name) {
+      html += '<option value="' + name + '">' + name + '</option>';
+    });
+    select.innerHTML = html;
+  }
+
+  function renderTeamReportTable() {
+    var searchVal = (document.getElementById('reportSearch').value || '').toLowerCase().trim();
+    var userVal = document.getElementById('reportUserFilter').value;
+    var statusVal = document.getElementById('reportStatusFilter').value;
+
+    filteredReportData = reportData.filter(function (r) {
+      var assignedTo = r.assigned_to || r.assignedTo || r.teamMember || '';
+      var matchSearch = !searchVal ||
+        (r.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.register_no || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.department || '').toLowerCase().indexOf(searchVal) !== -1 ||
+        (r.batch || '').toLowerCase().indexOf(searchVal) !== -1;
+      var matchUser = userVal === 'all' || assignedTo === userVal;
+      var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
+      return matchSearch && matchUser && matchStatus;
+    });
+
+    var totalPages = Math.max(1, Math.ceil(filteredReportData.length / reportPageSize));
+    if (reportCurrentPage > totalPages) reportCurrentPage = totalPages;
+    var start = (reportCurrentPage - 1) * reportPageSize;
+    var end = Math.min(start + reportPageSize, filteredReportData.length);
+    var pageData = filteredReportData.slice(start, end);
+
+    var tbody = document.getElementById('teamReportTableBody');
+    if (pageData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.4"></i>No update history found.</td></tr>';
+    } else {
+      var html = '';
+      pageData.forEach(function (r, idx) {
+        var sno = start + idx + 1;
+        var status = r.status || 'Pending';
+        var badgeClass = status === 'Completed' ? 'badge-success' : (status === 'Draft' ? 'badge-info' : 'badge-warning');
+        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
+        if (compDate !== '-') {
+          compDate = new Date(compDate).toLocaleDateString() + ' ' + new Date(compDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        var updaterName = r.assigned_to || r.assignedTo || r.teamMember || '-';
+        html += '<tr>' +
+          '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
+          '<td><strong>' + (r.name || '-') + '</strong></td>' +
+          '<td>' + (r.department || '-') + '</td>' +
+          '<td>' + (r.batch || '-') + '</td>' +
+          '<td>' + updaterName + '</td>' +
+          '<td>' + (r.company || '-') + '</td>' +
+          '<td>' + (r.designation || '-') + '</td>' +
+          '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
+          '<td style="font-size:0.8rem;color:#64748B">' + compDate + '</td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    document.getElementById('reportPaginationInfo').textContent = 'Showing ' + (filteredReportData.length > 0 ? (start + 1) + '-' + end : '0') + ' of ' + filteredReportData.length + ' records';
+
+    var pagContainer = document.getElementById('reportPagination');
+    var pagHtml = '';
+    pagHtml += '<button class="pagination-item" data-page="prev" ' + (reportCurrentPage <= 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
+    for (var i = 1; i <= totalPages; i++) {
+      pagHtml += '<button class="pagination-item ' + (i === reportCurrentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button>';
+    }
+    pagHtml += '<button class="pagination-item" data-page="next" ' + (reportCurrentPage >= totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
+    pagContainer.innerHTML = pagHtml;
+
+    pagContainer.querySelectorAll('.pagination-item').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var page = this.getAttribute('data-page');
+        if (page === 'prev' && reportCurrentPage > 1) { reportCurrentPage--; renderTeamReportTable(); }
+        else if (page === 'next' && reportCurrentPage < totalPages) { reportCurrentPage++; renderTeamReportTable(); }
+        else if (page !== 'prev' && page !== 'next') { reportCurrentPage = parseInt(page); renderTeamReportTable(); }
+      });
+    });
   }
 
   function setupSessionTimeout() {
@@ -875,11 +1376,17 @@
       avatarEls.forEach(function (el) { if (el) el.textContent = user.name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2); });
       var greeting = document.querySelector('.page-header p');
       if (greeting) greeting.textContent = 'Welcome back, ' + user.name.split(' ')[0] + '! Here\'s your team\'s progress overview.';
+      
+      // Populate General Settings fields
+      var settingsName = document.getElementById('settingsName');
+      var settingsEmail = document.getElementById('settingsEmail');
+      if (settingsName) settingsName.value = user.name;
+      if (settingsEmail && user.email) settingsEmail.value = user.email;
     }
   }
 
   function fetchLeaderData() {
-    Promise.all([
+    return Promise.all([
       API.getLeaderDashboard().catch(function () { return null; }),
       API.getAssignedAlumni({ page: 1, limit: 100 }).catch(function () { return null; })
     ]).then(function (results) {
@@ -911,11 +1418,6 @@
             };
           });
         }
-        if (_apiDashboardData.recentActivity && _apiDashboardData.recentActivity.length > 0) {
-          activities = _apiDashboardData.recentActivity.map(function (a) {
-            return { member: a.user || 'System', action: a.action, time: a.time, type: a.type || 'purple' };
-          });
-        }
       }
       var assigned = results[1];
       if (assigned && assigned.success) {
@@ -924,13 +1426,11 @@
       populateNotifications();
       populateOverviewCards();
       populateTeamTable();
-      populateRecentActivities();
       initCharts();
     }).catch(function () {
       populateNotifications();
       populateOverviewCards();
       populateTeamTable();
-      populateRecentActivities();
       initCharts();
     });
   }
@@ -945,7 +1445,31 @@
     setupExport();
     setupLockFeatures();
     setupSessionTimeout();
+    setupUpdateModalEvents();
     fetchLeaderData();
+
+    // Hook tab-specific navigation load events
+    document.querySelectorAll('.sidebar-nav .sidebar-item').forEach(function (item) {
+      item.addEventListener('click', function () {
+        var page = this.getAttribute('data-page');
+        if (page === 'assignments') {
+          loadMyAssignments();
+        } else if (page === 'progress') {
+          loadTeamProgress();
+        } else if (page === 'reports') {
+          loadTeamReport();
+        }
+      });
+    });
+
+    // Bind my assignments sub-filters
+    document.getElementById('myAssignmentsSearch').addEventListener('input', renderMyAssignmentsTable);
+    document.getElementById('myAssignmentsStatusFilter').addEventListener('change', renderMyAssignmentsTable);
+
+    // Bind report sub-filters
+    document.getElementById('reportSearch').addEventListener('input', renderTeamReportTable);
+    document.getElementById('reportUserFilter').addEventListener('change', renderTeamReportTable);
+    document.getElementById('reportStatusFilter').addEventListener('change', renderTeamReportTable);
 
     setTimeout(function () {
       document.getElementById('loadingScreen').classList.add('hide');
@@ -956,6 +1480,25 @@
       card.style.animationDelay = (idx * 0.08) + 's';
     });
   }
+
+  window.switchSettingsTab = function(tabName, btn) {
+    var tabsContainer = btn.closest('.card-body');
+    tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
+      item.classList.remove('active');
+      item.style.fontWeight = 'normal';
+    });
+    tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
+      content.style.display = 'none';
+      content.classList.remove('active');
+    });
+    btn.classList.add('active');
+    btn.style.fontWeight = 'bold';
+    var target = document.getElementById('tab-' + tabName);
+    if (target) {
+      target.style.display = 'block';
+      target.classList.add('active');
+    }
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

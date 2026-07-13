@@ -359,11 +359,6 @@
     }
 
     function handleSaveDraft() {
-        if (!validateForm()) {
-            showToast('Please fill all required fields', 'error');
-            return;
-        }
-
         saveDraftBtn.classList.add('loading');
         saveDraftBtn.disabled = true;
 
@@ -456,6 +451,9 @@
                 is_government_job: record.govtJob === 'Yes' ? 1 : 0
             };
             API.updateAlumni(record.id, updateData).then(function () {
+                if (record.assignment_id) {
+                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
+                }
                 return API.submitAlumni(record.id, updateData);
             }).then(function () {
                 doLocalSubmit();
@@ -477,8 +475,9 @@
     }
 
     function handleUpdateClick(e) {
-        if (e.target.classList.contains('btn-update')) {
-            const idx = e.target.getAttribute('data-index');
+        var btn = e.target.closest('.btn-update');
+        if (btn) {
+            const idx = btn.getAttribute('data-index');
             openModal(idx);
         }
     }
@@ -506,10 +505,13 @@
             }
         });
         markAllRead.addEventListener('click', function () {
-            document.querySelectorAll('.notif-item .notif-dot').forEach(function (dot) {
-                dot.style.display = 'none';
-            });
-            showToast('All notifications marked as read', 'success');
+            var list = document.getElementById('notifList');
+            if (list) {
+                list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
+            }
+            var dot = document.querySelector('#notifBtn .notif-dot');
+            if (dot) dot.style.display = 'none';
+            showToast('All notifications cleared', 'success');
             notifDropdown.classList.remove('active');
         });
     }
@@ -520,20 +522,54 @@
         });
         document.querySelectorAll('.nav-item').forEach(function (item) {
             item.addEventListener('click', function () {
-                document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
-                item.classList.add('active');
-                if (item.getAttribute('data-page') === 'logout') {
+                var page = item.getAttribute('data-page');
+                if (page === 'logout') {
                     showToast('Logging out...', 'warning');
                     API.clearToken();
                     setTimeout(function () {
                         window.location.href = 'index.html';
                     }, 1500);
+                    return;
                 }
+                
+                document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+                item.classList.add('active');
+
+                // Toggle sections
+                var dashboardSection = document.getElementById('section-dashboard');
+                var settingsSection = document.getElementById('section-settings');
+                if (page === 'dashboard' || page === 'records') {
+                    if (dashboardSection) dashboardSection.style.display = 'block';
+                    if (settingsSection) settingsSection.style.display = 'none';
+                } else if (page === 'settings') {
+                    if (dashboardSection) dashboardSection.style.display = 'none';
+                    if (settingsSection) settingsSection.style.display = 'block';
+                }
+
                 if (window.innerWidth <= 992) {
                     sidebar.classList.remove('active');
                 }
             });
         });
+
+        window.switchSettingsTab = function(tabName, btn) {
+            var tabsContainer = btn.closest('.card') || btn.closest('.card-body');
+            tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
+                item.classList.remove('active');
+                item.style.fontWeight = 'normal';
+            });
+            tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            btn.classList.add('active');
+            btn.style.fontWeight = 'bold';
+            var target = document.getElementById('tab-' + tabName);
+            if (target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+        };
     }
 
     function initSessionTimeout() {
@@ -560,6 +596,12 @@
             document.getElementById('memberName').textContent = user.name.split(' ')[0] || user.name;
             var avatar = document.querySelector('.profile-avatar');
             if (avatar) avatar.textContent = user.name.charAt(0).toUpperCase();
+            
+            // Populate General Settings with real user data
+            var settingsName = document.getElementById('settingsName');
+            var settingsEmail = document.getElementById('settingsEmail');
+            if (settingsName) settingsName.value = user.name;
+            if (settingsEmail && user.email) settingsEmail.value = user.email;
         }
     }
 
@@ -584,27 +626,32 @@
             var assigned = results[1];
             if (assigned && assigned.success && assigned.data && assigned.data.records) {
                 _apiAlumniData = assigned.data.records.map(function (a) {
+                    // Map assignment status: Pending/Draft/Completed
+                    var st = a.status || 'Pending';
                     return {
-                        id: a.id || Math.random(),
+                        id: a.alumni_id || a.id,
+                        alumni_id: a.alumni_id || a.id,
+                        assignment_id: a.assignment_id,
                         name: a.name || a.fullName || 'Unknown',
+                        register_no: a.register_no || '',
                         department: a.department || a.dept || '',
                         batch: a.batch || '',
                         company: a.company || '',
                         designation: a.designation || '',
-                        city: a.city || '',
+                        city: a.current_city || a.city || '',
                         state: a.state || '',
                         country: a.country || 'India',
                         email: a.email || '',
                         phone: a.phone || '',
-                        linkedin_profile: a.linkedin_profile || a.linkedin || '',
+                        linkedin_profile: a.linkedin_profile || '',
                         working_details: a.working_details || '',
-                        higherStudies: a.higherStudies || 'No',
-                        higherDetails: a.higherDetails || '',
-                        entrepreneur: a.entrepreneur || 'No',
-                        govtJob: a.govtJob || 'No',
-                        otherOcc: a.otherOcc || '',
+                        higherStudies: a.higher_studies || a.higherStudies || 'No',
+                        higherDetails: a.higher_details || a.higherDetails || '',
+                        entrepreneur: a.is_entrepreneur ? 'Yes' : (a.entrepreneur || 'No'),
+                        govtJob: a.is_government_job ? 'Yes' : (a.govtJob || 'No'),
+                        otherOcc: a.other_occupation || a.otherOcc || '',
                         remarks: a.remarks || '',
-                        status: a.status || 'Pending'
+                        status: st
                     };
                 });
                 alumniData = _apiAlumniData;

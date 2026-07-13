@@ -86,17 +86,10 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
   return professionalInfo;
 }
 
-async function getMyAssignments(userId, role, { page, limit }) {
+async function getMyAssignments(userId, role, { page, limit, onlyMe }) {
   const p = computeOffset(page, limit);
-  if (role === 'LEADER') {
-    const pool = await getPool();
-    const teamResult = await pool.request()
-      .input('leaderId', sql.Int, userId)
-      .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId');
-    if (teamResult.recordset.length === 0) {
-      return { data: [], totalCount: 0, page: p.page, limit: p.limit };
-    }
-    return alumniRepository.getAssignmentsByTeam(teamResult.recordset[0].team_id, { page: p.page, limit: p.limit, offset: p.offset });
+  if (role === 'LEADER' && !onlyMe) {
+    return alumniRepository.getAssignmentsByLeader(userId, { page: p.page, limit: p.limit, offset: p.offset });
   }
   return alumniRepository.getAssignmentsByMember(userId, { page: p.page, limit: p.limit, offset: p.offset });
 }
