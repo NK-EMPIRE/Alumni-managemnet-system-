@@ -70,16 +70,11 @@ async function assignAlumni(teamId, currentUser, filters) {
   }
 
   const assignments = [];
-  let memberIndex = 0;
-
   for (const alumni of unassigned) {
-    const member = members[memberIndex % members.length];
     assignments.push({
       alumniId: alumni.alumni_id,
-      memberId: member.user_id,
-      memberName: `${member.first_name} ${member.last_name}`
+      memberId: team.leader_id
     });
-    memberIndex++;
   }
 
   const transaction = pool.transaction();
@@ -109,34 +104,29 @@ async function assignAlumni(teamId, currentUser, filters) {
     roleName: currentUser.role,
     action: 'ROUND_ROBIN_ASSIGN',
     target: `Team#${teamId}`,
-    description: `Assigned ${assignments.length} alumni across ${members.length} team members` +
+    description: `Assigned ${assignments.length} alumni to the Team Leader for distribution` +
       (filters.batch ? ` (batch: ${filters.batch})` : '') +
       (filters.department ? ` (dept: ${filters.department})` : '')
   });
 
-  // Send email notifications to each member (non-blocking)
+  // Send email notification to the Team Leader (non-blocking)
   try {
-    const leaderName = `${currentUser.firstName} ${currentUser.lastName}`;
-    // Get member emails
-    const emailReq = pool.request().input('teamId', sql.Int, teamId);
-    const emailResult = await emailReq.query(`
-      SELECT u.user_id, u.email, u.first_name, u.last_name
-      FROM TeamMembers tm
-      JOIN Users u ON u.user_id = tm.user_id
-      WHERE tm.team_id = @teamId
+    const assignerName = `${currentUser.firstName} ${currentUser.lastName}`;
+    const leaderEmailReq = pool.request().input('leaderId', sql.Int, team.leader_id);
+    const leaderEmailResult = await leaderEmailReq.query(`
+      SELECT email, first_name, last_name FROM Users WHERE user_id = @leaderId
     `);
-    const memberEmailMap = {};
-    emailResult.recordset.forEach(function(m) {
-      memberEmailMap[m.user_id] = { email: m.email, name: m.first_name + ' ' + m.last_name, count: 0 };
-    });
-    assignments.forEach(function(a) {
-      if (memberEmailMap[a.memberId]) memberEmailMap[a.memberId].count++;
-    });
-    Object.values(memberEmailMap).forEach(function(m) {
-      if (m.count > 0 && m.email) {
-        sendAssignmentNotificationEmail(m.email, m.name, m.count, leaderName).catch(function() {});
+    if (leaderEmailResult.recordset.length > 0) {
+      const leaderUser = leaderEmailResult.recordset[0];
+      if (leaderUser.email) {
+        sendAssignmentNotificationEmail(
+          leaderUser.email,
+          `${leaderUser.first_name} ${leaderUser.last_name}`,
+          assignments.length,
+          assignerName
+        ).catch(function() {});
       }
-    });
+    }
   } catch (e) { /* email errors are non-fatal */ }
 
   return {
