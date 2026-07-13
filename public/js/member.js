@@ -271,23 +271,23 @@
         ensureOptionExists(deptEl, record.department);
         ensureOptionExists(batchEl, record.batch);
 
-        document.getElementById('fieldName').value = record.name;
+        document.getElementById('fieldName').value = record.name || '';
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
-        document.getElementById('fieldCompany').value = record.company;
-        document.getElementById('fieldDesignation').value = record.designation;
-        document.getElementById('fieldCity').value = record.city;
-        document.getElementById('fieldState').value = record.state;
-        document.getElementById('fieldCountry').value = record.country;
-        document.getElementById('fieldEmail').value = record.email;
-        document.getElementById('fieldPhone').value = record.phone;
-        document.getElementById('fieldLinkedin').value = record.linkedin_profile;
+        document.getElementById('fieldCompany').value = record.company || '';
+        document.getElementById('fieldDesignation').value = record.designation || '';
+        document.getElementById('fieldCity').value = record.city || record.current_city || '';
+        document.getElementById('fieldState').value = record.state || '';
+        document.getElementById('fieldCountry').value = record.country || '';
+        document.getElementById('fieldEmail').value = record.email || '';
+        document.getElementById('fieldPhone').value = record.phone || '';
+        document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldWorkingDetails').value = record.working_details || '';
-        document.getElementById('fieldHigherStudies').value = record.higherStudies;
-        document.getElementById('fieldHigherDetails').value = record.higherDetails || '';
-        document.getElementById('fieldEntrepreneur').value = record.entrepreneur;
-        document.getElementById('fieldGovtJob').value = record.govtJob;
-        document.getElementById('fieldOtherOcc').value = record.otherOcc || '';
+        document.getElementById('fieldHigherStudies').value = record.higherStudies || record.higher_studies || 'No';
+        document.getElementById('fieldHigherDetails').value = record.higherDetails || record.higher_studies_details || '';
+        document.getElementById('fieldEntrepreneur').value = record.entrepreneur || (record.is_entrepreneur ? 'Yes' : 'No') || 'No';
+        document.getElementById('fieldGovtJob').value = record.govtJob || (record.is_government_job ? 'Yes' : 'No') || 'No';
+        document.getElementById('fieldOtherOcc').value = record.otherOcc || record.other_occupation || '';
         document.getElementById('fieldRemarks').value = record.remarks || '';
 
         if (record.higherStudies === 'Yes') {
@@ -533,6 +533,11 @@
             if (list) {
                 list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
             }
+            var pendingIds = alumniData.filter(function(r) { return r.status === 'Pending' || r.status === 'Draft'; }).map(function(r) { return String(r.id); });
+            var cleared = JSON.parse(localStorage.getItem('cleared_notifications_member') || '[]');
+            pendingIds.forEach(function(id) { if (cleared.indexOf(id) === -1) cleared.push(id); });
+            localStorage.setItem('cleared_notifications_member', JSON.stringify(cleared));
+            
             var dot = document.querySelector('#notifBtn .notif-dot');
             if (dot) dot.style.display = 'none';
             showToast('All notifications cleared', 'success');
@@ -630,7 +635,10 @@
         var list = document.getElementById('notifList');
         if (!list) return;
         
-        var pendingRecords = alumniData.filter(function(r) { return r.status === 'Pending' || r.status === 'Draft'; });
+        var cleared = JSON.parse(localStorage.getItem('cleared_notifications_member') || '[]');
+        var pendingRecords = alumniData.filter(function(r) { 
+            return (r.status === 'Pending' || r.status === 'Draft') && cleared.indexOf(String(r.id)) === -1; 
+        });
         var dot = document.querySelector('#notifBtn .notif-dot');
         
         if (pendingRecords.length === 0) {

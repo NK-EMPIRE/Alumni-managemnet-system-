@@ -10,29 +10,8 @@
   var _apiDataLoaded = false;
   var _teamId = null;
 
-  var teamMembers = [
-    { id: 1, name: 'Priya Sharma', initials: 'PS', color: '#2563EB', assigned: 65, completed: 52, pending: 13, progress: 80, status: 'On Track', lastActivity: '2 hours ago' },
-    { id: 2, name: 'Amit Verma', initials: 'AV', color: '#7C3AED', assigned: 58, completed: 45, pending: 13, progress: 78, status: 'On Track', lastActivity: '4 hours ago' },
-    { id: 3, name: 'Sneha Patel', initials: 'SP', color: '#F59E0B', assigned: 62, completed: 38, pending: 24, progress: 61, status: 'Behind', lastActivity: '6 hours ago' },
-    { id: 4, name: 'Rahul Kumar', initials: 'RK', color: '#10B981', assigned: 55, completed: 50, pending: 5, progress: 91, status: 'On Track', lastActivity: '1 hour ago' },
-    { id: 5, name: 'Deepika Gupta', initials: 'DG', color: '#EF4444', assigned: 60, completed: 30, pending: 30, progress: 50, status: 'Critical', lastActivity: '1 day ago' },
-    { id: 6, name: 'Vikram Singh', initials: 'VS', color: '#06B6D4', assigned: 54, completed: 42, pending: 12, progress: 78, status: 'On Track', lastActivity: '3 hours ago' },
-    { id: 7, name: 'Anjali Mishra', initials: 'AM', color: '#F43F5E', assigned: 48, completed: 35, pending: 13, progress: 73, status: 'On Track', lastActivity: '5 hours ago' },
-    { id: 8, name: 'Rohan Desai', initials: 'RD', color: '#8B5CF6', assigned: 48, completed: 0, pending: 48, progress: 0, status: 'Critical', lastActivity: '2 days ago' }
-  ];
-
-  var activities = [
-    { member: 'Priya Sharma', action: 'completed verification for 12 alumni records', time: '2 hours ago', type: 'green' },
-    { member: 'Rahul Kumar', action: 'updated contact details for 8 alumni', time: '3 hours ago', type: 'green' },
-    { member: 'Amit Verma', action: 'submitted pending documents for 5 alumni', time: '4 hours ago', type: 'green' },
-    { member: 'Vikram Singh', action: 'marked 3 alumni as verified', time: '5 hours ago', type: 'purple' },
-    { member: 'Anjali Mishra', action: 'uploaded 10 alumni profiles for review', time: '6 hours ago', type: 'purple' },
-    { member: 'Sneha Patel', action: 'flagged 4 alumni with incorrect data', time: '7 hours ago', type: 'yellow' },
-    { member: 'Deepika Gupta', action: 'requested extension for 8 pending alumni', time: '1 day ago', type: 'red' },
-    { member: 'Rohan Desai', action: 'started initial review of assigned alumni', time: '2 days ago', type: 'yellow' },
-    { member: 'Priya Sharma', action: 'completed phone verification for 6 alumni', time: '2 days ago', type: 'green' },
-    { member: 'Amit Verma', action: 'resolved 3 data discrepancies in alumni records', time: '2 days ago', type: 'purple' }
-  ];
+  var teamMembers = [];
+  var activities = [];
 
   // No dummy notifications — real data loaded from API activities
 
@@ -286,14 +265,24 @@
 
   function populateRecentActivities() {
     var timeline = document.getElementById('timeline');
+    if (!timeline) return;
     var html = '';
-    activities.forEach(function (act) {
+    var list = _apiDataLoaded && _apiDashboardData && _apiDashboardData.recentActivity ? _apiDashboardData.recentActivity : [];
+    if (list.length === 0) {
+      timeline.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No recent activities.</div>';
+      return;
+    }
+    list.forEach(function (act) {
+      var actTime = act.time || act.timestamp || 'Just now';
+      if (actTime && actTime !== 'Just now') {
+        actTime = new Date(actTime).toLocaleDateString() + ' ' + new Date(actTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
       html += '<div class="timeline-item">' +
-        '<div class="timeline-dot ' + act.type + '"></div>' +
+        '<div class="timeline-dot green"></div>' +
         '<div class="timeline-content">' +
-        '<h4>' + act.member + '</h4>' +
+        '<h4>' + (act.user || 'System') + '</h4>' +
         '<p>' + act.action + '</p>' +
-        '<div class="time"><i class="far fa-clock" style="margin-right:4px"></i>' + act.time + '</div>' +
+        '<div class="time"><i class="far fa-clock" style="margin-right:4px"></i>' + actTime + '</div>' +
         '</div></div>';
     });
     timeline.innerHTML = html;
@@ -304,8 +293,12 @@
     if (!list) return;
 
     var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
+    var cleared = JSON.parse(localStorage.getItem('cleared_notifications_leader') || '[]');
     // Filter completed or draft records as notifications
-    var updatedRecords = records.filter(function (r) { return r.status === 'Completed' || r.status === 'Draft'; });
+    var updatedRecords = records.filter(function (r) { 
+      var key = (r.alumni_id || r.id) + '_' + r.status;
+      return (r.status === 'Completed' || r.status === 'Draft') && cleared.indexOf(key) === -1; 
+    });
     var nc = document.getElementById('notifCount');
 
     if (updatedRecords.length === 0) {
@@ -342,6 +335,17 @@
     if (list) {
       list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No new notifications</div>';
     }
+    
+    var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
+    var cleared = JSON.parse(localStorage.getItem('cleared_notifications_leader') || '[]');
+    records.forEach(function (r) {
+      if (r.status === 'Completed' || r.status === 'Draft') {
+        var key = (r.alumni_id || r.id) + '_' + r.status;
+        if (cleared.indexOf(key) === -1) cleared.push(key);
+      }
+    });
+    localStorage.setItem('cleared_notifications_leader', JSON.stringify(cleared));
+
     var count = document.getElementById('notifCount');
     if (count) {
       count.textContent = '0';
@@ -1432,11 +1436,13 @@
       populateNotifications();
       populateOverviewCards();
       populateTeamTable();
+      populateRecentActivities();
       initCharts();
     }).catch(function () {
       populateNotifications();
       populateOverviewCards();
       populateTeamTable();
+      populateRecentActivities();
       initCharts();
     });
   }

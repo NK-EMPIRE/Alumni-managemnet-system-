@@ -160,7 +160,6 @@
         return patch('/alumni/assignments/' + assignmentId + '/status', data);
     },
 
-    // Import
     uploadImport: function (formData) {
         return fetch(BASE_URL + '/upload/import', {
             method: 'POST',
@@ -169,6 +168,18 @@
         }).then(function (res) {
             if (!res.ok) {
                 return res.json().then(function (err) { throw new Error(err.message || 'Import failed'); });
+            }
+            return res.json();
+        });
+    },
+    uploadPreview: function (formData) {
+        return fetch(BASE_URL + '/upload/preview', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + getToken() },
+            body: formData
+        }).then(function (res) {
+            if (!res.ok) {
+                return res.json().then(function (err) { throw new Error(err.message || 'Preview failed'); });
             }
             return res.json();
         });

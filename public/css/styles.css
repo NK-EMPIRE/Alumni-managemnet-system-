@@ -1737,7 +1737,7 @@ textarea.form-control {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  z-index: 1045;
+  z-index: 1100 !important;
   min-width: 200px;
   background: var(--bg-white);
   border-radius: var(--radius-sm);
@@ -3616,5 +3616,67 @@ body.dark-mode [style*="background:#FEF2F2"],
 body.dark-mode [style*="background: #FEF2F2"] {
   background-color: rgba(239, 68, 68, 0.1) !important;
   background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Extra dark mode fixes for admin and leader dashboards */
+body.dark-mode .stat-info h3,
+body.dark-mode .stat-card h3 {
+  color: #94A3B8 !important;
+}
+body.dark-mode .stat-info p,
+body.dark-mode .stat-card p {
+  color: #F8FAFC !important;
+}
+body.dark-mode .navbar-profile-name,
+body.dark-mode .topbar-profile span,
+body.dark-mode .profile-name {
+  color: #F8FAFC !important;
+}
+body.dark-mode .top-navbar,
+body.dark-mode .topbar {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode .dropdown-menu {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+body.dark-mode .dropdown-item {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .dropdown-item:hover {
+  background-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+body.dark-mode .dropdown-header {
+  color: #94A3B8 !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode .sidebar-header {
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode .sidebar-divider {
+  border-top-color: #334155 !important;
+}
+body.dark-mode .sidebar-user-name {
+  color: #F8FAFC !important;
+}
+body.dark-mode .sidebar-user-role {
+  color: #94A3B8 !important;
+}
+body.dark-mode .sidebar-toggle,
+body.dark-mode .topbar-btn {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .sidebar-toggle:hover,
+body.dark-mode .topbar-btn:hover {
+  background-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+body.dark-mode #lockStatusBadge span {
+  color: inherit !important;
 }
 

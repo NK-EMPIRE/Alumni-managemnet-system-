@@ -30,18 +30,7 @@ const dummyTeamMembers = [
   { name: 'Sneha Rao', email: 'sneha.rao@alumnims.edu', phone: '+91-9988776662', dept: 'CSE', leader: 'Amit Verma', assigned: 7 }
 ];
 
-const dummyActivities = [
-  { user: 'Amit Verma', action: 'assigned 15 alumni from CSE department', time: '2 minutes ago', avatar: 'AV' },
-  { user: 'Priya Sharma', action: 'completed 8 alumni updates', time: '15 minutes ago', avatar: 'PS' },
-  { user: 'Rajesh Patel', action: 'assigned 20 alumni from EEE department', time: '1 hour ago', avatar: 'RP' },
-  { user: 'Sunita Gupta', action: 'updated 12 alumni records', time: '2 hours ago', avatar: 'SG' },
-  { user: 'Vikram Singh', action: 'completed 5 pending updates', time: '3 hours ago', avatar: 'VS' },
-  { user: 'Admin User', action: 'added new team member Anjali Rao', time: '5 hours ago', avatar: 'AD' },
-  { user: 'Amit Verma', action: 'submitted 10 alumni verification requests', time: '6 hours ago', avatar: 'AV' },
-  { user: 'Priya Sharma', action: 'assigned 12 alumni from ECE department', time: '8 hours ago', avatar: 'PS' },
-  { user: 'Rajesh Patel', action: 'completed 18 alumni updates', time: '10 hours ago', avatar: 'RP' },
-  { user: 'Admin User', action: 'generated monthly progress report', time: '1 day ago', avatar: 'AD' }
-];
+const dummyActivities = [];
 
 // Real notifications drawn from audit logs — no dummy data
 
@@ -1421,10 +1410,46 @@ function initImportHandlers() {
         fileNameEl.style.display = 'block';
         fileNameEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + selectedImportFile.name + ' (' + (selectedImportFile.size / 1024 / 1024).toFixed(2) + ' MB)';
       }
-      importBtn.disabled = false;
+      
+      // Generate Preview
+      var formData = new FormData();
+      formData.append('file', selectedImportFile);
+      var previewBody = document.getElementById('importPreviewBody');
+      var previewContainer = document.getElementById('importPreviewContainer');
+      if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;"><span class="spinner spinner-sm"></span> Loading Preview...</td></tr>';
+      if (previewContainer) previewContainer.style.display = 'block';
+      
+      API.uploadPreview(formData).then(function (res) {
+        if (res.success && res.data && res.data.length > 0) {
+          var html = '';
+          res.data.forEach(function (row, idx) {
+            var badgeClass = row.action === 'Insert' ? 'badge-success' : row.action === 'Update' ? 'badge-primary' : 'badge-danger';
+            html += '<tr>' +
+              '<td style="padding:10px 12px;font-weight:600;color:#64748B;">' + (idx + 1) + '</td>' +
+              '<td style="padding:10px 12px;">' + row.registerNo + '</td>' +
+              '<td style="padding:10px 12px;"><strong>' + row.name + '</strong></td>' +
+              '<td style="padding:10px 12px;">' + row.department + '</td>' +
+              '<td style="padding:10px 12px;">' + row.batch + '</td>' +
+              '<td style="padding:10px 12px;"><span class="badge ' + badgeClass + '">' + row.action + '</span></td>' +
+              '<td style="padding:10px 12px;color:#64748B;">' + row.reason + '</td>' +
+              '</tr>';
+          });
+          if (previewBody) previewBody.innerHTML = html;
+          importBtn.disabled = false;
+        } else {
+          if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">No valid rows to preview.</td></tr>';
+          importBtn.disabled = true;
+        }
+      }).catch(function (err) {
+        if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">Failed to generate preview: ' + err.message + '</td></tr>';
+        importBtn.disabled = true;
+      });
+
     } else {
       selectedImportFile = null;
       if (fileNameEl) { fileNameEl.style.display = 'none'; }
+      var pc = document.getElementById('importPreviewContainer');
+      if (pc) pc.style.display = 'none';
       importBtn.disabled = true;
     }
   });
@@ -1439,6 +1464,8 @@ function initImportHandlers() {
     API.uploadImport(formData).then(function (res) {
       importBtn.disabled = false;
       importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+      var pc = document.getElementById('importPreviewContainer');
+      if (pc) pc.style.display = 'none';
       if (res.success) {
         var msg = 'Imported: ' + res.data.imported + ' records. Duplicates: ' + res.data.duplicates + ', Errors: ' + res.data.errors;
         if (res.data.errors > 0 && res.data.errorDetails) {

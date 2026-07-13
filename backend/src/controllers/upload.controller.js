@@ -8,6 +8,11 @@ const uploadExcel = asyncHandler(async (req, res) => {
   success(res, result, 'File uploaded and processed successfully', 201);
 });
 
+const previewExcel = asyncHandler(async (req, res) => {
+  const result = await uploadService.getExcelPreview(req.file.path);
+  success(res, result, 'Excel preview generated successfully', 200);
+});
+
 const getImportHistory = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
   const currentUser = req.user;
@@ -37,6 +42,7 @@ const downloadTemplate = asyncHandler(async (req, res) => {
 
 module.exports = {
   uploadExcel,
+  previewExcel,
   getImportHistory,
   downloadTemplate
 };
