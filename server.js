@@ -111,6 +111,56 @@ async function startServer() {
         END
       `);
 
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'experience'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD experience VARCHAR(50) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'salary'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD salary VARCHAR(50) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'city'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD city VARCHAR(100) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'country'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD country VARCHAR(100) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'faculty_assigned'
+        )
+        BEGIN
+          ALTER TABLE dbo.Alumni ADD faculty_assigned VARCHAR(150) NULL;
+        END
+      `);
+
       // Migrate ImportHistory table columns
       await pool.request().query(`
         IF NOT EXISTS (
@@ -132,7 +182,55 @@ async function startServer() {
         END
       `);
 
-      logger.info('Migrations: verified and updated Users, Alumni, and ImportHistory columns successfully');
+      // AlumniAssignments migrations
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'assigned_by'
+        )
+        BEGIN
+          ALTER TABLE dbo.AlumniAssignments ADD assigned_by INT NULL;
+          ALTER TABLE dbo.AlumniAssignments ADD CONSTRAINT FK_AA_AssignedBy FOREIGN KEY (assigned_by) REFERENCES dbo.Users(user_id);
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'assignment_type'
+        )
+        BEGIN
+          ALTER TABLE dbo.AlumniAssignments ADD assignment_type VARCHAR(50) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'reassignment_reason'
+        )
+        BEGIN
+          ALTER TABLE dbo.AlumniAssignments ADD reassignment_reason VARCHAR(500) NULL;
+        END
+      `);
+
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.objects 
+          WHERE parent_object_id = OBJECT_ID('dbo.AlumniAssignments') AND type = 'UQ' AND name = 'UQ_AlumniAssignments_Alumni'
+        )
+        BEGIN
+          WITH cte AS (
+            SELECT assignment_id, ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) as rn
+            FROM dbo.AlumniAssignments
+          )
+          DELETE FROM dbo.AlumniAssignments WHERE assignment_id IN (SELECT assignment_id FROM cte WHERE rn > 1);
+
+          ALTER TABLE dbo.AlumniAssignments ADD CONSTRAINT UQ_AlumniAssignments_Alumni UNIQUE (alumni_id);
+        END
+      `);
+
+      logger.info('Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully');
     } catch (migErr) {
       logger.warn('Migration check failed: ' + migErr.message);
     }

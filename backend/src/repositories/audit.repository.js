@@ -1,6 +1,6 @@
 const { sql, getPool } = require('../config/database');
 
-async function findAll({ page, limit, offset, action, role, dateFrom, dateTo }) {
+async function findAll({ page, limit, offset, action, role, dateFrom, dateTo, target }) {
   const pool = await getPool();
   let countQuery = 'SELECT COUNT(*) AS total FROM AuditLogs WHERE 1=1';
   let dataQuery = `
@@ -19,6 +19,11 @@ async function findAll({ page, limit, offset, action, role, dateFrom, dateTo }) 
     countQuery += ' AND role_name = @role';
     dataQuery += ' AND role_name = @role';
     inputs.push({ name: 'role', type: sql.NVarChar(30), value: role });
+  }
+  if (target) {
+    countQuery += ' AND target = @target';
+    dataQuery += ' AND target = @target';
+    inputs.push({ name: 'target', type: sql.NVarChar(255), value: target });
   }
   if (dateFrom) {
     countQuery += ' AND created_at >= @dateFrom';

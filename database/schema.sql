@@ -138,10 +138,36 @@ CREATE TABLE dbo.AlumniAssignments (
     status VARCHAR(30) DEFAULT 'Pending' NOT NULL,
     assigned_date DATETIME DEFAULT GETUTCDATE(),
     completed_date DATETIME NULL,
+    assigned_by INT NULL,
+    assignment_type VARCHAR(50) NULL,
+    reassignment_reason VARCHAR(500) NULL,
+    batch_wise_batch VARCHAR(10) NULL,
     CONSTRAINT FK_AlumniAssignments_Alumni FOREIGN KEY (alumni_id) REFERENCES dbo.Alumni(alumni_id),
     CONSTRAINT FK_AlumniAssignments_Team FOREIGN KEY (team_id) REFERENCES dbo.Teams(team_id),
     CONSTRAINT FK_AlumniAssignments_Member FOREIGN KEY (member_id) REFERENCES dbo.Users(user_id),
-    CONSTRAINT CK_AlumniAssignments_status CHECK (status IN ('Pending', 'Draft', 'Completed'))
+    CONSTRAINT FK_AlumniAssignments_AssignedBy FOREIGN KEY (assigned_by) REFERENCES dbo.Users(user_id),
+    CONSTRAINT CK_AlumniAssignments_status CHECK (status IN ('Pending', 'Draft', 'Completed', 'ASSIGNED_TO_LEADER', 'DISTRIBUTED'))
+);
+
+-- Create AssignmentHistory table for tracking all assignment changes
+CREATE TABLE dbo.AssignmentHistory (
+    history_id INT IDENTITY(1,1) PRIMARY KEY,
+    assignment_id INT NOT NULL,
+    alumni_id INT NOT NULL,
+    team_id INT NOT NULL,
+    prev_member_id INT NULL,
+    new_member_id INT NULL,
+    prev_status VARCHAR(30),
+    new_status VARCHAR(30),
+    assignment_type VARCHAR(50),
+    reassigned_by INT NOT NULL,
+    reassignment_reason VARCHAR(500) NULL,
+    batch_wise_batch VARCHAR(10) NULL,
+    created_at DATETIME DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_AssignmentHistory_Assignment FOREIGN KEY (assignment_id) REFERENCES dbo.AlumniAssignments(assignment_id),
+    CONSTRAINT FK_AssignmentHistory_Alumni FOREIGN KEY (alumni_id) REFERENCES dbo.Alumni(alumni_id),
+    CONSTRAINT FK_AssignmentHistory_Team FOREIGN KEY (team_id) REFERENCES dbo.Teams(team_id),
+    CONSTRAINT FK_AssignmentHistory_Users FOREIGN KEY (reassigned_by) REFERENCES dbo.Users(user_id)
 );
 
 -- ============================================================
@@ -269,6 +295,9 @@ CREATE INDEX IX_Alumni_batch ON dbo.Alumni(batch);
 CREATE INDEX IX_AlumniAssignments_member ON dbo.AlumniAssignments(member_id);
 CREATE INDEX IX_AlumniAssignments_status ON dbo.AlumniAssignments(status);
 CREATE INDEX IX_AlumniAssignments_team ON dbo.AlumniAssignments(team_id);
+CREATE INDEX IX_AlumniAssignments_team_status ON dbo.AlumniAssignments(team_id, status);
+CREATE INDEX IX_AlumniAssignments_member_status ON dbo.AlumniAssignments(member_id, status);
+CREATE UNIQUE INDEX IX_AlumniAssignments_Alumni_Active ON dbo.AlumniAssignments(alumni_id) WHERE status IN ('Pending', 'DISTRIBUTED', 'ASSIGNED_TO_LEADER');
 CREATE INDEX IX_AuditLogs_action ON dbo.AuditLogs(action);
 CREATE INDEX IX_AuditLogs_created ON dbo.AuditLogs(created_at);
 CREATE INDEX IX_ActivityLogs_user ON dbo.ActivityLogs(user_id);

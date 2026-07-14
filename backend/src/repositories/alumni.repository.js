@@ -2,7 +2,8 @@ const { sql, getPool } = require('../config/database');
 
 const ALLOWED_UPDATE_FIELDS = [
   'name', 'gender', 'batch', 'department', 'email', 'phone',
-  'company', 'designation', 'working_details', 'linkedin_profile', 'date_of_birth'
+  'company', 'designation', 'working_details', 'linkedin_profile', 'date_of_birth',
+  'experience', 'salary', 'city', 'country'
 ];
 
 const FIELD_TYPES = {
@@ -16,7 +17,11 @@ const FIELD_TYPES = {
   designation: sql.NVarChar(200),
   working_details: sql.NVarChar(500),
   linkedin_profile: sql.NVarChar(255),
-  date_of_birth: sql.NVarChar(20)
+  date_of_birth: sql.NVarChar(20),
+  experience: sql.NVarChar(50),
+  salary: sql.NVarChar(50),
+  city: sql.NVarChar(100),
+  country: sql.NVarChar(100)
 };
 
 async function findAll({ page, limit, offset, search, department, batch, status }) {
@@ -35,9 +40,11 @@ async function findAll({ page, limit, offset, search, department, batch, status 
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at,
-        aa.status, aa.assigned_date, aa.completed_date,
-        aa.assignment_id, aa.team_id, aa.member_id
+        a.updated_date, a.created_at, a.experience, a.salary, a.city, a.country,
+        aa.status AS assignment_status, aa.assigned_date, aa.completed_date,
+        aa.assignment_id, aa.team_id, aa.member_id,
+        ul.first_name + ' ' + ul.last_name AS leader_name,
+        um.first_name + ' ' + um.last_name AS member_name
       FROM Alumni a
       LEFT JOIN (
         SELECT assignment_id, alumni_id, team_id, member_id, status,
@@ -45,11 +52,18 @@ async function findAll({ page, limit, offset, search, department, batch, status 
                ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
         FROM AlumniAssignments
       ) aa ON a.alumni_id = aa.alumni_id AND aa.rn = 1
+      LEFT JOIN Teams t ON aa.team_id = t.team_id
+      LEFT JOIN Users ul ON t.leader_id = ul.user_id
+      LEFT JOIN Users um ON aa.member_id = um.user_id
       WHERE
-        (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
+        (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR a.register_no LIKE @search)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
-        AND (@status IS NULL OR aa.status = @status)
+        AND (
+          @status IS NULL
+          OR (@status = 'Available' AND aa.status IS NULL)
+          OR (aa.status = @status)
+        )
     )
     SELECT *, (SELECT COUNT(*) FROM AlumniCTE) AS total_count
     FROM AlumniCTE

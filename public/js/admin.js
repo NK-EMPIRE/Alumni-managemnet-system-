@@ -83,8 +83,33 @@ var auditState = {
 
 var selectedImportFile = null;
 
+function initSpreadsheetHandlers() {
+  // Initialize leader dropdown for edit modal
+  populateEditLeaderDropdown(null);
+}
+
 /* ────────────────────────────────────────────────────────────
-    3. DOM READY – Initialization
+    3b. SPREADSHEET STATE
+    ──────────────────────────────────────────────────────────── */
+var spreadsheetState = {
+  currentPage: 1,
+  rowsPerPage: 10,
+  filteredData: [],
+  columns: [
+    { id: 'name', label: 'Name', visible: true },
+    { id: 'registerNo', label: 'Register No', visible: true },
+    { id: 'email', label: 'Email', visible: true },
+    { id: 'batch', label: 'Batch', visible: true },
+    { id: 'status', label: 'Current Status', visible: true },
+    { id: 'leader', label: 'Leader', visible: true }
+  ],
+  selectedAlumni: new Set(),
+  inEditMode: false,
+  editedAlumni: null
+};
+
+/* ────────────────────────────────────────────────────────────
+    3c. DOM READY – Initialization
     ──────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
   try {
@@ -95,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     populateTeamLeaderDropdowns();
     initImportHandlers();
     initAuditHandlers();
+    initSpreadsheetHandlers();
     fetchAllData();
   } catch (err) {
     console.error('Admin init error:', err);
@@ -529,7 +555,7 @@ function populateTeamMembersTable() {
   if (!tbody) return;
   var data;
   if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
-    data = _apiMembers.records.slice(0, 12).map(function (u) {
+    data = _apiMembers.records.map(function (u) {
       var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
       return { name: name, email: u.email, phone: u.phone || '-', dept: u.department || '-', leader: u.team_leader_name || '-', assigned: u.assigned_count || 0 };
     });
@@ -772,7 +798,7 @@ function populateTeamLeaderDropdowns() {
   selects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
-    sel.innerHTML = '<option value="">Select Team Leader</option>';
+    sel.innerHTML = '<option value="" disabled selected hidden>Select Team Leader</option>';
     leaders.forEach(function (tl) {
       var opt = document.createElement('option');
       opt.value = tl.id || tl.name;
@@ -784,7 +810,8 @@ function populateTeamLeaderDropdowns() {
 
   var batchSel = document.getElementById('assignBatch');
   if (batchSel) {
-    batchSel.innerHTML = '<option value="">All Batches</option>';
+    var currentVal = batchSel.value;
+    batchSel.innerHTML = '<option value="" disabled selected hidden>Select Batch</option>';
     var seen = {};
     if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
       _apiAlumni.records.forEach(function (a) {
@@ -793,8 +820,17 @@ function populateTeamLeaderDropdowns() {
           var opt = document.createElement('option');
           opt.value = a.batch;
           opt.textContent = a.batch;
+          if (a.batch === currentVal) opt.selected = true;
           batchSel.appendChild(opt);
         }
+      });
+    } else {
+      ['2024', '2023', '2022', '2021', '2020'].forEach(function(b) {
+        var opt = document.createElement('option');
+        opt.value = b;
+        opt.textContent = b;
+        if (b === currentVal) opt.selected = true;
+        batchSel.appendChild(opt);
       });
     }
   }
@@ -881,6 +917,8 @@ function navigateTo(section, el) {
 
   if (section === 'audit') {
     fetchLatestAuditLogs(populateAuditLogTable);
+  } else if (section === 'viewAlumni') {
+    fetchSpreadsheetData();
   }
 
   /* Update breadcrumb */
@@ -945,8 +983,11 @@ function closeMobileSidebar() {
    20. SUBMENU TOGGLE
    ──────────────────────────────────────────────────────────── */
 function toggleSubmenu(el) {
-  var isCollapsed = document.body.classList.contains('sidebar-collapsed');
-  if (isCollapsed) return;
+  var sidebar = document.getElementById('sidebar');
+  // Don't toggle submenu if sidebar is collapsed
+  if (sidebar && sidebar.classList && sidebar.classList.contains('collapsed')) {
+    return; // On mobile/collapsed, submenus shouldn't show
+  }
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
     var isOpen = submenu.style.display === 'block';
@@ -1116,6 +1157,7 @@ function submitAddTeamMember() {
       findOrCreateTeam().then(function (teamId) {
         return API.addTeamMember(teamId, { userId: createdUserId });
       }).then(function () {
+        hideLoading(btn);
         Toast.success('Success', 'Team Member added successfully!' + (tmpPwd ? ' Password: ' + tmpPwd : ''));
         closeModal('addTeamMemberModal');
         fetchAllData();
@@ -1140,52 +1182,35 @@ function submitAssignAlumni() {
   showLoading(btn);
   var leaderSelect = document.getElementById('assignTeamLeader');
   var leaderId = parseInt(leaderSelect.value, 10);
-  var leaderName = leaderSelect.options[leaderSelect.selectedIndex].getAttribute('data-name') || leaderSelect.options[leaderSelect.selectedIndex].text;
   if (!leaderId || isNaN(leaderId)) {
     hideLoading(btn);
     Toast.danger('Error', 'Please select a valid team leader.');
     return;
   }
 
-  function doAssign(teamId) {
-    var batch = document.getElementById('assignBatch').value;
-    var count = parseInt(document.getElementById('assignCount').value, 10) || 0;
-    var params = {};
-    if (batch) params.batch = batch;
-    if (count > 0) params.count = count;
-    API.assignAlumni(teamId, params).then(function (res) {
-      hideLoading(btn);
-      if (res.success) {
-        Toast.success('Success', res.data.assigned + ' alumni assigned successfully!');
-        closeModal('assignAlumniModal');
-        fetchAllData();
-      } else {
-        Toast.danger('Error', res.message || 'Failed to assign alumni');
-      }
-    }).catch(function (err) {
-      hideLoading(btn);
-      Toast.danger('Error', err.message || 'Failed to assign alumni');
-    });
-  }
+  var dept = document.getElementById('assignDept').value;
+  var batch = document.getElementById('assignBatch').value;
+  var count = parseInt(document.getElementById('assignCount').value, 10) || 0;
 
-  if (_apiTeams && _apiTeams.records) {
-    var found = _apiTeams.records.find(function (t) { return t.leader_id === leaderId; });
-    if (found) {
-      doAssign(found.team_id);
-      return;
-    }
-  }
-
-  API.createTeam({ teamName: leaderName + "'s Team", leaderId: leaderId }).then(function (teamRes) {
-    if (teamRes && teamRes.success) {
-      doAssign(teamRes.data.team_id);
+  API.adminAssign({ department: dept, batch: batch, leaderId: leaderId, count: count }).then(function (res) {
+    hideLoading(btn);
+    if (res.success) {
+      Toast.success('Success', res.message || 'Alumni assigned successfully!');
+      closeModal('assignAlumniModal');
+      // Reset form
+      document.getElementById('assignDept').value = '';
+      document.getElementById('assignBatch').value = '';
+      document.getElementById('assignCount').value = '';
+      document.getElementById('assignTeamLeader').value = '';
+      document.getElementById('assignCountGroup').style.display = 'none';
+      document.getElementById('assignPreviewSummary').style.display = 'none';
+      fetchAllData();
     } else {
-      hideLoading(btn);
-      Toast.danger('Error', 'Could not create team: ' + (teamRes && teamRes.message || 'Unknown error'));
+      Toast.danger('Error', res.message || 'Failed to assign alumni');
     }
   }).catch(function (err) {
     hideLoading(btn);
-    Toast.danger('Error', err.message || 'Failed to create team');
+    Toast.danger('Error', err.message || 'Failed to assign alumni');
   });
 }
 
@@ -1250,15 +1275,87 @@ function validateAssignForm() {
   clearAllErrors(modal);
   var valid = true;
 
+  var dept = document.getElementById('assignDept');
+  if (!dept.value) { showFieldError(dept, 'Department is required'); valid = false; }
+
+  var batch = document.getElementById('assignBatch');
+  if (!batch.value) { showFieldError(batch, 'Batch is required'); valid = false; }
+
   var leader = document.getElementById('assignTeamLeader');
   if (!leader.value) { showFieldError(leader, 'Please select a team leader'); valid = false; }
 
   var count = document.getElementById('assignCount');
+  var available = parseInt(document.getElementById('availableAlumniCount').innerText, 10) || 0;
   if (!validateRequired(count.value)) { showFieldError(count, 'Number of alumni is required'); valid = false; }
-  else if (parseInt(count.value) < 1) { showFieldError(count, 'Minimum 1 alumni required'); valid = false; }
+  else {
+    var cVal = parseInt(count.value, 10);
+    if (cVal < 1) { showFieldError(count, 'Minimum 1 alumni required'); valid = false; }
+    else if (cVal > available) { showFieldError(count, 'Cannot exceed available alumni count'); valid = false; }
+  }
 
   return valid;
 }
+
+window.fetchAvailableAlumniForAssign = function() {
+  var dept = document.getElementById('assignDept').value;
+  var batch = document.getElementById('assignBatch').value;
+  if (!dept || !batch) return;
+
+  var countGroup = document.getElementById('assignCountGroup');
+  var badge = document.getElementById('availableAlumniCount');
+
+  API.getAvailableAlumniCount({ department: dept, batch: batch }).then(function(res) {
+    if (res && res.success) {
+      badge.innerText = res.data.count;
+      countGroup.style.display = 'block';
+      
+      var input = document.getElementById('assignCount');
+      input.value = Math.min(50, res.data.count);
+      input.max = res.data.count;
+
+      updateAssignPreviewSummary();
+    }
+  }).catch(function(err) {
+    console.error('Error fetching available alumni count:', err);
+  });
+};
+
+window.updateAssignPreviewSummary = function() {
+  var dept = document.getElementById('assignDept').value;
+  var batch = document.getElementById('assignBatch').value;
+  var available = parseInt(document.getElementById('availableAlumniCount').innerText, 10) || 0;
+  var countInput = document.getElementById('assignCount');
+  var count = parseInt(countInput.value, 10) || 0;
+  
+  var previewBox = document.getElementById('assignPreviewSummary');
+  if (!dept || !batch || isNaN(available) || isNaN(count) || count <= 0) {
+    previewBox.style.display = 'none';
+    return;
+  }
+
+  var remaining = available - count;
+  if (remaining < 0) {
+    countInput.classList.add('error');
+    previewBox.style.background = '#FEF2F2';
+    previewBox.style.borderColor = '#FCA5A5';
+    previewBox.style.color = '#991B1B';
+    previewBox.innerHTML = '<i class="fas fa-exclamation-circle" style="margin-right:6px;"></i>Assign count exceeds available alumni!';
+    previewBox.style.display = 'block';
+    return;
+  } else {
+    countInput.classList.remove('error');
+  }
+
+  previewBox.style.background = '#F0FDF4';
+  previewBox.style.borderColor = '#BBF7D0';
+  previewBox.style.color = '#166534';
+  previewBox.innerHTML = `
+    <strong>Preview Summary:</strong><br/>
+    Department: <strong>${dept}</strong> | Batch: <strong>${batch}</strong><br/>
+    Available: <strong>${available}</strong> | Assigning: <strong>${count}</strong> | Remaining: <strong>${remaining}</strong>
+  `;
+  previewBox.style.display = 'block';
+};
 
 /* ─── BUTTON LOADING STATE ─── */
 function showLoading(btn) {
@@ -2021,17 +2118,526 @@ function populateViewModal(record) {
   openModal('viewAlumniModal');
 }
 
-window.handleGlobalSearch = function(val) {
-  var activeItem = document.querySelector('.sidebar-item.active');
-  var activeSection = activeItem ? (activeItem.getAttribute('data-section') || 'dashboard') : 'dashboard';
-  if (activeSection === 'alumni' || activeSection === 'dashboard') {
-    var ts = document.getElementById('tableSearch');
-    if (ts) { ts.value = val; filterTable(); }
-  } else if (activeSection === 'teamLeaders') {
-    var ts = document.getElementById('tlSearch');
-    if (ts) { ts.value = val; filterTeamLeaders(); }
-  } else if (activeSection === 'teamMembers') {
-    var ts = document.getElementById('tmSearch');
-    if (ts) { ts.value = val; filterTeamMembers(); }
+/* ────────────────────────────────────────────────────────────
+   19. SPREADSHEET-STYLE VIEW ALUMNI & DRAWER CONTROLS
+   ──────────────────────────────────────────────────────────── */
+var ssPage = 1;
+var ssLimit = 10;
+var ssTotal = 0;
+var ssSearchQuery = '';
+var ssSortColumn = 'alumni_id';
+var ssSortDirection = 'DESC';
+
+var ssColumns = [
+  { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
+  { key: 'name', label: 'Name', visible: true, width: 160 },
+  { key: 'department', label: 'Department', visible: true, width: 100 },
+  { key: 'batch', label: 'Batch', visible: true, width: 80 },
+  { key: 'email', label: 'Email', visible: true, width: 180 },
+  { key: 'phone', label: 'Phone', visible: true, width: 120 },
+  { key: 'company', label: 'Company', visible: true, width: 150 },
+  { key: 'designation', label: 'Designation', visible: true, width: 150 },
+  { key: 'experience', label: 'Experience', visible: true, width: 100 },
+  { key: 'salary', label: 'Salary', visible: true, width: 100 },
+  { key: 'city', label: 'City', visible: true, width: 120 },
+  { key: 'country', label: 'Country', visible: true, width: 120 },
+  { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
+  { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
+  { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
+  { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
+  { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
+];
+
+var debounceTimer;
+window.debounceSearch = function() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function() {
+    ssSearchQuery = document.getElementById('ssSearch').value;
+    ssPage = 1;
+    fetchSpreadsheetData();
+  }, 300);
+};
+
+window.fetchSpreadsheetData = function() {
+  var dept = document.getElementById('ssFilterDept').value;
+  var batch = document.getElementById('ssFilterBatch').value;
+  var status = document.getElementById('ssFilterStatus').value;
+
+  // Load stats
+  API.getAlumniStats().then(function(res) {
+    if (res && res.success && res.data) {
+      var d = res.data;
+      document.getElementById('sumTotalAlumni').innerText = d.totalAlumni || 0;
+      var available = 0, assigned = 0, completed = 0, pending = 0;
+      if (Array.isArray(d.statusCounts)) {
+        d.statusCounts.forEach(function(sc) {
+          var s = String(sc.status || sc.assignment_status).toLowerCase();
+          if (s === 'unassigned' || s === 'available' || sc.status === null) available += sc.count;
+          else if (s === 'assigned_to_leader') assigned += sc.count;
+          else if (s === 'completed') completed += sc.count;
+          else pending += sc.count; // Pending or Draft
+        });
+      }
+      document.getElementById('sumAvailable').innerText = available;
+      document.getElementById('sumAssigned').innerText = assigned;
+      document.getElementById('sumCompleted').innerText = completed;
+      document.getElementById('sumPending').innerText = pending;
+    }
+  }).catch(function(err) {
+    console.error('Failed to load stats:', err);
+  });
+
+  // Load alumni records
+  var params = {
+    page: ssPage,
+    limit: ssLimit,
+    search: ssSearchQuery || undefined,
+    department: dept || undefined,
+    batch: batch || undefined,
+    status: status || undefined
+  };
+
+  API.getAlumni(params).then(function(res) {
+    if (res && res.success) {
+      var data = res.data || [];
+      // If server returns totalCount in parent or response metadata
+      ssTotal = res.totalCount || res.total || data.length;
+      renderSpreadsheetTable(data);
+      renderSpreadsheetPagination();
+    } else {
+      Toast.error('Load Alumni', 'Failed to retrieve records');
+    }
+  }).catch(function(err) {
+    console.error('Error fetching alumni:', err);
+    Toast.error('Load Alumni', 'An error occurred fetching records');
+  });
+};
+
+window.renderSpreadsheetTable = function(data) {
+  var headRow = document.getElementById('ssTableHeadRow');
+  var body = document.getElementById('ssTableBody');
+  if (!headRow || !body) return;
+
+  // Render headers
+  var headHtml = '<th class="sticky-col" style="width: 50px; z-index: 5;">S.No</th>';
+  ssColumns.forEach(function(col) {
+    if (!col.visible) return;
+    var sortIcon = '';
+    if (ssSortColumn === col.key) {
+      sortIcon = ssSortDirection === 'ASC' ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+    } else {
+      sortIcon = ' <i class="fas fa-sort" style="opacity:0.3;"></i>';
+    }
+    headHtml += '<th style="width: ' + col.width + 'px; min-width: ' + col.width + 'px; position: relative;" onclick="sortSpreadsheet(\'' + col.key + '\')">';
+    headHtml += col.label + sortIcon;
+    headHtml += '<div class="resizer" onclick="event.stopPropagation()"></div>';
+    headHtml += '</th>';
+  });
+  headHtml += '<th style="width: 140px; text-align: center; position: sticky; right: 0; background: var(--bg-light); z-index: 4;">Actions</th>';
+  headRow.innerHTML = headHtml;
+
+  // Render rows
+  if (data.length === 0) {
+    body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 2) + '" style="text-align: center; padding: 24px; color: var(--text-muted);">No alumni records found</td></tr>';
+    return;
+  }
+
+  var bodyHtml = '';
+  data.forEach(function(row, idx) {
+    var serial = (ssPage - 1) * ssLimit + idx + 1;
+    bodyHtml += '<tr>';
+    bodyHtml += '<td class="sticky-col" style="text-align: center; font-weight: 500;">' + serial + '</td>';
+
+    ssColumns.forEach(function(col) {
+      if (!col.visible) return;
+      var val = row[col.key];
+      if (col.key === 'updated_date' || col.key === 'created_at') {
+        val = val ? new Date(val).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+      } else if (col.key === 'assignment_status') {
+        var status = val || 'Available';
+        var badgeClass = 'badge-secondary';
+        if (status === 'Completed') badgeClass = 'badge-success';
+        else if (status === 'Pending') badgeClass = 'badge-warning';
+        else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
+        else if (status === 'Draft') badgeClass = 'badge-info';
+        val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
+      } else if (col.key === 'linkedin_profile') {
+        val = val ? '<a href="' + (val.startsWith('http') ? val : 'https://' + val) + '" target="_blank" style="color:var(--primary);"><i class="fab fa-linkedin"></i> View</a>' : '-';
+      } else {
+        val = val || '-';
+      }
+      bodyHtml += '<td>' + val + '</td>';
+    });
+
+    // Action column
+    var isCompleted = row.assignment_status === 'Completed';
+    var actionButtons = '<div style="display:flex; gap:6px; justify-content:center;">';
+    actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
+    actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
+    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + row.name.replace(/'/g, "\\'") + '\')" title="History"><i class="fas fa-history"></i></button>';
+    if (isCompleted) {
+      actionButtons += '<button class="btn btn-danger btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="reopenRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-unlock"></i></button>';
+    }
+    actionButtons += '</div>';
+
+    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center;">' + actionButtons + '</td>';
+    bodyHtml += '</tr>';
+  });
+  body.innerHTML = bodyHtml;
+
+  // Initialize resizers
+  var table = document.querySelector('.spreadsheet-table');
+  if (table) {
+    initializeResizers(table);
   }
 };
+
+window.sortSpreadsheet = function(colKey) {
+  if (ssSortColumn === colKey) {
+    ssSortDirection = ssSortDirection === 'ASC' ? 'DESC' : 'ASC';
+  } else {
+    ssSortColumn = colKey;
+    ssSortDirection = 'ASC';
+  }
+  // Local sort for fast feedback
+  var tableBody = document.getElementById('ssTableBody');
+  var rows = Array.from(tableBody.querySelectorAll('tr'));
+  if (rows.length === 0 || rows[0].innerText.includes('No alumni')) return;
+
+  var colIdx = ssColumns.filter(function(c){return c.visible;}).findIndex(function(c){return c.key === colKey;});
+  if (colIdx === -1) return;
+  colIdx += 1; // offset S.No
+
+  rows.sort(function(a, b) {
+    var valA = a.children[colIdx].innerText.trim();
+    var valB = b.children[colIdx].innerText.trim();
+    return ssSortDirection === 'ASC' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+  });
+
+  rows.forEach(function(r) { tableBody.appendChild(r); });
+};
+
+window.initializeResizers = function(table) {
+  var cols = table.querySelectorAll('th');
+  cols.forEach(function(col) {
+    var resizer = col.querySelector('.resizer');
+    if (!resizer) return;
+
+    var startX, startWidth;
+
+    resizer.addEventListener('mousedown', function(e) {
+      startX = e.clientX;
+      startWidth = col.offsetWidth;
+      resizer.classList.add('resizing');
+
+      document.addEventListener('mousemove', doResize);
+      document.addEventListener('mouseup', stopResize);
+      e.preventDefault();
+    });
+
+    function doResize(e) {
+      var width = startWidth + (e.clientX - startX);
+      if (width > 60) {
+        col.style.width = width + 'px';
+        col.style.minWidth = width + 'px';
+      }
+    }
+
+    function stopResize() {
+      resizer.classList.remove('resizing');
+      document.removeEventListener('mousemove', doResize);
+      document.removeEventListener('mouseup', stopResize);
+    }
+  });
+};
+
+window.changeSpreadsheetPageSize = function(limit) {
+  ssLimit = parseInt(limit, 10);
+  ssPage = 1;
+  fetchSpreadsheetData();
+};
+
+window.changeSpreadsheetPage = function(page) {
+  ssPage = page;
+  fetchSpreadsheetData();
+};
+
+window.renderSpreadsheetPagination = function() {
+  var wrapper = document.getElementById('ssPagination');
+  var info = document.getElementById('ssPaginationInfo');
+  if (!wrapper || !info) return;
+
+  var totalPages = Math.ceil(ssTotal / ssLimit) || 1;
+  var start = (ssPage - 1) * ssLimit + 1;
+  var end = Math.min(ssPage * ssLimit, ssTotal);
+  if (ssTotal === 0) start = 0;
+
+  info.innerText = 'Showing ' + start + ' to ' + end + ' of ' + ssTotal + ' entries';
+
+  var html = '<button class="btn btn-outline btn-sm" onclick="changeSpreadsheetPage(1)" ' + (ssPage === 1 ? 'disabled' : '') + '><i class="fas fa-angle-double-left"></i></button>';
+  html += '<button class="btn btn-outline btn-sm" onclick="changeSpreadsheetPage(' + (ssPage - 1) + ')" ' + (ssPage === 1 ? 'disabled' : '') + '><i class="fas fa-angle-left"></i></button>';
+
+  var startPage = Math.max(1, ssPage - 2);
+  var endPage = Math.min(totalPages, startPage + 4);
+  if (endPage - startPage < 4) {
+    startPage = Math.max(1, endPage - 4);
+  }
+
+  for (var p = startPage; p <= endPage; p++) {
+    html += '<button class="btn ' + (p === ssPage ? 'btn-primary' : 'btn-outline') + ' btn-sm" onclick="changeSpreadsheetPage(' + p + ')">' + p + '</button>';
+  }
+
+  html += '<button class="btn btn-outline btn-sm" onclick="changeSpreadsheetPage(' + (ssPage + 1) + ')" ' + (ssPage === totalPages ? 'disabled' : '') + '><i class="fas fa-angle-right"></i></button>';
+  html += '<button class="btn btn-outline btn-sm" onclick="changeSpreadsheetPage(' + totalPages + ')" ' + (ssPage === totalPages ? 'disabled' : '') + '><i class="fas fa-angle-double-right"></i></button>';
+
+  wrapper.innerHTML = html;
+};
+
+window.toggleColumnVisibilityMenu = function() {
+  var menu = document.getElementById('columnVisibilityMenu');
+  if (!menu) return;
+
+  if (menu.style.display === 'block') {
+    menu.style.display = 'none';
+    return;
+  }
+
+  var html = '<div style="font-weight:600; margin-bottom:8px; font-size:0.85rem; border-bottom:1px solid var(--border); padding-bottom:6px;">Show/Hide Columns</div>';
+  ssColumns.forEach(function(col) {
+    html += '<label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; margin-bottom:6px; cursor:pointer; font-weight:normal;">';
+    html += '<input type="checkbox" ' + (col.visible ? 'checked' : '') + ' onchange="toggleColumnVisibility(\'' + col.key + '\')"> ' + col.label;
+    html += '</label>';
+  });
+
+  var btn = document.getElementById('colVisibilityBtn');
+  var rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+  menu.style.left = (rect.left + window.scrollX - 60) + 'px';
+  menu.innerHTML = html;
+  menu.style.display = 'block';
+
+  // Click outside to close
+  setTimeout(function() {
+    function clickOutsideMenu(e) {
+      if (!menu.contains(e.target) && e.target !== btn) {
+        menu.style.display = 'none';
+        document.removeEventListener('click', clickOutsideMenu);
+      }
+    }
+    document.addEventListener('click', clickOutsideMenu);
+  }, 50);
+};
+
+window.toggleColumnVisibility = function(key) {
+  var col = ssColumns.find(function(c) { return c.key === key; });
+  if (col) {
+    col.visible = !col.visible;
+    fetchSpreadsheetData();
+  }
+};
+
+window.exportAlumniCSV = function() {
+  var dept = document.getElementById('ssFilterDept').value;
+  var batch = document.getElementById('ssFilterBatch').value;
+  var status = document.getElementById('ssFilterStatus').value;
+
+  var params = {
+    page: 1,
+    limit: 10000,
+    search: ssSearchQuery || undefined,
+    department: dept || undefined,
+    batch: batch || undefined,
+    status: status || undefined
+  };
+
+  API.getAlumni(params).then(function(res) {
+    if (res && res.success && Array.isArray(res.data)) {
+      var data = res.data;
+      var csv = '\uFEFF';
+      // Header
+      var headers = ssColumns.map(function(c) { return c.label; });
+      csv += headers.join(',') + '\r\n';
+      // Rows
+      data.forEach(function(row) {
+        var line = ssColumns.map(function(col) {
+          var val = row[col.key] || '';
+          if (col.key === 'updated_date' && val) {
+            val = new Date(val).toLocaleDateString('en-IN');
+          }
+          return '"' + String(val).replace(/"/g, '""') + '"';
+        });
+        csv += line.join(',') + '\r\n';
+      });
+
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'alumni_records_' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      Toast.success('Export', 'Alumni records exported successfully');
+    }
+  }).catch(function(err) {
+    console.error('Export error:', err);
+    Toast.error('Export', 'Failed to export CSV');
+  });
+};
+
+window.openAssignmentHistoryDrawer = function(alumniId, alumniName) {
+  var drawer = document.getElementById('assignmentHistoryDrawer');
+  var list = document.getElementById('assignmentHistoryList');
+  if (!drawer || !list) return;
+
+  drawer.classList.add('show');
+  list.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><div style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">Loading history...</div></div>';
+
+  API.getAuditLogs({ target: 'Alumni#' + alumniId, page: 1, limit: 100 }).then(function(res) {
+    if (res && res.success && Array.isArray(res.data)) {
+      var logs = res.data;
+      if (logs.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--text-muted);"><i class="fas fa-info-circle" style="font-size:1.5rem; margin-bottom:12px; display:block;"></i>No history records found for ' + alumniName + '</div>';
+        return;
+      }
+
+      var html = '<h4 style="font-size:0.95rem; font-weight:600; margin-bottom:16px; color:var(--text-secondary);">History for ' + alumniName + '</h4>';
+      html += '<div style="display:flex; flex-direction:column; gap:16px; border-left:2px solid var(--border); padding-left:16px; margin-left:8px;">';
+      logs.forEach(function(log) {
+        var dateStr = new Date(log.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        html += '<div style="position:relative;">';
+        html += '<div style="width:10px; height:10px; border-radius:50%; background:var(--primary); position:absolute; left:-22px; top:6px; border:2px solid var(--bg-white);"></div>';
+        html += '<div style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">' + dateStr + '</div>';
+        html += '<div style="font-size:0.85rem; font-weight:600; color:var(--text-dark); margin-top:2px;">' + log.description + '</div>';
+        html += '<div style="font-size:0.75rem; color:var(--text-muted); margin-top:1px;">By ' + log.username + ' (' + log.role_name + ')</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      list.innerHTML = html;
+    } else {
+      list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger);">Failed to load history logs</div>';
+    }
+  }).catch(function(err) {
+    console.error('Drawer history error:', err);
+    list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger);">Error loading history</div>';
+  });
+};
+
+window.closeDrawer = function() {
+  var drawer = document.getElementById('assignmentHistoryDrawer');
+  if (drawer) drawer.classList.remove('show');
+};
+
+window.reopenRecord = function(alumniId) {
+  if (confirm('Are you sure you want to reopen this completed alumni record? This will clear the completion status and allow members to re-update details.')) {
+    var token = localStorage.getItem('token');
+    fetch('/api/v1/assignments/reopen/' + alumniId, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ reason: 'Reopened by Admin' })
+    }).then(function(r) { return r.json(); }).then(function(res) {
+      if (res && res.success) {
+        Toast.success('Reopen Record', 'Record reopened successfully');
+        fetchSpreadsheetData();
+      } else {
+        Toast.error('Reopen Record', res.message || 'Failed to reopen record');
+      }
+    }).catch(function(err) {
+      console.error('Reopen error:', err);
+      Toast.error('Reopen Record', 'An error occurred reopening the record');
+    });
+  }
+};
+
+window.editAlumniRecord = function(id) {
+  API.getAlumniById(id).then(function(res) {
+    if (res && res.success && res.data) {
+      var record = res.data;
+      document.getElementById('editAlumniId').value = record.alumni_id;
+      document.getElementById('editName').value = record.name || '';
+      document.getElementById('editRegisterNo').value = record.register_no || '';
+      document.getElementById('editGender').value = record.gender || 'Male';
+      document.getElementById('editBatch').value = record.batch || '';
+      document.getElementById('editDepartment').value = record.department || '';
+      document.getElementById('editEmail').value = record.email || '';
+      document.getElementById('editPhone').value = record.phone || '';
+      document.getElementById('editLinkedIn').value = record.linkedin_profile || '';
+      document.getElementById('editCompany').value = record.company || '';
+      document.getElementById('editDesignation').value = record.designation || '';
+      document.getElementById('editCity').value = record.current_city || record.city || '';
+      document.getElementById('editState').value = record.state || '';
+      document.getElementById('editCountry').value = record.country || '';
+      
+      // Populate leader dropdown
+      populateEditLeaderDropdown(record.assigned_leader_id || (record.assignedTo ? record.assignedTo.userId : null));
+      
+      document.getElementById('editStatus').value = record.assignment_status || 'Available';
+      
+      openModal('editAlumniModal');
+    } else {
+      Toast.error('Load Details', 'Alumni record not found');
+    }
+  }).catch(function(e) {
+    console.error('Edit modal fetch error:', e);
+    Toast.error('Load Details', 'Failed to retrieve alumni details');
+  });
+};
+
+window.populateEditLeaderDropdown = function(selectedLeaderId) {
+  var dropdown = document.getElementById('editLeader');
+  if (!dropdown) return;
+  
+  // Get team leaders from API
+  API.getUsers({ role: 'LEADER', page: 1, limit: 100 }).then(function(res) {
+    if (res && res.success && res.data && res.data.records) {
+      dropdown.innerHTML = '<option value="">No Leader Assigned</option>';
+      res.data.records.forEach(function(leader) {
+        var option = document.createElement('option');
+        option.value = leader.user_id;
+        option.text = leader.first_name + ' ' + leader.last_name;
+        if (leader.user_id === selectedLeaderId) {
+          option.selected = true;
+        }
+        dropdown.appendChild(option);
+      });
+    }
+  }).catch(function(err) {
+    console.error('Failed to load leaders:', err);
+  });
+};
+
+window.submitEditAlumni = function() {
+  var id = document.getElementById('editAlumniId').value;
+  var data = {
+    name: document.getElementById('editName').value,
+    registerNo: document.getElementById('editRegisterNo').value,
+    gender: document.getElementById('editGender').value,
+    batch: document.getElementById('editBatch').value,
+    department: document.getElementById('editDepartment').value,
+    email: document.getElementById('editEmail').value,
+    phone: document.getElementById('editPhone').value,
+    linkedin_profile: document.getElementById('editLinkedIn').value,
+    company: document.getElementById('editCompany').value,
+    designation: document.getElementById('editDesignation').value,
+    city: document.getElementById('editCity').value,
+    state: document.getElementById('editState').value,
+    country: document.getElementById('editCountry').value
+  };
+
+  API.updateAlumni(id, data).then(function(res) {
+    if (res && res.success) {
+      Toast.success('Edit Alumni', 'Alumni record updated successfully');
+      closeModal('editAlumniModal');
+      fetchSpreadsheetData();
+    } else {
+      Toast.error('Edit Alumni', res.message || 'Failed to update record');
+    }
+  }).catch(function(err) {
+    console.error('Update error:', err);
+    Toast.error('Edit Alumni', 'An error occurred updating the record');
+  });
+};
+

@@ -1,10 +1,11 @@
 (function () {
   'use strict';
 
-  var totalAlumni = 450;
-  var totalCompleted = 292;
-  var totalPending = 158;
+  var totalAlumni = 0;
+  var totalCompleted = 0;
+  var totalPending = 0;
   var totalDraft = 0;
+  var totalUndistributed = 0;
 
   var _apiDashboardData = null;
   var _apiAssignedAlumni = null;
@@ -94,11 +95,12 @@
   function populateOverviewCards() {
     var container = document.getElementById('overviewCards');
     var cards = [
-      { icon: 'fa-user-graduate', color: 'blue', value: totalAlumni, label: 'Assigned Alumni', change: '+12 this week', changeDir: 'up' },
-      { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '+8 this week', changeDir: 'up' },
-      { icon: 'fa-clock', color: 'yellow', value: totalPending, label: 'Pending', change: '-3 this week', changeDir: 'down' },
-      { icon: 'fa-file-alt', color: 'blue', value: totalDraft, label: 'In Draft', change: '0 this week', changeDir: 'up' },
-      { icon: 'fa-users', color: 'purple', value: teamMembers.length, label: 'Team Members', change: '0 this week', changeDir: 'up' }
+      { icon: 'fa-user-graduate', color: 'blue', value: totalAlumni, label: 'Assigned Alumni', change: '', changeDir: 'up' },
+      { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '', changeDir: 'up' },
+      { icon: 'fa-clock', color: 'yellow', value: totalPending, label: 'Pending', change: '', changeDir: 'down' },
+      { icon: 'fa-file-alt', color: 'blue', value: totalDraft, label: 'In Draft', change: '', changeDir: 'up' },
+      { icon: 'fa-hourglass-half', color: 'purple', value: totalUndistributed, label: 'Awaiting Distribution', change: '', changeDir: 'up' },
+      { icon: 'fa-users', color: 'green', value: teamMembers.length, label: 'Team Members', change: '', changeDir: 'up' }
     ];
     var html = '';
     cards.forEach(function (card) {
@@ -107,30 +109,10 @@
         '<div class="stat-card-content">' +
         '<h2 class="stat-card-value">' + card.value + '</h2>' +
         '<p class="stat-card-label">' + card.label + '</p>' +
-        '<span class="stat-card-change ' + card.changeDir + '"><i class="fas fa-' + (card.changeDir === 'up' ? 'arrow-up' : 'arrow-down') + '"></i> ' + card.change + '</span>' +
-        '</div></div>';
+        '</div>' +
+        '</div>';
     });
-
-    var overallProgress = totalAlumni > 0 ? Math.round((totalCompleted / totalAlumni) * 100) : 0;
-    var circumference = 2 * Math.PI * 38;
-    var offset = circumference - (overallProgress / 100) * circumference;
-    var ringColorClass = overallProgress >= 75 ? 'green' : overallProgress >= 50 ? '' : 'yellow';
-
-    html += '<div class="stat-card fade-in-up" style="display:flex;align-items:center;justify-content:center">' +
-      '<div style="text-align:center">' +
-      '<div class="progress-ring-container" style="margin:0 auto 8px">' +
-      '<svg width="100" height="100" viewBox="0 0 100 100">' +
-      '<circle class="progress-ring-bg" cx="50" cy="50" r="38"></circle>' +
-      '<circle class="progress-ring-fill ' + ringColorClass + '" cx="50" cy="50" r="38" stroke-dasharray="' + circumference + '" stroke-dashoffset="' + offset + '"></circle>' +
-      '</svg>' +
-      '<div class="progress-ring-text"><span class="value">' + overallProgress + '%</span><span class="label">Progress</span></div>' +
-      '</div>' +
-      '<p class="stat-card-label" style="margin:0">Team Progress</p>' +
-      '</div></div>';
-
     container.innerHTML = html;
-    container.style.marginBottom = html ? '28px' : '0';
-  }
 
   function populateTeamTable() {
     var searchVal = (document.getElementById('tableSearch').value || '').toLowerCase().trim();
@@ -1288,7 +1270,8 @@
   function fetchLeaderData() {
     return Promise.all([
       API.getLeaderDashboard().catch(function () { return null; }),
-      API.getAssignedAlumni({ page: 1, limit: 100 }).catch(function () { return null; })
+      API.getAssignedAlumni({ page: 1, limit: 100 }).catch(function () { return null; }),
+      API.getUndistributedCount().catch(function () { return null; })
     ]).then(function (results) {
       var dash = results[0];
       if (dash && dash.success) {
@@ -1324,6 +1307,10 @@
       if (assigned && assigned.success) {
         _apiAssignedAlumni = assigned.data;
       }
+      var undistRes = results[2];
+      if (undistRes && undistRes.success && undistRes.data) {
+        totalUndistributed = undistRes.data.count || 0;
+      }
       populateNotifications();
       populateOverviewCards();
       populateTeamTable();
@@ -1338,6 +1325,165 @@
     });
   }
 
+  // --- DISTRIBUTE MODAL LOGIC ---
+  var _distPreviewData = null;
+  var _distUnmatchedAssignments = {}; // alumniId -> memberId (manual overrides)
+
+  function setupDistributeModal() {
+    var distributeBtn = document.getElementById('distributeModalBtn');
+    if (distributeBtn) {
+      distributeBtn.addEventListener('click', function () {
+        _distPreviewData = null;
+        _distUnmatchedAssignments = {};
+        document.getElementById('distPreviewSection').style.display = 'none';
+        document.getElementById('distEmptyState').style.display = 'block';
+        document.getElementById('distLoadingState').style.display = 'none';
+        document.getElementById('distEmptyMsg').textContent = 'Click Preview to load distribution.';
+        document.getElementById('confirmDistributeBtn').style.display = 'none';
+        document.getElementById('distributeModalOverlay').classList.add('show');
+      });
+    }
+
+    var methodSelect = document.getElementById('distMethodSelect');
+    if (methodSelect) {
+      methodSelect.addEventListener('change', function () {
+        var isBatch = this.value === 'BatchWise';
+        document.getElementById('distBatchRow').style.display = isBatch ? 'flex' : 'none';
+      });
+    }
+
+    var previewBtn = document.getElementById('previewDistBtn');
+    if (previewBtn) {
+      previewBtn.addEventListener('click', function () {
+        if (!_teamId) {
+          showToast('Error', 'No team found. Please refresh.', 'danger');
+          return;
+        }
+        var method = document.getElementById('distMethodSelect').value;
+        var batch = document.getElementById('distBatchInput').value.trim() || undefined;
+        var body = { teamId: _teamId, method: method };
+        if (method === 'BatchWise' && batch) body.batch = batch;
+        if (method === 'RoundRobin') {
+          // Use all active member IDs
+          body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
+        }
+        document.getElementById('distLoadingState').style.display = 'block';
+        document.getElementById('distPreviewSection').style.display = 'none';
+        document.getElementById('distEmptyState').style.display = 'none';
+        document.getElementById('confirmDistributeBtn').style.display = 'none';
+        _distUnmatchedAssignments = {};
+
+        API.leaderPreview(body).then(function (res) {
+          document.getElementById('distLoadingState').style.display = 'none';
+          if (!res || !res.success || !res.data || res.data.length === 0) {
+            document.getElementById('distEmptyState').style.display = 'block';
+            document.getElementById('distEmptyMsg').textContent = 'No undistributed alumni found for this selection.';
+            return;
+          }
+          _distPreviewData = res.data;
+          renderDistPreview(res.data);
+          document.getElementById('distPreviewSection').style.display = 'block';
+          document.getElementById('confirmDistributeBtn').style.display = 'inline-flex';
+        }).catch(function (err) {
+          document.getElementById('distLoadingState').style.display = 'none';
+          document.getElementById('distEmptyState').style.display = 'block';
+          document.getElementById('distEmptyMsg').textContent = err.message || 'Failed to generate preview.';
+        });
+      });
+    }
+
+    var confirmBtn = document.getElementById('confirmDistributeBtn');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', function () {
+        if (!_distPreviewData) return;
+        var hasUnmatched = _distPreviewData.some(function (g) { return g.userId === -1 || g.isUnmatched; });
+        if (hasUnmatched) {
+          var unmatchedGroup = _distPreviewData.find(function (g) { return g.userId === -1 || g.isUnmatched; });
+          var unmatchedAlumni = unmatchedGroup ? unmatchedGroup.alumniList : [];
+          var unresolved = unmatchedAlumni.filter(function (a) { return !_distUnmatchedAssignments[a.alumni_id]; });
+          if (unresolved.length > 0) {
+            showToast('Warning', unresolved.length + ' unmatched alumni still need manual member assignment.', 'warning');
+            return;
+          }
+        }
+        var method = document.getElementById('distMethodSelect').value;
+        var batch = document.getElementById('distBatchInput').value.trim() || undefined;
+        var manualAssignments = Object.keys(_distUnmatchedAssignments).map(function (alumniId) {
+          return { alumniId: parseInt(alumniId), memberId: _distUnmatchedAssignments[alumniId] };
+        });
+        var body = { teamId: _teamId, method: method, manualAssignments: manualAssignments };
+        if (method === 'BatchWise' && batch) body.batch = batch;
+        if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
+
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Distributing...';
+        API.leaderDistribute(body).then(function (res) {
+          document.getElementById('distributeModalOverlay').classList.remove('show');
+          showToast('Success', (res.data && res.data.distributed) + ' alumni distributed successfully!', 'success');
+          fetchLeaderData();
+        }).catch(function (err) {
+          showToast('Error', err.message || 'Distribution failed.', 'danger');
+        }).finally(function () {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<i class="fas fa-check"></i> Confirm Distribution';
+        });
+      });
+    }
+  }
+
+  function renderDistPreview(groups) {
+    var matchedGroups = groups.filter(function (g) { return g.userId !== -1 && !g.isUnmatched; });
+    var unmatchedGroup = groups.find(function (g) { return g.userId === -1 || g.isUnmatched; });
+
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem">' +
+      '<thead><tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0">' +
+      '<th style="padding:8px 12px;text-align:left;font-weight:600;color:#374151">Member</th>' +
+      '<th style="padding:8px 12px;text-align:center;font-weight:600;color:#374151">Count</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-weight:600;color:#374151">Alumni</th>' +
+      '</tr></thead><tbody>';
+
+    matchedGroups.forEach(function (g) {
+      var names = g.alumniList.map(function (a) { return a.name; }).join(', ');
+      html += '<tr style="border-bottom:1px solid #F1F5F9">' +
+        '<td style="padding:8px 12px;font-weight:600;color:#1E293B">' + g.userName + '</td>' +
+        '<td style="padding:8px 12px;text-align:center"><span class="badge badge-info">' + g.count + '</span></td>' +
+        '<td style="padding:8px 12px;color:#64748B;max-width:300px;word-break:break-word">' + (names || '-') + '</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('distPreviewTable').innerHTML = html;
+
+    if (unmatchedGroup && unmatchedGroup.alumniList.length > 0) {
+      document.getElementById('distUnmatchedSection').style.display = 'block';
+      var uHtml = '';
+      unmatchedGroup.alumniList.forEach(function (a) {
+        var optionsHtml = '<option value="">-- Select Member --</option>';
+        teamMembers.forEach(function (m) {
+          optionsHtml += '<option value="' + m.id + '">' + m.name + '</option>';
+        });
+        uHtml += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9">' +
+          '<span style="flex:1;font-size:0.82rem;color:#1E293B"><strong>' + a.name + '</strong> (' + (a.register_no || '-') + ')' +
+          (a.originalFaculty ? ' <em style="color:#94A3B8;font-size:0.75rem">faculty: ' + a.originalFaculty + '</em>' : '') + '</span>' +
+          '<select class="unmatched-member-select" data-alumni-id="' + a.alumni_id + '" style="padding:4px 8px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.8rem">' +
+          optionsHtml + '</select>' +
+          '</div>';
+      });
+      document.getElementById('distUnmatchedList').innerHTML = uHtml;
+      document.querySelectorAll('.unmatched-member-select').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+          var alumniId = this.getAttribute('data-alumni-id');
+          if (this.value) {
+            _distUnmatchedAssignments[alumniId] = parseInt(this.value);
+          } else {
+            delete _distUnmatchedAssignments[alumniId];
+          }
+        });
+      });
+    } else {
+      document.getElementById('distUnmatchedSection').style.display = 'none';
+    }
+  }
+
   function init() {
     setLeaderUserInfo();
     setupSidebar();
@@ -1349,6 +1495,7 @@
     setupLockFeatures();
     setupSessionTimeout();
     setupUpdateModalEvents();
+    setupDistributeModal();
     fetchLeaderData();
 
     // Hook tab-specific navigation load events

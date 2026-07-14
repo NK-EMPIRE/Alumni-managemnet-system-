@@ -416,12 +416,18 @@
             <h3 style="font-size: 0.95rem; font-weight: 600;"><i class="fas fa-bolt" style="color:#7C3AED;margin-right:8px"></i> Quick Actions</h3>
           </div>
           <div class="card-body" style="padding: 16px 20px">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
               <div class="quick-action-btn" id="assignModalBtn" style="padding: 10px 14px">
                 <div class="icon-wrap" style="background:#DBEAFE;color:#2563EB;width:36px;height:36px;font-size:0.95rem">
                   <i class="fas fa-user-plus"></i>
                 </div>
                 <span style="font-size:0.85rem;font-weight:500">Assign / Reassign Alumni</span>
+              </div>
+              <div class="quick-action-btn" id="distributeModalBtn" style="padding: 10px 14px">
+                <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED;width:36px;height:36px;font-size:0.95rem">
+                  <i class="fas fa-share-alt"></i>
+                </div>
+                <span style="font-size:0.85rem;font-weight:500">Distribute to Members</span>
               </div>
               <div class="quick-action-btn" id="refreshDataBtn" style="padding: 10px 14px">
                 <div class="icon-wrap" style="background:#D1FAE5;color:#10B981;width:36px;height:36px;font-size:0.95rem">
@@ -430,7 +436,7 @@
                 <span style="font-size:0.85rem;font-weight:500">Refresh Data</span>
               </div>
               <div class="quick-action-btn" id="exportReportBtn" style="padding: 10px 14px">
-                <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED;width:36px;height:36px;font-size:0.95rem">
+                <div class="icon-wrap" style="background:#FEF3C7;color:#F59E0B;width:36px;height:36px;font-size:0.95rem">
                   <i class="fas fa-file-pdf"></i>
                 </div>
                 <span style="font-size:0.85rem;font-weight:500">Export Report</span>
@@ -1031,6 +1037,68 @@
       <div class="session-timeout-actions" style="display:flex;gap:10px;justify-content:center">
         <button class="btn btn-primary" id="extendSessionBtn"><i class="fas fa-clock"></i> Stay Logged In</button>
         <button class="btn btn-secondary" id="logoutSessionBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Faculty-Wise / Distribution Modal -->
+  <div class="modal-overlay" id="distributeModalOverlay">
+    <div class="modal" style="max-width:720px;width:95%;max-height:90vh;overflow-y:auto">
+      <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #E2E8F0">
+        <div>
+          <h2 style="font-size:1.1rem;font-weight:700;color:#1E293B;margin:0"><i class="fas fa-share-alt" style="color:#7C3AED;margin-right:8px"></i>Distribute Alumni to Members</h2>
+          <p style="font-size:0.8rem;color:#64748B;margin:4px 0 0">Stage 2: Distribute assigned alumni from your pool to team members.</p>
+        </div>
+        <button class="modal-close" data-close="distributeModalOverlay"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px">
+        <!-- Method Select -->
+        <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <label style="font-size:0.85rem;font-weight:600;color:#374151">Distribution Method:</label>
+          <select id="distMethodSelect" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;color:#1E293B">
+            <option value="FacultyWise">Faculty-Wise (Auto-match by Faculty)</option>
+            <option value="RoundRobin">Round Robin (Equal Split)</option>
+            <option value="BatchWise">Batch-Wise (Manual Count)</option>
+          </select>
+          <button class="btn btn-secondary" id="previewDistBtn" style="padding:6px 16px;font-size:0.85rem"><i class="fas fa-eye"></i> Preview</button>
+        </div>
+
+        <!-- Batch filter (shown only for BatchWise) -->
+        <div id="distBatchRow" style="display:none;margin-bottom:14px">
+          <label style="font-size:0.85rem;font-weight:600;color:#374151">Filter by Batch:</label>
+          <input type="text" id="distBatchInput" placeholder="e.g. 2020" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;width:150px;margin-left:8px">
+        </div>
+
+        <!-- Preview Table -->
+        <div id="distPreviewSection" style="display:none">
+          <h3 style="font-size:0.9rem;font-weight:600;color:#1E293B;margin-bottom:10px"><i class="fas fa-table" style="margin-right:6px;color:#2563EB"></i>Distribution Preview</h3>
+          <div id="distPreviewTable"></div>
+
+          <!-- Unmatched alumni section (FacultyWise only) -->
+          <div id="distUnmatchedSection" style="display:none;margin-top:16px">
+            <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:12px 16px;margin-bottom:12px">
+              <strong style="color:#92400E;font-size:0.85rem"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Unmatched Alumni</strong>
+              <p style="color:#78350F;font-size:0.8rem;margin:4px 0 0">The following alumni could not be auto-matched. Please assign them manually before confirming.</p>
+            </div>
+            <div id="distUnmatchedList"></div>
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="distLoadingState" style="display:none;text-align:center;padding:30px">
+          <div class="spinner"></div>
+          <p style="margin-top:12px;color:#64748B;font-size:0.85rem">Generating preview...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div id="distEmptyState" style="display:none;text-align:center;padding:30px;color:#94A3B8">
+          <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;opacity:0.4"></i>
+          <p id="distEmptyMsg">No undistributed alumni found. Click Preview to load.</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:16px 24px;border-top:1px solid #E2E8F0;display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-secondary" data-close="distributeModalOverlay">Cancel</button>
+        <button class="btn btn-primary" id="confirmDistributeBtn" style="display:none"><i class="fas fa-check"></i> Confirm Distribution</button>
       </div>
     </div>
   </div>

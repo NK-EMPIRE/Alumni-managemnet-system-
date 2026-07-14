@@ -189,8 +189,23 @@
     },
 
     // Round robin assignment
-    assignAlumni: function (teamId, params) {
-        return post('/assignments/' + teamId + '/assign', params || {});
+    getAvailableAlumniCount: function (params) {
+        return get('/assignments/available-count', params);
+    },
+    adminAssign: function (params) {
+        return post('/assignments/admin-assign', params);
+    },
+    leaderPreview: function (data) {
+        return post('/assignments/leader-preview', data);
+    },
+    leaderDistribute: function (data) {
+        return post('/assignments/leader-distribute', data);
+    },
+    getUndistributedAlumni: function (params) {
+        return get('/assignments/undistributed', params);
+    },
+    getUndistributedCount: function () {
+        return get('/assignments/undistributed-count');
     },
 
     // Reports
@@ -216,7 +231,8 @@
         return get('/reports/' + id + '/download');
     },
     downloadTemplate: function () {
-        window.open('/api/v1/upload/template', '_blank');
+        window.open(BASE_URL + '/upload/template', '_blank');
+        return Promise.resolve({ success: true });
     },
     getAssignmentHistory: function (params) {
         return get('/assignments/history', params);
@@ -233,6 +249,11 @@
     },
     updateProfile: function (id, data) {
         return put('/users/' + id, data);
+    },
+
+    // Additional export method
+    downloadImportTemplate: function () {
+        return this.downloadTemplate();
     }
     };
 

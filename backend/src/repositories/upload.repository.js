@@ -85,9 +85,10 @@ async function batchInsertAlumni(records) {
         .input('linkedinProfile', sql.NVarChar(255), record.linkedinProfile || null)
         .input('company', sql.NVarChar(200), record.company || null)
         .input('designation', sql.NVarChar(200), record.designation || null)
+        .input('facultyAssigned', sql.NVarChar(150), record.facultyAssigned || null)
         .query(`
-          INSERT INTO Alumni (register_no, name, email, phone, department, batch, gender, date_of_birth, working_details, linkedin_profile, company, designation)
-          VALUES (@registerNo, @name, @email, @phone, @department, @batch, @gender, @dob, @workingDetails, @linkedinProfile, @company, @designation)
+          INSERT INTO Alumni (register_no, name, email, phone, department, batch, gender, date_of_birth, working_details, linkedin_profile, company, designation, faculty_assigned)
+          VALUES (@registerNo, @name, @email, @phone, @department, @batch, @gender, @dob, @workingDetails, @linkedinProfile, @company, @designation, @facultyAssigned)
         `);
     }
     await transaction.commit();
