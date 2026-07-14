@@ -323,24 +323,38 @@
     }
 
     // 2. Security / Password Settings
-    var saveSecurityBtn = document.querySelector('#tab-security button.btn-primary');
+    var saveSecurityBtn = document.getElementById('saveSecurityBtn') ||
+                          document.querySelector('#tab-security button.btn-primary');
     if (saveSecurityBtn) {
       saveSecurityBtn.removeAttribute('onclick');
       saveSecurityBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        var passInputs = document.querySelectorAll('#tab-security input[type="password"]');
-        if (passInputs.length < 3) return;
-        var oldPassword = passInputs[0].value;
-        var newPassword = passInputs[1].value;
-        var confirmPassword = passInputs[2].value;
+
+        var oldPasswordInput    = document.getElementById('secCurrentPassword') || document.querySelectorAll('#tab-security input[type="password"]')[0];
+        var newPasswordInput    = document.getElementById('secNewPassword')     || document.querySelectorAll('#tab-security input[type="password"]')[1];
+        var confirmPasswordInput= document.getElementById('secConfirmPassword') || document.querySelectorAll('#tab-security input[type="password"]')[2];
+
+        if (!oldPasswordInput || !newPasswordInput || !confirmPasswordInput) return;
+
+        var oldPassword     = oldPasswordInput.value.trim();
+        var newPassword     = newPasswordInput.value.trim();
+        var confirmPassword = confirmPasswordInput.value.trim();
 
         if (!oldPassword || !newPassword || !confirmPassword) {
-          if (window.Toast) Toast.error('Security', 'All fields are required');
+          if (window.Toast) Toast.error('Security', 'All password fields are required');
+          else if (window.showToast) showToast('All password fields are required', 'error');
+          return;
+        }
+
+        if (newPassword.length < 6) {
+          if (window.Toast) Toast.error('Security', 'New password must be at least 6 characters');
+          else if (window.showToast) showToast('New password must be at least 6 characters', 'error');
           return;
         }
 
         if (newPassword !== confirmPassword) {
           if (window.Toast) Toast.error('Security', 'New passwords do not match');
+          else if (window.showToast) showToast('New passwords do not match', 'error');
           return;
         }
 
@@ -350,17 +364,19 @@
         API.changePassword(oldPassword, newPassword)
           .then(function (res) {
             if (res && res.success !== false) {
-              if (window.Toast) Toast.success('Security', 'Password changed successfully!');
-              else if (window.showToast) showToast('Password changed successfully!', 'success');
-              passInputs[0].value = '';
-              passInputs[1].value = '';
-              passInputs[2].value = '';
+              if (window.Toast) Toast.success('Security', 'Password updated successfully!');
+              else if (window.showToast) showToast('Password updated successfully!', 'success');
+              oldPasswordInput.value = '';
+              newPasswordInput.value = '';
+              confirmPasswordInput.value = '';
             } else {
               if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
+              else if (window.showToast) showToast(res.message || 'Failed to change password', 'error');
             }
           })
           .catch(function (err) {
-            if (window.Toast) Toast.error('Security', err.message || 'Failed to change password');
+            if (window.Toast) Toast.error('Security', err.message || 'Incorrect current password');
+            else if (window.showToast) showToast(err.message || 'Incorrect current password', 'error');
           })
           .finally(function () {
             saveSecurityBtn.disabled = false;

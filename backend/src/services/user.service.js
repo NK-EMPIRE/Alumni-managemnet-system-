@@ -76,13 +76,39 @@ async function createUser(userData, currentUser) {
 }
 
 async function updateUser(userId, userData, currentUser) {
+  if (currentUser.role !== 'Admin' && Number(userId) !== Number(currentUser.userId)) {
+    throw new AppError('Insufficient permissions to update this profile', 403);
+  }
+
   const existing = await userRepository.findById(userId);
 
   if (!existing) {
     throw new NotFoundError('User not found');
   }
 
-  await userRepository.update(userId, userData);
+  let fieldsToUpdate = { ...userData };
+  if (currentUser.role !== 'Admin') {
+    fieldsToUpdate = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      phone: userData.phone
+    };
+    Object.keys(fieldsToUpdate).forEach(key => {
+      if (fieldsToUpdate[key] === undefined) {
+        delete fieldsToUpdate[key];
+      }
+    });
+  }
+
+  if (fieldsToUpdate.email && fieldsToUpdate.email.toLowerCase() !== existing.email.toLowerCase()) {
+    const emailConflict = await userRepository.findByEmail(fieldsToUpdate.email);
+    if (emailConflict && Number(emailConflict.user_id) !== Number(userId)) {
+      throw new ConflictError('Email already in use');
+    }
+  }
+
+  await userRepository.update(userId, fieldsToUpdate);
 
   const updated = await userRepository.findById(userId);
 

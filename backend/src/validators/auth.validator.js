@@ -6,11 +6,10 @@ const loginRules = [
 ];
 
 const changePasswordRules = [
-  body('oldPassword').notEmpty(),
+  body('oldPassword').notEmpty().withMessage('Current password is required'),
   body('newPassword')
-    .isLength({ min: 8 })
-    .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
-    .withMessage('Password must contain uppercase, lowercase, number, and special character')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters')
 ];
 
 const refreshTokenRules = [
