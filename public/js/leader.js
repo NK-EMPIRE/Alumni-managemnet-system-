@@ -1583,6 +1583,57 @@
     }
   };
 
+  window.saveLeaderProfile = function() {
+    var user = API.getUser();
+    if (!user || !user.id) return;
+    var name = document.getElementById('settingsName').value.trim();
+    var email = document.getElementById('settingsEmail').value.trim();
+    if (!name || !email) {
+      showToast('Validation Error', 'Name and Email are required.', 'danger');
+      return;
+    }
+    
+    // Split name to first and last
+    var parts = name.split(' ');
+    var fName = parts[0];
+    var lName = parts.slice(1).join(' ') || '';
+
+    API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function(res) {
+      showToast('Success', 'Profile settings updated successfully!', 'success');
+      // Update local storage representation
+      user.name = name;
+      user.email = email;
+      localStorage.setItem('user', JSON.stringify(user));
+      setLeaderUserInfo();
+    }).catch(function(err) {
+      showToast('Error', err.message || 'Failed to update profile.', 'danger');
+    });
+  };
+
+  window.saveLeaderPassword = function() {
+    var oldPass = document.getElementById('settingsOldPass').value;
+    var newPass = document.getElementById('settingsNewPass').value;
+    var confirmPass = document.getElementById('settingsConfirmPass').value;
+
+    if (!oldPass || !newPass || !confirmPass) {
+      showToast('Validation Error', 'All password fields are required.', 'danger');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      showToast('Validation Error', 'Passwords do not match.', 'danger');
+      return;
+    }
+
+    API.changePassword(oldPass, newPass).then(function(res) {
+      showToast('Success', 'Password changed successfully!', 'success');
+      document.getElementById('settingsOldPass').value = '';
+      document.getElementById('settingsNewPass').value = '';
+      document.getElementById('settingsConfirmPass').value = '';
+    }).catch(function(err) {
+      showToast('Error', err.message || 'Failed to update password.', 'danger');
+    });
+  };
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

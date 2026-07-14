@@ -721,7 +721,7 @@
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Email Address</label>
               <input class="form-control" type="email" id="settingsEmail" value="leader@test.com" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
             </div>
-            <button class="btn btn-primary" onclick="Toast.success('Settings','Profile settings updated successfully!')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+            <button class="btn btn-primary" onclick="saveLeaderProfile()" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
               <i class="fas fa-save"></i> Save Settings
             </button>
           </div>
@@ -736,24 +736,24 @@
                 Weekly progress reports
               </label>
             </div>
-            <button class="btn btn-primary" onclick="Toast.success('Settings','Notification preferences saved!')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+            <button class="btn btn-primary" onclick="showToast('Settings','Notification preferences saved!','success')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
               <i class="fas fa-save"></i> Save Preferences
             </button>
           </div>
           <div class="tab-content" id="tab-security" style="display:none;">
             <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
-              <input class="form-control" type="password" value="password123" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+              <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
             </div>
             <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
-              <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+              <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
             </div>
             <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
-              <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
+              <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;">
             </div>
-            <button class="btn btn-primary" onclick="Toast.success('Security','Password changed successfully!')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+            <button class="btn btn-primary" onclick="saveLeaderPassword()" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
               <i class="fas fa-save"></i> Update Password
             </button>
           </div>
