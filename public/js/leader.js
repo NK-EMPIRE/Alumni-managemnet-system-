@@ -113,6 +113,7 @@
         '</div>';
     });
     container.innerHTML = html;
+  }
 
   function populateTeamTable() {
     var searchVal = (document.getElementById('tableSearch').value || '').toLowerCase().trim();
