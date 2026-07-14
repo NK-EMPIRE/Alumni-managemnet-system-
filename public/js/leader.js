@@ -609,10 +609,13 @@
   }
 
   function setupModals() {
-    document.getElementById('assignModalBtn').addEventListener('click', function () {
-      populateAssignModal();
-      document.getElementById('assignModalOverlay').classList.add('show');
-    });
+    var assignModalBtn = document.getElementById('assignModalBtn');
+    if (assignModalBtn) {
+      assignModalBtn.addEventListener('click', function () {
+        populateAssignModal();
+        document.getElementById('assignModalOverlay').classList.add('show');
+      });
+    }
 
     document.querySelectorAll('[data-close]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -1420,7 +1423,10 @@
         confirmBtn.textContent = 'Distributing...';
         API.leaderDistribute(body).then(function (res) {
           document.getElementById('distributeModalOverlay').classList.remove('show');
-          showToast('Success', (res.data && res.data.distributed) + ' alumni distributed successfully!', 'success');
+          var count = (res.data && res.data.distributed !== undefined) ? res.data.distributed : 
+                      ((res.data && res.data.data && res.data.data.distributed !== undefined) ? res.data.data.distributed : 
+                       (res.distributed || 0));
+          showToast('Success', count + ' alumni distributed successfully!', 'success');
           fetchLeaderData();
         }).catch(function (err) {
           showToast('Error', err.message || 'Distribution failed.', 'danger');

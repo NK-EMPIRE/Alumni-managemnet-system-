@@ -585,8 +585,9 @@ function populateAssignHistoryTable() {
   var tbody = document.getElementById('assignHistoryBody');
   if (!tbody) return;
   var data = [];
-  if (_apiDataLoaded && _apiAssignHistory && _apiAssignHistory.records) {
-    data = _apiAssignHistory.records.map(function (a) {
+  var records = _apiAssignHistory ? (_apiAssignHistory.records || (Array.isArray(_apiAssignHistory) ? _apiAssignHistory : [])) : [];
+  if (_apiDataLoaded && records.length > 0) {
+    data = records.map(function (a) {
       var dateStr = '';
       if (a.last_assigned) {
         var d = new Date(a.last_assigned);
@@ -1044,6 +1045,10 @@ function openModal(id) {
   document.body.style.overflow = 'hidden';
   /* Clear previous errors */
   clearAllErrors(modal);
+  /* Initialize assign modal with DB-loaded options */
+  if (id === 'assignAlumniModal') {
+    initAssignModal();
+  }
 }
 
 function closeModal(id) {
@@ -1304,19 +1309,84 @@ window.fetchAvailableAlumniForAssign = function() {
   var countGroup = document.getElementById('assignCountGroup');
   var badge = document.getElementById('availableAlumniCount');
 
+  badge.innerText = '...';
+  countGroup.style.display = 'block';
+
   API.getAvailableAlumniCount({ department: dept, batch: batch }).then(function(res) {
     if (res && res.success) {
-      badge.innerText = res.data.count;
-      countGroup.style.display = 'block';
+      var cnt = res.data.count || 0;
+      badge.innerText = cnt;
       
       var input = document.getElementById('assignCount');
-      input.value = Math.min(50, res.data.count);
-      input.max = res.data.count;
+      input.value = cnt > 0 ? Math.min(50, cnt) : '';
+      input.max = cnt;
 
-      updateAssignPreviewSummary();
+      if (cnt === 0) {
+        document.getElementById('assignPreviewSummary').style.display = 'block';
+        document.getElementById('assignPreviewSummary').style.background = '#FEF9C3';
+        document.getElementById('assignPreviewSummary').style.borderColor = '#FDE047';
+        document.getElementById('assignPreviewSummary').style.color = '#78350F';
+        document.getElementById('assignPreviewSummary').innerHTML = '<i class="fas fa-info-circle" style="margin-right:6px;"></i>No available alumni for this batch and department combination.';
+      } else {
+        updateAssignPreviewSummary();
+      }
     }
   }).catch(function(err) {
     console.error('Error fetching available alumni count:', err);
+    badge.innerText = 'Error';
+  });
+};
+
+window.onAssignBatchChange = function() {
+  var batch = document.getElementById('assignBatch').value;
+  var deptSel = document.getElementById('assignDept');
+  
+  // Reset dept and count
+  deptSel.value = '';
+  document.getElementById('assignCountGroup').style.display = 'none';
+  document.getElementById('assignPreviewSummary').style.display = 'none';
+  
+  if (!batch) return;
+
+  // Load departments for this batch from DB
+  API.getAvailableAlumniCount({ batch: batch }).then(function() {
+    // Just trigger fetchAvailableAlumniForAssign if dept already selected
+    if (deptSel.value) fetchAvailableAlumniForAssign();
+  }).catch(function() {});
+};
+
+window.initAssignModal = function() {
+  var batchSel = document.getElementById('assignBatch');
+  var deptSel = document.getElementById('assignDept');
+  
+  // Reset
+  batchSel.value = '';
+  deptSel.value = '';
+  document.getElementById('assignCountGroup').style.display = 'none';
+  document.getElementById('assignPreviewSummary').style.display = 'none';
+  document.getElementById('assignCount').value = '';
+  document.getElementById('availableAlumniCount').innerText = '0';
+
+  // Populate from DB
+  API.getAlumniFilters().then(function(res) {
+    if (res && res.success && res.data) {
+      var batches = res.data.batches || [];
+      var depts = res.data.departments || [];
+      
+      batchSel.innerHTML = '<option value="" disabled selected hidden>Select Batch...</option>';
+      batches.forEach(function(b) {
+        batchSel.innerHTML += '<option value="' + b + '">' + b + '</option>';
+      });
+      
+      deptSel.innerHTML = '<option value="" disabled selected hidden>Select Department...</option>';
+      depts.forEach(function(d) {
+        deptSel.innerHTML += '<option value="' + d + '">' + d + '</option>';
+      });
+    }
+  }).catch(function() {
+    // Fallback static options
+    batchSel.innerHTML = '<option value="" disabled selected hidden>Select Batch...</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option>';
+    deptSel.innerHTML = '<option value="" disabled selected hidden>Select Department...</option><option value="CSE">CSE</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CE">CE</option><option value="IT">IT</option><option value="CIVIL">CIVIL</option><option value="MBA">MBA</option><option value="MCA">MCA</option>';
   });
 };
 
@@ -2199,17 +2269,17 @@ window.fetchSpreadsheetData = function() {
 
   API.getAlumni(params).then(function(res) {
     if (res && res.success) {
-      var data = res.data || [];
-      // If server returns totalCount in parent or response metadata
-      ssTotal = res.totalCount || res.total || data.length;
-      renderSpreadsheetTable(data);
+      var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+      var pagination = (res.data && res.data.pagination) ? res.data.pagination : null;
+      ssTotal = (pagination && pagination.total) ? pagination.total : records.length;
+      renderSpreadsheetTable(records);
       renderSpreadsheetPagination();
     } else {
-      Toast.error('Load Alumni', 'Failed to retrieve records');
+      Toast.danger('Load Alumni', 'Failed to retrieve records');
     }
   }).catch(function(err) {
     console.error('Error fetching alumni:', err);
-    Toast.error('Load Alumni', 'An error occurred fetching records');
+    Toast.danger('Load Alumni', 'An error occurred fetching records');
   });
 };
 
@@ -2451,13 +2521,12 @@ window.exportAlumniCSV = function() {
   };
 
   API.getAlumni(params).then(function(res) {
-    if (res && res.success && Array.isArray(res.data)) {
-      var data = res.data;
+    if (res && res.success) {
+      var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+      if (data.length === 0) { Toast.danger('Export', 'No alumni records to export'); return; }
       var csv = '\uFEFF';
-      // Header
       var headers = ssColumns.map(function(c) { return c.label; });
       csv += headers.join(',') + '\r\n';
-      // Rows
       data.forEach(function(row) {
         var line = ssColumns.map(function(col) {
           var val = row[col.key] || '';
@@ -2494,8 +2563,8 @@ window.openAssignmentHistoryDrawer = function(alumniId, alumniName) {
   list.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><div style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">Loading history...</div></div>';
 
   API.getAuditLogs({ target: 'Alumni#' + alumniId, page: 1, limit: 100 }).then(function(res) {
-    if (res && res.success && Array.isArray(res.data)) {
-      var logs = res.data;
+    if (res && res.success) {
+      var logs = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
       if (logs.length === 0) {
         list.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--text-muted);"><i class="fas fa-info-circle" style="font-size:1.5rem; margin-bottom:12px; display:block;"></i>No history records found for ' + alumniName + '</div>';
         return;

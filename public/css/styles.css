@@ -361,9 +361,16 @@ ul {
 .sidebar-collapsed .sidebar-item .badge,
 .sidebar-collapsed .nav-item-text,
 .sidebar-collapsed .nav-section-text,
-.sidebar-collapsed .nav-item .badge {
+.sidebar-collapsed .nav-item .badge,
+.sidebar-collapsed .submenu,
+.sidebar-collapsed .sidebar-item i::after,
+.sidebar-collapsed .sidebar-item svg::after,
+.sidebar-collapsed .sidebar-item .fa-chevron-down {
   opacity: 0;
   width: 0;
+  height: 0;
+  padding: 0 !important;
+  margin: 0 !important;
   display: none !important;
   overflow: hidden;
 }

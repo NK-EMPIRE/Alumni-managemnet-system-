@@ -150,6 +150,9 @@
     getAlumniStats: function () {
         return get('/alumni/stats');
     },
+    getAlumniFilters: function () {
+        return get('/alumni/filters');
+    },
     saveAlumniDraft: function (id, data) {
         return patch('/alumni/' + id + '/draft', data);
     },

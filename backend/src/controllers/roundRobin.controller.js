@@ -51,6 +51,14 @@ const getUndistributedCount = asyncHandler(async (req, res) => {
   success(res, { count }, 'Undistributed alumni count retrieved successfully');
 });
 
+const getHistory = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const offset = (page - 1) * limit;
+  const result = await roundRobinService.getHistory({ page, limit, offset });
+  paginated(res, result.rows, result.total, page, limit, 'Assignment history retrieved successfully');
+});
+
 module.exports = {
   adminAssign,
   leaderPreview,
@@ -58,5 +66,6 @@ module.exports = {
   reopenAssignment,
   getUndistributedAlumni,
   getAvailableCount,
-  getUndistributedCount
+  getUndistributedCount,
+  getHistory
 };

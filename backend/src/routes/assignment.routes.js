@@ -51,6 +51,12 @@ router.get(
   roundRobinController.getUndistributedCount
 );
 
+router.get(
+  '/history',
+  authorize(ROLES.ADMIN),
+  roundRobinController.getHistory
+);
+
 // Batch-wise round-robin routes
 router.post(
   '/batch-assign',

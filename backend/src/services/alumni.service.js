@@ -245,6 +245,20 @@ async function submitAndComplete(alumniId, data, currentUser) {
   return professionalInfo;
 }
 
+async function getFilters() {
+  const pool = await getPool();
+  const result = await pool.request().query(`
+    SELECT DISTINCT batch FROM Alumni WHERE batch IS NOT NULL AND batch != '' ORDER BY batch DESC;
+  `);
+  const result2 = await pool.request().query(`
+    SELECT DISTINCT department FROM Alumni WHERE department IS NOT NULL AND department != '' ORDER BY department ASC;
+  `);
+  return {
+    batches: result.recordset.map(r => r.batch),
+    departments: result2.recordset.map(r => r.department)
+  };
+}
+
 module.exports = {
   getAlumni,
   getAlumniById,
@@ -254,6 +268,7 @@ module.exports = {
   getMyAssignments,
   updateAssignmentStatus,
   getStats,
+  getFilters,
   saveDraft,
   submitAndComplete
 };

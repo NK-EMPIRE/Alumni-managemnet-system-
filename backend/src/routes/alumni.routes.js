@@ -22,6 +22,13 @@ router.get(
 );
 
 router.get(
+  '/filters',
+  authorize(ROLES.ADMIN, ROLES.LEADER),
+  alumniController.getFilters
+);
+
+
+router.get(
   '/assigned',
   authorize(ROLES.MEMBER, ROLES.LEADER),
   alumniController.getMyAssignments

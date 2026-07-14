@@ -1117,31 +1117,18 @@
         <button class="modal-close" onclick="closeModal('assignAlumniModal')">&times;</button>
       </div>
       <div class="modal-body">
+        <!-- Batch comes FIRST, then Department -->
+        <div class="form-group">
+          <select class="form-control form-select" id="assignBatch" required onchange="onAssignBatchChange()">
+            <option value="" disabled selected hidden></option>
+          </select>
+          <label class="floating-label">Select Batch <span style="color:var(--danger);">*</span></label>
+        </div>
         <div class="form-group">
           <select class="form-control form-select" id="assignDept" required onchange="fetchAvailableAlumniForAssign()">
             <option value="" disabled selected hidden></option>
-            <option value="CSE">CSE</option>
-            <option value="ECE">ECE</option>
-            <option value="EEE">EEE</option>
-            <option value="ME">ME</option>
-            <option value="CE">CE</option>
-            <option value="IT">IT</option>
-            <option value="CIVIL">CIVIL</option>
-            <option value="MBA">MBA</option>
-            <option value="MCA">MCA</option>
           </select>
           <label class="floating-label">Select Department <span style="color:var(--danger);">*</span></label>
-        </div>
-        <div class="form-group">
-          <select class="form-control form-select" id="assignBatch" required onchange="fetchAvailableAlumniForAssign()">
-            <option value="" disabled selected hidden></option>
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-          </select>
-          <label class="floating-label">Select Batch <span style="color:var(--danger);">*</span></label>
         </div>
         
         <div id="assignCountGroup" style="display:none; margin-top: 15px;">

@@ -546,6 +546,11 @@ async function getUndistributedCount(leaderId) {
   return result.recordset[0].count;
 }
 
+async function getHistory({ page, limit, offset }) {
+  const alumniRepository = require('../repositories/alumni.repository');
+  return alumniRepository.getAssignmentHistory({ page, limit, offset });
+}
+
 module.exports = {
   adminAssign,
   leaderPreview,
@@ -553,5 +558,6 @@ module.exports = {
   reopenAssignment,
   getUndistributedAlumni,
   getAvailableAlumniCount,
-  getUndistributedCount
+  getUndistributedCount,
+  getHistory
 };

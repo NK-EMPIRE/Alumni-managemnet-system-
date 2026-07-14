@@ -53,6 +53,12 @@ const getStats = asyncHandler(async (req, res) => {
   success(res, result, 'Alumni stats retrieved successfully');
 });
 
+const getFilters = asyncHandler(async (req, res) => {
+  const result = await alumniService.getFilters();
+  success(res, result, 'Alumni filters retrieved successfully');
+});
+
+
 const saveDraft = asyncHandler(async (req, res) => {
   const { alumniId } = req.params;
   const currentUser = req.user;
@@ -69,5 +75,6 @@ module.exports = {
   getMyAssignments,
   updateAssignmentStatus,
   getStats,
+  getFilters,
   saveDraft
 };
