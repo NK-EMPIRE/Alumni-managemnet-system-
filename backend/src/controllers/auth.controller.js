@@ -41,9 +41,19 @@ const forgotPassword = asyncHandler(async (req, res) => {
   success(res, null, 'Temporary password sent to email if account exists');
 });
 
+const resetPasswordWithTemp = asyncHandler(async (req, res) => {
+  const { email, temporaryPassword, newPassword } = req.body;
+  if (!email || !temporaryPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: 'email, temporaryPassword, and newPassword are required.' });
+  }
+  await authService.resetPasswordWithTemp(email, temporaryPassword, newPassword);
+  success(res, null, 'Password reset successfully. You can now log in with your new password.');
+});
+
 module.exports = {
   login,
   refreshToken,
   changePassword,
-  forgotPassword
+  forgotPassword,
+  resetPasswordWithTemp
 };

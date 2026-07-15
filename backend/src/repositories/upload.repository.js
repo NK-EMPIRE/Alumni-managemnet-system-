@@ -62,6 +62,18 @@ async function batchInsertAlumni(records) {
   await ensureColumn(pool, 'date_of_birth', 'VARCHAR(20)');
   await ensureColumn(pool, 'working_details', 'VARCHAR(500)');
   await ensureColumn(pool, 'linkedin_profile', 'VARCHAR(255)');
+  await ensureColumn(pool, 'father_name', 'VARCHAR(150)');
+
+  // Also ensure father_name is in ProfessionalInformation table
+  await pool.request().query(`
+    IF NOT EXISTS (
+      SELECT * FROM sys.columns 
+      WHERE object_id = OBJECT_ID('dbo.ProfessionalInformation') AND name = 'father_name'
+    )
+    BEGIN
+      ALTER TABLE dbo.ProfessionalInformation ADD father_name VARCHAR(150) NULL;
+    END
+  `);
 
   // Create a new mssql Table object matching the Alumni table schema
   const table = new sql.Table('Alumni');
@@ -80,6 +92,7 @@ async function batchInsertAlumni(records) {
   table.columns.add('company', sql.NVarChar(200), { nullable: true });
   table.columns.add('designation', sql.NVarChar(200), { nullable: true });
   table.columns.add('faculty_assigned', sql.NVarChar(150), { nullable: true });
+  table.columns.add('father_name', sql.NVarChar(150), { nullable: true });
 
   const { logger } = require('../utils/logger');
 
@@ -102,7 +115,8 @@ async function batchInsertAlumni(records) {
       record.linkedinProfile || null,
       record.company || null,
       record.designation || null,
-      record.facultyAssigned || null
+      record.facultyAssigned || null,
+      record.fatherName || record.father_name || null
     );
   }
 

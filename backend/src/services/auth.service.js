@@ -130,9 +130,27 @@ async function forgotPassword(email) {
   logger.auditLog('Password reset requested via forgot password', { userId: user.user_id });
 }
 
+async function resetPasswordWithTemp(email, temporaryPassword, newPassword) {
+  const user = await authRepo.findByEmail(email);
+  if (!user) {
+    throw new AuthenticationError('Invalid email or temporary password.');
+  }
+  
+  // Validate the temp password against current hash (which was set by forgotPassword)
+  const match = await comparePassword(temporaryPassword, user.password_hash);
+  if (!match) {
+    throw new AuthenticationError('Temporary password is incorrect. Please check your email.');
+  }
+
+  const hashed = await hashPassword(newPassword);
+  await authRepo.updatePassword(user.user_id, hashed);
+  logger.auditLog('Password reset with temporary password', { userId: user.user_id });
+}
+
 module.exports = {
   login,
   changePassword,
   refreshToken,
-  forgotPassword
+  forgotPassword,
+  resetPasswordWithTemp
 };
