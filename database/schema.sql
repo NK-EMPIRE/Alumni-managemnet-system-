@@ -176,6 +176,7 @@ CREATE TABLE dbo.AssignmentHistory (
 CREATE TABLE dbo.ImportHistory (
     import_id INT IDENTITY(1,1) PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(500) NULL,
     total_rows INT DEFAULT 0,
     imported INT DEFAULT 0,
     duplicates INT DEFAULT 0,

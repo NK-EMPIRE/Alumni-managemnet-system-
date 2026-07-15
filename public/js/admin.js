@@ -56,12 +56,12 @@ const dummyBatchProgress = [
     ──────────────────────────────────────────────────────────── */
 
 var importHistory = [
-  { file: 'alumni_batch_2023.xlsx', imported: 200, merged: 45, skipped: 3, duplicates: 12, errors: 3, by: 'Admin User', date: '05 Jul 2026', status: 'Completed' },
-  { file: 'cse_alumni_2022.xlsx', imported: 150, merged: 30, skipped: 1, duplicates: 5, errors: 1, by: 'Admin User', date: '28 Jun 2026', status: 'Completed' },
-  { file: 'ece_alumni_update.csv', imported: 60, merged: 32, skipped: 0, duplicates: 8, errors: 0, by: 'Admin User', date: '15 Jun 2026', status: 'Completed' },
-  { file: 'mech_batch_2021.xlsx', imported: 120, merged: 36, skipped: 2, duplicates: 3, errors: 2, by: 'Admin User', date: '01 Jun 2026', status: 'Completed' },
-  { file: 'full_alumni_export.csv', imported: 400, merged: 220, skipped: 7, duplicates: 45, errors: 7, by: 'Admin User', date: '20 May 2026', status: 'Completed' },
-  { file: 'batch_2020_update.xlsx', imported: 0, merged: 0, skipped: 0, duplicates: 0, errors: 0, by: 'Admin User', date: '10 May 2026', status: 'Failed' }
+  { file: 'alumni_batch_2023.xlsx', imported: 200, merged: 45, skipped: 3, duplicates: 12, errors: 3, by: 'Admin User', date: '05 Jul 2026', status: 'Completed', original_name: 'alumni_batch_2023.xlsx', errorDetails: 'Row 23: Invalid email format "john.doe@"\nRow 67: Duplicate register number "2023CSE045"\nRow 89: Missing required field "FullName"' },
+  { file: 'cse_alumni_2022.xlsx', imported: 150, merged: 30, skipped: 1, duplicates: 5, errors: 1, by: 'Admin User', date: '28 Jun 2026', status: 'Completed', original_name: 'cse_alumni_2022.xlsx', errorDetails: 'Row 12: Invalid phone number "+91-98765"' },
+  { file: 'ece_alumni_update.csv', imported: 60, merged: 32, skipped: 0, duplicates: 8, errors: 0, by: 'Admin User', date: '15 Jun 2026', status: 'Completed', original_name: 'ece_alumni_update.csv', errorDetails: null },
+  { file: 'mech_batch_2021.xlsx', imported: 120, merged: 36, skipped: 2, duplicates: 3, errors: 2, by: 'Admin User', date: '01 Jun 2026', status: 'Completed', original_name: 'mech_batch_2021.xlsx', errorDetails: 'Row 45: Batch year mismatch "2020" expected "2021"\nRow 78: Invalid department code "MEC"' },
+  { file: 'full_alumni_export.csv', imported: 400, merged: 220, skipped: 7, duplicates: 45, errors: 7, by: 'Admin User', date: '20 May 2026', status: 'Completed', original_name: 'full_alumni_export.csv', errorDetails: 'Row 3: Missing email\nRow 15: Invalid register number\nRow 34: Duplicate entry\nRow 56: Invalid batch format\nRow 78: Missing department\nRow 102: Invalid phone\nRow 145: Duplicate email' },
+  { file: 'batch_2020_update.xlsx', imported: 0, merged: 0, skipped: 0, duplicates: 0, errors: 0, by: 'Admin User', date: '10 May 2026', status: 'Failed', original_name: 'batch_2020_update.xlsx', errorDetails: 'File corrupted: Unable to read worksheet. The file may be damaged or in an unsupported format.' }
 ];
 
 var auditLogs = [];
@@ -163,6 +163,7 @@ var _apiImportHistory = null;
 var _apiTeams = null;
 var _apiAuditLogs = null;
 var _apiAssignHistory = null;
+var _importErrorDetails = [];
 
 function setUserInfo() {
   var user = API.getUser();
@@ -1843,10 +1844,9 @@ function populateImportHistory() {
   if (_apiDataLoaded && _apiImportHistory && _apiImportHistory.records) {
     data = _apiImportHistory.records.map(function (h) {
       return {
-        file: h.file_name || h.file || h.fileName || '-',
+        file: h.original_name || h.file_name || h.file || h.fileName || '-',
         imported: h.imported || h.recordsImported || 0,
         merged: h.merged || 0,
-        skipped: h.skipped || 0,
         duplicates: h.duplicates || h.duplicatesSkipped || 0,
         errors: h.errors || 0,
         by: h.importer_name || h.by || h.importedBy || '-',
@@ -1858,36 +1858,70 @@ function populateImportHistory() {
   } else {
     data = importHistory;
   }
+  _importErrorDetails = data;
   var html = '';
   data.forEach(function (item, i) {
     var statusBadge = item.status === 'Completed'
       ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Completed</span>'
       : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Failed</span>';
+    var formattedDate = item.date;
+    if (item.date && item.date !== '-' && item.date.indexOf('T') > -1) {
+      try {
+        var d = new Date(item.date);
+        if (!isNaN(d.getTime())) {
+          formattedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+      } catch(e) {}
+    }
     html += '<tr>';
     html += '<td>' + (i + 1) + '</td>';
     html += '<td>' + item.file + '</td>';
     html += '<td>' + item.imported + '</td>';
     html += '<td>' + (item.merged || 0) + '</td>';
-    html += '<td>' + (item.skipped || 0) + '</td>';
     html += '<td>' + item.duplicates + '</td>';
     var errBtn = '';
     if (item.errors > 0) {
       var errData = item.errorDetails;
-      var errMsg = errData ? (typeof errData === 'string' ? errData : JSON.stringify(errData)).slice(0, 500) : 'Check server logs';
-      errBtn = ' <button class="btn btn-sm btn-ghost" onclick="Toast.info(\'Import Errors (' + item.errors + ')\',\'' + errMsg.replace(/'/g,"\\'").replace(/"/g,'&quot;') + '\')"><i class="fas fa-info-circle"></i></button>';
+      var errMsg = errData ? (typeof errData === 'string' ? errData : JSON.stringify(errData, null, 2)) : 'No error details available. Check server logs.';
+      var errIndex = i;
+      errBtn = ' <button class="btn btn-sm btn-ghost" onclick="showImportErrors(' + errIndex + ')"><i class="fas fa-info-circle"></i></button>';
     }
     html += '<td>' + item.errors + errBtn + '</td>';
     html += '<td>' + item.by + '</td>';
-    html += '<td>' + item.date + '</td>';
+    html += '<td>' + formattedDate + '</td>';
     html += '<td>' + statusBadge + '</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
 }
 
+function showImportErrors(index) {
+  var item = _importErrorDetails[index];
+  if (!item) return;
+  var errData = item.errorDetails;
+  var content = document.getElementById('importErrorContent');
+  if (!content) return;
+  if (!errData) {
+    content.innerHTML = '<div style="padding:12px;color:#6B7280;"><i class="fas fa-check-circle" style="color:#10B981;margin-right:6px;"></i> No error details available.</div>';
+    openModal('importErrorModal');
+    return;
+  }
+  var errLines = (typeof errData === 'string' ? errData : JSON.stringify(errData, null, 2)).split('\n');
+  var listHtml = '';
+  errLines.forEach(function(line) {
+    var trimmed = line.trim();
+    if (!trimmed) return;
+    var icon = '<i class="fas fa-times-circle" style="color:#EF4444;margin-right:8px;flex-shrink:0;margin-top:3px;"></i>';
+    listHtml += '<div style="display:flex;gap:4px;padding:6px 0;border-bottom:1px solid #FECACA;font-size:0.85rem;line-height:1.5;color:#991B1B;">' + icon + '<span>' + trimmed + '</span></div>';
+  });
+  var infoBadge = '<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"><span style="background:#DBEAFE;color:#1D4ED8;padding:4px 12px;border-radius:6px;font-size:0.8rem;font-weight:500;"><i class="fas fa-file"></i> ' + item.file + '</span><span style="background:#FEE2E2;color:#DC2626;padding:4px 12px;border-radius:6px;font-size:0.8rem;font-weight:500;"><i class="fas fa-exclamation-circle"></i> ' + item.errors + ' error(s)</span></div>';
+  content.innerHTML = infoBadge + listHtml;
+  openModal('importErrorModal');
+}
+
 /* ────────────────────────────────────────────────────────────
-   38. AUDIT LOGS – Table Population
-   ──────────────────────────────────────────────────────────── */
+    38. AUDIT LOGS – Table Population
+    ──────────────────────────────────────────────────────────── */
 function getAuditActionBadge(action) {
   var map = {
     'login': '<span class="badge badge-info"><i class="fas fa-sign-in-alt"></i> Login</span>',

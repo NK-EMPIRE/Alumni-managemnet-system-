@@ -732,46 +732,6 @@
           </div>
         </div>
 
-        <!-- Import Stats -->
-        <div class="stats-grid" style="margin-bottom:24px;">
-          <div class="stat-card">
-            <div class="stat-icon" style="background:#DBEAFE;color:#2563EB;">
-              <i class="fas fa-database"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Total Records</h3>
-              <p>2,450</p>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:#D1FAE5;color:#10B981;">
-              <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Last Import</h3>
-              <p>05 Jul 2026</p>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:#FEF3C7;color:#F59E0B;">
-              <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Pending Import</h3>
-              <p>0</p>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:#EDE9FE;color:#8B5CF6;">
-              <i class="fas fa-file-excel"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Format</h3>
-              <p>.xlsx, .csv</p>
-            </div>
-          </div>
-        </div>
-
         <!-- Import Form Card -->
         <div class="card" style="padding:32px;margin-bottom:24px;">
           <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:8px;">Upload Excel File</h3>
@@ -848,7 +808,6 @@
                   <th>File Name</th>
                   <th>Imported</th>
                   <th>Updated</th>
-                  <th>Skipped</th>
                   <th>Duplicates</th>
                   <th>Errors</th>
                   <th>Imported By</th>
@@ -1459,6 +1418,22 @@
         <button class="btn btn-primary" id="editAlumniSubmitBtn" onclick="submitEditAlumni()">
           <i class="fas fa-save"></i> Save Changes
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Error Details Modal -->
+  <div class="modal-overlay" id="importErrorModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#EF4444;margin-right:8px;"></i>Import Errors</h3>
+        <button class="modal-close" onclick="closeModal('importErrorModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="importErrorContent" style="font-size:0.85rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:16px;color:#991B1B;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('importErrorModal')">Close</button>
       </div>
     </div>
   </div>

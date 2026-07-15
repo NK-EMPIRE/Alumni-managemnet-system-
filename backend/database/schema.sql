@@ -130,6 +130,7 @@ CREATE TABLE AlumniAssignments (
 CREATE TABLE ImportHistory (
     import_id INT IDENTITY PRIMARY KEY,
     file_name VARCHAR(500) NOT NULL,
+    original_name VARCHAR(500) NULL,
     total_rows INT DEFAULT 0,
     imported INT DEFAULT 0,
     duplicates INT DEFAULT 0,

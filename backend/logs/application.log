@@ -753,3 +753,64 @@
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 10:17:52.070"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 10:17:52.070"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 10:18:25.550","userId":1}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 11:20:51.287"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 11:20:51.291"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 11:20:51.292"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 11:20:51.292"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 11:21:19.674","userId":51}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-15 11:22:24.435","userId":25}
+{"error":"Incorrect syntax near the keyword 'AS'.","ip":"::1","level":"error","message":"GET /api/v1/dashboard/leader","stack":"RequestError: Incorrect syntax near the keyword 'AS'.\n    at handleError (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:519:28)\n    at addChunk (node:internal/streams/readable:559:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:536:3)\n    at Readable.push (node:internal/streams/readable:391:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-07-15 11:22:26.441","userId":25}
+{"level":"error","message":"UNEXPECTED: Incorrect syntax near the keyword 'AS'.","stack":"RequestError: Incorrect syntax near the keyword 'AS'.\n    at handleError (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:519:28)\n    at addChunk (node:internal/streams/readable:559:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:536:3)\n    at Readable.push (node:internal/streams/readable:391:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-07-15 11:22:26.442"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 11:23:11.544","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 11:27:03.555","userId":1}
+{"ip":"::1","level":"info","loginId":"Admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-15 11:28:20.983"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 11:28:32.644","userId":51}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 11:30:14.326","userId":51}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 11:33:21.857","userId":51}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 11:49:33.796"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 11:49:33.800"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 11:49:33.800"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 11:49:33.800"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 11:50:20.242","userId":51}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 11:51:09.665"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 11:51:09.671"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 11:51:09.671"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 11:51:09.671"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:00:27.370"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:00:27.375"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:00:27.375"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:00:27.376"}
+{"duplicates":25,"errors":25,"fileName":"1784097118283-5f8357929d8f93a1.xlsx","imported":105,"level":"info","merged":0,"message":"[AUDIT] EXCEL_IMPORTED","skipped":0,"timestamp":"2026-07-15 12:02:19.529","total":130,"userId":51}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:18.001"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:18.005"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:18.006"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:18.006"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:24.386"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:24.391"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:24.392"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:24.392"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:28.405"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:28.410"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:28.410"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:28.411"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:32.241"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:32.246"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:32.246"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:32.247"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:36.653"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:36.659"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:36.659"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:36.660"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:40.785"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:40.789"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:40.790"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:40.790"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:05:49.948"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:05:49.951"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:05:49.952"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:05:49.952"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 12:06:11.926"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 12:06:11.932"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:06:11.932"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:06:11.932"}
+{"duplicates":25,"errors":25,"fileName":"1784097476214-221db06cb4fcab29.xlsx","imported":0,"level":"info","merged":0,"message":"[AUDIT] EXCEL_IMPORTED","skipped":105,"timestamp":"2026-07-15 12:08:09.773","total":130,"userId":51}
