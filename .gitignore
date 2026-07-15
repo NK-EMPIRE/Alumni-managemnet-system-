@@ -8,3 +8,7 @@ node_modules
 /frontend/public/uploads
 /scratch_docs
 /backend/uploads
+.agents/
+*.md.old
+tmp/
+.tempmediaStorage/
