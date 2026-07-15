@@ -95,6 +95,8 @@ function initSpreadsheetHandlers() {
       
       var ssFilterDept = document.getElementById('ssFilterDept');
       var ssFilterBatch = document.getElementById('ssFilterBatch');
+      var filterDeptDash = document.getElementById('filterDepartment');
+      var filterBatchDash = document.getElementById('filterBatch');
       
       if (ssFilterDept) {
         ssFilterDept.innerHTML = '<option value="">All Depts</option>';
@@ -102,11 +104,23 @@ function initSpreadsheetHandlers() {
           ssFilterDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
         });
       }
+      if (filterDeptDash) {
+        filterDeptDash.innerHTML = '<option value="">All Depts</option>';
+        depts.forEach(function(d) {
+          filterDeptDash.innerHTML += '<option value="' + d + '">' + d + '</option>';
+        });
+      }
       
       if (ssFilterBatch) {
         ssFilterBatch.innerHTML = '<option value="">All Batches</option>';
         batches.forEach(function(b) {
           ssFilterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
+        });
+      }
+      if (filterBatchDash) {
+        filterBatchDash.innerHTML = '<option value="">All Batch</option>';
+        batches.forEach(function(b) {
+          filterBatchDash.innerHTML += '<option value="' + b + '">' + b + '</option>';
         });
       }
     }
@@ -362,16 +376,33 @@ function renderTable() {
   }
 
   var html = '';
+  var q = (document.getElementById('tableSearch').value || '').toLowerCase().trim();
   pageData.forEach(function (item, i) {
     var sno = start + i + 1;
     var statusBadge = getStatusBadge(item.status);
     var progressColor = item.progress >= 80 ? 'green' : (item.progress >= 40 ? '' : 'red');
+    
+    var nameVal = item.name || '';
+    var deptVal = item.dept || '';
+    var batchVal = item.batch || '';
+    var leaderVal = item.leader || '';
+
+    if (q) {
+      var cleanQuery = q.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      var regex = new RegExp('(' + cleanQuery + ')', 'gi');
+      var highlightMark = '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>';
+      nameVal = String(nameVal).replace(regex, highlightMark);
+      deptVal = String(deptVal).replace(regex, highlightMark);
+      batchVal = String(batchVal).replace(regex, highlightMark);
+      leaderVal = String(leaderVal).replace(regex, highlightMark);
+    }
+
     html += '<tr>';
     html += '<td>' + sno + '</td>';
-    html += '<td><strong>' + item.name + '</strong></td>';
-    html += '<td>' + item.dept + '</td>';
-    html += '<td>' + item.batch + '</td>';
-    html += '<td>' + item.leader + '</td>';
+    html += '<td><strong>' + nameVal + '</strong></td>';
+    html += '<td>' + deptVal + '</td>';
+    html += '<td>' + batchVal + '</td>';
+    html += '<td>' + leaderVal + '</td>';
     html += '<td>' + statusBadge + '</td>';
     html += '<td><div class="progress-label" style="margin-bottom:2px;"><span></span><span>' + item.progress + '%</span></div><div class="progress"><div class="progress-bar ' + progressColor + '" style="width:' + item.progress + '%;"></div></div></td>';
     html += '<td><button class="btn btn-sm btn-outline" onclick="viewAlumniDetails(' + item.id + ')"><i class="fas fa-eye"></i></button></td>';

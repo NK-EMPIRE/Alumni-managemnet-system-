@@ -527,6 +527,16 @@
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
+        
+        var globalHeader = document.getElementById('globalPageHeader');
+        if (globalHeader) {
+          if (page === 'dashboard') {
+            globalHeader.style.display = 'flex';
+          } else {
+            globalHeader.style.display = 'none';
+          }
+        }
+
         if (window.innerWidth < 1024) {
           var sidebar = document.getElementById('sidebar');
           var overlay = document.getElementById('sidebarOverlay');
@@ -597,21 +607,24 @@
       currentPage = 1;
       populateTeamTable();
     });
-    document.getElementById('globalSearch').addEventListener('input', function () {
-      var val = this.value.trim();
-      var activeItem = document.querySelector('.sidebar-item.active');
-      var activePage = activeItem ? activeItem.getAttribute('data-page') : 'dashboard';
-      if (activePage === 'dashboard') {
-        var el = document.getElementById('memberSearch');
-        if (el) { el.value = val; populateTeamTable(); }
-      } else if (activePage === 'assignments') {
-        var el = document.getElementById('myAssignmentsSearch');
-        if (el) { el.value = val; renderMyAssignmentsTable(); }
-      } else if (activePage === 'reports') {
-        var el = document.getElementById('reportSearch');
-        if (el) { el.value = val; renderTeamReportTable(); }
-      }
-    });
+    var globalSearch = document.getElementById('globalSearch');
+    if (globalSearch) {
+      globalSearch.addEventListener('input', function () {
+        var val = this.value.trim();
+        var activeItem = document.querySelector('.sidebar-item.active');
+        var activePage = activeItem ? activeItem.getAttribute('data-page') : 'dashboard';
+        if (activePage === 'dashboard') {
+          var el = document.getElementById('memberSearch');
+          if (el) { el.value = val; populateTeamTable(); }
+        } else if (activePage === 'assignments') {
+          var el = document.getElementById('myAssignmentsSearch');
+          if (el) { el.value = val; renderMyAssignmentsTable(); }
+        } else if (activePage === 'reports') {
+          var el = document.getElementById('reportSearch');
+          if (el) { el.value = val; renderTeamReportTable(); }
+        }
+      });
+    }
   }
 
   function setupModals() {
@@ -693,9 +706,12 @@
       }, 1500);
     });
 
-    document.getElementById('refreshBtn').addEventListener('click', function () {
-      document.getElementById('refreshDataBtn').click();
-    });
+    var refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function () {
+        document.getElementById('refreshDataBtn').click();
+      });
+    }
   }
 
   function setupExport() {

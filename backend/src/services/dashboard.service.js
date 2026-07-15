@@ -125,8 +125,8 @@ async function getLeaderDashboard(leaderId) {
     completed: stats?.completed || 0,
     pending: stats?.pending || 0,
     draft: stats?.draft || 0,
-    undistributed: stats?.undistributed || 0,
-    distributed: stats?.distributed || 0,
+    undistributed: stats?.undistributed_count || 0,
+    distributed: stats?.distributed_count || 0,
     memberCount: stats?.member_count || 0,
     completionPercentage: stats?.total_assigned > 0
       ? Math.round(((stats?.completed || 0) / stats?.total_assigned) * 100)

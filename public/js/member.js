@@ -726,9 +726,31 @@
             populateNotifications();
         });
     }
-
     function init() {
         setMemberUserInfo();
+        
+        // Populate dynamic filters from database
+        API.getAlumniFilters().then(function(res) {
+            if (res && res.success && res.data) {
+                const depts = res.data.departments || [];
+                const batches = res.data.batches || [];
+                if (filterDept) {
+                    filterDept.innerHTML = '<option value="">All Departments</option>';
+                    depts.forEach(d => {
+                        filterDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
+                    });
+                }
+                if (filterBatch) {
+                    filterBatch.innerHTML = '<option value="">All Batches</option>';
+                    batches.forEach(b => {
+                        filterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
+                    });
+                }
+            }
+        }).catch(err => {
+            console.error('Failed to load dynamic filters in member:', err);
+        });
+
         fetchMemberData();
 
         tableSearch.addEventListener('input', function () {
