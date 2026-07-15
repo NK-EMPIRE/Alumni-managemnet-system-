@@ -1242,6 +1242,7 @@ textarea.form-control {
 .form-group.floating .password-toggle {
   top: 50%;
   transform: translateY(-50%);
+  z-index: 3;
 }
 
 /* ────────────────────────────────────────────────────────────

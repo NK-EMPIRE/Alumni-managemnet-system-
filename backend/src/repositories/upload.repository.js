@@ -63,40 +63,52 @@ async function batchInsertAlumni(records) {
   await ensureColumn(pool, 'working_details', 'VARCHAR(500)');
   await ensureColumn(pool, 'linkedin_profile', 'VARCHAR(255)');
 
-  const transaction = pool.transaction();
-  await transaction.begin();
+  // Create a new mssql Table object matching the Alumni table schema
+  const table = new sql.Table('Alumni');
+  
+  // Add column structures matching the insert fields
+  table.columns.add('register_no', sql.NVarChar(30), { nullable: false });
+  table.columns.add('name', sql.NVarChar(150), { nullable: false });
+  table.columns.add('email', sql.NVarChar(150), { nullable: true });
+  table.columns.add('phone', sql.NVarChar(20), { nullable: true });
+  table.columns.add('department', sql.NVarChar(50), { nullable: true });
+  table.columns.add('batch', sql.NVarChar(10), { nullable: true });
+  table.columns.add('gender', sql.NVarChar(10), { nullable: true });
+  table.columns.add('date_of_birth', sql.NVarChar(20), { nullable: true });
+  table.columns.add('working_details', sql.NVarChar(500), { nullable: true });
+  table.columns.add('linkedin_profile', sql.NVarChar(255), { nullable: true });
+  table.columns.add('company', sql.NVarChar(200), { nullable: true });
+  table.columns.add('designation', sql.NVarChar(200), { nullable: true });
+  table.columns.add('faculty_assigned', sql.NVarChar(150), { nullable: true });
 
-  try {
-    for (const record of records) {
-      if (!record.registerNo || String(record.registerNo).trim() === '' || String(record.registerNo).trim().toLowerCase() === 'null') {
-        const { logger } = require('../utils/logger');
-        logger.warn('Skipping batch insert record due to missing or invalid registerNo: ' + JSON.stringify(record));
-        continue;
-      }
-      await transaction.request()
-        .input('registerNo', sql.NVarChar(30), record.registerNo)
-        .input('name', sql.NVarChar(150), record.name)
-        .input('email', sql.NVarChar(150), record.email)
-        .input('phone', sql.NVarChar(20), record.phone)
-        .input('department', sql.NVarChar(50), record.department)
-        .input('batch', sql.NVarChar(10), record.batch)
-        .input('gender', sql.NVarChar(10), record.gender)
-        .input('dob', sql.NVarChar(20), record.dateOfBirth || null)
-        .input('workingDetails', sql.NVarChar(500), record.workingDetails || null)
-        .input('linkedinProfile', sql.NVarChar(255), record.linkedinProfile || null)
-        .input('company', sql.NVarChar(200), record.company || null)
-        .input('designation', sql.NVarChar(200), record.designation || null)
-        .input('facultyAssigned', sql.NVarChar(150), record.facultyAssigned || null)
-        .query(`
-          INSERT INTO Alumni (register_no, name, email, phone, department, batch, gender, date_of_birth, working_details, linkedin_profile, company, designation, faculty_assigned)
-          VALUES (@registerNo, @name, @email, @phone, @department, @batch, @gender, @dob, @workingDetails, @linkedinProfile, @company, @designation, @facultyAssigned)
-        `);
+  const { logger } = require('../utils/logger');
+
+  // Populate row data
+  for (const record of records) {
+    if (!record.registerNo || String(record.registerNo).trim() === '' || String(record.registerNo).trim().toLowerCase() === 'null') {
+      logger.warn('Skipping batch insert record due to missing or invalid registerNo: ' + JSON.stringify(record));
+      continue;
     }
-    await transaction.commit();
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
+    table.rows.add(
+      record.registerNo,
+      record.name,
+      record.email || null,
+      record.phone || null,
+      record.department || null,
+      record.batch || null,
+      record.gender || null,
+      record.dateOfBirth || null,
+      record.workingDetails || null,
+      record.linkedinProfile || null,
+      record.company || null,
+      record.designation || null,
+      record.facultyAssigned || null
+    );
   }
+
+  // Perform bulk insert
+  const request = pool.request();
+  await request.bulk(table);
 }
 
 async function findByRegisterNo(registerNo) {

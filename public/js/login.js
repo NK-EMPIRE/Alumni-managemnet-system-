@@ -219,6 +219,42 @@
   // ─── Form Submit Event ──────────────────────────────────────
   loginForm.addEventListener('submit', handleLogin);
 
+  // ─── Forgot Password Handler ─────────────────────────────────
+  const forgotLink = document.querySelector('.forgot-link');
+  if (forgotLink) {
+    forgotLink.addEventListener('click', async function (e) {
+      e.preventDefault();
+      const email = prompt('Enter your registered email address to reset your password:');
+      if (!email) return;
+      if (!email.trim() || !email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      // Show loader during reset request
+      loginLoadingOverlay.classList.add('active');
+      const loadingText = loginLoadingOverlay.querySelector('.loading-text');
+      const loadingSub = loginLoadingOverlay.querySelector('.loading-subtext');
+      if (loadingText) loadingText.textContent = 'Processing request...';
+      if (loadingSub) loadingSub.textContent = 'Verifying email and sending reset information';
+
+      try {
+        const res = await API.forgotPassword(email.trim());
+        if (res && res.success) {
+          alert('If the account exists, a temporary password has been sent to your email.');
+        } else {
+          alert(res.message || 'An error occurred. Please try again.');
+        }
+      } catch (err) {
+        alert(err.message || 'Failed to process password reset request.');
+      } finally {
+        loginLoadingOverlay.classList.remove('active');
+        if (loadingText) loadingText.textContent = 'Signing in...';
+        if (loadingSub) loadingSub.textContent = 'Please wait while we verify your credentials';
+      }
+    });
+  }
+
   // ─── Init ────────────────────────────────────────────────────
   loadRememberMe();
 })();

@@ -63,6 +63,9 @@
                 return res;
             });
         },
+        forgotPassword: function (email) {
+            return post('/auth/forgot-password', { email: email });
+        },
         isAuthenticated: function () {
             return !!localStorage.getItem('token');
         },
