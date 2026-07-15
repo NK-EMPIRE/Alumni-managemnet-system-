@@ -29,7 +29,6 @@ router.post(
 
 router.put(
   '/:userId',
-  authorize(ROLES.ADMIN),
   userController.updateUser
 );
 

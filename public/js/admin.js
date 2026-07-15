@@ -86,6 +86,33 @@ var selectedImportFile = null;
 function initSpreadsheetHandlers() {
   // Initialize leader dropdown for edit modal
   populateEditLeaderDropdown(null);
+
+  // Populate department and batch filters from Excel data dynamically
+  API.getAlumniFilters().then(function(res) {
+    if (res && res.success && res.data) {
+      var depts = res.data.departments || [];
+      var batches = res.data.batches || [];
+      
+      var ssFilterDept = document.getElementById('ssFilterDept');
+      var ssFilterBatch = document.getElementById('ssFilterBatch');
+      
+      if (ssFilterDept) {
+        ssFilterDept.innerHTML = '<option value="">All Depts</option>';
+        depts.forEach(function(d) {
+          ssFilterDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
+        });
+      }
+      
+      if (ssFilterBatch) {
+        ssFilterBatch.innerHTML = '<option value="">All Batches</option>';
+        batches.forEach(function(b) {
+          ssFilterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
+        });
+      }
+    }
+  }).catch(function(err) {
+    console.error('Failed to load dynamic spreadsheet filters:', err);
+  });
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -2379,7 +2406,8 @@ window.renderSpreadsheetTable = function(data) {
     ssColumns.forEach(function(col) {
       if (!col.visible) return;
       var val = row[col.key];
-      if (col.key === 'updated_date' || col.key === 'created_at') {
+      var isDate = col.key === 'updated_date' || col.key === 'created_at';
+      if (isDate) {
         val = val ? new Date(val).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
       } else if (col.key === 'assignment_status') {
         var status = val || 'Available';
@@ -2394,6 +2422,14 @@ window.renderSpreadsheetTable = function(data) {
       } else {
         val = val || '-';
       }
+
+      // Dynamic search query highlighting
+      if (!isDate && col.key !== 'assignment_status' && col.key !== 'linkedin_profile' && val !== '-' && ssSearchQuery) {
+        var cleanQuery = ssSearchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        var regex = new RegExp('(' + cleanQuery + ')', 'gi');
+        val = String(val).replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>');
+      }
+
       bodyHtml += '<td>' + val + '</td>';
     });
 

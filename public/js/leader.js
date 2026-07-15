@@ -140,9 +140,15 @@
         var statusClass = m.status === 'On Track' ? 'badge-success' : m.status === 'Behind' ? 'badge-warning' : 'badge-danger';
         var barClass = m.progress >= 75 ? 'green' : m.progress >= 50 ? '' : 'red';
         var sno = start + idx + 1;
+        var displayName = m.name;
+        if (searchVal) {
+          var cleanQuery = searchVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          var regex = new RegExp('(' + cleanQuery + ')', 'gi');
+          displayName = displayName.replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>');
+        }
         rows += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-          '<td><div style="display:flex;align-items:center;gap:10px"><div class="member-avatar" style="background:' + m.color + '">' + m.initials + '</div><span style="font-weight:500">' + m.name + '</span></div></td>' +
+          '<td><div style="display:flex;align-items:center;gap:10px"><div class="member-avatar" style="background:' + m.color + '">' + m.initials + '</div><span style="font-weight:500">' + displayName + '</span></div></td>' +
           '<td style="text-align:center;font-weight:600">' + m.assigned + '</td>' +
           '<td style="text-align:center;font-weight:600;color:#10B981">' + m.completed + '</td>' +
           '<td style="text-align:center;font-weight:600;color:' + (m.pending > 20 ? '#EF4444' : '#F59E0B') + '">' + m.pending + '</td>' +
@@ -805,13 +811,31 @@
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
         var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
+
+        var nameVal = r.name || '-';
+        var deptVal = r.department || '-';
+        var batchVal = r.batch || '-';
+        var compVal = r.company || '-';
+        var desgVal = r.designation || '-';
+
+        if (searchVal) {
+          var cleanQuery = searchVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          var regex = new RegExp('(' + cleanQuery + ')', 'gi');
+          var highlightMark = '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>';
+          if (nameVal !== '-') nameVal = nameVal.replace(regex, highlightMark);
+          if (deptVal !== '-') deptVal = deptVal.replace(regex, highlightMark);
+          if (batchVal !== '-') batchVal = batchVal.replace(regex, highlightMark);
+          if (compVal !== '-') compVal = compVal.replace(regex, highlightMark);
+          if (desgVal !== '-') desgVal = desgVal.replace(regex, highlightMark);
+        }
+
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-          '<td><strong>' + (r.name || '-') + '</strong></td>' +
-          '<td>' + (r.department || '-') + '</td>' +
-          '<td>' + (r.batch || '-') + '</td>' +
-          '<td>' + (r.company || '-') + '</td>' +
-          '<td>' + (r.designation || '-') + '</td>' +
+          '<td><strong>' + nameVal + '</strong></td>' +
+          '<td>' + deptVal + '</td>' +
+          '<td>' + batchVal + '</td>' +
+          '<td>' + compVal + '</td>' +
+          '<td>' + desgVal + '</td>' +
           '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
           '<td style="text-align:center"><button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button></td>' +
           '</tr>';

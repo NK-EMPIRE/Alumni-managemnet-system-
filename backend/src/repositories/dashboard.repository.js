@@ -112,6 +112,7 @@ async function getLeaderStats(leaderId) {
       FROM Teams t
       INNER JOIN AlumniAssignments aa ON t.team_id = aa.team_id
       WHERE t.leader_id = @leaderId
+      GROUP BY t.team_id
     `);
   return result.recordset[0];
 }

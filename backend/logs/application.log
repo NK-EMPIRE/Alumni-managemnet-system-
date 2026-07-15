@@ -741,3 +741,15 @@
 {"level":"error","message":"UNEXPECTED: Incorrect syntax near the keyword 'AS'.","stack":"RequestError: Incorrect syntax near the keyword 'AS'.\n    at handleError (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:509:28)\n    at addChunk (node:internal/streams/readable:563:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:540:3)\n    at Readable.push (node:internal/streams/readable:395:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-07-15 09:41:05.350"}
 {"duplicates":0,"errors":0,"fileName":"1784089118974-363d0fd7d5618f56.xlsx","imported":0,"level":"info","merged":2,"message":"[AUDIT] EXCEL_IMPORTED","skipped":8,"timestamp":"2026-07-15 09:48:42.214","total":10,"userId":29}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 09:57:56.481","userId":1}
+{"error":"Failed to connect to 103.207.1.87:1433 in 15000ms","level":"error","message":"Failed to start server:","timestamp":"2026-07-15 10:10:51.534"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 10:13:44.356"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 10:13:44.359"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 10:13:44.360"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 10:13:44.360"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 10:13:52.667","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 10:13:58.244","userId":1}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 10:17:52.066"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 10:17:52.070"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 10:17:52.070"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 10:17:52.070"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 10:18:25.550","userId":1}

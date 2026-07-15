@@ -146,7 +146,8 @@ async function update(userId, fields) {
     phone: 'phone',
     roleId: 'role_id',
     leaderId: 'leader_id',
-    isActive: 'is_active'
+    isActive: 'is_active',
+    department: 'department'
   };
 
   for (const [key, value] of Object.entries(fields)) {
@@ -157,7 +158,7 @@ async function update(userId, fields) {
       else if (key === 'isActive') sqlType = sql.Bit;
       else if (key === 'email') sqlType = sql.NVarChar(150);
       else if (key === 'phone') sqlType = sql.NVarChar(20);
-      else if (key === 'firstName' || key === 'lastName') sqlType = sql.NVarChar(100);
+      else if (key === 'firstName' || key === 'lastName' || key === 'department') sqlType = sql.NVarChar(100);
 
       request.input(key, sqlType, value);
       setClauses.push(`${fieldMap[key]} = @${key}`);
