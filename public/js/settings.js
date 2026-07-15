@@ -182,6 +182,47 @@
     }
   });
 
+  window.togglePassword = function(id, btn) {
+    var input = document.getElementById(id);
+    var icon = btn.querySelector('i');
+    if (!input || !icon) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fas fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'far fa-eye';
+    }
+  };
+
+  window.savePasswordFromSettings = function() {
+    var oldPass = document.getElementById('settingsOldPass').value;
+    var newPass = document.getElementById('settingsNewPass').value;
+    var confirmPass = document.getElementById('settingsConfirmPass').value;
+
+    if (!oldPass || !newPass || !confirmPass) {
+      Toast.danger('Validation', 'All password fields are required.');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      Toast.danger('Validation', 'New passwords do not match.');
+      return;
+    }
+
+    if (typeof API !== 'undefined' && API.changePassword) {
+      API.changePassword(oldPass, newPass).then(function(res) {
+        Toast.success('Security', 'Password changed successfully!');
+        document.getElementById('settingsOldPass').value = '';
+        document.getElementById('settingsNewPass').value = '';
+        document.getElementById('settingsConfirmPass').value = '';
+      }).catch(function(err) {
+        Toast.danger('Error', err.message || 'Failed to update password.');
+      });
+    } else {
+      Toast.danger('Error', 'API integration not loaded.');
+    }
+  };
+
   loadSettings();
 
   document.querySelectorAll('.sidebar-item a').forEach(function (item) {

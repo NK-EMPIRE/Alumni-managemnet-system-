@@ -3,7 +3,7 @@ const { sql, getPool } = require('../config/database');
 const ALLOWED_UPDATE_FIELDS = [
   'name', 'gender', 'batch', 'department', 'email', 'phone',
   'company', 'designation', 'working_details', 'linkedin_profile', 'date_of_birth',
-  'experience', 'salary', 'city', 'country'
+  'experience', 'salary', 'city', 'country', 'father_name'
 ];
 
 const FIELD_TYPES = {
@@ -21,7 +21,8 @@ const FIELD_TYPES = {
   experience: sql.NVarChar(50),
   salary: sql.NVarChar(50),
   city: sql.NVarChar(100),
-  country: sql.NVarChar(100)
+  country: sql.NVarChar(100),
+  father_name: sql.NVarChar(150)
 };
 
 async function findAll({ page, limit, offset, search, department, batch, status }) {
@@ -86,13 +87,13 @@ async function findById(alumniId) {
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at,
+        a.updated_date, a.created_at, a.father_name,
         pi.info_id, pi.company AS pi_company, pi.designation AS pi_designation,
         pi.current_city, pi.state, pi.country,
         pi.email AS pi_email, pi.phone AS pi_phone,
         pi.linkedin_url, pi.higher_studies,
         pi.is_entrepreneur, pi.is_government_job, pi.other_occupation,
-        pi.remarks, pi.updated_by, pi.updated_at AS pi_updated_at,
+        pi.remarks, pi.updated_by, pi.updated_at AS pi_updated_at, pi.father_name AS pi_father_name,
         aa.assignment_id, aa.team_id, aa.member_id,
         aa.status AS assignment_status,
         aa.assigned_date, aa.completed_date
@@ -189,16 +190,17 @@ async function createProfessionalInfo(data) {
     .input('otherOccupation', sql.NVarChar(200), data.other_occupation)
     .input('remarks', sql.NVarChar(sql.MAX), data.remarks)
     .input('updatedBy', sql.Int, data.updated_by)
+    .input('fatherName', sql.NVarChar(150), data.father_name || null)
     .query(`
       INSERT INTO ProfessionalInformation
         (alumni_id, company, designation, current_city, state, country,
          email, phone, linkedin_url, higher_studies, is_entrepreneur,
-         is_government_job, other_occupation, remarks, updated_by)
+         is_government_job, other_occupation, remarks, updated_by, father_name)
       OUTPUT INSERTED.*
       VALUES
         (@alumniId, @company, @designation, @currentCity, @state, @country,
          @email, @phone, @linkedinUrl, @higherStudies, @isEntrepreneur,
-         @isGovernmentJob, @otherOccupation, @remarks, @updatedBy)
+         @isGovernmentJob, @otherOccupation, @remarks, @updatedBy, @fatherName)
     `);
 
   const updateReq = pool.request();
@@ -210,6 +212,7 @@ async function createProfessionalInfo(data) {
   updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
   updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
   updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
+  updateReq.input('fatherName', sql.NVarChar(150), data.father_name || null);
   await updateReq.query(`
     UPDATE Alumni
     SET company = @company,
@@ -219,6 +222,7 @@ async function createProfessionalInfo(data) {
         working_details = @workingDetails,
         linkedin_profile = @linkedinProfile,
         date_of_birth = COALESCE(@dateOfBirth, date_of_birth),
+        father_name = COALESCE(@fatherName, father_name),
         is_updated = 1,
         updated_date = GETUTCDATE()
     WHERE alumni_id = @alumniId

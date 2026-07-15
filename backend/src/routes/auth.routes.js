@@ -11,5 +11,10 @@ router.post('/login', loginRules, validate, authController.login);
 router.post('/refresh-token', refreshTokenRules, validate, authController.refreshToken);
 router.post('/change-password', authenticate, changePasswordRules, validate, authController.changePassword);
 router.post('/forgot-password', [body('email').isEmail().normalizeEmail()], validate, authController.forgotPassword);
+router.post('/reset-password-with-temp', [
+  body('email').isEmail().normalizeEmail(),
+  body('temporaryPassword').notEmpty(),
+  body('newPassword').isLength({ min: 6 })
+], validate, authController.resetPasswordWithTemp);
 
 module.exports = router;

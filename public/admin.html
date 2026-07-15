@@ -417,7 +417,7 @@
           </div>
         </div>
 
-        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 220px);">
+        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
           <!-- Spreadsheet Toolbar -->
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -459,12 +459,12 @@
           </div>
 
           <!-- Column Show/Hide Dropdown Menu -->
-          <div id="columnVisibilityMenu" class="dropdown-menu" style="display:none;position:absolute;right:300px;top:260px;z-index:100;width:200px;max-height:300px;overflow-y:auto;padding:10px;">
+          <div id="columnVisibilityMenu" class="dropdown-menu" style="display:none;position:absolute;z-index:100;width:200px;max-height:300px;overflow-y:auto;padding:10px;">
             <!-- Generated Dynamically -->
           </div>
 
           <!-- Spreadsheet Table Container -->
-          <div class="table-container" style="flex:1;overflow:auto;max-height:500px;position:relative;">
+          <div class="table-container" style="flex:1;overflow:auto;position:relative;">
             <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;">
               <thead style="position:sticky;top:0;z-index:3;background:#E2E8F0;">
                 <tr id="ssTableHeadRow">
@@ -635,6 +635,20 @@
             <div class="card-body" id="tlRankingList"></div>
           </div>
         </div>
+        <!-- Team Progress Watch -->
+        <div class="card fade-in-up" style="margin-bottom:24px;">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <h3><i class="fas fa-eye" style="color:var(--primary);margin-right:8px;"></i>Team Progress Watch</h3>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <select id="progressLeaderSelect" style="padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;cursor:pointer;min-width:240px;">
+                <option value="">— Select Team Leader —</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body" id="teamProgressPanel" style="min-height:80px;">
+            <p style="color:var(--text-muted);text-align:center;padding:24px;">Select a team leader from the dropdown to view their team's progress and member statistics.</p>
+          </div>
+        </div>
       </section>
 
       <!-- ─── SETTINGS SECTION ─── -->
@@ -689,17 +703,26 @@
               </button>
             </div>
             <div class="tab-content" id="tab-security">
-              <div class="form-group">
+              <div class="form-group" style="position:relative; margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
-                <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="max-width:400px;">
+                <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="max-width:400px; padding-right: 40px;">
+                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
               </div>
-              <div class="form-group">
+              <div class="form-group" style="position:relative; margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
-                <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="max-width:400px;">
+                <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="max-width:400px; padding-right: 40px;">
+                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
               </div>
-              <div class="form-group">
+              <div class="form-group" style="position:relative; margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
-                <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="max-width:400px;">
+                <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="max-width:400px; padding-right: 40px;">
+                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsConfirmPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
               </div>
               <button class="btn btn-primary" onclick="saveAdminPassword()">
                 <i class="fas fa-save"></i> Update Password
@@ -1159,6 +1182,10 @@
               style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned
               Alumni</label><span id="tlDetailAssigned" style="font-weight:500;">-</span></div>
         </div>
+        <div style="margin-top:20px;border-top:1px solid #E2E8F0;padding-top:16px;">
+          <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:8px;">Teammates / Members</label>
+          <div id="tlDetailTeammatesList" style="font-size:0.85rem;color:#1E293B;max-height:120px;overflow-y:auto;background:#F8FAFC;padding:8px 12px;border-radius:6px;border:1px solid #E2E8F0;line-height:1.6;">-</div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('viewTLModal')">Close</button>
@@ -1361,6 +1388,10 @@
             <option value="IT">IT</option>
           </select>
           <label class="floating-label">Department <span style="color:var(--danger);">*</span></label>
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="text" id="editFatherName" placeholder="Father's Name">
+          <label class="floating-label">Father's Name</label>
         </div>
         <div class="form-group">
           <input class="form-control" type="email" id="editEmail" placeholder="Email Address">

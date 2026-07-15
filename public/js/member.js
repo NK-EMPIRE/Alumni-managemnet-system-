@@ -222,6 +222,8 @@
         record.name = document.getElementById('fieldName').value.trim();
         record.department = document.getElementById('fieldDept').value;
         record.batch = document.getElementById('fieldBatch').value;
+        record.fatherName = document.getElementById('fieldFatherName').value.trim();
+        record.father_name = record.fatherName;
         record.company = document.getElementById('fieldCompany').value.trim();
         record.designation = document.getElementById('fieldDesignation').value.trim();
         record.city = document.getElementById('fieldCity').value.trim();
@@ -273,6 +275,7 @@
         document.getElementById('fieldName').value = record.name || '';
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
+        document.getElementById('fieldFatherName').value = record.fatherName || record.father_name || record.pi_father_name || '';
         document.getElementById('fieldCompany').value = record.company || '';
         document.getElementById('fieldDesignation').value = record.designation || '';
         document.getElementById('fieldCity').value = record.city || record.current_city || '';
@@ -596,6 +599,21 @@
             }
         };
 
+        window.togglePasswordVisibility = function(id, btn) {
+            var input = document.getElementById(id);
+            var icon = btn.querySelector('i');
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'far fa-eye';
+            }
+        };
+
+        window.togglePassword = window.togglePasswordVisibility; // Alias just in case
+
         window.saveMemberPassword = function() {
             var oldPass = document.getElementById('settingsOldPass').value;
             var newPass = document.getElementById('settingsNewPass').value;
@@ -707,6 +725,12 @@
                 var todayVal = d.todayUpdates || d.todayCount || 0;
                 todayUpdateCount = todayVal;
                 document.getElementById('todayCount').textContent = todayVal;
+                
+                // Set the Team Leader name label
+                var leaderNameEl = document.getElementById('memberLeaderName');
+                if (leaderNameEl) {
+                    leaderNameEl.textContent = d.leaderName || 'Not Assigned';
+                }
             }
             var assigned = results[1];
             if (assigned && assigned.success && assigned.data && assigned.data.records) {

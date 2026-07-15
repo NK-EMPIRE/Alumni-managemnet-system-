@@ -222,39 +222,118 @@
   // ─── Forgot Password Handler ─────────────────────────────────
   const forgotLink = document.querySelector('.forgot-link');
   if (forgotLink) {
-    forgotLink.addEventListener('click', async function (e) {
+    forgotLink.addEventListener('click', function (e) {
       e.preventDefault();
-      const email = prompt('Enter your registered email address to reset your password:');
-      if (!email) return;
-      if (!email.trim() || !email.includes('@')) {
-        alert('Please enter a valid email address.');
-        return;
-      }
-
-      // Show loader during reset request
-      loginLoadingOverlay.classList.add('active');
-      const loadingText = loginLoadingOverlay.querySelector('.loading-text');
-      const loadingSub = loginLoadingOverlay.querySelector('.loading-subtext');
-      if (loadingText) loadingText.textContent = 'Processing request...';
-      if (loadingSub) loadingSub.textContent = 'Verifying email and sending reset information';
-
-      try {
-        const res = await API.forgotPassword(email.trim());
-        if (res && res.success) {
-          alert('If the account exists, a temporary password has been sent to your email.');
-        } else {
-          alert(res.message || 'An error occurred. Please try again.');
-        }
-      } catch (err) {
-        alert(err.message || 'Failed to process password reset request.');
-      } finally {
-        loginLoadingOverlay.classList.remove('active');
-        if (loadingText) loadingText.textContent = 'Signing in...';
-        if (loadingSub) loadingSub.textContent = 'Please wait while we verify your credentials';
-      }
+      openForgotModal();
     });
   }
 
   // ─── Init ────────────────────────────────────────────────────
   loadRememberMe();
 })();
+
+// ─── Forgot Password Modal Globals ───────────────────────────
+var _forgotEmail = '';
+
+function openForgotModal() {
+  var modal = document.getElementById('forgotPasswordModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  document.getElementById('forgotStep1').style.display = 'block';
+  document.getElementById('forgotStep2').style.display = 'none';
+  document.getElementById('forgotEmail').value = '';
+  document.getElementById('forgotEmailError').style.display = 'none';
+  _forgotEmail = '';
+}
+
+function closeForgotModal() {
+  var modal = document.getElementById('forgotPasswordModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function toggleForgotPwd(inputId, btn) {
+  var inp = document.getElementById(inputId);
+  if (!inp) return;
+  var isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.querySelector('i').className = isText ? 'far fa-eye' : 'far fa-eye-slash';
+}
+
+function sendTempPassword() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  var errEl = document.getElementById('forgotEmailError');
+  errEl.style.display = 'none';
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+  _forgotEmail = email;
+  var spinner = document.getElementById('sendTempBtnSpinner');
+  var btn = document.getElementById('sendTempPasswordBtn');
+  spinner.style.display = 'inline';
+  btn.disabled = true;
+
+  API.forgotPassword(email).then(function(res) {
+    spinner.style.display = 'none';
+    btn.disabled = false;
+    if (res && res.success) {
+      document.getElementById('forgotStep1').style.display = 'none';
+      document.getElementById('forgotStep2').style.display = 'block';
+    } else {
+      errEl.textContent = res.message || 'Failed to send temporary password.';
+      errEl.style.display = 'block';
+    }
+  }).catch(function(err) {
+    spinner.style.display = 'none';
+    btn.disabled = false;
+    errEl.textContent = err.message || 'An error occurred. Try again.';
+    errEl.style.display = 'block';
+  });
+}
+
+function setNewPassword() {
+  var tempPwd = document.getElementById('tempPasswordInput').value.trim();
+  var newPwd = document.getElementById('newPasswordInput').value.trim();
+  var confirmPwd = document.getElementById('confirmNewPasswordInput').value.trim();
+  var errEl = document.getElementById('resetPasswordError');
+  errEl.style.display = 'none';
+
+  if (!tempPwd || !newPwd || !confirmPwd) {
+    errEl.textContent = 'All fields are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPwd !== confirmPwd) {
+    errEl.textContent = 'New passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPwd.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var spinner = document.getElementById('setNewPwdSpinner');
+  var btn = document.getElementById('setNewPasswordBtn');
+  spinner.style.display = 'inline';
+  btn.disabled = true;
+
+  API.resetPasswordWithTemp({ email: _forgotEmail, temporaryPassword: tempPwd, newPassword: newPwd }).then(function(res) {
+    spinner.style.display = 'none';
+    btn.disabled = false;
+    if (res && res.success) {
+      closeForgotModal();
+      alert('✅ Password reset successfully! You can now login with your new password.');
+    } else {
+      errEl.textContent = res.message || 'Reset failed. Check your temporary password.';
+      errEl.style.display = 'block';
+    }
+  }).catch(function(err) {
+    spinner.style.display = 'none';
+    btn.disabled = false;
+    errEl.textContent = err.message || 'An error occurred. Try again.';
+    errEl.style.display = 'block';
+  });
+}

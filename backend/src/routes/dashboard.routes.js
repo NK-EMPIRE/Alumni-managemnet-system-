@@ -64,6 +64,12 @@ router.get(
 );
 
 router.get(
+  '/leader/:leaderId/stats',
+  authorize(ROLES.ADMIN),
+  dashboardController.getLeaderStats
+);
+
+router.get(
   '/my-stats',
   authorize(ROLES.LEADER, ROLES.MEMBER),
   dashboardController.getMyStats

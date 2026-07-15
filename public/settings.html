@@ -230,7 +230,32 @@
                   <span><strong>Two-Factor Authentication</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Add an extra layer of security to your account</span></span>
                 </label>
               </div>
-              <button class="btn btn-primary" onclick="saveSecuritySettings()"><i class="fas fa-save"></i> Save</button>
+              <button class="btn btn-primary" onclick="saveSecuritySettings()" style="margin-bottom: 24px;"><i class="fas fa-save"></i> Save Preferences</button>
+
+              <hr style="border:none;border-top:1px solid var(--border);margin:24px 0;">
+              <h4 style="font-size:0.95rem;font-weight:600;margin:0 0 16px;color:var(--text-dark);"><i class="fas fa-key" style="color:var(--primary);margin-right:8px;"></i> Change Password</h4>
+              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Current Password</label>
+                <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password" style="max-width:400px;width:100%;padding-right:40px;">
+                <button type="button" class="password-toggle" onclick="togglePassword('settingsOldPass', this)" style="position:absolute;right:115px;top:38px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
+              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">New Password</label>
+                <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password" style="max-width:400px;width:100%;padding-right:40px;">
+                <button type="button" class="password-toggle" onclick="togglePassword('settingsNewPass', this)" style="position:absolute;right:115px;top:38px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
+              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:#374151;">Confirm Password</label>
+                <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password" style="max-width:400px;width:100%;padding-right:40px;">
+                <button type="button" class="password-toggle" onclick="togglePassword('settingsConfirmPass', this)" style="position:absolute;right:115px;top:38px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
+              <button class="btn btn-primary" onclick="savePasswordFromSettings()"><i class="fas fa-save"></i> Update Password</button>
             </div>
           </div>
 

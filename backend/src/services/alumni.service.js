@@ -75,12 +75,14 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
     email: info.email || null,
     phone: info.phone || null,
     working_details: info.working_details || null,
-    linkedin_profile: info.linkedin_url || info.linkedin_profile || null
+    linkedin_profile: info.linkedin_url || info.linkedin_profile || null,
+    father_name: info.father_name || info.fatherName || null
   };
   await alumniRepository.update(alumniId, alumniUpdate);
 
   const professionalInfo = await alumniRepository.createProfessionalInfo({
     ...info,
+    father_name: info.father_name || info.fatherName || null,
     alumni_id: alumniId,
     updated_by: currentUser.userId
   });
@@ -174,6 +176,7 @@ async function saveDraft(alumniId, data, currentUser) {
       other_occupation: data.other_occupation || data.otherOcc || null,
       remarks: data.remarks || null,
       working_details: data.working_details || null,
+      father_name: data.father_name || data.fatherName || alumni.father_name || null,
       updated_by: currentUser.userId
     });
   } catch (piErr) {

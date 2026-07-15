@@ -152,6 +152,10 @@ var spreadsheetState = {
 /* ────────────────────────────────────────────────────────────
     3c. DOM READY – Initialization
     ──────────────────────────────────────────────────────────── */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 document.addEventListener('DOMContentLoaded', function () {
   try {
     setCurrentDate();
@@ -162,6 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initImportHandlers();
     initAuditHandlers();
     initSpreadsheetHandlers();
+    initProgressWatch();
     fetchAllData();
   } catch (err) {
     console.error('Admin init error:', err);
@@ -224,6 +229,11 @@ function fetchAllData() {
     populateImportHistory();
     populateAuditLogTable();
     populateTeamLeaderDropdowns();
+    // Fill progress watch leader dropdown
+    populateProgressLeaderDropdown();
+    // Dismiss loading screen
+    var ls = document.getElementById('loadingScreen');
+    if (ls) { ls.classList.add('hide'); setTimeout(function() { ls.style.display = 'none'; }, 600); }
   }).catch(function () {
     _apiDataLoaded = false;
     populateDashboardStats();
@@ -238,6 +248,9 @@ function fetchAllData() {
     populateImportHistory();
     populateAuditLogTable();
     populateTeamLeaderDropdowns();
+    populateProgressLeaderDropdown();
+    var ls = document.getElementById('loadingScreen');
+    if (ls) { ls.classList.add('hide'); setTimeout(function() { ls.style.display = 'none'; }, 600); }
   });
 }
 
@@ -538,8 +551,9 @@ function viewTeamLeaderDetails(name) {
     data = dummyTeamLeaders;
   }
   var tl = null;
+  var n = '';
   for (var i = 0; i < data.length; i++) {
-    var n = data[i].name || (data[i].first_name + ' ' + (data[i].last_name || ''));
+    n = data[i].name || (data[i].first_name + ' ' + (data[i].last_name || ''));
     if (n === name) { tl = data[i]; break; }
   }
   if (!tl) { Toast.error('Error', 'Team Leader not found'); return; }
@@ -552,6 +566,32 @@ function viewTeamLeaderDetails(name) {
   document.getElementById('tlDetailPhone').textContent = tl.phone || '-';
   document.getElementById('tlDetailMembers').textContent = tl.members || tl.member_count || 0;
   document.getElementById('tlDetailAssigned').textContent = tl.assigned || tl.assigned_count || 0;
+
+  // List teammates / members assigned to this leader
+  var teammatesDiv = document.getElementById('tlDetailTeammatesList');
+  if (teammatesDiv) {
+    var leaderId = tl.user_id || tl.id;
+    var teammates = [];
+    if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
+      teammates = _apiMembers.records.filter(function(m) {
+        return m.leader_id === leaderId;
+      });
+    } else {
+      teammates = dummyTeamMembers.filter(function(m) {
+        return m.leader === tlName;
+      });
+    }
+    
+    if (teammates.length > 0) {
+      var names = teammates.map(function(m) {
+        var mName = m.name || (m.first_name + ' ' + (m.last_name || ''));
+        return '<div style="display:flex;align-items:center;justify-content:between;border-bottom:1px solid #F1F5F9;padding:4px 0;"><span style="font-weight:500;">' + mName + '</span> <span style="font-size:0.75rem;color:var(--text-muted);">' + (m.department || m.dept || '') + '</span></div>';
+      }).join('');
+      teammatesDiv.innerHTML = names;
+    } else {
+      teammatesDiv.innerHTML = '<span style="color:var(--text-muted);font-style:italic;">No team members assigned</span>';
+    }
+  }
   openModal('viewTLModal');
 }
 
@@ -747,6 +787,102 @@ function populateTLRankings() {
     html += '</div>';
   });
   container.innerHTML = html;
+}
+
+/* ────────────────────────────────────────────────────────────
+   13b. TEAM PROGRESS WATCH (Admin Progress Page)
+   ──────────────────────────────────────────────────────────── */
+function initProgressWatch() {
+  var sel = document.getElementById('progressLeaderSelect');
+  if (!sel) return;
+  sel.addEventListener('change', function() {
+    var lid = this.value;
+    if (lid) loadTeamProgressData(lid);
+    else document.getElementById('teamProgressPanel').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;">Select a team leader to view progress.</p>';
+  });
+}
+
+function populateProgressLeaderDropdown() {
+  var sel = document.getElementById('progressLeaderSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select Team Leader —</option>';
+  var leaders = _apiUsers && _apiUsers.records ? _apiUsers.records : [];
+  leaders.forEach(function(l) {
+    var opt = document.createElement('option');
+    opt.value = l.user_id;
+    opt.textContent = l.first_name + ' ' + l.last_name + ' (' + (l.department || 'No Dept') + ')';
+    sel.appendChild(opt);
+  });
+}
+
+function loadTeamProgressData(leaderId) {
+  var panel = document.getElementById('teamProgressPanel');
+  if (!panel) return;
+  panel.innerHTML = '<div style="text-align:center;padding:32px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--primary);"></i><p style="margin-top:10px;color:var(--text-muted);">Loading...</p></div>';
+  
+  API.getLeaderStats(leaderId).then(function(res) {
+    if (!res || !res.success || !res.data) {
+      panel.innerHTML = '<p style="color:var(--danger);text-align:center;padding:24px;">Failed to load team data.</p>';
+      return;
+    }
+    var d = res.data;
+    var pct = d.completionPercentage || 0;
+    var members = d.teamMembers || [];
+    
+    // Leader card
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px;">';
+    html += mkStatBox('Total Assigned', d.totalAssigned || 0, '#3B82F6');
+    html += mkStatBox('Completed', d.completed || 0, '#10B981');
+    html += mkStatBox('Pending', d.pending || 0, '#F59E0B');
+    html += mkStatBox('Draft', d.draft || 0, '#8B5CF6');
+    html += '</div>';
+    html += '<div style="margin-bottom:20px;">';
+    html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:600;font-size:0.85rem;">Team Completion</span><span style="font-weight:700;color:var(--primary);">' + pct + '%</span></div>';
+    html += '<div class="progress"><div class="progress-bar" style="width:' + pct + '%;background:var(--primary);"></div></div>';
+    html += '</div>';
+    
+    if (members.length === 0) {
+      html += '<p style="color:var(--text-muted);text-align:center;padding:16px;">No team members assigned to this leader.</p>';
+    } else {
+      html += '<h5 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;color:var(--text);"><i class="fas fa-users" style="color:var(--primary);margin-right:6px;"></i>Team Member Progress</h5>';
+      html += '<table style="width:100%;border-collapse:collapse;">';
+      html += '<thead><tr style="background:var(--surface);">';
+      html += '<th style="text-align:left;padding:8px 10px;font-size:0.78rem;color:var(--text-muted);">Member</th>';
+      html += '<th style="text-align:center;padding:8px;font-size:0.78rem;color:var(--text-muted);">Assigned</th>';
+      html += '<th style="text-align:center;padding:8px;font-size:0.78rem;color:var(--text-muted);">Done</th>';
+      html += '<th style="text-align:center;padding:8px;font-size:0.78rem;color:var(--text-muted);">Pending</th>';
+      html += '<th style="text-align:left;padding:8px 10px;font-size:0.78rem;color:var(--text-muted);">Progress</th>';
+      html += '<th style="text-align:center;padding:8px;font-size:0.78rem;color:var(--text-muted);">Status</th>';
+      html += '</tr></thead><tbody>';
+      members.forEach(function(m, i) {
+        var bg = i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.02)';
+        var sc = m.progress >= 75 ? '#10B981' : m.progress >= 50 ? '#F59E0B' : '#EF4444';
+        html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border);">';
+        html += '<td style="padding:10px 10px;font-size:0.83rem;font-weight:500;">' + escapeHtml(m.name) + '</td>';
+        html += '<td style="text-align:center;padding:8px;font-size:0.83rem;">' + m.assigned + '</td>';
+        html += '<td style="text-align:center;padding:8px;font-size:0.83rem;color:#10B981;font-weight:600;">' + m.completed + '</td>';
+        html += '<td style="text-align:center;padding:8px;font-size:0.83rem;color:#F59E0B;">' + m.pending + '</td>';
+        html += '<td style="padding:8px 10px;">';
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<div style="flex:1;background:#E2E8F0;border-radius:4px;height:8px;overflow:hidden;"><div style="width:' + m.progress + '%;height:100%;background:' + sc + ';border-radius:4px;"></div></div>';
+        html += '<span style="font-size:0.78rem;font-weight:600;color:' + sc + ';width:32px;">' + m.progress + '%</span>';
+        html += '</div></td>';
+        html += '<td style="text-align:center;padding:8px;"><span style="font-size:0.73rem;padding:3px 8px;border-radius:20px;background:' + sc + '20;color:' + sc + ';font-weight:600;">' + (m.status || '') + '</span></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+    }
+    panel.innerHTML = html;
+  }).catch(function() {
+    panel.innerHTML = '<p style="color:var(--danger);text-align:center;padding:24px;">Error loading team data.</p>';
+  });
+}
+
+function mkStatBox(label, val, color) {
+  return '<div style="background:' + color + '15;border:1px solid ' + color + '30;border-radius:10px;padding:14px;text-align:center;">' +
+    '<div style="font-size:1.5rem;font-weight:700;color:' + color + ';">' + val + '</div>' +
+    '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">' + label + '</div>' +
+    '</div>';
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -2631,9 +2767,9 @@ window.toggleColumnVisibilityMenu = function() {
     return;
   }
 
-  var html = '<div style="font-weight:600; margin-bottom:8px; font-size:0.85rem; border-bottom:1px solid var(--border); padding-bottom:6px;">Show/Hide Columns</div>';
+  var html = '<div style="font-weight:600; margin-bottom:8px; font-size:0.85rem; border-bottom:1px solid var(--border); padding-bottom:6px; color:#1E293B;">Show/Hide Columns</div>';
   ssColumns.forEach(function(col) {
-    html += '<label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; margin-bottom:6px; cursor:pointer; font-weight:normal;">';
+    html += '<label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; margin-bottom:6px; cursor:pointer; font-weight:normal; color:#475569;">';
     html += '<input type="checkbox" ' + (col.visible ? 'checked' : '') + ' onchange="toggleColumnVisibility(\'' + col.key + '\')"> ' + col.label;
     html += '</label>';
   });
@@ -2645,10 +2781,10 @@ window.toggleColumnVisibilityMenu = function() {
   menu.innerHTML = html;
   menu.style.display = 'block';
 
-  // Click outside to close
+  // Click outside to close, checking we don't close when selecting the checkboxes
   setTimeout(function() {
     function clickOutsideMenu(e) {
-      if (!menu.contains(e.target) && e.target !== btn) {
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
         menu.style.display = 'none';
         document.removeEventListener('click', clickOutsideMenu);
       }
@@ -2790,6 +2926,7 @@ window.editAlumniRecord = function(id) {
       document.getElementById('editGender').value = record.gender || 'Male';
       document.getElementById('editBatch').value = record.batch || '';
       document.getElementById('editDepartment').value = record.department || '';
+      document.getElementById('editFatherName').value = record.father_name || record.pi_father_name || '';
       document.getElementById('editEmail').value = record.email || '';
       document.getElementById('editPhone').value = record.phone || '';
       document.getElementById('editLinkedIn').value = record.linkedin_profile || '';
@@ -2845,6 +2982,7 @@ window.submitEditAlumni = function() {
     gender: document.getElementById('editGender').value,
     batch: document.getElementById('editBatch').value,
     department: document.getElementById('editDepartment').value,
+    father_name: document.getElementById('editFatherName').value,
     email: document.getElementById('editEmail').value,
     phone: document.getElementById('editPhone').value,
     linkedin_profile: document.getElementById('editLinkedIn').value,

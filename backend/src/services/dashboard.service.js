@@ -31,7 +31,38 @@ async function getLeaderStats(leaderId) {
   if (!stats || stats.total_assigned === null) {
     throw new NotFoundError('Leader stats');
   }
-  return stats;
+  
+  // Also fetch team members for admin progress watch
+  const teams = await teamRepository.getLeaderTeams(leaderId);
+  const teamId = teams.length > 0 ? teams[0].team_id : null;
+  let teamMembers = [];
+  if (teamId) {
+    const memberStats = await dashboardRepository.getTeamMemberStats(teamId);
+    teamMembers = memberStats.map(m => {
+      const assigned = m.total_assigned || 0;
+      const completed = m.completed || 0;
+      const pending = m.pending || 0;
+      const progress = assigned > 0 ? Math.round((completed / assigned) * 100) : 0;
+      return {
+        id: m.user_id,
+        name: `${m.first_name} ${m.last_name}`,
+        assigned, completed, pending, progress,
+        status: progress >= 75 ? 'On Track' : progress >= 50 ? 'Behind' : 'Critical'
+      };
+    });
+  }
+  
+  const totalAssigned = stats.total_assigned || 0;
+  const completed = stats.completed || 0;
+  return {
+    totalAssigned,
+    completed,
+    pending: stats.pending || 0,
+    draft: stats.draft || 0,
+    memberCount: stats.member_count || 0,
+    completionPercentage: totalAssigned > 0 ? Math.round((completed / totalAssigned) * 100) : 0,
+    teamMembers
+  };
 }
 
 async function getMemberStats(memberId) {
@@ -155,7 +186,8 @@ async function getMemberDashboard(memberId) {
     todayUpdates: stats?.today_updates || 0,
     completionPercentage: stats?.total_assigned > 0
       ? Math.round(((stats?.completed || 0) / stats?.total_assigned) * 100)
-      : 0
+      : 0,
+    leaderName: stats?.leader_name || 'Not Assigned'
   };
 }
 

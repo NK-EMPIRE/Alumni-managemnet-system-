@@ -935,6 +935,7 @@
         document.getElementById('fieldName').value = record.name || '';
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
+        document.getElementById('fieldFatherName').value = record.father_name || record.pi_father_name || '';
         document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
         document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
         document.getElementById('fieldCity').value = record.current_city || '';
@@ -967,6 +968,7 @@
       name: document.getElementById('fieldName').value.trim(),
       department: document.getElementById('fieldDept').value,
       batch: document.getElementById('fieldBatch').value,
+      father_name: document.getElementById('fieldFatherName').value.trim(),
       company: document.getElementById('fieldCompany').value.trim(),
       designation: document.getElementById('fieldDesignation').value.trim(),
       current_city: document.getElementById('fieldCity').value.trim(),
@@ -1300,7 +1302,7 @@
       nameEls.forEach(function (el) { if (el) el.textContent = user.name; });
       var avatarEls = document.querySelectorAll('.sidebar-user-avatar, .navbar-profile-avatar .avatar');
       avatarEls.forEach(function (el) { if (el) el.textContent = user.name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2); });
-      var greeting = document.querySelector('.page-header p');
+      var greeting = document.querySelector('#globalPageHeader p, .page-header p');
       if (greeting) greeting.textContent = 'Welcome back, ' + user.name.split(' ')[0] + '! Here\'s your team\'s progress overview.';
       
       // Populate General Settings fields
@@ -1650,6 +1652,21 @@
     });
   };
 
+  window.togglePasswordVisibility = function(id, btn) {
+    var input = document.getElementById(id);
+    var icon = btn.querySelector('i');
+    if (!input || !icon) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fas fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'far fa-eye';
+    }
+  };
+  
+  window.togglePassword = window.togglePasswordVisibility; // Alias just in case
+  
   window.saveLeaderPassword = function() {
     var oldPass = document.getElementById('settingsOldPass').value;
     var newPass = document.getElementById('settingsNewPass').value;

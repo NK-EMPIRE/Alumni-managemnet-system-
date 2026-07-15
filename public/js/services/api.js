@@ -66,6 +66,9 @@
         forgotPassword: function (email) {
             return post('/auth/forgot-password', { email: email });
         },
+        resetPasswordWithTemp: function (data) {
+            return post('/auth/reset-password-with-temp', data);
+        },
         isAuthenticated: function () {
             return !!localStorage.getItem('token');
         },
@@ -93,6 +96,9 @@
     },
     getDashboardStats: function () {
         return get('/dashboard/stats');
+    },
+    getLeaderStats: function (leaderId) {
+        return get('/dashboard/leader/' + leaderId + '/stats');
     },
 
     // Users
