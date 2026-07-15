@@ -182,6 +182,7 @@ var _apiImportHistory = null;
 var _apiTeams = null;
 var _apiAuditLogs = null;
 var _apiAssignHistory = null;
+var _apiAlumniFilters = null;
 var _importErrorDetails = [];
 
 function setUserInfo() {
@@ -206,7 +207,8 @@ function fetchAllData() {
     API.getImportHistory().catch(function () { return null; }),
     API.getTeams().catch(function () { return null; }),
     API.getAuditLogs({ page: 1, limit: 1000 }).catch(function () { return null; }),
-    API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; })
+    API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; }),
+    API.getAlumniFilters().catch(function () { return null; })
   ]).then(function (results) {
     _dashboardData = results[0] && results[0].success ? results[0].data : null;
     _apiUsers = results[1] && results[1].success ? results[1].data : null;
@@ -216,7 +218,12 @@ function fetchAllData() {
     _apiTeams = results[5] && results[5].success ? results[5].data : null;
     _apiAuditLogs = results[6] && results[6].success ? results[6].data : null;
     _apiAssignHistory = results[7] && results[7].success ? results[7].data : null;
+    _apiAlumniFilters = results[8] && results[8].success ? results[8].data : null;
     _apiDataLoaded = true;
+    
+    // Populate dynamic filters first
+    populateDynamicFilters(_apiAlumniFilters);
+
     populateDashboardStats();
     populateActivityFeed();
     populateTable();
@@ -986,11 +993,47 @@ function showAllNotifications() {
   Toast.info('Notifications', 'Showing all notifications');
 }
 
+function populateDynamicFilters(filters) {
+  if (!filters || !filters.success || !filters.data) return;
+  var depts = filters.data.departments || [];
+  var batches = filters.data.batches || [];
+  
+  // Populate all department selects
+  var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment'];
+  deptSelects.forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var currentVal = sel.value;
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('ssFilter');
+    var html = isFilter ? '<option value="">All Depts</option>' : '<option value="" disabled selected hidden>Select Department</option>';
+    depts.forEach(function(d) {
+      if (d) html += '<option value="' + d + '">' + d + '</option>';
+    });
+    sel.innerHTML = html;
+    if (currentVal) sel.value = currentVal;
+  });
+
+  // Populate all batch selects
+  var batchSelects = ['filterBatch', 'ssFilterBatch', 'assignBatch'];
+  batchSelects.forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var currentVal = sel.value;
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('ssFilter');
+    var html = isFilter ? '<option value="">All Batches</option>' : '<option value="" disabled selected hidden>Select Batch</option>';
+    batches.forEach(function(b) {
+      if (b) html += '<option value="' + b + '">' + b + '</option>';
+    });
+    sel.innerHTML = html;
+    if (currentVal) sel.value = currentVal;
+  });
+}
+
 /* ────────────────────────────────────────────────────────────
    15. TEAM LEADER DROPDOWNS (for modals)
    ──────────────────────────────────────────────────────────── */
 function populateTeamLeaderDropdowns() {
-  var selects = ['tmTeamLeader', 'assignTeamLeader'];
+  var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader'];
   var leaders;
   if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
     leaders = _apiUsers.records.map(function (u) {
@@ -1003,7 +1046,8 @@ function populateTeamLeaderDropdowns() {
   selects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
-    sel.innerHTML = '<option value="" disabled selected hidden>Select Team Leader</option>';
+    var isFilter = id === 'ssFilterLeader';
+    sel.innerHTML = isFilter ? '<option value="">All Leaders</option>' : '<option value="" disabled selected hidden>Select Team Leader</option>';
     leaders.forEach(function (tl) {
       var opt = document.createElement('option');
       opt.value = tl.id || tl.name;
@@ -1673,10 +1717,34 @@ function filterTeamLeaders() {
 
 function filterTeamMembers() {
   var q = getVal('tmSearch').toLowerCase();
+  var leaderFilter = document.getElementById('tmFilterLeader') ? document.getElementById('tmFilterLeader').value.toLowerCase() : '';
+  
   var rows = document.querySelectorAll('#tmBody tr');
   rows.forEach(function (row) {
     var text = row.textContent.toLowerCase();
-    row.style.display = text.indexOf(q) === -1 ? 'none' : '';
+    
+    // Check search query matches
+    var matchesSearch = text.indexOf(q) !== -1;
+    
+    // Check leader matches
+    var matchesLeader = true;
+    if (leaderFilter) {
+      // Find the 6th column (index 5)
+      var leaderCol = row.cells[5];
+      var leaderText = leaderCol ? leaderCol.textContent.trim().toLowerCase() : '';
+      
+      // Resolve option name
+      var select = document.getElementById('tmFilterLeader');
+      var selectedOpt = select.options[select.selectedIndex];
+      var leaderName = selectedOpt ? selectedOpt.getAttribute('data-name') : null;
+      if (leaderName) {
+        matchesLeader = leaderText.indexOf(leaderName.toLowerCase()) !== -1;
+      } else {
+        matchesLeader = leaderText.indexOf(leaderFilter) !== -1;
+      }
+    }
+    
+    row.style.display = (matchesSearch && matchesLeader) ? '' : 'none';
   });
 }
 
@@ -2023,7 +2091,7 @@ function populateImportHistory() {
       };
     });
   } else {
-    data = importHistory;
+    data = [];
   }
   _importErrorDetails = data;
   var html = '';
@@ -2444,6 +2512,7 @@ function populateViewModal(record) {
   document.getElementById('vAlumniRegNo').innerText = record.register_no || record.registerNo || '-';
   document.getElementById('vAlumniGender').innerText = record.gender || '-';
   document.getElementById('vAlumniDOB').innerText = record.date_of_birth || record.dob || '-';
+  document.getElementById('vAlumniFatherName').innerText = record.father_name || record.fatherName || '-';
   document.getElementById('vAlumniEmail').innerText = record.email || '-';
   document.getElementById('vAlumniPhone').innerText = record.phone || '-';
   
@@ -2518,6 +2587,7 @@ window.fetchSpreadsheetData = function() {
   var dept = document.getElementById('ssFilterDept').value;
   var batch = document.getElementById('ssFilterBatch').value;
   var status = document.getElementById('ssFilterStatus').value;
+  var leaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
 
   // Load stats
   API.getAlumniStats().then(function(res) {
@@ -2550,7 +2620,8 @@ window.fetchSpreadsheetData = function() {
     search: ssSearchQuery || undefined,
     department: dept || undefined,
     batch: batch || undefined,
-    status: status || undefined
+    status: status || undefined,
+    leaderId: leaderId || undefined
   };
 
   API.getAlumni(params).then(function(res) {

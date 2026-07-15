@@ -28,7 +28,8 @@ def map_column_name(normalized_header):
         'linkedinProfile': ['linkedin_profile', 'linkedin_url', 'linkedin', 'linkedinurl', 'linkedinfacebook', 'linkedin_facebook', 'facebook'],
         'company': ['company', 'organization', 'org', 'employer'],
         'designation': ['designation', 'role', 'position', 'job_title', 'jobtitle'],
-        'facultyAssigned': ['faculty_assigned', 'faculty', 'assigned_faculty', 'faculty_name', 'facultyname']
+        'facultyAssigned': ['faculty_assigned', 'faculty', 'assigned_faculty', 'faculty_name', 'facultyname'],
+        'fatherName': ['father_name', 'fathername', 'fathers_name', 'fathersname', 'father_s_name', 'father']
     }
     
     for target, alternates in mappings.items():
@@ -229,6 +230,11 @@ def main():
                 if dob_str.endswith('.0'):
                     dob_str = dob_str[:-2]
                 record['dateOfBirth'] = dob_str
+
+            # Father Name
+            fname = record.get('fatherName')
+            if fname:
+                record['fatherName'] = str(fname).strip()
 
             # Add to valid list
             all_records.append(record)

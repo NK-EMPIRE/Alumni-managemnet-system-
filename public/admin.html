@@ -70,11 +70,6 @@
         <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
-        <a class="sidebar-item sub-item" data-section="teamLeaders" data-sub="viewAll"
-          onclick="navigateTo('teamLeaders', this)">
-          <i class="fas fa-list"></i>
-          <span class="sidebar-item-text">View All</span>
-        </a>
         <a class="sidebar-item sub-item" data-section="addTeamLeader" onclick="openModal('addTeamLeaderModal')">
           <i class="fas fa-plus-circle"></i>
           <span class="sidebar-item-text">Add New</span>
@@ -87,11 +82,6 @@
         <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
-        <a class="sidebar-item sub-item" data-section="teamMembers" data-sub="viewAll"
-          onclick="navigateTo('teamMembers', this)">
-          <i class="fas fa-list"></i>
-          <span class="sidebar-item-text">View All</span>
-        </a>
         <a class="sidebar-item sub-item" data-section="addTeamMember" onclick="openModal('addTeamMemberModal')">
           <i class="fas fa-plus-circle"></i>
           <span class="sidebar-item-text">Add New</span>
@@ -425,6 +415,9 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
               </div>
+              <select class="form-control" id="ssFilterLeader" onchange="fetchSpreadsheetData()" style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Leaders</option>
+              </select>
               <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()" style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
                 <option value="">All Depts</option>
                 <option value="CSE">CSE</option>
@@ -554,6 +547,9 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search team members..." id="tmSearch" oninput="filterTeamMembers()">
               </div>
+              <select class="form-control" id="tmFilterLeader" onchange="filterTeamMembers()" style="max-width:200px;height:36px;font-size:0.8rem;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);">
+                <option value="">All Leaders</option>
+              </select>
             </div>
             <div class="table-container">
               <table class="table" id="tmTable">
@@ -703,26 +699,32 @@
               </button>
             </div>
             <div class="tab-content" id="tab-security">
-              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
-                <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="max-width:400px; padding-right: 40px;">
-                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
-                  <i class="far fa-eye"></i>
-                </button>
+                <div style="position:relative; max-width:400px;">
+                  <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                    <i class="far fa-eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
-                <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="max-width:400px; padding-right: 40px;">
-                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
-                  <i class="far fa-eye"></i>
-                </button>
+                <div style="position:relative; max-width:400px;">
+                  <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                    <i class="far fa-eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
-                <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="max-width:400px; padding-right: 40px;">
-                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsConfirmPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
-                  <i class="far fa-eye"></i>
-                </button>
+                <div style="position:relative; max-width:400px;">
+                  <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsConfirmPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                    <i class="far fa-eye"></i>
+                  </button>
+                </div>
               </div>
               <button class="btn btn-primary" onclick="saveAdminPassword()">
                 <i class="fas fa-save"></i> Update Password
@@ -1269,6 +1271,11 @@
               style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Date
               of Birth</label>
             <span id="vAlumniDOB" style="font-weight:500;">-</span>
+          </div>
+          <div>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Father's Name</label>
+            <span id="vAlumniFatherName" style="font-weight:500;">-</span>
           </div>
           <div>
             <label

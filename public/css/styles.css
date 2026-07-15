@@ -389,7 +389,7 @@ ul {
 }
 
 .sidebar-collapsed .sidebar-brand {
-  justify-content: center;
+  display: none !important;
 }
 
 .sidebar-collapsed .sidebar-header {
@@ -1097,6 +1097,7 @@ ul {
   color: #CBD5E1;
 }
 
+select.form-control ~ .floating-label,
 .form-control:not(:placeholder-shown)~.floating-label,
 .form-control:focus~.floating-label {
   top: 0;
