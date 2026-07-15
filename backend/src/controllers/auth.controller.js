@@ -35,8 +35,15 @@ const changePassword = asyncHandler(async (req, res) => {
   success(res, null, 'Password changed successfully');
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  await authService.forgotPassword(email);
+  success(res, null, 'Temporary password sent to email if account exists');
+});
+
 module.exports = {
   login,
   refreshToken,
-  changePassword
+  changePassword,
+  forgotPassword
 };

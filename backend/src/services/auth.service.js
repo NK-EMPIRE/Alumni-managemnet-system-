@@ -98,8 +98,28 @@ async function refreshToken(token) {
   }
 }
 
+async function forgotPassword(email) {
+  const user = await authRepo.findByEmail(email);
+  if (!user) {
+    // Return early to prevent timing attacks / email discovery, but log it
+    logger.info(`Forgot password request for non-existent email: ${email}`);
+    return;
+  }
+
+  const { generateTemporaryPassword } = require('../utils/password');
+  const { sendPasswordResetEmail } = require('../helpers/email');
+  
+  const tempPass = generateTemporaryPassword();
+  const hashed = await hashPassword(tempPass);
+  
+  await authRepo.updatePassword(user.user_id, hashed);
+  await sendPasswordResetEmail(user.email, tempPass);
+  logger.auditLog('Password reset requested via forgot password', { userId: user.user_id });
+}
+
 module.exports = {
   login,
   changePassword,
-  refreshToken
+  refreshToken,
+  forgotPassword
 };

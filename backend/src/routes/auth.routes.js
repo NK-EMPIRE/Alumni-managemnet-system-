@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const { body } = require('express-validator');
 const authController = require('../controllers/auth.controller');
 const authenticate = require('../middleware/authenticate');
 const validate = require('../middleware/validate');
@@ -9,5 +10,6 @@ const router = Router();
 router.post('/login', loginRules, validate, authController.login);
 router.post('/refresh-token', refreshTokenRules, validate, authController.refreshToken);
 router.post('/change-password', authenticate, changePasswordRules, validate, authController.changePassword);
+router.post('/forgot-password', [body('email').isEmail().normalizeEmail()], validate, authController.forgotPassword);
 
 module.exports = router;

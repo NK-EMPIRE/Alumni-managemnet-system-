@@ -814,3 +814,65 @@
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 12:06:11.932"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 12:06:11.932"}
 {"duplicates":25,"errors":25,"fileName":"1784097476214-221db06cb4fcab29.xlsx","imported":0,"level":"info","merged":0,"message":"[AUDIT] EXCEL_IMPORTED","skipped":105,"timestamp":"2026-07-15 12:08:09.773","total":130,"userId":51}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 13:36:49.522"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 13:36:49.526"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 13:36:49.526"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 13:36:49.527"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 13:36:58.949","userId":1}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 13:43:11.499"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 13:43:11.503"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 13:43:11.503"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 13:43:11.504"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-15 13:43:59.580","userId":29}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 13:45:25.239","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 13:51:24.661","userId":24}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 13:52:28.069","userId":24}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-15 13:53:34.102","userId":49}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:11:49.740"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:11:49.743"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:11:49.744"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:11:49.744"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-15 14:12:48.693","userId":49}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 14:16:19.980","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:20:16.414","userId":47}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:20:18.951","userId":47}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:20:31.873","userId":47}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:20:37.610","userId":47}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:20:48.051","userId":47}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:21:28.607","userId":48}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:21:34.441","userId":48}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:21:46.420","userId":48}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:24:13.781","userId":42}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:24:18.500","userId":42}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:24:26.819","userId":42}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-15 14:26:11.665","userId":47}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:29:05.142"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:29:05.146"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:29:05.146"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:29:05.146"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 14:29:35.444","userId":1}
+{"level":"warn","message":"Email not configured. Skipping email send.","subject":"APIUMS - Password Reset","timestamp":"2026-07-15 14:30:27.978","to":"member3@gmail.com"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-15 14:31:10.661","userId":52}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-15 14:31:19.897","userId":52}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:32:57.957"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:32:57.960"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:32:57.960"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:32:57.961"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-15 14:33:25.598","userId":1}
+{"duplicates":0,"errors":0,"fileName":"1784106356913-ee5bc917be3b94d1.xlsx","imported":238,"level":"info","merged":0,"message":"[AUDIT] EXCEL_IMPORTED","skipped":0,"timestamp":"2026-07-15 14:38:05.765","total":238,"userId":1}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:44:51.283"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:44:51.287"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:44:51.288"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:44:51.288"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:44:55.639"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:44:55.643"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:44:55.644"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:44:55.644"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:45:04.522"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:45:04.525"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:45:04.526"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:45:04.526"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-15 14:45:20.367"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 14:45:20.371"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 14:45:20.371"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 14:45:20.372"}

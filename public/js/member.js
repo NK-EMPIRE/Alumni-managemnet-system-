@@ -824,6 +824,12 @@
         initNotifications();
         initSidebar();
         initSessionTimeout();
+
+        // Hide loading screen
+        var loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            setTimeout(function () { loadingScreen.classList.add('hide'); }, 300);
+        }
     }
 
     if (document.readyState === 'loading') {
