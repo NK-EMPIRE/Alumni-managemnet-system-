@@ -658,26 +658,14 @@
             </div>
             <div class="tab-content active" id="tab-general">
               <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">System Name</label>
-                <input class="form-control" type="text" value="Alumni Professional Details Update Management System"
-                  style="max-width:400px;">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Your Name</label>
+                <input class="form-control" type="text" id="adminSettingsName" style="max-width:400px;">
               </div>
               <div class="form-group">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Admin Email</label>
-                <input class="form-control" type="email" value="admin@alumnims.edu" style="max-width:400px;">
+                <input class="form-control" type="email" id="adminSettingsEmail" style="max-width:400px;">
               </div>
-              <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Records Per
-                  Page</label>
-                <select class="form-control form-select" style="max-width:200px;">
-                  <option>5</option>
-                  <option selected>10</option>
-                  <option>20</option>
-                  <option>50</option>
-                </select>
-              </div>
-              <button class="btn btn-primary"
-                onclick="Toast.success('Settings','General settings saved successfully!')">
+              <button class="btn btn-primary" onclick="saveAdminProfile()">
                 <i class="fas fa-save"></i> Save Settings
               </button>
             </div>
@@ -702,20 +690,18 @@
             </div>
             <div class="tab-content" id="tab-security">
               <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current
-                  Password</label>
-                <input class="form-control" type="password" value="password123" style="max-width:400px;">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
+                <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="max-width:400px;">
               </div>
               <div class="form-group">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
-                <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;">
+                <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="max-width:400px;">
               </div>
               <div class="form-group">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm
-                  Password</label>
-                <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;">
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
+                <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="max-width:400px;">
               </div>
-              <button class="btn btn-primary" onclick="Toast.success('Security','Password changed successfully!')">
+              <button class="btn btn-primary" onclick="saveAdminPassword()">
                 <i class="fas fa-save"></i> Update Password
               </button>
             </div>
@@ -803,6 +789,7 @@
               <i class="fas fa-folder-open"></i> Browse Files
             </button>
             <div id="fileName" style="margin-top:12px;font-size:0.85rem;color:#10B981;display:none;"></div>
+          </div>
           <div id="importPreviewContainer" style="display:none;margin-top:24px;border-top:1px solid var(--border);padding-top:24px;">
             <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:12px;">Import Preview</h3>
             <div class="table-container" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
@@ -1189,7 +1176,7 @@
         <div
           style="display:flex;align-items:center;gap:16px;margin-bottom:24px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
           <div id="tlAvatar"
-            style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">
+            style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#8B5CF6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">
             A</div>
           <div>
             <h2 id="tlDetailName" style="margin:0;font-size:1.2rem;font-weight:600;">-</h2>

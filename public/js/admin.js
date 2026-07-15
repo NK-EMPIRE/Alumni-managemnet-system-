@@ -143,6 +143,11 @@ function setUserInfo() {
   var navbarName = document.getElementById('navbarProfileName');
   if (sidebarName && user.name) sidebarName.textContent = user.name;
   if (navbarName && user.name) navbarName.textContent = user.name.split(' ')[0];
+  
+  var settingsName = document.getElementById('adminSettingsName');
+  var settingsEmail = document.getElementById('adminSettingsEmail');
+  if (settingsName) settingsName.value = user.name || '';
+  if (settingsEmail && user.email) settingsEmail.value = user.email || '';
 }
 
 function fetchAllData() {
@@ -225,8 +230,8 @@ function populateDashboardStats() {
     total = 0;
     pending = 0;
     completed = 0;
-    tlCount = dummyTeamLeaders.length;
-    tmCount = dummyTeamMembers.length;
+    tlCount = 0;
+    tmCount = 0;
     progressPct = 0;
   }
 
@@ -522,28 +527,30 @@ function viewTeamMemberDetails(name) {
 function populateTeamLeadersTable() {
   var tbody = document.getElementById('tlBody');
   if (!tbody) return;
-  var data;
+  var data = [];
   if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
     data = _apiUsers.records.map(function (u) {
       var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
       return { name: name, email: u.email, phone: u.phone || '-', dept: u.department || '-', members: u.member_count || 0, assigned: u.assigned_count || 0 };
     });
-  } else {
-    data = dummyTeamLeaders;
   }
   var html = '';
-  data.forEach(function (tl, i) {
-    html += '<tr>';
-    html += '<td>' + (i + 1) + '</td>';
-    html += '<td><strong>' + tl.name + '</strong></td>';
-    html += '<td>' + tl.email + '</td>';
-    html += '<td>' + tl.phone + '</td>';
-    html += '<td>' + tl.dept + '</td>';
-    html += '<td>' + tl.members + '</td>';
-    html += '<td>' + tl.assigned + '</td>';
-    html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamLeaderDetails(\'' + tl.name + '\')"><i class="fas fa-eye"></i></button></td>';
-    html += '</tr>';
-  });
+  if (data.length === 0) {
+    html = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:24px;">No team leaders available.</td></tr>';
+  } else {
+    data.forEach(function (tl, i) {
+      html += '<tr>';
+      html += '<td>' + (i + 1) + '</td>';
+      html += '<td><strong>' + tl.name + '</strong></td>';
+      html += '<td>' + tl.email + '</td>';
+      html += '<td>' + tl.phone + '</td>';
+      html += '<td>' + tl.dept + '</td>';
+      html += '<td>' + tl.members + '</td>';
+      html += '<td>' + tl.assigned + '</td>';
+      html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamLeaderDetails(\'' + tl.name + '\')"><i class="fas fa-eye"></i></button></td>';
+      html += '</tr>';
+    });
+  }
   tbody.innerHTML = html;
 }
 
@@ -553,28 +560,30 @@ function populateTeamLeadersTable() {
 function populateTeamMembersTable() {
   var tbody = document.getElementById('tmBody');
   if (!tbody) return;
-  var data;
+  var data = [];
   if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
     data = _apiMembers.records.map(function (u) {
       var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
       return { name: name, email: u.email, phone: u.phone || '-', dept: u.department || '-', leader: u.team_leader_name || '-', assigned: u.assigned_count || 0 };
     });
-  } else {
-    data = dummyTeamMembers;
   }
   var html = '';
-  data.forEach(function (tm, i) {
-    html += '<tr>';
-    html += '<td>' + (i + 1) + '</td>';
-    html += '<td><strong>' + tm.name + '</strong></td>';
-    html += '<td>' + tm.email + '</td>';
-    html += '<td>' + tm.phone + '</td>';
-    html += '<td>' + tm.dept + '</td>';
-    html += '<td>' + tm.leader + '</td>';
-    html += '<td>' + tm.assigned + '</td>';
-    html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamMemberDetails(\'' + tm.name + '\')"><i class="fas fa-eye"></i></button></td>';
-    html += '</tr>';
-  });
+  if (data.length === 0) {
+    html = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:24px;">No team members available.</td></tr>';
+  } else {
+    data.forEach(function (tm, i) {
+      html += '<tr>';
+      html += '<td>' + (i + 1) + '</td>';
+      html += '<td><strong>' + tm.name + '</strong></td>';
+      html += '<td>' + tm.email + '</td>';
+      html += '<td>' + tm.phone + '</td>';
+      html += '<td>' + tm.dept + '</td>';
+      html += '<td>' + tm.leader + '</td>';
+      html += '<td>' + tm.assigned + '</td>';
+      html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamMemberDetails(\'' + tm.name + '\')"><i class="fas fa-eye"></i></button></td>';
+      html += '</tr>';
+    });
+  }
   tbody.innerHTML = html;
 }
 
@@ -1498,6 +1507,55 @@ function switchSettingsTab(tab, btn) {
   var target = document.getElementById('tab-' + tab);
   if (target) target.classList.add('active');
 }
+
+window.saveAdminProfile = function() {
+  var user = API.getUser();
+  if (!user || !user.id) return;
+  var name = document.getElementById('adminSettingsName').value.trim();
+  var email = document.getElementById('adminSettingsEmail').value.trim();
+  if (!name || !email) {
+    Toast.danger('Validation', 'Name and Email are required.');
+    return;
+  }
+  
+  var parts = name.split(' ');
+  var fName = parts[0];
+  var lName = parts.slice(1).join(' ') || '';
+
+  API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function(res) {
+    Toast.success('Settings', 'Admin profile updated successfully!');
+    user.name = name;
+    user.email = email;
+    localStorage.setItem('user', JSON.stringify(user));
+    setUserInfo();
+  }).catch(function(err) {
+    Toast.danger('Error', err.message || 'Failed to update profile.');
+  });
+};
+
+window.saveAdminPassword = function() {
+  var oldPass = document.getElementById('adminSettingsOldPass').value;
+  var newPass = document.getElementById('adminSettingsNewPass').value;
+  var confirmPass = document.getElementById('adminSettingsConfirmPass').value;
+
+  if (!oldPass || !newPass || !confirmPass) {
+    Toast.danger('Validation', 'All password fields are required.');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    Toast.danger('Validation', 'Passwords do not match.');
+    return;
+  }
+
+  API.changePassword(oldPass, newPass).then(function(res) {
+    Toast.success('Security', 'Password changed successfully!');
+    document.getElementById('adminSettingsOldPass').value = '';
+    document.getElementById('adminSettingsNewPass').value = '';
+    document.getElementById('adminSettingsConfirmPass').value = '';
+  }).catch(function(err) {
+    Toast.danger('Error', err.message || 'Failed to update password.');
+  });
+};
 
 /* ────────────────────────────────────────────────────────────
    30. EXPORT BUTTON

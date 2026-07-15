@@ -123,15 +123,24 @@ async function getTeamMemberStats(teamId) {
     .query(`
       SELECT
         u.user_id, u.first_name, u.last_name, u.email,
-        COUNT(aa.assignment_id) AS total_assigned,
-        SUM(CASE WHEN aa.status = 'Completed' THEN 1 ELSE 0 END) AS completed,
-        SUM(CASE WHEN aa.status = 'Pending' THEN 1 ELSE 0 END) AS pending,
-        SUM(CASE WHEN aa.status = 'Draft' THEN 1 ELSE 0 END) AS draft
+        ISNULL(aa.total_assigned, 0) AS total_assigned,
+        ISNULL(aa.completed, 0) AS completed,
+        ISNULL(aa.pending, 0) AS pending,
+        ISNULL(aa.draft, 0) AS draft
       FROM TeamMembers tm
       INNER JOIN Users u ON tm.user_id = u.user_id
-      LEFT JOIN AlumniAssignments aa ON tm.user_id = aa.member_id AND tm.team_id = aa.team_id
+      LEFT JOIN (
+        SELECT 
+          member_id,
+          COUNT(assignment_id) AS total_assigned,
+          SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed,
+          SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending,
+          SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draft
+        FROM AlumniAssignments
+        WHERE team_id = @teamId
+        GROUP BY member_id
+      ) aa ON tm.user_id = aa.member_id
       WHERE tm.team_id = @teamId
-      GROUP BY u.user_id, u.first_name, u.last_name, u.email
     `);
   return result.recordset;
 }
