@@ -6,7 +6,7 @@ const loginRules = [
 ];
 
 const changePasswordRules = [
-  body('currentPassword').notEmpty(),
+  body('oldPassword').notEmpty(),
   body('newPassword')
     .isLength({ min: 8 })
     .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)

@@ -32,6 +32,10 @@
         return fetch(url, options).then(function (res) {
             if (!res.ok) {
                 return res.json().then(function (err) {
+                    if (err.errors && Array.isArray(err.errors) && err.errors.length > 0) {
+                        var msg = err.errors.map(function (e) { return e.message || e.msg || ''; }).filter(Boolean).join(', ');
+                        if (msg) throw new Error(msg);
+                    }
                     throw new Error(err.message || 'Request failed with status ' + res.status);
                 }).catch(function (e) {
                     if (e instanceof TypeError) throw new Error('Request failed with status ' + res.status);

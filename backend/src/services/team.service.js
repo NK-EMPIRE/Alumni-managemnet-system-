@@ -3,6 +3,7 @@ const userRepository = require('../repositories/user.repository');
 const alumniRepository = require('../repositories/alumni.repository');
 const { createAuditLog } = require('../helpers/audit');
 const { AppError, NotFoundError, ConflictError } = require('../middleware/errorHandler');
+const { ROLES } = require('../constants');
 
 async function getTeams({ page, limit, search }) {
   page = parseInt(page, 10) || 1;
@@ -12,10 +13,13 @@ async function getTeams({ page, limit, search }) {
   return { ...result, page, limit };
 }
 
-async function getTeamById(teamId) {
+async function getTeamById(teamId, currentUser) {
   const team = await teamRepository.findById(teamId);
   if (!team) {
     throw new NotFoundError('Team');
+  }
+  if (currentUser && currentUser.role === ROLES.LEADER && team.leader_id !== currentUser.userId) {
+    throw new AppError('Access denied: You are not the leader of this team', 403);
   }
   const members = await teamRepository.getMembers(teamId);
   return { ...team, members };
@@ -85,6 +89,9 @@ async function addMember(teamId, userId, currentUser) {
   if (!team) {
     throw new NotFoundError('Team');
   }
+  if (currentUser.role === ROLES.LEADER && team.leader_id !== currentUser.userId) {
+    throw new AppError('Access denied: You are not the leader of this team', 403);
+  }
   const user = await userRepository.findById(userId);
   if (!user) {
     throw new NotFoundError('User');
@@ -102,6 +109,13 @@ async function addMember(teamId, userId, currentUser) {
 }
 
 async function removeMember(teamMemberId, currentUser) {
+  const member = await teamRepository.findMemberById(teamMemberId);
+  if (!member) {
+    throw new NotFoundError('Team member');
+  }
+  if (currentUser.role === ROLES.LEADER && member.leader_id !== currentUser.userId) {
+    throw new AppError('Access denied: You are not the leader of this team', 403);
+  }
   await teamRepository.removeMember(teamMemberId);
   await createAuditLog({
     userId: currentUser.userId,
@@ -114,6 +128,13 @@ async function removeMember(teamMemberId, currentUser) {
 }
 
 async function lockDistribution(teamId, currentUser) {
+  const team = await teamRepository.findById(teamId);
+  if (!team) {
+    throw new NotFoundError('Team');
+  }
+  if (currentUser.role === ROLES.LEADER && team.leader_id !== currentUser.userId) {
+    throw new AppError('Access denied: You are not the leader of this team', 403);
+  }
   await teamRepository.lockDistribution(teamId);
   await createAuditLog({
     userId: currentUser.userId,
@@ -131,6 +152,9 @@ async function redistributeAssignments(teamId, currentUser, allocations) {
   }
   const team = await teamRepository.findById(teamId);
   if (!team) throw new NotFoundError('Team');
+  if (currentUser.role === ROLES.LEADER && team.leader_id !== currentUser.userId) {
+    throw new AppError('Access denied: You are not the leader of this team', 403);
+  }
   if (team.distribution_locked) throw new AppError('Distribution is locked for this team', 400);
 
   const pending = await alumniRepository.getPendingAssignmentsByTeam(teamId);
@@ -161,6 +185,13 @@ async function redistributeAssignments(teamId, currentUser, allocations) {
 }
 
 async function unlockDistribution(teamId, currentUser) {
+  const team = await teamRepository.findById(teamId);
+  if (!team) {
+    throw new NotFoundError('Team');
+  }
+  if (currentUser.role === ROLES.LEADER && team.leader_id !== currentUser.userId) {
+    throw new AppError('Access denied: You are not the leader of this team', 403);
+  }
   await teamRepository.unlockDistribution(teamId);
   await createAuditLog({
     userId: currentUser.userId,

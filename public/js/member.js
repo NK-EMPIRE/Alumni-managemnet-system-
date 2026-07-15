@@ -595,6 +595,30 @@
                 target.classList.add('active');
             }
         };
+
+        window.saveMemberPassword = function() {
+            var oldPass = document.getElementById('settingsOldPass').value;
+            var newPass = document.getElementById('settingsNewPass').value;
+            var confirmPass = document.getElementById('settingsConfirmPass').value;
+
+            if (!oldPass || !newPass || !confirmPass) {
+                showToast('All password fields are required.', 'error');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                showToast('Passwords do not match.', 'error');
+                return;
+            }
+
+            API.changePassword(oldPass, newPass).then(function(res) {
+                showToast('Password changed successfully!', 'success');
+                document.getElementById('settingsOldPass').value = '';
+                document.getElementById('settingsNewPass').value = '';
+                document.getElementById('settingsConfirmPass').value = '';
+            }).catch(function(err) {
+                showToast(err.message || 'Failed to update password.', 'error');
+            });
+        };
     }
 
     function initSessionTimeout() {

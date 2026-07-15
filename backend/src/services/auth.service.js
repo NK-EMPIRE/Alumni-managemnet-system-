@@ -48,21 +48,30 @@ async function login(loginId, password, ip, userAgent) {
 }
 
 async function changePassword(userId, oldPassword, newPassword) {
+  logger.info(`[changePassword] Request received for userId: ${userId}`);
+  
   const user = await authRepo.findById(userId);
-
   if (!user) {
+    logger.error(`[changePassword] User not found for userId: ${userId}`);
     throw new AuthenticationError('User not found');
   }
 
+  logger.info(`[changePassword] Found user: ${user.email}, password_hash length: ${user.password_hash ? user.password_hash.length : 0}`);
+
   const match = await comparePassword(oldPassword, user.password_hash);
+  logger.info(`[changePassword] Password match result: ${match}`);
+  
   if (!match) {
     throw new AuthenticationError('Current password is incorrect');
   }
 
   const hashed = await hashPassword(newPassword);
-  await authRepo.updatePassword(userId, hashed);
+  logger.info(`[changePassword] New password hashed successfully. Length: ${hashed.length}`);
+  
+  const rowsAffected = await authRepo.updatePassword(userId, hashed);
+  logger.info(`[changePassword] updatePassword executed. Rows affected: ${rowsAffected}`);
 
-  logger.auditLog('Password changed', { userId });
+  logger.auditLog('Password changed', { userId, rowsAffected });
 }
 
 async function refreshToken(token) {

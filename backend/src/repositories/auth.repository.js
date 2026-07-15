@@ -23,7 +23,7 @@ async function findById(userId) {
     .query(`
       SELECT
         u.user_id, u.first_name, u.last_name, u.email,
-        u.phone, u.role_id, r.role_name, u.leader_id,
+        u.phone, u.password_hash, u.role_id, r.role_name, u.leader_id,
         u.is_active, u.last_login, u.created_at, u.updated_at
       FROM Users u
       INNER JOIN Roles r ON u.role_id = r.role_id
@@ -34,10 +34,11 @@ async function findById(userId) {
 
 async function updatePassword(userId, passwordHash) {
   const pool = await getPool();
-  await pool.request()
+  const result = await pool.request()
     .input('userId', sql.Int, userId)
-    .input('passwordHash', sql.NVarChar(255), passwordHash)
+    .input('passwordHash', sql.VarChar(255), passwordHash)
     .query('UPDATE Users SET password_hash = @passwordHash, updated_at = GETUTCDATE() WHERE user_id = @userId');
+  return result.rowsAffected[0];
 }
 
 async function updateLastLogin(userId) {

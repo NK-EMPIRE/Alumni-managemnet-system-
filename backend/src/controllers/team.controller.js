@@ -10,7 +10,8 @@ const getTeams = asyncHandler(async (req, res) => {
 
 const getTeamById = asyncHandler(async (req, res) => {
   const { teamId } = req.params;
-  const result = await teamService.getTeamById(teamId);
+  const currentUser = req.user;
+  const result = await teamService.getTeamById(teamId, currentUser);
   success(res, result, 'Team retrieved successfully');
 });
 

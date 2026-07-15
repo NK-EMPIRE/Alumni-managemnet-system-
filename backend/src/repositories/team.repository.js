@@ -176,6 +176,21 @@ async function getLeaderTeams(leaderId) {
   return result.recordset;
 }
 
+async function findMemberById(teamMemberId) {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('teamMemberId', sql.Int, teamMemberId)
+    .query(`
+      SELECT
+        tm.team_member_id, tm.team_id, tm.user_id, tm.assigned_at,
+        t.leader_id
+      FROM TeamMembers tm
+      INNER JOIN Teams t ON tm.team_id = t.team_id
+      WHERE tm.team_member_id = @teamMemberId
+    `);
+  return result.recordset[0];
+}
+
 module.exports = {
   findAll,
   findById,
@@ -188,5 +203,6 @@ module.exports = {
   getTeamAlumniCount,
   lockDistribution,
   unlockDistribution,
-  getLeaderTeams
+  getLeaderTeams,
+  findMemberById
 };

@@ -906,6 +906,147 @@
         body.sidebar-collapsed .sidebar-brand-left {
             display: none !important;
         }
+
+        /* ── DARK MODE OVERRIDES (FIX WHITE ELEMENTS AND TOUCH/FOCUS REFLECTIONS) ── */
+        body.dark-mode .table-container {
+            background: #1E293B !important;
+            border: 1px solid #334155 !important;
+            box-shadow: none !important;
+        }
+
+        body.dark-mode .table-header h3 {
+            color: #F8FAFC !important;
+        }
+
+        body.dark-mode .table-search {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .table-search:focus {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .filter-select {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .filter-select option {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+
+        body.dark-mode .filter-select:focus {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .table-footer {
+            border-top-color: #334155 !important;
+            color: #94A3B8 !important;
+        }
+
+        body.dark-mode #rowsPerPageSelect {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode #rowsPerPageSelect option {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+
+        body.dark-mode .pagination button {
+            background: #1E293B !important;
+            color: #CBD5E1 !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .pagination button:hover:not(:disabled) {
+            background: var(--primary) !important;
+            color: #fff !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .pagination button.active {
+            background: var(--primary) !important;
+            color: #fff !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .pagination button:disabled {
+            background: #0F172A !important;
+            color: #475569 !important;
+            border-color: #334155 !important;
+            opacity: 0.5 !important;
+        }
+
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select,
+        body.dark-mode .form-group textarea {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .form-group input:focus,
+        body.dark-mode .form-group select:focus,
+        body.dark-mode .form-group textarea:focus {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .form-control {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .form-control:focus {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .form-control option {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+
+        body.dark-mode .tabs {
+            border-bottom-color: #334155 !important;
+        }
+
+        body.dark-mode .tab-item {
+            color: #94A3B8 !important;
+        }
+
+        body.dark-mode .tab-item.active {
+            color: var(--primary) !important;
+        }
+
+        body.dark-mode .stat-card .card-trend.up {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #10B981 !important;
+        }
+
+        body.dark-mode .stat-card .card-trend.down {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #EF4444 !important;
+        }
+
+        body.dark-mode .stat-card .card-trend.neutral {
+            background: rgba(148, 163, 184, 0.15) !important;
+            color: #94A3B8 !important;
+        }
     </style>
 </head>
 <body>
@@ -1011,31 +1152,26 @@
                 <div class="card-icon blue"><i class="fas fa-folder-open"></i></div>
                 <div class="card-value" id="assignedCount">56</div>
                 <div class="card-label">Assigned Records</div>
-                <div class="card-trend up"><i class="fas fa-arrow-up"></i> 12%</div>
             </div>
             <div class="stat-card">
                 <div class="card-icon green"><i class="fas fa-check-double"></i></div>
                 <div class="card-value" id="completedCount">38</div>
                 <div class="card-label">Completed</div>
-                <div class="card-trend up"><i class="fas fa-arrow-up"></i> 8%</div>
             </div>
             <div class="stat-card">
                 <div class="card-icon amber"><i class="fas fa-pen"></i></div>
                 <div class="card-value" id="draftCount">0</div>
                 <div class="card-label">Drafts</div>
-                <div class="card-trend neutral">In Progress</div>
             </div>
             <div class="stat-card">
                 <div class="card-icon orange"><i class="fas fa-hourglass-half"></i></div>
                 <div class="card-value" id="remainingCount">18</div>
                 <div class="card-label">Remaining</div>
-                <div class="card-trend down"><i class="fas fa-arrow-down"></i> 3%</div>
             </div>
             <div class="stat-card">
                 <div class="card-icon purple"><i class="fas fa-calendar-day"></i></div>
                 <div class="card-value" id="todayCount">0</div>
                 <div class="card-label">Today's Updates</div>
-                <div class="card-trend neutral">Active</div>
             </div>
         </div>
 
@@ -1147,17 +1283,17 @@
           <div class="tab-content" id="tab-security" style="display:none;">
             <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Current Password</label>
-              <input class="form-control" type="password" value="password123" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+              <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
             </div>
             <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">New Password</label>
-              <input class="form-control" type="password" placeholder="Enter new password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+              <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
             </div>
             <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Confirm Password</label>
-              <input class="form-control" type="password" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+              <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
             </div>
-            <button class="btn btn-primary" onclick="showToast('Password changed successfully!', 'success')" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+            <button class="btn btn-primary" onclick="saveMemberPassword()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
               <i class="fas fa-save"></i> Update Password
             </button>
           </div>
