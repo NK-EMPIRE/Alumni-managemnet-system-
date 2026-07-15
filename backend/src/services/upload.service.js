@@ -38,7 +38,7 @@ function runPythonImporter(filePath) {
   });
 }
 
-async function processExcelImport(filePath, currentUser) {
+async function processExcelImport(filePath, originalName, currentUser) {
   const importerResult = await runPythonImporter(filePath);
   const { summary, records, errors } = importerResult;
 
@@ -100,6 +100,7 @@ async function processExcelImport(filePath, currentUser) {
   
   await uploadRepository.createImportLog({
     fileName: filePath.split('\\').pop().split('/').pop(),
+    originalName: originalName || null,
     totalRows,
     imported: newRows.length,
     merged: mergedCount,

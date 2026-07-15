@@ -182,6 +182,16 @@ async function startServer() {
         END
       `);
 
+      await pool.request().query(`
+        IF NOT EXISTS (
+          SELECT * FROM sys.columns
+          WHERE object_id = OBJECT_ID('dbo.ImportHistory') AND name = 'original_name'
+        )
+        BEGIN
+          ALTER TABLE dbo.ImportHistory ADD original_name VARCHAR(500) NULL;
+        END
+      `);
+
       // AlumniAssignments migrations
       await pool.request().query(`
         IF NOT EXISTS (

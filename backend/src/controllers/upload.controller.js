@@ -4,7 +4,7 @@ const { success, paginated } = require('../utils/response');
 
 const uploadExcel = asyncHandler(async (req, res) => {
   const currentUser = req.user;
-  const result = await uploadService.processExcelImport(req.file.path, currentUser);
+  const result = await uploadService.processExcelImport(req.file.path, req.file.originalname, currentUser);
   success(res, result, 'File uploaded and processed successfully', 201);
 });
 
