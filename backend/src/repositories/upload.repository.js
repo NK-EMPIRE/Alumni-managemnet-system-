@@ -64,6 +64,17 @@ async function batchInsertAlumni(records) {
   await ensureColumn(pool, 'linkedin_profile', 'VARCHAR(255)');
   await ensureColumn(pool, 'father_name', 'VARCHAR(150)');
 
+  // Widen phone column if it's still too narrow (VARCHAR(20) -> VARCHAR(50))
+  await pool.request().query(`
+    IF EXISTS (
+      SELECT * FROM sys.columns
+      WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'phone' AND max_length < 50
+    )
+    BEGIN
+      ALTER TABLE dbo.Alumni ALTER COLUMN phone VARCHAR(50) NULL;
+    END
+  `);
+
   // Also ensure father_name is in ProfessionalInformation table
   await pool.request().query(`
     IF NOT EXISTS (
@@ -75,6 +86,17 @@ async function batchInsertAlumni(records) {
     END
   `);
 
+  // Widen phone in ProfessionalInformation as well
+  await pool.request().query(`
+    IF EXISTS (
+      SELECT * FROM sys.columns
+      WHERE object_id = OBJECT_ID('dbo.ProfessionalInformation') AND name = 'phone' AND max_length < 50
+    )
+    BEGIN
+      ALTER TABLE dbo.ProfessionalInformation ALTER COLUMN phone VARCHAR(50) NULL;
+    END
+  `);
+
   // Create a new mssql Table object matching the Alumni table schema
   const table = new sql.Table('Alumni');
   
@@ -82,9 +104,9 @@ async function batchInsertAlumni(records) {
   table.columns.add('register_no', sql.NVarChar(30), { nullable: false });
   table.columns.add('name', sql.NVarChar(150), { nullable: false });
   table.columns.add('email', sql.NVarChar(150), { nullable: true });
-  table.columns.add('phone', sql.NVarChar(20), { nullable: true });
-  table.columns.add('department', sql.NVarChar(50), { nullable: true });
-  table.columns.add('batch', sql.NVarChar(10), { nullable: true });
+  table.columns.add('phone', sql.NVarChar(50), { nullable: true });   // widened from 20
+  table.columns.add('department', sql.NVarChar(100), { nullable: true });
+  table.columns.add('batch', sql.NVarChar(20), { nullable: true });
   table.columns.add('gender', sql.NVarChar(10), { nullable: true });
   table.columns.add('date_of_birth', sql.NVarChar(20), { nullable: true });
   table.columns.add('working_details', sql.NVarChar(500), { nullable: true });
@@ -102,21 +124,24 @@ async function batchInsertAlumni(records) {
       logger.warn('Skipping batch insert record due to missing or invalid registerNo: ' + JSON.stringify(record));
       continue;
     }
+    // Helper: truncate string safely to avoid BCP column-length overflow
+    const trunc = (val, max) => val ? String(val).trim().slice(0, max) : null;
+
     table.rows.add(
-      record.registerNo,
-      record.name,
-      record.email || null,
-      record.phone || null,
-      record.department || null,
-      record.batch || null,
-      record.gender || null,
-      record.dateOfBirth || null,
-      record.workingDetails || null,
-      record.linkedinProfile || null,
-      record.company || null,
-      record.designation || null,
-      record.facultyAssigned || null,
-      record.fatherName || record.father_name || null
+      trunc(record.registerNo, 30),
+      trunc(record.name, 150),
+      trunc(record.email, 150) || null,
+      trunc(record.phone, 50) || null,
+      trunc(record.department, 100) || null,
+      trunc(record.batch, 20) || null,
+      trunc(record.gender, 10) || null,
+      trunc(record.dateOfBirth, 20) || null,
+      trunc(record.workingDetails, 500) || null,
+      trunc(record.linkedinProfile, 255) || null,
+      trunc(record.company, 200) || null,
+      trunc(record.designation, 200) || null,
+      trunc(record.facultyAssigned, 150) || null,
+      trunc(record.fatherName || record.father_name, 150) || null
     );
   }
 

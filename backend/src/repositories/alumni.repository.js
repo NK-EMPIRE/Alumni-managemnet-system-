@@ -12,7 +12,7 @@ const FIELD_TYPES = {
   batch: sql.NVarChar(10),
   department: sql.NVarChar(50),
   email: sql.NVarChar(150),
-  phone: sql.NVarChar(20),
+  phone: sql.NVarChar(50),
   company: sql.NVarChar(200),
   designation: sql.NVarChar(200),
   working_details: sql.NVarChar(500),
@@ -134,7 +134,7 @@ async function create(data) {
     .input('batch', sql.NVarChar(10), data.batch)
     .input('department', sql.NVarChar(50), data.department)
     .input('email', sql.NVarChar(150), data.email)
-    .input('phone', sql.NVarChar(20), data.phone)
+    .input('phone', sql.NVarChar(50), data.phone)
     .query(`
       INSERT INTO Alumni (register_no, name, gender, batch, department, email, phone)
       OUTPUT INSERTED.*
@@ -182,7 +182,7 @@ async function createProfessionalInfo(data) {
     .input('state', sql.NVarChar(100), data.state)
     .input('country', sql.NVarChar(100), data.country)
     .input('email', sql.NVarChar(150), data.email)
-    .input('phone', sql.NVarChar(20), data.phone)
+    .input('phone', sql.NVarChar(50), data.phone)
     .input('linkedinUrl', sql.NVarChar(500), data.linkedin_url)
     .input('higherStudies', sql.NVarChar(200), data.higher_studies)
     .input('isEntrepreneur', sql.Bit, data.is_entrepreneur)
@@ -208,7 +208,7 @@ async function createProfessionalInfo(data) {
   updateReq.input('company', sql.NVarChar(200), data.company);
   updateReq.input('designation', sql.NVarChar(200), data.designation);
   updateReq.input('email', sql.NVarChar(150), data.email);
-  updateReq.input('phone', sql.NVarChar(20), data.phone);
+  updateReq.input('phone', sql.NVarChar(50), data.phone);
   updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
   updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
   updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
