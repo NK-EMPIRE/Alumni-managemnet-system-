@@ -65,7 +65,11 @@ async function getLeaderRankings(limit) {
       INNER JOIN AlumniAssignments aa ON t.team_id = aa.team_id
       WHERE r.role_name = 'LEADER'
       GROUP BY u.user_id, u.first_name, u.last_name
-      ORDER BY completion_percentage DESC
+      ORDER BY ROUND(
+        CAST(SUM(CASE WHEN aa.status = 'Completed' THEN 1 ELSE 0 END) AS FLOAT) /
+        NULLIF(COUNT(aa.assignment_id), 0) * 100,
+        2
+      ) DESC
     `);
   return result.recordset;
 }
