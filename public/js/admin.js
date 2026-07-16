@@ -168,6 +168,17 @@ document.addEventListener('DOMContentLoaded', function () {
     initSpreadsheetHandlers();
     initProgressWatch();
     fetchAllData();
+    initRealtimeClock();
+    // Real-time polling every 30 seconds for notifications + reset requests
+    setInterval(function() {
+      API.getAuditLogs({ page: 1, limit: 1000 }).then(function(res) {
+        if (res && res.success) {
+          _apiAuditLogs = res.data;
+          populateNotifications();
+        }
+      }).catch(function() {});
+      if (window.fetchResetRequests) window.fetchResetRequests();
+    }, 30000);
   } catch (err) {
     console.error('Admin init error:', err);
   }
@@ -181,6 +192,40 @@ var _apiAlumni = null;
 var _apiImportHistory = null;
 var _apiTeams = null;
 var _apiAuditLogs = null;
+var _apiStats = null;
+
+function parseUTCDateTime(dateStr) {
+  if (!dateStr) return new Date();
+  if (typeof dateStr === 'string') {
+    var cleanStr = dateStr.trim();
+    if (!cleanStr.endsWith('Z') && !cleanStr.includes('+')) {
+      cleanStr = cleanStr.replace(' ', 'T') + 'Z';
+    }
+    return new Date(cleanStr);
+  }
+  return new Date(dateStr);
+}
+
+function initRealtimeClock() {
+  function updateClock() {
+    var dateEl = document.getElementById('navClockDate');
+    var timeEl = document.getElementById('navClockTime');
+    var sidebarDateEl = document.getElementById('currentDate');
+    var sidebarTimeEl = document.getElementById('currentTime');
+    var now = new Date();
+    var dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' };
+    var timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
+    var dateStr = now.toLocaleDateString('en-IN', dateOptions);
+    var timeStr = now.toLocaleTimeString('en-IN', timeOptions).toLowerCase();
+    if (dateEl) dateEl.textContent = dateStr;
+    if (timeEl) timeEl.textContent = timeStr;
+    if (sidebarDateEl) sidebarDateEl.textContent = dateStr;
+    if (sidebarTimeEl) sidebarTimeEl.textContent = timeStr;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+}
+
 var _apiAssignHistory = null;
 var _apiAlumniFilters = null;
 var _importErrorDetails = [];
@@ -909,7 +954,7 @@ function populateNotifications() {
       return {
         id: nid,
         text: (r.username || 'System') + ' — ' + (r.action || '').replace(/_/g, ' ').toLowerCase(),
-        time: r.created_at ? new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
+        time: r.created_at ? parseUTCDateTime(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
         unread: true
       };
     });
@@ -1311,8 +1356,15 @@ window.fetchResetRequests = function() {
       reqs.forEach(function(r) {
         var dateStr = '';
         if (r.created_at) {
-          var d = new Date(r.created_at);
-          dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          var d = parseUTCDateTime(r.created_at);
+          dateStr = d.toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
         }
         html += '<div class="reset-item" style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;">' +
           '<div style="display:flex;justify-content:space-between;font-size:0.85rem;">' +
@@ -2019,7 +2071,7 @@ function handleLogout() {
   API.clearToken();
   Toast.warning('Logout', 'You have been logged out successfully.');
   setTimeout(function () {
-    window.location.href = 'index.html';
+    window.location.href = 'index.html?logout=success';
   }, 1500);
 }
 

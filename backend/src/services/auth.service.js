@@ -125,7 +125,7 @@ async function forgotPassword(email) {
     .input('role', sql.VarChar, roleName)
     .query(`
       INSERT INTO ResetRequests (email, name, role, status, created_at, updated_at)
-      VALUES (@email, @name, @role, 'Pending', GETDATE(), GETDATE())
+      VALUES (@email, @name, @role, 'Pending', SYSUTCDATETIME(), SYSUTCDATETIME())
     `);
 
   logger.auditLog('Password reset request submitted to admin', { email });
@@ -190,14 +190,14 @@ async function updateResetRequestStatus(requestId, status, adminUser) {
     // Update request status
     await pool.request()
       .input('requestId', sql.Int, requestId)
-      .query(`UPDATE ResetRequests SET status = 'Accepted', updated_at = GETDATE() WHERE request_id = @requestId`);
+      .query(`UPDATE ResetRequests SET status = 'Accepted', updated_at = SYSUTCDATETIME() WHERE request_id = @requestId`);
       
     logger.auditLog('Password reset request accepted by admin', { email: req.email, adminId: adminUser.userId });
   } else {
     // Update request status to Declined
     await pool.request()
       .input('requestId', sql.Int, requestId)
-      .query(`UPDATE ResetRequests SET status = 'Declined', updated_at = GETDATE() WHERE request_id = @requestId`);
+      .query(`UPDATE ResetRequests SET status = 'Declined', updated_at = SYSUTCDATETIME() WHERE request_id = @requestId`);
       
     logger.auditLog('Password reset request declined by admin', { email: req.email, adminId: adminUser.userId });
   }
