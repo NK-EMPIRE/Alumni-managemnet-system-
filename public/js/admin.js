@@ -1341,25 +1341,13 @@ function closeMobileSidebar() {
    20. SUBMENU TOGGLE
    ──────────────────────────────────────────────────────────── */
 function toggleSubmenu(el) {
-  if (document.body.classList.contains('sidebar-collapsed')) {
-    document.body.classList.remove('sidebar-collapsed');
-    localStorage.setItem('sidebar_collapsed', 'false');
-  }
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
-    submenu.style.display = 'block';
+    var isOpen = submenu.style.display === 'block';
+    submenu.style.display = isOpen ? 'none' : 'block';
     var chevron = el.querySelector('.fa-chevron-down');
-    if (chevron) chevron.style.transform = 'rotate(180deg)';
-    
-    var firstSub = submenu.querySelector('.sub-item');
-    if (firstSub) {
-      // Direct navigate
-      var section = firstSub.getAttribute('data-section');
-      if (typeof navigateTo === 'function') {
-        navigateTo(section, firstSub);
-      } else {
-        firstSub.click();
-      }
+    if (chevron) {
+      chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
     }
   }
 }

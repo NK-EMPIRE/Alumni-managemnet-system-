@@ -9,7 +9,7 @@ def main():
 
     file_path = sys.argv[1]
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    target_script = os.path.join(script_dir, 'import_engine', 'main.py')
+    target_script = os.path.join(os.path.dirname(script_dir), 'services', 'import_engine', 'main.py')
 
     if not os.path.exists(target_script):
         sys.stderr.write(f'{{"success": false, "error": "Import engine script not found at {target_script}"}}\n')
