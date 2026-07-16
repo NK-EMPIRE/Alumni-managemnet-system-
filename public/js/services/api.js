@@ -203,6 +203,9 @@
     getImportHistory: function (params) {
         return get('/upload/history', params);
     },
+    confirmAliases: function (data) {
+        return post('/upload/aliases/confirm', data);
+    },
 
     // Round robin assignment
     getAvailableAlumniCount: function (params) {

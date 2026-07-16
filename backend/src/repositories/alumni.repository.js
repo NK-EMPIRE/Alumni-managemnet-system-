@@ -3,7 +3,8 @@ const { sql, getPool } = require('../config/database');
 const ALLOWED_UPDATE_FIELDS = [
   'name', 'gender', 'batch', 'department', 'email', 'phone',
   'company', 'designation', 'working_details', 'linkedin_profile', 'date_of_birth',
-  'experience', 'salary', 'city', 'country', 'father_name'
+  'experience', 'salary', 'city', 'country', 'father_name',
+  'address', 'state', 'secondary_phone', 'secondary_email'
 ];
 
 const FIELD_TYPES = {
@@ -22,7 +23,11 @@ const FIELD_TYPES = {
   salary: sql.NVarChar(50),
   city: sql.NVarChar(100),
   country: sql.NVarChar(100),
-  father_name: sql.NVarChar(150)
+  father_name: sql.NVarChar(150),
+  address: sql.NVarChar(500),
+  state: sql.NVarChar(100),
+  secondary_phone: sql.NVarChar(50),
+  secondary_email: sql.NVarChar(150)
 };
 
 async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId }) {
@@ -44,6 +49,7 @@ async function findAll({ page, limit, offset, search, department, batch, status,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.experience, a.salary, a.city, a.country,
+        a.date_of_birth, a.address, a.state, a.secondary_phone, a.secondary_email,
         aa.status AS assignment_status, aa.assigned_date, aa.completed_date,
         aa.assignment_id, aa.team_id, aa.member_id,
         ul.first_name + ' ' + ul.last_name AS leader_name,
@@ -63,7 +69,11 @@ async function findAll({ page, limit, offset, search, department, batch, status,
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@leaderId IS NULL OR t.leader_id = @leaderId)
-        AND (@memberId IS NULL OR aa.member_id = @memberId)
+        AND (
+          @memberId IS NULL 
+          OR aa.member_id = @memberId 
+          OR (aa.member_id IS NULL AND @memberId = t.leader_id)
+        )
         AND (
           @status IS NULL
           OR (@status = 'Available' AND aa.status IS NULL)
@@ -92,8 +102,9 @@ async function findById(alumniId) {
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.father_name,
+        a.date_of_birth, a.address, a.state, a.secondary_phone, a.secondary_email,
         pi.info_id, pi.company AS pi_company, pi.designation AS pi_designation,
-        pi.current_city, pi.state, pi.country,
+        pi.current_city, pi.state AS pi_state, pi.country AS pi_country,
         pi.email AS pi_email, pi.phone AS pi_phone,
         pi.linkedin_url, pi.higher_studies,
         pi.is_entrepreneur, pi.is_government_job, pi.other_occupation,
@@ -213,20 +224,32 @@ async function createProfessionalInfo(data) {
   updateReq.input('designation', sql.NVarChar(200), data.designation);
   updateReq.input('email', sql.NVarChar(150), data.email);
   updateReq.input('phone', sql.NVarChar(50), data.phone);
+  updateReq.input('secondaryEmail', sql.NVarChar(150), data.secondary_email || null);
+  updateReq.input('secondaryPhone', sql.NVarChar(50), data.secondary_phone || null);
   updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
   updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
   updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
   updateReq.input('fatherName', sql.NVarChar(150), data.father_name || null);
+  updateReq.input('address', sql.NVarChar(500), data.address || null);
+  updateReq.input('city', sql.NVarChar(100), data.current_city || null);
+  updateReq.input('state', sql.NVarChar(100), data.state || null);
+  updateReq.input('country', sql.NVarChar(100), data.country || null);
   await updateReq.query(`
     UPDATE Alumni
     SET company = @company,
         designation = @designation,
         email = @email,
         phone = @phone,
+        secondary_email = @secondaryEmail,
+        secondary_phone = @secondaryPhone,
         working_details = @workingDetails,
         linkedin_profile = @linkedinProfile,
         date_of_birth = COALESCE(@dateOfBirth, date_of_birth),
         father_name = COALESCE(@fatherName, father_name),
+        address = @address,
+        city = @city,
+        state = @state,
+        country = @country,
         is_updated = 1,
         updated_date = GETUTCDATE()
     WHERE alumni_id = @alumniId

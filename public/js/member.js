@@ -227,6 +227,8 @@
         record.batch = document.getElementById('fieldBatch').value;
         record.fatherName = document.getElementById('fieldFatherName').value.trim();
         record.father_name = record.fatherName;
+        record.date_of_birth = document.getElementById('fieldDOB').value.trim();
+        record.dob = record.date_of_birth;
         record.company = document.getElementById('fieldCompany').value.trim();
         record.designation = document.getElementById('fieldDesignation').value.trim();
         record.city = document.getElementById('fieldCity').value.trim();
@@ -234,6 +236,8 @@
         record.country = document.getElementById('fieldCountry').value.trim();
         record.email = document.getElementById('fieldEmail').value.trim();
         record.phone = document.getElementById('fieldPhone').value.trim();
+        record.secondary_email = document.getElementById('fieldSecondaryEmail').value.trim();
+        record.secondary_phone = document.getElementById('fieldSecondaryPhone').value.trim();
         record.linkedin_profile = document.getElementById('fieldLinkedin').value.trim();
         record.working_details = document.getElementById('fieldWorkingDetails').value.trim();
         record.higherStudies = document.getElementById('fieldHigherStudies').value;
@@ -279,6 +283,7 @@
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
         document.getElementById('fieldFatherName').value = record.fatherName || record.father_name || record.pi_father_name || '';
+        document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
         document.getElementById('fieldCompany').value = record.company || '';
         document.getElementById('fieldDesignation').value = record.designation || '';
         document.getElementById('fieldCity').value = record.city || record.current_city || '';
@@ -286,6 +291,8 @@
         document.getElementById('fieldCountry').value = record.country || '';
         document.getElementById('fieldEmail').value = record.email || '';
         document.getElementById('fieldPhone').value = record.phone || '';
+        document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
+        document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldWorkingDetails').value = record.working_details || '';
         document.getElementById('fieldHigherStudies').value = record.higherStudies || record.higher_studies || 'No';
@@ -294,6 +301,27 @@
         document.getElementById('fieldGovtJob').value = record.govtJob || (record.is_government_job ? 'Yes' : 'No') || 'No';
         document.getElementById('fieldOtherOcc').value = record.otherOcc || record.other_occupation || '';
         document.getElementById('fieldRemarks').value = record.remarks || '';
+
+        // Auto-toggle secondary containers if values exist
+        var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
+        var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
+        if (record.secondary_email) {
+            secEmailContainer.style.display = 'block';
+            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+        } else {
+            secEmailContainer.style.display = 'none';
+            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+        }
+
+        var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
+        var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('button');
+        if (record.secondary_phone) {
+            secPhoneContainer.style.display = 'block';
+            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+        } else {
+            secPhoneContainer.style.display = 'none';
+            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+        }
 
         if (record.higherStudies === 'Yes') {
             higherStudiesDetails.classList.add('active');
@@ -545,8 +573,12 @@
                 batch: record.batch,
                 company: record.company,
                 designation: record.designation,
+                father_name: record.father_name,
+                date_of_birth: record.date_of_birth,
                 email: record.email,
                 phone: record.phone,
+                secondary_email: record.secondary_email,
+                secondary_phone: record.secondary_phone,
                 working_details: record.working_details,
                 linkedin_profile: record.linkedin_profile,
                 linkedin_url: record.linkedin_profile,
@@ -605,11 +637,15 @@
                 batch: record.batch,
                 company: record.company,
                 designation: record.designation,
+                father_name: record.father_name,
+                date_of_birth: record.date_of_birth,
                 current_city: record.city,
                 state: record.state,
                 country: record.country,
                 email: record.email,
                 phone: record.phone,
+                secondary_email: record.secondary_email,
+                secondary_phone: record.secondary_phone,
                 linkedin_url: record.linkedin_profile,
                 working_details: record.working_details,
                 higher_studies: record.higherStudies,

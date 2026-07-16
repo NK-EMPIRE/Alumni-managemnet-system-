@@ -3,6 +3,7 @@ import os
 import json
 import pandas as pd
 import time
+import re
 from typing import Dict, Any, List
 
 # Include local service modules
@@ -69,6 +70,8 @@ def main():
     invalid_rows = 0
     missing_faculty_count = 0
 
+    unmapped_columns_samples = {}
+
     for sheet_name, df in valid_sheets.items():
         total_sheets += 1
         
@@ -81,12 +84,24 @@ def main():
 
         # Map headers
         header_map = {}
+        unmapped_cols = []
         for col_idx, col_val in headers_row_data.items():
             col_str = str(col_val).strip() if not pd.isna(col_val) else ""
             if col_str:
                 target_field = mapper.map_column(col_str)
+                # Differentiate Mail (primary) and Mail ID (secondary)
+                # and Mobile No. (primary) and Mobile No (secondary)
+                norm_header = mapper.normalize_header(col_str)
+                
                 if target_field:
-                    header_map[col_idx] = target_field
+                    if norm_header in ('mail_id', 'mailid'):
+                        header_map[col_idx] = 'secondaryEmail'
+                    elif norm_header in ('mobile_no', 'mobileno') and col_str == 'Mobile No':
+                        header_map[col_idx] = 'secondaryPhone'
+                    else:
+                        header_map[col_idx] = target_field
+                else:
+                    unmapped_cols.append((col_idx, col_str))
 
         # Cache columns list for fast name lookup checks
         headers_normalized = [mapper.normalize_header(str(val)) for val in headers_row_data.values]
@@ -98,12 +113,47 @@ def main():
             total_records += 1
             row_num = idx + 1  # Excel row is 1-based
 
-            # Map raw fields
+            # Extract samples for unmapped columns
+            for col_idx, col_name in unmapped_cols:
+                val = row.get(col_idx)
+                val_str = str(val).strip() if not pd.isna(val) else ""
+                if val_str:
+                    if col_name not in unmapped_columns_samples:
+                        unmapped_columns_samples[col_name] = []
+                    if len(unmapped_columns_samples[col_name]) < 3 and val_str not in unmapped_columns_samples[col_name]:
+                        unmapped_columns_samples[col_name].append(val_str)
+
+            # Map raw fields with duplicate header collision prevention
             record = {"sheet": sheet_name}
+            
+            email_primary = None
+            email_secondary = None
+            phone_primary = None
+            phone_secondary = None
+
             for col_idx, val in row.items():
                 target = header_map.get(col_idx)
-                if target:
-                    record[target] = val if not pd.isna(val) else None
+                if not target:
+                    continue
+                
+                cell_val = val if not pd.isna(val) else None
+                
+                if target == 'email':
+                    if email_primary is None:
+                        email_primary = cell_val
+                elif target == 'secondaryEmail':
+                    if email_secondary is None:
+                        email_secondary = cell_val
+                elif target == 'phone':
+                    if phone_primary is None:
+                        phone_primary = cell_val
+                elif target == 'secondaryPhone':
+                    if phone_secondary is None:
+                        phone_secondary = cell_val
+                else:
+                    # Generic collision check: first write wins
+                    if target not in record:
+                        record[target] = cell_val
 
             # Process scientific notation/string clean for registration number
             reg_no = DataCleaningEngine.clean_register_no(record.get('registerNo'))
@@ -135,9 +185,7 @@ def main():
                 StructureIntelligenceEngine.resolve_split_names(record, headers_normalized, row)
             )
 
-            # Normalizations
-            record['email'] = DataCleaningEngine.clean_email(record.get('email'))
-            record['phone'] = DataCleaningEngine.clean_phone(record.get('phone'))
+            # Normalizations & Cleanings
             record['department'] = DataCleaningEngine.clean_text(record.get('department'))
             record['batch'] = DataCleaningEngine.clean_batch(record.get('batch'))
             record['gender'] = DataCleaningEngine.clean_gender(record.get('gender'))
@@ -147,6 +195,46 @@ def main():
             record['company'] = DataCleaningEngine.clean_text(record.get('company'))
             record['designation'] = DataCleaningEngine.clean_text(record.get('designation'))
             record['fatherName'] = DataCleaningEngine.clean_text(record.get('fatherName'))
+            
+            # Address mapping
+            record['address'] = DataCleaningEngine.clean_text(record.get('address'))
+            record['city'] = DataCleaningEngine.clean_text(record.get('city'))
+            record['state'] = DataCleaningEngine.clean_text(record.get('state'))
+            record['country'] = DataCleaningEngine.clean_text(record.get('country'))
+
+            # Multi-value split and routing with precedence (Fix 6 & Fix 9)
+            multi_emails = StructureIntelligenceEngine.parse_multiple_emails(email_primary)
+            multi_phones = StructureIntelligenceEngine.parse_multiple_phones(phone_primary)
+
+            record['email'] = DataCleaningEngine.clean_email(multi_emails[0] if multi_emails else email_primary)
+            record['phone'] = DataCleaningEngine.clean_phone(multi_phones[0] if multi_phones else phone_primary)
+
+            if email_secondary:
+                record['secondaryEmail'] = DataCleaningEngine.clean_email(email_secondary)
+            elif len(multi_emails) > 1:
+                record['secondaryEmail'] = DataCleaningEngine.clean_email(multi_emails[1])
+            else:
+                record['secondaryEmail'] = ""
+
+            if phone_secondary:
+                record['secondaryPhone'] = DataCleaningEngine.clean_phone(phone_secondary)
+            elif len(multi_phones) > 1:
+                record['secondaryPhone'] = DataCleaningEngine.clean_phone(multi_phones[1])
+            else:
+                record['secondaryPhone'] = ""
+
+            # Validate LinkedIn Profile URL
+            linkedin_val = record.get('linkedinProfile')
+            if linkedin_val:
+                is_url = re.match(r'^https?://', linkedin_val.strip().lower())
+                if not is_url:
+                    errors.append({
+                        "sheet": sheet_name,
+                        "row": row_num,
+                        "registerNo": reg_no or "-",
+                        "errorType": "Validation Warning",
+                        "errorDescription": f"Row {row_num}: linkedinProfile value '{linkedin_val}' is not a URL."
+                    })
 
             # Parse Course and Batch if merged e.g., 'CSE-2022'
             merged_course = StructureIntelligenceEngine.split_course_batch(record.get('department'))
@@ -165,12 +253,15 @@ def main():
                 record['facultyId'] = resolved_fid
                 record['facultyAssigned'] = resolved_canonical
                 record['facultyConfidence'] = confidence_score
-                # If matched with medium confidence (80-95%) or high (>=95%), flag for auto-alias save later
-                record['facultyAliasToSave'] = fac_name if (0.80 <= confidence_score < 1.0) else None
+                # auto-alias save later only if confidence is high (>=95%)
+                record['facultyAliasToSave'] = fac_name if (confidence_score >= 0.95) else None
+                # For FIX 2: 80% to 95% threshold gets set aside for human review
+                record['facultyAliasPendingReview'] = fac_name if (0.80 <= confidence_score < 0.95) else None
             else:
                 record['facultyId'] = None
                 record['facultyConfidence'] = 0.0
                 record['facultyAliasToSave'] = None
+                record['facultyAliasPendingReview'] = None
                 if fac_name:
                     missing_faculty_count += 1
 
@@ -189,11 +280,20 @@ def main():
         "executionTime": execution_time
     }
 
+    # Format unmapped columns list
+    unmapped_output = []
+    for col_name, samples in unmapped_columns_samples.items():
+        unmapped_output.append({
+            "columnName": col_name,
+            "sampleValues": samples
+        })
+
     output = {
         "success": True,
         "summary": summary,
         "records": all_records,
-        "errors": errors
+        "errors": errors,
+        "unmappedColumns": unmapped_output
     }
     print(json.dumps(output, ensure_ascii=False, indent=2))
 

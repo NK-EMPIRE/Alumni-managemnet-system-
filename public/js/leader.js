@@ -786,7 +786,7 @@
     var tbody = document.getElementById('myAssignmentsTableBody');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading assignments...</td></tr>';
     
-    API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 100 }).then(function (res) {
+    API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 10000 }).then(function (res) {
       if (res && res.success) {
         myAssignmentsData = res.data.records || res.data || [];
         renderMyAssignmentsTable();
@@ -939,6 +939,7 @@
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
         document.getElementById('fieldFatherName').value = record.father_name || record.pi_father_name || '';
+        document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
         document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
         document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
         document.getElementById('fieldCity').value = record.current_city || '';
@@ -946,6 +947,8 @@
         document.getElementById('fieldCountry').value = record.country || '';
         document.getElementById('fieldEmail').value = record.email || record.pi_email || '';
         document.getElementById('fieldPhone').value = record.phone || record.pi_phone || '';
+        document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
+        document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldWorkingDetails').value = record.working_details || '';
         document.getElementById('fieldHigherStudies').value = record.higher_studies || '';
@@ -954,6 +957,27 @@
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
         document.getElementById('fieldOtherOcc').value = record.other_occupation || '';
         document.getElementById('fieldRemarks').value = record.remarks || '';
+
+        // Auto-toggle secondary containers if values exist
+        var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
+        var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
+        if (record.secondary_email) {
+            secEmailContainer.style.display = 'block';
+            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+        } else {
+            secEmailContainer.style.display = 'none';
+            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+        }
+
+        var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
+        var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('button');
+        if (record.secondary_phone) {
+            secPhoneContainer.style.display = 'block';
+            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+        } else {
+            secPhoneContainer.style.display = 'none';
+            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+        }
 
         if (record.higher_studies === 'Yes') {
           document.getElementById('higherStudiesDetails').style.display = 'block';
@@ -975,6 +999,7 @@
       department: document.getElementById('fieldDept').value,
       batch: document.getElementById('fieldBatch').value,
       father_name: document.getElementById('fieldFatherName').value.trim(),
+      date_of_birth: document.getElementById('fieldDOB').value.trim(),
       company: document.getElementById('fieldCompany').value.trim(),
       designation: document.getElementById('fieldDesignation').value.trim(),
       current_city: document.getElementById('fieldCity').value.trim(),
@@ -982,6 +1007,8 @@
       country: document.getElementById('fieldCountry').value.trim(),
       email: document.getElementById('fieldEmail').value.trim(),
       phone: document.getElementById('fieldPhone').value.trim(),
+      secondary_email: document.getElementById('fieldSecondaryEmail').value.trim(),
+      secondary_phone: document.getElementById('fieldSecondaryPhone').value.trim(),
       linkedin_url: document.getElementById('fieldLinkedin').value.trim(),
       working_details: document.getElementById('fieldWorkingDetails').value.trim(),
       higher_studies: document.getElementById('fieldHigherStudies').value,
@@ -1323,117 +1350,337 @@
     }
   }
 
-  // --- TEAM REPORT SECTION (Read-only update viewing) ---
-  var reportData = [];
-  var filteredReportData = [];
-  var reportCurrentPage = 1;
-  var reportPageSize = 10;
+  // --- TEAM REPORT SPREADSHEET VIEW SECTION ---
+  var ssPage = 1;
+  var ssLimit = 10;
+  var ssTotal = 0;
+  var ssSearchQuery = '';
+  var ssSortColumn = 'alumni_id';
+  var ssSortDirection = 'DESC';
+
+  var ssColumns = [
+    { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
+    { key: 'name', label: 'Name', visible: true, width: 160 },
+    { key: 'department', label: 'Department', visible: true, width: 100 },
+    { key: 'batch', label: 'Batch', visible: true, width: 80 },
+    { key: 'email', label: 'Email', visible: true, width: 180 },
+    { key: 'phone', label: 'Phone', visible: true, width: 120 },
+    { key: 'company', label: 'Company', visible: true, width: 150 },
+    { key: 'designation', label: 'Designation', visible: true, width: 150 },
+    { key: 'experience', label: 'Experience', visible: true, width: 100 },
+    { key: 'salary', label: 'Salary', visible: true, width: 100 },
+    { key: 'city', label: 'City', visible: true, width: 120 },
+    { key: 'country', label: 'Country', visible: true, width: 120 },
+    { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
+    { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
+    { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
+    { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
+  ];
+
+  var debounceTimer;
+  window.debounceSearch = function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function() {
+      ssSearchQuery = document.getElementById('ssSearch').value;
+      ssPage = 1;
+      fetchSpreadsheetData();
+    }, 300);
+  };
+
+  window.fetchSpreadsheetData = function() {
+    var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
+    var dept = document.getElementById('ssFilterDept').value;
+    var batch = document.getElementById('ssFilterBatch').value;
+    var status = document.getElementById('ssFilterStatus').value;
+
+    var params = {
+      page: ssPage,
+      limit: ssLimit,
+      search: ssSearchQuery || undefined,
+      department: dept || undefined,
+      batch: batch || undefined,
+      status: status || undefined,
+      memberId: memberId || undefined,
+      onlyMe: false
+    };
+
+    var body = document.getElementById('ssTableBody');
+    if (body) {
+      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 1) + '" style="text-align: center; padding: 40px;"><div class="spinner"></div> Loading...</td></tr>';
+    }
+
+    API.getAssignedAlumni(params).then(function(res) {
+      if (res && res.success) {
+        var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+        var pagination = (res.data && res.data.pagination) ? res.data.pagination : null;
+        ssTotal = (pagination && pagination.total) ? pagination.total : records.length;
+        renderSpreadsheetTable(records);
+        renderSpreadsheetPagination();
+      } else {
+        showToast('Failed to retrieve records', 'error');
+      }
+    }).catch(function(err) {
+      console.error('Error fetching alumni:', err);
+      showToast('An error occurred fetching records', 'error');
+    });
+  };
+
+  window.renderSpreadsheetTable = function(data) {
+    var headRow = document.getElementById('ssTableHeadRow');
+    var body = document.getElementById('ssTableBody');
+    if (!headRow || !body) return;
+
+    var headHtml = '<th class="sticky-col" style="width: 50px; z-index: 5;">S.No</th>';
+    ssColumns.forEach(function(col) {
+      if (!col.visible) return;
+      var sortIcon = '';
+      if (ssSortColumn === col.key) {
+        sortIcon = ssSortDirection === 'ASC' ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+      } else {
+        sortIcon = ' <i class="fas fa-sort" style="opacity:0.3;"></i>';
+      }
+      headHtml += '<th style="width: ' + col.width + 'px; min-width: ' + col.width + 'px; position: relative;" onclick="sortSpreadsheet(\'' + col.key + '\')">';
+      headHtml += col.label + sortIcon;
+      headHtml += '<div class="resizer" onclick="event.stopPropagation()"></div>';
+      headHtml += '</th>';
+    });
+    headRow.innerHTML = headHtml;
+
+    if (data.length === 0) {
+      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 1) + '" style="text-align: center; padding: 24px; color: var(--text-muted);">No records found</td></tr>';
+      return;
+    }
+
+    var html = '';
+    var startSerial = (ssPage - 1) * ssLimit + 1;
+    data.forEach(function(row, idx) {
+      var serial = startSerial + idx;
+      html += '<tr>';
+      html += '<td class="sticky-col" style="text-align: center; font-weight: 500;">' + serial + '</td>';
+      ssColumns.forEach(function(col) {
+        if (!col.visible) return;
+        var val = '';
+        if (col.key === 'assignment_status') {
+          var status = row.assignment_status || 'Pending';
+          var badgeClass = status === 'Completed' ? 'badge-success' : (status === 'Draft' ? 'badge-info' : 'badge-warning');
+          val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
+        } else if (col.key === 'member_name') {
+          val = row.member_name || row.teamMember || row.assigned_to || '-';
+        } else if (col.key === 'updated_date') {
+          var date = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '-';
+          if (date !== '-') {
+            date = new Date(date).toLocaleDateString();
+          }
+          val = date;
+        } else if (col.key === 'linkedin_profile') {
+          var link = row.linkedin_profile || row.linkedin_url;
+          if (link) {
+            val = '<a href="' + (link.startsWith('http') ? link : 'https://' + link) + '" target="_blank" style="color: var(--primary);"><i class="fab fa-linkedin"></i> View</a>';
+          } else {
+            val = '-';
+          }
+        } else {
+          val = row[col.key] || row[col.key.replace(/_([a-z])/g, function(g){return g[1].toUpperCase();})] || '-';
+        }
+        html += '<td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + val + '</td>';
+      });
+      html += '</tr>';
+    });
+    body.innerHTML = html;
+    setupResizers();
+  };
+
+  window.renderSpreadsheetPagination = function() {
+    var info = document.getElementById('ssPaginationInfo');
+    var container = document.getElementById('ssPagination');
+    if (!info || !container) return;
+
+    var totalPages = Math.max(1, Math.ceil(ssTotal / ssLimit));
+    var start = (ssPage - 1) * ssLimit + 1;
+    var end = Math.min(start + ssLimit - 1, ssTotal);
+    info.innerText = 'Showing ' + (ssTotal > 0 ? start + '-' + end : '0-0') + ' of ' + ssTotal + ' entries';
+
+    var pagHtml = '<button class="pagination-item" ' + (ssPage === 1 ? 'disabled' : '') + ' onclick="changeSpreadsheetPage(' + (ssPage - 1) + ')"><i class="fas fa-chevron-left"></i></button>';
+    var maxVisible = 5;
+    var startPage = Math.max(1, ssPage - 2);
+    var endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+    for (var i = startPage; i <= endPage; i++) {
+      pagHtml += '<button class="pagination-item ' + (i === ssPage ? 'active' : '') + '" onclick="changeSpreadsheetPage(' + i + ')">' + i + '</button>';
+    }
+    pagHtml += '<button class="pagination-item" ' + (ssPage === totalPages ? 'disabled' : '') + ' onclick="changeSpreadsheetPage(' + (ssPage + 1) + ')"><i class="fas fa-chevron-right"></i></button>';
+    container.innerHTML = pagHtml;
+  };
+
+  window.changeSpreadsheetPage = function(page) {
+    ssPage = page;
+    fetchSpreadsheetData();
+  };
+
+  window.changeSpreadsheetPageSize = function(size) {
+    ssLimit = parseInt(size, 10);
+    ssPage = 1;
+    fetchSpreadsheetData();
+  };
+
+  window.sortSpreadsheet = function(colKey) {
+    if (ssSortColumn === colKey) {
+      ssSortDirection = ssSortDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      ssSortColumn = colKey;
+      ssSortDirection = 'ASC';
+    }
+    fetchSpreadsheetData();
+  };
+
+  window.toggleColumnVisibilityMenu = function() {
+    var menu = document.getElementById('colVisibilityMenu');
+    var btn = document.getElementById('colVisibilityBtn');
+    if (!menu || !btn) return;
+
+    if (menu.style.display === 'block') {
+      menu.style.display = 'none';
+      return;
+    }
+
+    var html = '<div style="font-weight:600;font-size:0.85rem;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;">Toggle Columns</div>';
+    ssColumns.forEach(function(col) {
+      var checked = col.visible ? 'checked' : '';
+      html += '<label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;margin:4px 0;cursor:pointer;">' +
+        '<input type="checkbox" ' + checked + ' onchange="toggleSpreadsheetColumn(\'' + col.key + '\')"> ' +
+        col.label +
+        '</label>';
+    });
+    menu.innerHTML = html;
+
+    var rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + window.scrollY) + 'px';
+    menu.style.left = (rect.left + window.scrollX) + 'px';
+    menu.style.display = 'block';
+
+    function closeMenu(e) {
+      if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closeMenu);
+      }
+    }
+    setTimeout(function() {
+      document.addEventListener('click', closeMenu);
+    }, 50);
+  };
+
+  window.toggleSpreadsheetColumn = function(key) {
+    var col = ssColumns.find(function(c) { return c.key === key; });
+    if (col) {
+      col.visible = !col.visible;
+      fetchSpreadsheetData();
+    }
+  };
+
+  window.exportAlumniCSV = function() {
+    var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
+    var dept = document.getElementById('ssFilterDept').value;
+    var batch = document.getElementById('ssFilterBatch').value;
+    var status = document.getElementById('ssFilterStatus').value;
+
+    var params = {
+      page: 1,
+      limit: 50000,
+      search: ssSearchQuery || undefined,
+      department: dept || undefined,
+      batch: batch || undefined,
+      status: status || undefined,
+      memberId: memberId || undefined,
+      onlyMe: false
+    };
+
+    API.getAssignedAlumni(params).then(function(res) {
+      if (res && res.success) {
+        var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+        var csvContent = 'data:text/csv;charset=utf-8,';
+        var headers = ssColumns.map(function(c) { return c.label; });
+        csvContent += headers.join(',') + '\r\n';
+
+        records.forEach(function(row) {
+          var line = ssColumns.map(function(col) {
+            var cellVal = '';
+            if (col.key === 'member_name') {
+              cellVal = row.member_name || row.teamMember || row.assigned_to || '';
+            } else if (col.key === 'updated_date') {
+              cellVal = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
+            } else {
+              cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function(g){return g[1].toUpperCase();})] || '';
+            }
+            var cleanVal = String(cellVal).replace(/"/g, '""');
+            return '"' + cleanVal + '"';
+          });
+          csvContent += line.join(',') + '\r\n';
+        });
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'Team_Report_Export.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        showToast('Export failed', 'error');
+      }
+    });
+  };
+
+  function setupResizers() {
+    var table = document.querySelector('.spreadsheet-table');
+    if (!table) return;
+    var cols = table.querySelectorAll('th');
+    cols.forEach(function(col) {
+      var resizer = col.querySelector('.resizer');
+      if (!resizer) return;
+
+      var startX, startWidth;
+      resizer.addEventListener('mousedown', function(e) {
+        startX = e.pageX;
+        startWidth = col.offsetWidth;
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', stopResize);
+        e.preventDefault();
+      });
+
+      function resize(e) {
+        var width = startWidth + (e.pageX - startX);
+        col.style.width = width + 'px';
+        col.style.minWidth = width + 'px';
+        var colLabel = col.innerText.trim();
+        var match = ssColumns.find(function(c) { return c.label === colLabel; });
+        if (match) match.width = width;
+      }
+
+      function stopResize() {
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('mouseup', stopResize);
+      }
+    });
+  }
 
   function loadTeamReport() {
-    var tbody = document.getElementById('teamReportTableBody');
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading report history...</td></tr>';
-    
-    API.getAssignedAlumni({ onlyMe: false, page: 1, limit: 100 }).then(function (res) {
-      if (res && res.success) {
-        reportData = res.data.records || res.data || [];
-        populateReportUserFilter();
-        renderTeamReportTable();
-      } else {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Failed to load report history.</td></tr>';
-      }
-    }).catch(function (err) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Error: ' + err.message + '</td></tr>';
-    });
-  }
-
-  function populateReportUserFilter() {
-    var select = document.getElementById('reportUserFilter');
-    if (!select) return;
-    
-    var users = {};
-    reportData.forEach(function (r) {
-      var name = r.assigned_to || r.assignedTo || r.teamMember || '';
-      if (name) users[name] = true;
-    });
-
-    var html = '<option value="all">All Members</option>';
-    Object.keys(users).sort().forEach(function (name) {
-      html += '<option value="' + name + '">' + name + '</option>';
-    });
-    select.innerHTML = html;
-  }
-
-  function renderTeamReportTable() {
-    var searchVal = (document.getElementById('reportSearch').value || '').toLowerCase().trim();
-    var userVal = document.getElementById('reportUserFilter').value;
-    var statusVal = document.getElementById('reportStatusFilter').value;
-
-    filteredReportData = reportData.filter(function (r) {
-      var assignedTo = r.assigned_to || r.assignedTo || r.teamMember || '';
-      var matchSearch = !searchVal ||
-        (r.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
-        (r.register_no || '').toLowerCase().indexOf(searchVal) !== -1 ||
-        (r.department || '').toLowerCase().indexOf(searchVal) !== -1 ||
-        (r.batch || '').toLowerCase().indexOf(searchVal) !== -1;
-      var matchUser = userVal === 'all' || assignedTo === userVal;
-      var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
-      return matchSearch && matchUser && matchStatus;
-    });
-
-    var totalPages = Math.max(1, Math.ceil(filteredReportData.length / reportPageSize));
-    if (reportCurrentPage > totalPages) reportCurrentPage = totalPages;
-    var start = (reportCurrentPage - 1) * reportPageSize;
-    var end = Math.min(start + reportPageSize, filteredReportData.length);
-    var pageData = filteredReportData.slice(start, end);
-
-    var tbody = document.getElementById('teamReportTableBody');
-    if (pageData.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.4"></i>No update history found.</td></tr>';
-    } else {
-      var html = '';
-      pageData.forEach(function (r, idx) {
-        var sno = start + idx + 1;
-        var status = r.status || 'Pending';
-        var badgeClass = status === 'Completed' ? 'badge-success' : (status === 'Draft' ? 'badge-info' : 'badge-warning');
-        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
-        if (compDate !== '-') {
-          compDate = new Date(compDate).toLocaleDateString() + ' ' + new Date(compDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Populate filter dropdown with members
+    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function(res) {
+      if (res && res.success && Array.isArray(res.data.records)) {
+        var dropdown = document.getElementById('ssFilterMember');
+        if (dropdown) {
+          var html = '<option value="">All Members</option>';
+          res.data.records.forEach(function(m) {
+            html += '<option value="' + m.user_id + '">' + m.first_name + ' ' + m.last_name + '</option>';
+          });
+          dropdown.innerHTML = html;
         }
-        var updaterName = r.assigned_to || r.assignedTo || r.teamMember || '-';
-        html += '<tr>' +
-          '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-          '<td><strong>' + (r.name || '-') + '</strong></td>' +
-          '<td>' + (r.department || '-') + '</td>' +
-          '<td>' + (r.batch || '-') + '</td>' +
-          '<td>' + updaterName + '</td>' +
-          '<td>' + (r.company || '-') + '</td>' +
-          '<td>' + (r.designation || '-') + '</td>' +
-          '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
-          '<td style="font-size:0.8rem;color:#64748B">' + compDate + '</td>' +
-          '</tr>';
-      });
-      tbody.innerHTML = html;
-    }
-
-    document.getElementById('reportPaginationInfo').textContent = 'Showing ' + (filteredReportData.length > 0 ? (start + 1) + '-' + end : '0') + ' of ' + filteredReportData.length + ' records';
-
-    var pagContainer = document.getElementById('reportPagination');
-    var pagHtml = '';
-    pagHtml += '<button class="pagination-item" data-page="prev" ' + (reportCurrentPage <= 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
-    for (var i = 1; i <= totalPages; i++) {
-      pagHtml += '<button class="pagination-item ' + (i === reportCurrentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button>';
-    }
-    pagHtml += '<button class="pagination-item" data-page="next" ' + (reportCurrentPage >= totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
-    pagContainer.innerHTML = pagHtml;
-
-    pagContainer.querySelectorAll('.pagination-item').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var page = this.getAttribute('data-page');
-        if (page === 'prev' && reportCurrentPage > 1) { reportCurrentPage--; renderTeamReportTable(); }
-        else if (page === 'next' && reportCurrentPage < totalPages) { reportCurrentPage++; renderTeamReportTable(); }
-        else if (page !== 'prev' && page !== 'next') { reportCurrentPage = parseInt(page); renderTeamReportTable(); }
-      });
+      }
     });
+
+    fetchSpreadsheetData();
   }
 
   function setupSessionTimeout() {
@@ -1512,7 +1759,7 @@
   function fetchLeaderData() {
     return Promise.all([
       API.getLeaderDashboard().catch(function () { return null; }),
-      API.getAssignedAlumni({ page: 1, limit: 100 }).catch(function () { return null; }),
+      API.getAssignedAlumni({ page: 1, limit: 10000 }).catch(function () { return null; }),
       API.getUndistributedCount().catch(function () { return null; })
     ]).then(function (results) {
       var dash = results[0];

@@ -1482,14 +1482,34 @@
                         <input type="text" id="fieldFatherName" placeholder="Enter father's name">
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="fieldEmail" placeholder="email@example.com">
+                        <label>Date of Birth</label>
+                        <input type="text" id="fieldDOB" placeholder="DD-MM-YYYY">
                     </div>
                 </div>
-                <div class="form-row">
+                <div class="form-row" style="flex-direction: column; gap: 16px;">
                     <div class="form-group" style="width: 100%;">
-                        <label>Phone</label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label style="margin: 0;">Email</label>
+                            <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
+                        </div>
+                        <input type="email" id="fieldEmail" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; width: 100%;">
+                        <label>Secondary Email</label>
+                        <input type="email" id="fieldSecondaryEmail" placeholder="secondary@example.com">
+                    </div>
+                </div>
+                <div class="form-row" style="flex-direction: column; gap: 16px;">
+                    <div class="form-group" style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label style="margin: 0;">Phone</label>
+                            <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
+                        </div>
                         <input type="text" id="fieldPhone" placeholder="Phone number">
+                    </div>
+                    <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; width: 100%;">
+                        <label>Secondary Phone</label>
+                        <input type="text" id="fieldSecondaryPhone" placeholder="Secondary Phone number">
                     </div>
                 </div>
                 <div class="form-row">

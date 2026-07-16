@@ -76,7 +76,10 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
     phone: info.phone || null,
     working_details: info.working_details || null,
     linkedin_profile: info.linkedin_url || info.linkedin_profile || null,
-    father_name: info.father_name || info.fatherName || null
+    father_name: info.father_name || info.fatherName || null,
+    date_of_birth: info.date_of_birth || info.dob || null,
+    secondary_email: info.secondary_email || null,
+    secondary_phone: info.secondary_phone || null
   };
   await alumniRepository.update(alumniId, alumniUpdate);
 
@@ -153,6 +156,12 @@ async function saveDraft(alumniId, data, currentUser) {
   const repoData = { ...data };
   if (data.linkedin_url !== undefined && data.linkedin_profile === undefined) {
     repoData.linkedin_profile = data.linkedin_url;
+  }
+  if (data.dob !== undefined && data.date_of_birth === undefined) {
+    repoData.date_of_birth = data.dob;
+  }
+  if (data.fatherName !== undefined && data.father_name === undefined) {
+    repoData.father_name = data.fatherName;
   }
 
   // Update Alumni table (basic fields that exist in Alumni table)

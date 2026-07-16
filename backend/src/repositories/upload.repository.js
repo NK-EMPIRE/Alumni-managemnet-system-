@@ -43,59 +43,8 @@ async function getImportHistory({ page, limit, offset }) {
   return { total, rows: result.recordset };
 }
 
-async function ensureColumn(pool, columnName, columnDef) {
-  const query = `
-    IF NOT EXISTS (
-      SELECT * FROM sys.columns 
-      WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = '${columnName}'
-    )
-    BEGIN
-      ALTER TABLE dbo.Alumni ADD ${columnName} ${columnDef};
-    END
-  `;
-  await pool.request().query(query);
-}
-
 async function batchInsertAlumni(records) {
   const pool = await getPool();
-
-  await ensureColumn(pool, 'date_of_birth', 'VARCHAR(20)');
-  await ensureColumn(pool, 'working_details', 'VARCHAR(500)');
-  await ensureColumn(pool, 'linkedin_profile', 'VARCHAR(255)');
-  await ensureColumn(pool, 'father_name', 'VARCHAR(150)');
-
-  // Widen phone column if it's still too narrow (VARCHAR(20) -> VARCHAR(50))
-  await pool.request().query(`
-    IF EXISTS (
-      SELECT * FROM sys.columns
-      WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'phone' AND max_length < 50
-    )
-    BEGIN
-      ALTER TABLE dbo.Alumni ALTER COLUMN phone VARCHAR(50) NULL;
-    END
-  `);
-
-  // Also ensure father_name is in ProfessionalInformation table
-  await pool.request().query(`
-    IF NOT EXISTS (
-      SELECT * FROM sys.columns 
-      WHERE object_id = OBJECT_ID('dbo.ProfessionalInformation') AND name = 'father_name'
-    )
-    BEGIN
-      ALTER TABLE dbo.ProfessionalInformation ADD father_name VARCHAR(150) NULL;
-    END
-  `);
-
-  // Widen phone in ProfessionalInformation as well
-  await pool.request().query(`
-    IF EXISTS (
-      SELECT * FROM sys.columns
-      WHERE object_id = OBJECT_ID('dbo.ProfessionalInformation') AND name = 'phone' AND max_length < 50
-    )
-    BEGIN
-      ALTER TABLE dbo.ProfessionalInformation ALTER COLUMN phone VARCHAR(50) NULL;
-    END
-  `);
 
   // Create a new mssql Table object matching the Alumni table schema
   const table = new sql.Table('Alumni');
@@ -104,7 +53,7 @@ async function batchInsertAlumni(records) {
   table.columns.add('register_no', sql.NVarChar(30), { nullable: false });
   table.columns.add('name', sql.NVarChar(150), { nullable: false });
   table.columns.add('email', sql.NVarChar(150), { nullable: true });
-  table.columns.add('phone', sql.NVarChar(50), { nullable: true });   // widened from 20
+  table.columns.add('phone', sql.NVarChar(50), { nullable: true });
   table.columns.add('department', sql.NVarChar(100), { nullable: true });
   table.columns.add('batch', sql.NVarChar(20), { nullable: true });
   table.columns.add('gender', sql.NVarChar(10), { nullable: true });
@@ -113,7 +62,16 @@ async function batchInsertAlumni(records) {
   table.columns.add('linkedin_profile', sql.NVarChar(255), { nullable: true });
   table.columns.add('company', sql.NVarChar(200), { nullable: true });
   table.columns.add('designation', sql.NVarChar(200), { nullable: true });
+  table.columns.add('experience', sql.NVarChar(50), { nullable: true });
+  table.columns.add('salary', sql.NVarChar(50), { nullable: true });
+  table.columns.add('city', sql.NVarChar(100), { nullable: true });
+  table.columns.add('country', sql.NVarChar(100), { nullable: true });
+  table.columns.add('address', sql.NVarChar(500), { nullable: true });
+  table.columns.add('state', sql.NVarChar(100), { nullable: true });
+  table.columns.add('secondary_phone', sql.NVarChar(50), { nullable: true });
+  table.columns.add('secondary_email', sql.NVarChar(150), { nullable: true });
   table.columns.add('faculty_assigned', sql.NVarChar(150), { nullable: true });
+  table.columns.add('resolved_faculty_user_id', sql.Int, { nullable: true });
   table.columns.add('father_name', sql.NVarChar(150), { nullable: true });
 
   const { logger } = require('../utils/logger');
@@ -140,7 +98,16 @@ async function batchInsertAlumni(records) {
       trunc(record.linkedinProfile, 255) || null,
       trunc(record.company, 200) || null,
       trunc(record.designation, 200) || null,
+      trunc(record.experience, 50) || null,
+      trunc(record.salary, 50) || null,
+      trunc(record.city, 100) || null,
+      trunc(record.country, 100) || null,
+      trunc(record.address, 500) || null,
+      trunc(record.state, 100) || null,
+      trunc(record.secondaryPhone || record.secondary_phone, 50) || null,
+      trunc(record.secondaryEmail || record.secondary_email, 150) || null,
       trunc(record.facultyAssigned, 150) || null,
+      record.facultyId || null,
       trunc(record.fatherName || record.father_name, 150) || null
     );
   }
@@ -179,7 +146,7 @@ async function getFacultiesAndAliases() {
     SELECT u.user_id AS userId, u.first_name + ' ' + u.last_name AS name, u.department
     FROM Users u
     INNER JOIN Roles r ON u.role_id = r.role_id
-    WHERE r.role_name = 'LEADER' AND u.deleted_at IS NULL AND u.is_active = 1
+    WHERE r.role_name IN ('LEADER', 'MEMBER') AND u.deleted_at IS NULL AND u.is_active = 1
   `);
   
   const aliases = await pool.request().query(`

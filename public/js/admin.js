@@ -233,7 +233,7 @@ function fetchAllData() {
     API.getAdminDashboard().catch(function () { return null; }),
     API.getUsers({ role: 'LEADER', page: 1, limit: 100 }).catch(function () { return null; }),
     API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).catch(function () { return null; }),
-    API.getAlumni({ page: 1, limit: 500 }).catch(function () { return null; }),
+    API.getAlumni({ page: 1, limit: 10000 }).catch(function () { return null; }),
     API.getImportHistory().catch(function () { return null; }),
     API.getTeams().catch(function () { return null; }),
     API.getAuditLogs({ page: 1, limit: 1000 }).catch(function () { return null; }),
@@ -1343,6 +1343,10 @@ function closeMobileSidebar() {
 function toggleSubmenu(el) {
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
+    if (document.body.classList.contains('sidebar-collapsed')) {
+      if (window.showCollapsedPopover) window.showCollapsedPopover(el, submenu);
+      return;
+    }
     var isOpen = submenu.style.display === 'block';
     submenu.style.display = isOpen ? 'none' : 'block';
     var chevron = el.querySelector('.fa-chevron-down');
@@ -2304,12 +2308,67 @@ function initImportHandlers() {
         if (titleEl) titleEl.textContent = 'Import Completed Successfully';
         
         var detailsHtml = 
-          '<strong>Total Rows:</strong> ' + (res.data.total !== undefined ? res.data.total : (res.data.totalRows !== undefined ? res.data.totalRows : '')) + '<br>' +
-          '<strong>Imported:</strong> ' + res.data.imported + '<br>' +
-          '<strong>Merged/Updated:</strong> ' + (res.data.merged || 0) + '<br>' +
-          '<strong>Skipped:</strong> ' + (res.data.skipped || 0) + '<br>' +
-          '<strong>Duplicates:</strong> ' + res.data.duplicates + '<br>' +
-          '<strong>Errors:</strong> ' + res.data.errors;
+          '<strong>Total Rows:</strong> ' + (res.data.summary.totalRows !== undefined ? res.data.summary.totalRows : '') + '<br>' +
+          '<strong>Imported:</strong> ' + (res.data.summary.imported !== undefined ? res.data.summary.imported : 0) + '<br>' +
+          '<strong>Merged/Updated:</strong> ' + (res.data.summary.merged || 0) + '<br>' +
+          '<strong>Skipped:</strong> ' + (res.data.summary.skipped || 0) + '<br>' +
+          '<strong>Duplicates:</strong> ' + (res.data.summary.duplicates !== undefined ? res.data.summary.duplicates : 0) + '<br>' +
+          '<strong>Errors:</strong> ' + (res.data.summary.errors !== undefined ? res.data.summary.errors : 0);
+
+        if (res.data.pendingAliasReview && res.data.pendingAliasReview.length > 0) {
+          detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #F3F4F6; border-radius: 6px; text-align: left;">' +
+            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Faculty Aliases to Confirm:</h4>';
+          
+          res.data.pendingAliasReview.forEach(function (item, idx) {
+            detailsHtml += '<div style="display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;">' +
+              '<input type="checkbox" class="alias-review-cb" id="alias_review_' + idx + '" checked data-excel-name="' + item.excelName + '" data-leader-id="' + item.suggestedLeaderId + '" style="margin-right: 8px;">' +
+              '<label for="alias_review_' + idx + '">Save alias "<strong>' + item.excelName + '</strong>" for Leader <strong>' + item.suggestedLeaderName + '</strong></label>' +
+              '</div>';
+          });
+
+          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Aliases</button></div>';
+          
+          setTimeout(function () {
+            var btn = document.getElementById('confirmAliasesBtn');
+            if (btn) {
+              btn.addEventListener('click', function () {
+                var checkboxes = document.querySelectorAll('.alias-review-cb');
+                var pairs = [];
+                checkboxes.forEach(function (cb) {
+                  if (cb.checked) {
+                    pairs.push({
+                      excelName: cb.getAttribute('data-excel-name'),
+                      leaderId: parseInt(cb.getAttribute('data-leader-id'), 10)
+                    });
+                  }
+                });
+                if (pairs.length > 0) {
+                  btn.disabled = true;
+                  btn.textContent = 'Saving...';
+                  API.confirmAliases({ pairs: pairs }).then(function () {
+                    Toast.success('Aliases Confirmed', 'Selected faculty aliases saved successfully.');
+                    btn.textContent = 'Aliases Saved';
+                  }).catch(function (err) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Aliases';
+                    Toast.danger('Failed to save aliases', err.message);
+                  });
+                }
+              });
+            }
+          }, 100);
+        }
+
+        if (res.data.unmappedColumns && res.data.unmappedColumns.length > 0) {
+          detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 6px; text-align: left;">' +
+            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #D97706;"><i class="fas fa-exclamation-triangle"></i> Unmapped Columns (Skipped):</h4>';
+          res.data.unmappedColumns.forEach(function (col) {
+            detailsHtml += '<div style="font-size: 12px; margin-bottom: 6px; color: #B45309;">' +
+              '• <strong>' + col.columnName + '</strong> (e.g. ' + col.sampleValues.join(', ') + ')' +
+              '</div>';
+          });
+          detailsHtml += '</div>';
+        }
           
         if (detailsEl) detailsEl.innerHTML = detailsHtml;
         Toast.success('Import Completed', 'Import finished in ' + duration + 's');
@@ -2855,7 +2914,7 @@ function populateViewModal(record) {
   document.getElementById('vAlumniGovtJob').innerText = record.govt_job || record.govtJob || '-';
   
   var avatar = document.getElementById('vAlumniAvatar');
-  var initials = (record.name || 'A').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+  var initials = (record.name || 'A').trim().split(/\s+/).map(function(w) { return w ? w[0] : ''; }).join('').toUpperCase().slice(0, 2);
   avatar.innerText = initials;
 
   openModal('viewAlumniModal');
@@ -3318,8 +3377,11 @@ window.editAlumniRecord = function(id) {
       document.getElementById('editBatch').value = record.batch || '';
       document.getElementById('editDepartment').value = record.department || '';
       document.getElementById('editFatherName').value = record.father_name || record.pi_father_name || '';
+      document.getElementById('editDOB').value = record.date_of_birth || record.dob || '';
       document.getElementById('editEmail').value = record.email || '';
       document.getElementById('editPhone').value = record.phone || '';
+      document.getElementById('editSecondaryEmail').value = record.secondary_email || '';
+      document.getElementById('editSecondaryPhone').value = record.secondary_phone || '';
       document.getElementById('editLinkedIn').value = record.linkedin_profile || '';
       document.getElementById('editCompany').value = record.company || '';
       document.getElementById('editDesignation').value = record.designation || '';
@@ -3327,6 +3389,27 @@ window.editAlumniRecord = function(id) {
       document.getElementById('editState').value = record.state || '';
       document.getElementById('editCountry').value = record.country || '';
       
+      // Auto-toggle secondary containers if values exist
+      var secEmailContainer = document.getElementById('editSecondaryEmailContainer');
+      var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('.btn-add-secondary');
+      if (record.secondary_email) {
+        secEmailContainer.style.display = 'block';
+        if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>';
+      } else {
+        secEmailContainer.style.display = 'none';
+        if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+      }
+
+      var secPhoneContainer = document.getElementById('editSecondaryPhoneContainer');
+      var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('.btn-add-secondary');
+      if (record.secondary_phone) {
+        secPhoneContainer.style.display = 'block';
+        if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>';
+      } else {
+        secPhoneContainer.style.display = 'none';
+        if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+      }
+
       // Populate leader dropdown
       populateEditLeaderDropdown(record.assigned_leader_id || (record.assignedTo ? record.assignedTo.userId : null));
       
@@ -3374,8 +3457,11 @@ window.submitEditAlumni = function() {
     batch: document.getElementById('editBatch').value,
     department: document.getElementById('editDepartment').value,
     father_name: document.getElementById('editFatherName').value,
+    date_of_birth: document.getElementById('editDOB').value,
     email: document.getElementById('editEmail').value,
     phone: document.getElementById('editPhone').value,
+    secondary_email: document.getElementById('editSecondaryEmail').value,
+    secondary_phone: document.getElementById('editSecondaryPhone').value,
     linkedin_profile: document.getElementById('editLinkedIn').value,
     company: document.getElementById('editCompany').value,
     designation: document.getElementById('editDesignation').value,

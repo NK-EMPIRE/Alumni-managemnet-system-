@@ -7,7 +7,7 @@ const { AppError } = require('../middleware/errorHandler');
 function runPythonImporter(filePath, stdinData = "") {
   return new Promise((resolve, reject) => {
     const pythonPath = 'python';
-    const scriptPath = path.join(__dirname, '..', 'utils', 'excel_importer.py');
+    const scriptPath = path.join(__dirname, 'import_engine', 'main.py');
     const child = spawn(pythonPath, [scriptPath, filePath]);
 
     let stdoutData = '';
@@ -56,7 +56,7 @@ async function getFacultyAndAliasStdin() {
 async function processExcelImport(filePath, originalName, currentUser) {
   const stdinData = await getFacultyAndAliasStdin();
   const importerResult = await runPythonImporter(filePath, stdinData);
-  const { summary, records, errors } = importerResult;
+  const { summary, records, errors, unmappedColumns } = importerResult;
 
   const totalRows = summary.totalRecords;
   const newRows = [];
@@ -64,11 +64,19 @@ async function processExcelImport(filePath, originalName, currentUser) {
   let mergedCount = 0;
   let skippedCount = 0;
 
+  const pendingAliasReviewMap = {}; // Use map to deduplicate by excelName
+
   for (const row of records) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
       const fieldsToUpdate = {};
-      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation', 'facultyAssigned', 'fatherName'];
+      const checkFields = [
+        'name', 'email', 'phone', 'department', 'batch', 'gender', 
+        'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 
+        'designation', 'facultyAssigned', 'fatherName', 'facultyId',
+        'experience', 'salary', 'city', 'country', 'address', 'state',
+        'secondaryPhone', 'secondaryEmail'
+      ];
       
       checkFields.forEach(f => {
         const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
@@ -76,6 +84,9 @@ async function processExcelImport(filePath, originalName, currentUser) {
                         f === 'linkedinProfile' ? 'linkedin_profile' :
                         f === 'facultyAssigned' ? 'faculty_assigned' :
                         f === 'fatherName' ? 'father_name' :
+                        f === 'facultyId' ? 'resolved_faculty_user_id' :
+                        f === 'secondaryPhone' ? 'secondary_phone' :
+                        f === 'secondaryEmail' ? 'secondary_email' :
                         f.replace(/([A-Z])/g, '_$1').toLowerCase();
 
         const incomingVal = row[f];
@@ -83,7 +94,7 @@ async function processExcelImport(filePath, originalName, currentUser) {
 
         if (incomingVal !== null && incomingVal !== undefined && String(incomingVal).trim() !== '') {
           if (existingVal === null || existingVal === undefined || String(existingVal).trim() === '' || String(existingVal).trim() !== String(incomingVal).trim()) {
-            fieldsToUpdate[dbField] = String(incomingVal).trim();
+            fieldsToUpdate[dbField] = incomingVal;
           }
         }
       });
@@ -94,109 +105,47 @@ async function processExcelImport(filePath, originalName, currentUser) {
       } else {
         skippedCount++;
       }
-      
-      // Update AlumniAssignments if resolved facultyId is present
-      if (row.facultyId) {
-        const { getPool } = require('../config/database');
-        const sql = require('mssql');
-        const pool = await getPool();
-        
-        // Find existing assignment (get the most recent one)
-        const checkAssign = await pool.request()
-          .input('alumniId', sql.Int, existing.alumni_id)
-          .query('SELECT TOP 1 assignment_id, member_id, team_id FROM AlumniAssignments WHERE alumni_id = @alumniId ORDER BY assigned_date DESC, assignment_id DESC');
-        
-        if (checkAssign.recordset.length > 0) {
-          const assignId = checkAssign.recordset[0].assignment_id;
-          const currentMember = checkAssign.recordset[0].member_id;
-          
-          // Reassign directly to leader if not already assigned to someone else
-          if (!currentMember) {
-            const teamRes = await pool.request()
-              .input('leaderId', sql.Int, row.facultyId)
-              .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1');
-            
-            if (teamRes.recordset.length > 0) {
-              const teamId = teamRes.recordset[0].team_id;
-              await pool.request()
-                .input('assignId', sql.Int, assignId)
-                .input('teamId', sql.Int, teamId)
-                .query('UPDATE AlumniAssignments SET team_id = @teamId, member_id = NULL, status = \'ASSIGNED_TO_LEADER\' WHERE assignment_id = @assignId');
-            }
-          }
-        } else {
-          // Find team_id for this leader
-          const teamRes = await pool.request()
-            .input('leaderId', sql.Int, row.facultyId)
-            .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1');
-          
-          if (teamRes.recordset.length > 0) {
-            const teamId = teamRes.recordset[0].team_id;
-            await pool.request()
-              .input('alumniId', sql.Int, existing.alumni_id)
-              .input('teamId', sql.Int, teamId)
-              .input('assignedBy', sql.Int, currentUser.userId)
-              .query(`
-                INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
-                VALUES (@alumniId, @teamId, NULL, 'ASSIGNED_TO_LEADER', GETUTCDATE(), @assignedBy, 'ADMIN_TO_LEADER')
-              `);
-          }
-        }
-      }
     } else {
-      if (!row.name || !row.department || !row.batch) {
+      if (!row.registerNo || !row.name || !row.department || !row.batch) {
         errors.push({
           sheet: row.sheet,
           row: 0,
-          registerNo: row.registerNo,
+          registerNo: row.registerNo || '-',
           errorType: "Missing Fields",
-          errorDescription: `Record ${row.registerNo} is missing Name, Department, or Batch for insertion.`
+          errorDescription: `Record ${row.registerNo || '-'} is missing Name, Department, or Batch for insertion.`
         });
         continue;
       }
       newRows.push(row);
     }
 
-    // Auto-learn alias if flagged high/medium confidence
+    // Auto-learn alias ONLY if confidence >= 95% (facultyAliasToSave is populated)
     if (row.facultyId && row.facultyAliasToSave) {
       await uploadRepository.saveFacultyAlias(row.facultyId, row.facultyAliasToSave.toLowerCase());
+    }
+
+    // Accumulate pending reviews if confidence is 80-95%
+    if (row.facultyId && row.facultyAliasPendingReview) {
+      const aliasName = row.facultyAliasPendingReview.toLowerCase();
+      if (!pendingAliasReviewMap[aliasName]) {
+        pendingAliasReviewMap[aliasName] = {
+          excelName: row.facultyAliasPendingReview,
+          suggestedLeaderId: row.facultyId,
+          suggestedLeaderName: row.facultyAssigned,
+          confidence: row.facultyConfidence
+        };
+      }
     }
   }
 
   if (newRows.length > 0) {
     await uploadRepository.batchInsertAlumni(newRows);
-    
-    // Create initial assignments for newly inserted records
-    const { getPool } = require('../config/database');
-    const sql = require('mssql');
-    const pool = await getPool();
-    
-    for (const record of newRows) {
-      if (record.facultyId) {
-        const alumniRes = await uploadRepository.findByRegisterNo(record.registerNo);
-        if (alumniRes) {
-          const teamRes = await pool.request()
-            .input('leaderId', sql.Int, record.facultyId)
-            .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1');
-          
-          if (teamRes.recordset.length > 0) {
-            const teamId = teamRes.recordset[0].team_id;
-            await pool.request()
-              .input('alumniId', sql.Int, alumniRes.alumni_id)
-              .input('teamId', sql.Int, teamId)
-              .input('assignedBy', sql.Int, currentUser.userId)
-              .query(`
-                INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
-                VALUES (@alumniId, @teamId, NULL, 'ASSIGNED_TO_LEADER', GETUTCDATE(), @assignedBy, 'ADMIN_TO_LEADER')
-              `);
-          }
-        }
-      }
-    }
   }
 
   const finalStatus = errors.length > 0 ? 'Partial' : 'Completed';
   
+  const pendingAliasReview = Object.values(pendingAliasReviewMap);
+
   await uploadRepository.createImportLog({
     fileName: filePath.split('\\').pop().split('/').pop(),
     originalName: originalName || null,
@@ -217,20 +166,24 @@ async function processExcelImport(filePath, originalName, currentUser) {
     merged: mergedCount,
     skipped: skippedCount,
     duplicates: duplicateCount,
-    errors: errors.length,
-    total: totalRows,
-    userId: currentUser.userId
+    errors: errors.length
   });
 
   return {
-    imported: newRows.length,
-    merged: mergedCount,
-    skipped: skippedCount,
-    duplicates: duplicateCount,
-    errors: errors.length,
-    total: totalRows,
-    summary,
-    errorReport: errors
+    success: true,
+    summary: {
+      totalSheets: summary.totalSheets,
+      totalRows,
+      imported: newRows.length,
+      merged: mergedCount,
+      skipped: skippedCount,
+      duplicates: duplicateCount,
+      errors: errors.length,
+      executionTime: summary.executionTime
+    },
+    errors,
+    unmappedColumns: unmappedColumns || [],
+    pendingAliasReview
   };
 }
 
@@ -257,13 +210,23 @@ async function getExcelPreview(filePath) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
       const fieldsToUpdate = {};
-      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation', 'facultyAssigned'];
+      const checkFields = [
+        'name', 'email', 'phone', 'department', 'batch', 'gender', 
+        'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 
+        'designation', 'facultyAssigned', 'fatherName', 'facultyId',
+        'experience', 'salary', 'city', 'country', 'address', 'state',
+        'secondaryPhone', 'secondaryEmail'
+      ];
       
       checkFields.forEach(f => {
         const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
                         f === 'workingDetails' ? 'working_details' :
                         f === 'linkedinProfile' ? 'linkedin_profile' :
                         f === 'facultyAssigned' ? 'faculty_assigned' :
+                        f === 'fatherName' ? 'father_name' :
+                        f === 'facultyId' ? 'resolved_faculty_user_id' :
+                        f === 'secondaryPhone' ? 'secondary_phone' :
+                        f === 'secondaryEmail' ? 'secondary_email' :
                         f.replace(/([A-Z])/g, '_$1').toLowerCase();
 
         const incomingVal = row[f];
@@ -333,8 +296,13 @@ async function getImportHistory({ page, limit }) {
   return { ...result, page, limit };
 }
 
+async function confirmAlias(leaderId, excelName) {
+  return uploadRepository.saveFacultyAlias(leaderId, excelName.toLowerCase());
+}
+
 module.exports = {
   processExcelImport,
   getExcelPreview,
-  getImportHistory
+  getImportHistory,
+  confirmAlias
 };

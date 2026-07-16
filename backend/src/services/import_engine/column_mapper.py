@@ -10,13 +10,17 @@ class ColumnMapper:
         'department': ['department', 'dept', 'depart', 'branch', 'stream', 'course'],
         'batch': ['batch', 'year', 'batch_year', 'batchyear', 'passing_year', 'passingyear'],
         'gender': ['gender', 'sex'],
-        'dateOfBirth': ['date_of_birth', 'dob', 'birth_date', 'birthdate', 'dateofbirth'],
+        'dateOfBirth': ['date_of_birth', 'dob', 'birth_date', 'birthdate', 'dateofbirth', 'd_o_b'],
         'workingDetails': ['working_detail', 'working_details', 'work_detail', 'workdetails', 'working_status', 'work_status'],
-        'linkedinProfile': ['linkedin_profile', 'linkedin_url', 'linkedin', 'linkedinurl'],
+        'linkedinProfile': ['linkedin_profile', 'linkedin_url', 'linkedin', 'linkedinurl', 'linkedin_facebook_profile'],
         'company': ['company', 'organization', 'org', 'employer'],
         'designation': ['designation', 'role', 'position', 'job_title', 'jobtitle'],
         'facultyAssigned': ['faculty_assigned', 'faculty', 'assigned_faculty', 'faculty_name', 'facultyname'],
-        'fatherName': ['father_name', 'fathername', 'fathers_name', 'fathersname', 'father_s_name', 'father']
+        'fatherName': ['father_name', 'fathername', 'fathers_name', 'fathersname', 'father_s_name', 'father'],
+        'address': ['address', 'residential_address', 'permanent_address', 'addr'],
+        'city': ['city', 'town'],
+        'state': ['state', 'province'],
+        'country': ['country', 'nation']
     }
 
     @staticmethod
