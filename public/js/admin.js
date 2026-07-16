@@ -1659,7 +1659,8 @@ function validateAssignForm() {
   var valid = true;
 
   var dept = document.getElementById('assignDept');
-  if (!dept.value) { showFieldError(dept, 'Department is required'); valid = false; }
+  // dept is optional — 'ALL' means all departments
+  // no validation error needed for dept
 
   var batch = document.getElementById('assignBatch');
   if (!batch.value) { showFieldError(batch, 'Batch is required'); valid = false; }
@@ -1680,9 +1681,9 @@ function validateAssignForm() {
 }
 
 window.fetchAvailableAlumniForAssign = function() {
-  var dept = document.getElementById('assignDept').value;
+  var dept = document.getElementById('assignDept').value || 'ALL';
   var batch = document.getElementById('assignBatch').value;
-  if (!dept || !batch) return;
+  if (!batch) return;
 
   var countGroup = document.getElementById('assignCountGroup');
   var badge = document.getElementById('availableAlumniCount');
@@ -1719,18 +1720,14 @@ window.onAssignBatchChange = function() {
   var batch = document.getElementById('assignBatch').value;
   var deptSel = document.getElementById('assignDept');
   
-  // Reset dept and count
-  deptSel.value = '';
+  // Reset to All Departments and count group
+  deptSel.value = 'ALL';
   document.getElementById('assignCountGroup').style.display = 'none';
   document.getElementById('assignPreviewSummary').style.display = 'none';
   
   if (!batch) return;
-
-  // Load departments for this batch from DB
-  API.getAvailableAlumniCount({ batch: batch }).then(function() {
-    // Just trigger fetchAvailableAlumniForAssign if dept already selected
-    if (deptSel.value) fetchAvailableAlumniForAssign();
-  }).catch(function() {});
+  // Immediately fetch available count for All Departments
+  fetchAvailableAlumniForAssign();
 };
 
 window.initAssignModal = function() {
@@ -1739,7 +1736,7 @@ window.initAssignModal = function() {
   
   // Reset
   batchSel.value = '';
-  deptSel.value = '';
+  deptSel.value = 'ALL';
   document.getElementById('assignCountGroup').style.display = 'none';
   document.getElementById('assignPreviewSummary').style.display = 'none';
   document.getElementById('assignCount').value = '';
@@ -1756,7 +1753,7 @@ window.initAssignModal = function() {
         batchSel.innerHTML += '<option value="' + b + '">' + b + '</option>';
       });
       
-      deptSel.innerHTML = '<option value="" disabled selected hidden>Select Department...</option>';
+      deptSel.innerHTML = '<option value="ALL">All Departments</option>';
       depts.forEach(function(d) {
         deptSel.innerHTML += '<option value="' + d + '">' + d + '</option>';
       });
@@ -1764,7 +1761,7 @@ window.initAssignModal = function() {
   }).catch(function() {
     // Fallback static options
     batchSel.innerHTML = '<option value="" disabled selected hidden>Select Batch...</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option>';
-    deptSel.innerHTML = '<option value="" disabled selected hidden>Select Department...</option><option value="CSE">CSE</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CE">CE</option><option value="IT">IT</option><option value="CIVIL">CIVIL</option><option value="MBA">MBA</option><option value="MCA">MCA</option>';
+    deptSel.innerHTML = '<option value="ALL">All Departments</option><option value="CSE">CSE</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CE">CE</option><option value="IT">IT</option><option value="CIVIL">CIVIL</option><option value="MBA">MBA</option><option value="MCA">MCA</option>';
   });
 };
 
@@ -1776,7 +1773,7 @@ window.updateAssignPreviewSummary = function() {
   var count = parseInt(countInput.value, 10) || 0;
   
   var previewBox = document.getElementById('assignPreviewSummary');
-  if (!dept || !batch || isNaN(available) || isNaN(count) || count <= 0) {
+  if (!batch || isNaN(available) || isNaN(count) || count <= 0) {
     previewBox.style.display = 'none';
     return;
   }

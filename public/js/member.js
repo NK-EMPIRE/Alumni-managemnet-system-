@@ -792,7 +792,7 @@
                     showToast('Logging out...', 'warning');
                     API.clearToken();
                     setTimeout(function () {
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html?logout=success';
                     }, 1500);
                     return;
                 }

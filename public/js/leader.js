@@ -519,7 +519,7 @@
         if (page === 'logout') {
           API.clearToken();
           showToast('Logged Out', 'You have been logged out successfully.', 'warning');
-          setTimeout(function () { window.location.href = 'index.html'; }, 1500);
+          setTimeout(function () { window.location.href = 'index.html?logout=success'; }, 1500);
           return;
         }
         document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });

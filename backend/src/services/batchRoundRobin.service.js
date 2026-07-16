@@ -41,8 +41,6 @@ async function getTeamAlumni(teamId, batch = null) {
     WHERE aa.team_id = @teamId
   `;
   
-  request.input('teamId', sql.Int, teamId);
-  
   if (batch) {
     query += ' AND a.batch = @batch';
     request.input('batch', sql.NVarChar(10), batch);
