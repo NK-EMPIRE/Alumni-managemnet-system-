@@ -1580,8 +1580,15 @@ function submitAssignAlumni() {
     if (res.success) {
       Toast.success('Success', res.message || 'Alumni assigned successfully!');
       closeModal('assignAlumniModal');
+      
+      // Show success modal
+      document.getElementById('assignmentResultIcon').innerHTML = '<i class="fas fa-check-circle" style="color:#10B981;"></i>';
+      document.getElementById('assignmentResultTitle').innerText = 'Assignment Successful';
+      document.getElementById('assignmentResultMsg').innerText = res.message || 'Alumni data has been successfully assigned to the selected Team Leader.';
+      openModal('assignmentResultModal');
+
       // Reset form
-      document.getElementById('assignDept').value = '';
+      document.getElementById('assignDept').value = 'ALL';
       document.getElementById('assignBatch').value = '';
       document.getElementById('assignCount').value = '';
       document.getElementById('assignTeamLeader').value = '';
@@ -1590,10 +1597,22 @@ function submitAssignAlumni() {
       fetchAllData();
     } else {
       Toast.danger('Error', res.message || 'Failed to assign alumni');
+      
+      // Show error modal
+      document.getElementById('assignmentResultIcon').innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#EF4444;"></i>';
+      document.getElementById('assignmentResultTitle').innerText = 'Assignment Failed';
+      document.getElementById('assignmentResultMsg').innerText = res.message || 'An error occurred while processing the assignment request.';
+      openModal('assignmentResultModal');
     }
   }).catch(function (err) {
     hideLoading(btn);
     Toast.danger('Error', err.message || 'Failed to assign alumni');
+    
+    // Show error modal with error message / reason
+    document.getElementById('assignmentResultIcon').innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#EF4444;"></i>';
+    document.getElementById('assignmentResultTitle').innerText = 'Assignment Failed';
+    document.getElementById('assignmentResultMsg').innerText = err.message || 'An error occurred while communicating with the database or server.';
+    openModal('assignmentResultModal');
   });
 }
 
