@@ -866,6 +866,11 @@ function loadTeamProgressData(leaderId) {
     var pct = d.completionPercentage || 0;
     var members = d.teamMembers || [];
     
+    // Sort team leader to the top
+    members.sort(function(a, b) {
+      return (b.isLeader ? 1 : 0) - (a.isLeader ? 1 : 0);
+    });
+    
     // Leader card
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px;">';
     html += mkStatBox('Total Assigned', d.totalAssigned || 0, '#3B82F6');
@@ -1092,6 +1097,25 @@ function populateTeamLeaderDropdowns() {
       sel.appendChild(opt);
     });
   });
+
+  // Populate ssFilterMember dropdown
+  var memberSel = document.getElementById('ssFilterMember');
+  if (memberSel) {
+    memberSel.innerHTML = '<option value="">All Members</option>';
+    var members = [];
+    if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
+      members = _apiMembers.records.map(function (u) {
+        var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
+        return { id: u.user_id, name: name.trim(), dept: u.department || '' };
+      });
+    }
+    members.forEach(function (m) {
+      var opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.name + (m.dept ? ' (' + m.dept + ')' : '');
+      memberSel.appendChild(opt);
+    });
+  }
 
   var batchSel = document.getElementById('assignBatch');
   if (batchSel) {
@@ -2749,6 +2773,7 @@ window.fetchSpreadsheetData = function() {
   var batch = document.getElementById('ssFilterBatch').value;
   var status = document.getElementById('ssFilterStatus').value;
   var leaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
+  var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
 
   // Load stats
   API.getAlumniStats().then(function(res) {
@@ -2782,7 +2807,8 @@ window.fetchSpreadsheetData = function() {
     department: dept || undefined,
     batch: batch || undefined,
     status: status || undefined,
-    leaderId: leaderId || undefined
+    leaderId: leaderId || undefined,
+    memberId: memberId || undefined
   };
 
   API.getAlumni(params).then(function(res) {
