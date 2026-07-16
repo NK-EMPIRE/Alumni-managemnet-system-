@@ -61,12 +61,20 @@
       justify-content: center;
       gap: 24px;
     }
+
     .login-loading-overlay.active {
       display: flex !important;
       animation: overlay-fadein 0.3s ease;
     }
+
     @keyframes overlay-fadein {
-      from { opacity: 0; } to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     /* Orbiting rings container */
@@ -78,63 +86,106 @@
       align-items: center;
       justify-content: center;
     }
+
     .ll-ring {
       position: absolute;
       border-radius: 50%;
       border-style: solid;
       border-color: transparent;
     }
+
     .ll-ring-1 {
-      width: 90px; height: 90px;
+      width: 90px;
+      height: 90px;
       border-width: 3px;
       border-top-color: #2563EB;
       border-right-color: #2563EB33;
       animation: ll-spin 1s linear infinite;
     }
+
     .ll-ring-2 {
-      width: 68px; height: 68px;
+      width: 68px;
+      height: 68px;
       border-width: 3px;
       border-top-color: #7C3AED;
       border-right-color: #7C3AED33;
       animation: ll-spin 1.4s linear infinite reverse;
     }
+
     .ll-ring-3 {
-      width: 46px; height: 46px;
+      width: 46px;
+      height: 46px;
       border-width: 3px;
       border-top-color: #10B981;
       border-right-color: #10B98133;
       animation: ll-spin 0.8s linear infinite;
     }
+
     .ll-inner-dot {
-      width: 14px; height: 14px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: linear-gradient(135deg, #2563EB, #7C3AED);
       animation: ll-pulse 1.2s ease-in-out infinite;
-      box-shadow: 0 0 12px rgba(37,99,235,0.5);
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
     }
+
     @keyframes ll-spin {
-      0%   { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
+
     @keyframes ll-pulse {
-      0%, 100% { transform: scale(0.85); opacity: 0.7; }
-      50%       { transform: scale(1.15); opacity: 1; }
+
+      0%,
+      100% {
+        transform: scale(0.85);
+        opacity: 0.7;
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
     }
 
     /* Animated dots under text */
     .ll-dots span {
       display: inline-block;
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #2563EB;
       margin: 0 3px;
       animation: ll-bounce 1.2s ease-in-out infinite;
     }
-    .ll-dots span:nth-child(2) { animation-delay: 0.2s; background: #7C3AED; }
-    .ll-dots span:nth-child(3) { animation-delay: 0.4s; background: #10B981; }
+
+    .ll-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+      background: #7C3AED;
+    }
+
+    .ll-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+      background: #10B981;
+    }
+
     @keyframes ll-bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40%            { transform: translateY(-8px); }
+
+      0%,
+      80%,
+      100% {
+        transform: translateY(0);
+      }
+
+      40% {
+        transform: translateY(-8px);
+      }
     }
 
     .login-loading-overlay .loading-text {
@@ -144,6 +195,7 @@
       color: #1E293B !important;
       margin: 0 !important;
     }
+
     .login-loading-overlay .loading-subtext {
       font-size: 0.82rem !important;
       color: #64748B !important;
@@ -179,8 +231,11 @@
       <div class="login-card stagger-children">
         <!-- Logo -->
         <div class="logo-container" style="display: flex; justify-content: center; margin-bottom: 16px;">
-          <div class="logo-circle" style="width: 90px; height: 90px; background: transparent; display: flex; align-items: center; justify-content: center; box-shadow: none;">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsBQrOWb5-VNesMiElYbcVsplTCFZRXy3USvYBN2zBKw&s" alt="MZCET Logo" style="width: 100%; height: 100%; object-fit: contain;">
+          <div class="logo-circle"
+            style="width: 90px; height: 90px; background: transparent; display: flex; align-items: center; justify-content: center; box-shadow: none;">
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsBQrOWb5-VNesMiElYbcVsplTCFZRXy3USvYBN2zBKw&s"
+              alt="MZCET Logo" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
         </div>
 
@@ -249,7 +304,7 @@
     <dotlottie-wc src="https://lottie.host/cc244a01-f247-45d6-9115-7e6a0a4a59a3/7Lb3UMZJo7.lottie"
       style="width: 400px; height: 240px; display: block; margin: 0 auto;" autoplay loop></dotlottie-wc>
     <p class="loading-text" style="margin-top: -10px;">Signing in...</p>
-    <p class="loading-subtext">Please wait while we verify your credentials 😊</p>
+    <p class="loading-subtext">Please wait while we verify your credentials.</p>
   </div>
 
   <!-- Forgot Password Modal -->
@@ -318,7 +373,8 @@
         <i class="fas fa-check" style="font-size:1.8rem;color:#10B981;"></i>
       </div>
       <h3 style="font-size:1.3rem;font-weight:700;color:#1E293B;margin:0 0 8px;">Logged Out!</h3>
-      <p style="font-size:0.9rem;color:#64748B;margin:0 0 24px;line-height:1.5;">You have been logged out of your account successfully. See you again!</p>
+      <p style="font-size:0.9rem;color:#64748B;margin:0 0 24px;line-height:1.5;">You have been logged out of your
+        account successfully. See you again!</p>
       <button onclick="closeLogoutModal()"
         style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.2);transition:all 0.2s ease;">
         Done
@@ -327,7 +383,7 @@
   </div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('DOMContentLoaded', function () {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('logout') === 'success') {
         const modal = document.getElementById('logoutSuccessModal');
