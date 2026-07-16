@@ -1346,6 +1346,16 @@ window.togglePasswordVisibility = function (inputId, btn) {
     }
 };
 
+window.showPasswordSuccessModal = function () {
+    var modal = document.getElementById('passwordSuccessModal');
+    if (modal) modal.classList.add('show');
+};
+
+window.closePasswordSuccessModal = function () {
+    var modal = document.getElementById('passwordSuccessModal');
+    if (modal) modal.classList.remove('show');
+};
+
 window.saveMemberPassword = function () {
     var oldPass     = document.getElementById('settingsOldPass');
     var newPass     = document.getElementById('settingsNewPass');
@@ -1385,11 +1395,10 @@ window.saveMemberPassword = function () {
 
     API.changePassword(oldVal, newVal)
         .then(function (res) {
-            _memberShowToast('Password updated successfully!', 'success');
-            // Clear all fields after success
             oldPass.value = '';
             newPass.value = '';
             confirmPass.value = '';
+            window.showPasswordSuccessModal();
         })
         .catch(function (err) {
             var msg = (err && err.message) ? err.message : 'Failed to update password. Please try again.';

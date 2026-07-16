@@ -314,7 +314,7 @@
               user.email = email;
               localStorage.setItem('user', JSON.stringify(user));
               if (window.Toast) Toast.success('Settings', 'Profile settings updated successfully!');
-              else if (window.showToast) showToast('Profile settings updated successfully!', 'success');
+              else if (window.showToast) window.showToast('Settings', 'Profile settings updated successfully!', 'success');
             } else {
               if (window.Toast) Toast.error('Settings', res.message || 'Failed to update profile');
             }
@@ -330,72 +330,8 @@
     }
 
     // 2. Security / Password Settings
-    var saveSecurityBtn = document.getElementById('saveSecurityBtn') ||
-                          document.querySelector('#tab-security button.btn-primary');
-    if (saveSecurityBtn) {
-      saveSecurityBtn.removeAttribute('onclick');
-      saveSecurityBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        var oldPasswordInput    = document.getElementById('secCurrentPassword') || document.querySelectorAll('#tab-security input[type="password"]')[0];
-        var newPasswordInput    = document.getElementById('secNewPassword')     || document.querySelectorAll('#tab-security input[type="password"]')[1];
-        var confirmPasswordInput= document.getElementById('secConfirmPassword') || document.querySelectorAll('#tab-security input[type="password"]')[2];
-
-        if (!oldPasswordInput || !newPasswordInput || !confirmPasswordInput) return;
-
-        var oldPassword     = oldPasswordInput.value.trim();
-        var newPassword     = newPasswordInput.value.trim();
-        var confirmPassword = confirmPasswordInput.value.trim();
-
-        if (!oldPassword || !newPassword || !confirmPassword) {
-          if (window.Toast) Toast.error('Security', 'All password fields are required');
-          else if (window.showToast) showToast('All password fields are required', 'error');
-          return;
-        }
-
-        if (newPassword.length < 6) {
-          if (window.Toast) Toast.error('Security', 'New password must be at least 6 characters');
-          else if (window.showToast) showToast('New password must be at least 6 characters', 'error');
-          return;
-        }
-
-        if (newPassword !== confirmPassword) {
-          if (window.Toast) Toast.error('Security', 'New passwords do not match');
-          else if (window.showToast) showToast('New passwords do not match', 'error');
-          return;
-        }
-
-        saveSecurityBtn.disabled = true;
-        saveSecurityBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-
-        API.changePassword(oldPassword, newPassword)
-          .then(function (res) {
-            if (res && res.success !== false) {
-              oldPasswordInput.value = '';
-              newPasswordInput.value = '';
-              confirmPasswordInput.value = '';
-              if (typeof window.showPasswordSuccessModal === 'function') {
-                window.showPasswordSuccessModal();
-              } else if (window.Toast) {
-                Toast.success('Security', 'Password updated successfully!');
-              } else if (window.showToast) {
-                window.showToast('Success', 'Password updated successfully!', 'success');
-              }
-            } else {
-              if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
-              else if (window.showToast) window.showToast('Error', res.message || 'Failed to change password', 'danger');
-            }
-          })
-          .catch(function (err) {
-            if (window.Toast) Toast.error('Security', err.message || 'Incorrect current password');
-            else if (window.showToast) window.showToast('Error', err.message || 'Incorrect current password', 'danger');
-          })
-          .finally(function () {
-            saveSecurityBtn.disabled = false;
-            saveSecurityBtn.innerHTML = '<i class="fas fa-save"></i> Update Password';
-          });
-      });
-    }
+    // Handled by page-specific scripts (admin.js, leader.js, member.js, settings.js)
+    // to avoid conflicts with role-specific input IDs and UX flows.
   }
 
   function initUniversalWidgets() {

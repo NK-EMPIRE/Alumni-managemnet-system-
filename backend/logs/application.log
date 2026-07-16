@@ -1009,3 +1009,43 @@
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:11:55.466"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:11:55.466"}
 {"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 11:12:11.990","userId":46}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:17:29.130"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:17:29.135"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:17:29.135"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:17:29.136"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-16 11:18:39.676","userId":46}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 11:18:46.082","userId":46}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-16 11:20:43.061","userId":51}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:23:14.750"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:23:14.754"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:23:14.754"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:23:14.755"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 11:26:35.563","userId":52}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:32:28.706"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:32:28.710"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:32:28.710"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:32:28.711"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:32:33.482"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:32:33.486"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:32:33.487"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:32:33.487"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:32:38.016"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:32:38.021"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:32:38.021"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:32:38.022"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:32:42.804"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:32:42.808"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:32:42.808"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:32:42.808"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:41:41.782"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:41:41.788"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:41:41.788"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:41:41.788"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:41:51.436"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:41:51.441"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:41:51.441"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:41:51.442"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully","timestamp":"2026-07-16 11:43:26.549"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:43:26.554"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:43:26.555"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:43:26.555"}

@@ -52,7 +52,7 @@ async function findByEmail(email) {
   const pool = await getPool();
   const result = await pool.request()
     .input('email', sql.NVarChar(150), email)
-    .query('SELECT user_id, first_name, last_name, email FROM Users WHERE email = @email AND deleted_at IS NULL');
+    .query('SELECT user_id, first_name, last_name, email, password_hash FROM Users WHERE email = @email AND deleted_at IS NULL');
   return result.recordset[0];
 }
 
