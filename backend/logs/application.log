@@ -947,3 +947,26 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-15 21:34:05.031"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-15 21:34:05.032"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-15 21:34:05.033"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-16 09:49:07.343"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 09:49:07.350"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 09:49:07.350"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 09:49:07.351"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 09:49:31.593","userId":24}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-16 09:50:41.539","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-16 09:50:48.683","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login failed - wrong password","timestamp":"2026-07-16 09:50:54.422","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-16 09:51:05.037","userId":1}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 09:51:56.699","userId":47}
+{"error":"Connection lost - read ECONNRESET","level":"error","message":"Failed to start server:","timestamp":"2026-07-16 10:16:19.868"}
+{"level":"info","message":"Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully","timestamp":"2026-07-16 10:17:10.238"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 10:17:10.245"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 10:17:10.245"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 10:17:10.246"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 10:17:43.010","userId":24}
+{"level":"info","message":"[changePassword] Request received for userId: 24","timestamp":"2026-07-16 10:18:11.014"}
+{"level":"info","message":"[changePassword] Found user: member1@gmail.com, password_hash length: 60","timestamp":"2026-07-16 10:18:11.375"}
+{"level":"info","message":"[changePassword] Password match result: true","timestamp":"2026-07-16 10:18:11.656"}
+{"level":"info","message":"[changePassword] New password hashed successfully. Length: 60","timestamp":"2026-07-16 10:18:11.960"}
+{"level":"info","message":"[changePassword] updatePassword executed. Rows affected: 1","timestamp":"2026-07-16 10:18:12.194"}
+{"level":"info","message":"[AUDIT] Password changed","rowsAffected":1,"timestamp":"2026-07-16 10:18:12.195","userId":24}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-07-16 10:18:47.657","userId":24}

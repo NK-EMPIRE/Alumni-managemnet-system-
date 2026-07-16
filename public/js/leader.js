@@ -1864,27 +1864,58 @@
   window.togglePassword = window.togglePasswordVisibility; // Alias just in case
   
   window.saveLeaderPassword = function() {
-    var oldPass = document.getElementById('settingsOldPass').value;
-    var newPass = document.getElementById('settingsNewPass').value;
-    var confirmPass = document.getElementById('settingsConfirmPass').value;
+    var oldPassEl    = document.getElementById('settingsOldPass');
+    var newPassEl    = document.getElementById('settingsNewPass');
+    var confirmPassEl = document.getElementById('settingsConfirmPass');
+    var btn          = document.querySelector('#tab-security .btn-primary');
 
-    if (!oldPass || !newPass || !confirmPass) {
-      showToast('Validation Error', 'All password fields are required.', 'danger');
+    if (!oldPassEl || !newPassEl || !confirmPassEl) return;
+
+    var oldVal     = oldPassEl.value.trim();
+    var newVal     = newPassEl.value.trim();
+    var confirmVal = confirmPassEl.value.trim();
+
+    // --- Validation ---
+    if (!oldVal) {
+      showToast('Validation', 'Please enter your current password.', 'warning');
+      oldPassEl.focus();
       return;
     }
-    if (newPass !== confirmPass) {
-      showToast('Validation Error', 'Passwords do not match.', 'danger');
+    if (!newVal || newVal.length < 6) {
+      showToast('Validation', 'New password must be at least 6 characters.', 'warning');
+      newPassEl.focus();
+      return;
+    }
+    if (newVal !== confirmVal) {
+      showToast('Validation', 'New password and confirm password do not match.', 'danger');
+      confirmPassEl.focus();
+      return;
+    }
+    if (oldVal === newVal) {
+      showToast('Validation', 'New password must be different from the current password.', 'warning');
+      newPassEl.focus();
       return;
     }
 
-    API.changePassword(oldPass, newPass).then(function(res) {
-      showToast('Success', 'Password changed successfully!', 'success');
-      document.getElementById('settingsOldPass').value = '';
-      document.getElementById('settingsNewPass').value = '';
-      document.getElementById('settingsConfirmPass').value = '';
-    }).catch(function(err) {
-      showToast('Error', err.message || 'Failed to update password.', 'danger');
-    });
+    // --- Call API ---
+    if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
+
+    API.changePassword(oldVal, newVal)
+      .then(function(res) {
+        showToast('Success', 'Password updated successfully!', 'success');
+        oldPassEl.value    = '';
+        newPassEl.value    = '';
+        confirmPassEl.value = '';
+      })
+      .catch(function(err) {
+        showToast('Error', err.message || 'Failed to update password. Please try again.', 'danger');
+      })
+      .finally(function() {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-save"></i> Update Password';
+        }
+      });
   };
 
   if (document.readyState === 'loading') {
