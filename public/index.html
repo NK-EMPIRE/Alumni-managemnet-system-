@@ -47,52 +47,107 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
     }
 
-    /* Premium Modern Spinner Styles & Animations */
+    /* Premium Animated Loading Overlay */
     .login-loading-overlay {
       position: fixed;
       inset: 0;
       z-index: 99999 !important;
-      background: rgba(255, 255, 255, 0.9) !important;
-      /* Light sleek background */
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
+      gap: 24px;
     }
-
     .login-loading-overlay.active {
       display: flex !important;
+      animation: overlay-fadein 0.3s ease;
+    }
+    @keyframes overlay-fadein {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+
+    /* Orbiting rings container */
+    .ll-spinner-wrap {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ll-ring {
+      position: absolute;
+      border-radius: 50%;
+      border-style: solid;
+      border-color: transparent;
+    }
+    .ll-ring-1 {
+      width: 90px; height: 90px;
+      border-width: 3px;
+      border-top-color: #2563EB;
+      border-right-color: #2563EB33;
+      animation: ll-spin 1s linear infinite;
+    }
+    .ll-ring-2 {
+      width: 68px; height: 68px;
+      border-width: 3px;
+      border-top-color: #7C3AED;
+      border-right-color: #7C3AED33;
+      animation: ll-spin 1.4s linear infinite reverse;
+    }
+    .ll-ring-3 {
+      width: 46px; height: 46px;
+      border-width: 3px;
+      border-top-color: #10B981;
+      border-right-color: #10B98133;
+      animation: ll-spin 0.8s linear infinite;
+    }
+    .ll-inner-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563EB, #7C3AED);
+      animation: ll-pulse 1.2s ease-in-out infinite;
+      box-shadow: 0 0 12px rgba(37,99,235,0.5);
+    }
+    @keyframes ll-spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes ll-pulse {
+      0%, 100% { transform: scale(0.85); opacity: 0.7; }
+      50%       { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* Animated dots under text */
+    .ll-dots span {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #2563EB;
+      margin: 0 3px;
+      animation: ll-bounce 1.2s ease-in-out infinite;
+    }
+    .ll-dots span:nth-child(2) { animation-delay: 0.2s; background: #7C3AED; }
+    .ll-dots span:nth-child(3) { animation-delay: 0.4s; background: #10B981; }
+    @keyframes ll-bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%            { transform: translateY(-8px); }
     }
 
     .login-loading-overlay .loading-text {
-      font-size: 1.2rem !important;
+      font-size: 1.15rem !important;
       font-weight: 700 !important;
       letter-spacing: 0.5px;
       color: #1E293B !important;
-      margin-top: 10px;
-      animation: pulse-opacity 1.8s ease-in-out infinite;
+      margin: 0 !important;
     }
-
     .login-loading-overlay .loading-subtext {
-      font-size: 0.85rem !important;
+      font-size: 0.82rem !important;
       color: #64748B !important;
       margin: 0 !important;
-      animation: pulse-opacity 1.8s ease-in-out infinite;
-      animation-delay: 0.3s;
-    }
-
-    @keyframes pulse-opacity {
-      0%,
-      100% {
-        opacity: 0.7;
-      }
-
-      50% {
-        opacity: 1;
-      }
     }
   </style>
 </head>
@@ -236,6 +291,66 @@
         style="width:100%;margin-top:12px;padding:10px;background:transparent;border:1.5px solid #E2E8F0;border-radius:10px;font-size:0.85rem;color:#64748B;cursor:pointer;">Cancel</button>
     </div>
   </div>
+
+  <!-- Loading Overlay -->
+  <div class="login-loading-overlay" id="loginLoadingOverlay">
+    <div class="ll-spinner-wrap">
+      <div class="ll-ring ll-ring-1"></div>
+      <div class="ll-ring ll-ring-2"></div>
+      <div class="ll-ring ll-ring-3"></div>
+      <div class="ll-inner-dot"></div>
+    </div>
+    <p class="loading-text">Signing in...</p>
+    <p class="loading-subtext">Please wait while we verify your credentials</p>
+    <div class="ll-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Logout Success Modal -->
+
+  <div id="logoutSuccessModal"
+    style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:99999;align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:20px;padding:40px 32px;max-width:380px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.15);text-align:center;border:1px solid rgba(255,255,255,0.8);transform:scale(0.9);transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div
+        style="width:64px;height:64px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 0 8px #F0FDF4;">
+        <i class="fas fa-check" style="font-size:1.8rem;color:#10B981;"></i>
+      </div>
+      <h3 style="font-size:1.3rem;font-weight:700;color:#1E293B;margin:0 0 8px;">Logged Out!</h3>
+      <p style="font-size:0.9rem;color:#64748B;margin:0 0 24px;line-height:1.5;">You have been logged out of your account successfully. See you again!</p>
+      <button onclick="closeLogoutModal()"
+        style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.2);transition:all 0.2s ease;">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('logout') === 'success') {
+        const modal = document.getElementById('logoutSuccessModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          setTimeout(() => {
+            modal.firstElementChild.style.transform = 'scale(1)';
+          }, 50);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
+
+    function closeLogoutModal() {
+      const modal = document.getElementById('logoutSuccessModal');
+      if (modal) {
+        modal.firstElementChild.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          modal.style.display = 'none';
+        }, 150);
+      }
+    }
+  </script>
 
   <script src="js/services/api.js"></script>
   <script src="js/app.js"></script>
