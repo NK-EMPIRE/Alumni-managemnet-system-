@@ -173,10 +173,50 @@ async function updateAlumniFields(alumniId, fields) {
   await request.query(query);
 }
 
+async function getFacultiesAndAliases() {
+  const pool = await getPool();
+  const faculties = await pool.request().query(`
+    SELECT u.user_id AS userId, u.first_name + ' ' + u.last_name AS name, u.department
+    FROM Users u
+    INNER JOIN Roles r ON u.role_id = r.role_id
+    WHERE r.role_name = 'LEADER' AND u.deleted_at IS NULL AND u.is_active = 1
+  `);
+  
+  const aliases = await pool.request().query(`
+    SELECT faculty_id, alias_name FROM FacultyAliases
+  `);
+  
+  return {
+    faculties: faculties.recordset,
+    aliases: aliases.recordset
+  };
+}
+
+async function saveFacultyAlias(facultyId, aliasName) {
+  const pool = await getPool();
+  try {
+    await pool.request()
+      .input('facultyId', sql.Int, facultyId)
+      .input('aliasName', sql.VarChar(255), aliasName)
+      .query(`
+        IF NOT EXISTS (SELECT * FROM FacultyAliases WHERE alias_name = @aliasName)
+        BEGIN
+          INSERT INTO FacultyAliases (faculty_id, alias_name) VALUES (@facultyId, @aliasName)
+        END
+      `);
+    return true;
+  } catch (err) {
+    // Ignore duplicate key violations
+    return false;
+  }
+}
+
 module.exports = {
   createImportLog,
   getImportHistory,
   batchInsertAlumni,
   findByRegisterNo,
-  updateAlumniFields
+  updateAlumniFields,
+  getFacultiesAndAliases,
+  saveFacultyAlias
 };

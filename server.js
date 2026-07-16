@@ -259,7 +259,19 @@ async function startServer() {
         END
       `);
 
-      logger.info('Migrations: verified and updated Users, Alumni, ImportHistory, and AlumniAssignments columns successfully');
+      await pool.request().query(`
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('dbo.FacultyAliases') AND type = 'U')
+        BEGIN
+          CREATE TABLE dbo.FacultyAliases (
+            alias_id INT IDENTITY(1,1) PRIMARY KEY,
+            faculty_id INT NOT NULL,
+            alias_name VARCHAR(255) NOT NULL UNIQUE,
+            CONSTRAINT FK_FacultyAliases_Users FOREIGN KEY (faculty_id) REFERENCES dbo.Users(user_id)
+          );
+        END
+      `);
+
+      logger.info('Migrations: verified and updated Users, Alumni, ImportHistory, AlumniAssignments, and FacultyAliases columns successfully');
     } catch (migErr) {
       logger.warn('Migration check failed: ' + migErr.message);
     }

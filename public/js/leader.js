@@ -1582,6 +1582,26 @@
         document.getElementById('distLoadingState').style.display = 'none';
         document.getElementById('distEmptyMsg').textContent = 'Click Preview to load distribution.';
         document.getElementById('confirmDistributeBtn').style.display = 'none';
+        
+        // Fetch batches and populate select dropdown
+        var batchInput = document.getElementById('distBatchInput');
+        if (batchInput) {
+          batchInput.innerHTML = '<option value="">Loading...</option>';
+          API.getAlumniFilters().then(function (res) {
+            if (res && res.success && res.data && res.data.batches) {
+              var opts = '<option value="">Select Batch...</option>';
+              res.data.batches.forEach(function (b) {
+                opts += '<option value="' + b + '">' + b + '</option>';
+              });
+              batchInput.innerHTML = opts;
+            } else {
+              batchInput.innerHTML = '<option value="">No batches found</option>';
+            }
+          }).catch(function () {
+            batchInput.innerHTML = '<option value="">Error loading batches</option>';
+          });
+        }
+        
         document.getElementById('distributeModalOverlay').classList.add('show');
       });
     }
