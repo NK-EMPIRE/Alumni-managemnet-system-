@@ -7,9 +7,10 @@ const { sendAssignmentNotificationEmail } = require('../helpers/email');
  * Admin assigns alumni of a specific department and batch to a Team Leader.
  */
 async function adminAssign(currentUser, { department, batch, leaderId, count }) {
-  if (!department || !batch || !leaderId) {
-    throw new AppError('Department, Batch, and Leader ID are required.', 400);
+  if (!batch || !leaderId) {
+    throw new AppError('Batch and Leader ID are required.', 400);
   }
+  const allDepts = !department || department === 'ALL';
 
   const assignCount = parseInt(count, 10);
   if (isNaN(assignCount) || assignCount <= 0) {
@@ -50,18 +51,22 @@ async function adminAssign(currentUser, { department, batch, leaderId, count }) 
   }
   const team = teamResult.recordset[0];
 
-  // Fetch AVAILABLE alumni matching department and batch (ordered by register_no ascending)
-  const alumniResult = await pool.request()
-    .input('department', sql.NVarChar(50), department)
+  // Fetch AVAILABLE alumni matching batch (and optionally department)
+  const alumniReq = pool.request()
     .input('batch', sql.NVarChar(10), batch)
-    .input('limit', sql.Int, assignCount)
-    .query(`
+    .input('limit', sql.Int, assignCount);
+  let alumniSql = `
       SELECT TOP (@limit) a.alumni_id, a.name
       FROM Alumni a
-      WHERE a.department = @department AND a.batch = @batch
+      WHERE a.batch = @batch
       AND a.alumni_id NOT IN (SELECT alumni_id FROM AlumniAssignments)
-      ORDER BY a.register_no ASC
-    `);
+  `;
+  if (!allDepts) {
+    alumniReq.input('department', sql.NVarChar(50), department);
+    alumniSql += ' AND a.department = @department';
+  }
+  alumniSql += ' ORDER BY a.register_no ASC';
+  const alumniResult = await alumniReq.query(alumniSql);
 
   const availableAlumni = alumniResult.recordset;
   if (availableAlumni.length === 0) {
@@ -93,14 +98,13 @@ async function adminAssign(currentUser, { department, batch, leaderId, count }) 
     throw new AppError('Failed to execute assignment transaction: ' + err.message, 500);
   }
 
-  // Record Audit Log
   await createAuditLog({
     userId: currentUser.userId,
     username: `${currentUser.firstName} ${currentUser.lastName}`,
     roleName: currentUser.role,
     action: 'ADMIN_ASSIGN',
     target: `Team#${team.team_id}`,
-    description: `Assigned ${availableAlumni.length} alumni (Dept: ${department}, Batch: ${batch}) to Leader ${leader.first_name} ${leader.last_name}`
+    description: `Assigned ${availableAlumni.length} alumni (Dept: ${allDepts ? 'ALL' : department}, Batch: ${batch}) to Leader ${leader.first_name} ${leader.last_name}`
   });
 
   // Non-blocking Email Notification
@@ -540,15 +544,14 @@ async function getUndistributedAlumni(leaderId, { page, limit, offset, search, b
 
 async function getAvailableAlumniCount({ department, batch }) {
   const pool = await getPool();
-  const result = await pool.request()
-    .input('department', sql.NVarChar(50), department)
-    .input('batch', sql.NVarChar(10), batch)
-    .query(`
-      SELECT COUNT(*) AS count
-      FROM Alumni
-      WHERE department = @department AND batch = @batch
-      AND alumni_id NOT IN (SELECT alumni_id FROM AlumniAssignments)
-    `);
+  const allDepts = !department || department === 'ALL';
+  const req = pool.request().input('batch', sql.NVarChar(10), batch);
+  let qry = `SELECT COUNT(*) AS count FROM Alumni WHERE batch = @batch AND alumni_id NOT IN (SELECT alumni_id FROM AlumniAssignments)`;
+  if (!allDepts) {
+    req.input('department', sql.NVarChar(50), department);
+    qry += ' AND department = @department';
+  }
+  const result = await req.query(qry);
   return result.recordset[0].count;
 }
 
