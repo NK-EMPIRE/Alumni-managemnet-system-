@@ -149,10 +149,10 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
 
   // Get undistributed alumni assigned to this leader
   let undistributedQuery = `
-    SELECT a.alumni_id, a.name, a.register_no, a.batch, a.department
+    SELECT a.alumni_id, a.name, a.register_no, a.batch, a.department, a.faculty_assigned
     FROM AlumniAssignments aa
     INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
-    WHERE aa.team_id = @teamId AND aa.status = 'ASSIGNED_TO_LEADER'
+    WHERE aa.team_id = @teamId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL
   `;
   const undistReq = pool.request().input('teamId', sql.Int, teamId);
 
@@ -531,7 +531,7 @@ async function getUndistributedAlumni(leaderId, { page, limit, offset, search, b
     FROM AlumniAssignments aa
     INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
     INNER JOIN Teams t ON aa.team_id = t.team_id
-    WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER'
+    WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL
       AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
       AND (@batch IS NULL OR a.batch = @batch)
   `;
@@ -544,7 +544,7 @@ async function getUndistributedAlumni(leaderId, { page, limit, offset, search, b
     FROM AlumniAssignments aa
     INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
     INNER JOIN Teams t ON aa.team_id = t.team_id
-    WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER'
+    WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL
       AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
       AND (@batch IS NULL OR a.batch = @batch)
     ORDER BY aa.assigned_date DESC
@@ -576,7 +576,7 @@ async function getUndistributedCount(leaderId) {
       SELECT COUNT(*) AS count
       FROM AlumniAssignments aa
       INNER JOIN Teams t ON aa.team_id = t.team_id
-      WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER'
+      WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL
     `);
   return result.recordset[0].count;
 }
