@@ -207,23 +207,8 @@ function parseUTCDateTime(dateStr) {
 }
 
 function initRealtimeClock() {
-  function updateClock() {
-    var dateEl = document.getElementById('navClockDate');
-    var timeEl = document.getElementById('navClockTime');
-    var sidebarDateEl = document.getElementById('currentDate');
-    var sidebarTimeEl = document.getElementById('currentTime');
-    var now = new Date();
-    var dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' };
-    var timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
-    var dateStr = now.toLocaleDateString('en-IN', dateOptions);
-    var timeStr = now.toLocaleTimeString('en-IN', timeOptions).toLowerCase();
-    if (dateEl) dateEl.textContent = dateStr;
-    if (timeEl) timeEl.textContent = timeStr;
-    if (sidebarDateEl) sidebarDateEl.textContent = dateStr;
-    if (sidebarTimeEl) sidebarTimeEl.textContent = timeStr;
-  }
-  updateClock();
-  setInterval(updateClock, 1000);
+  // Clock is now handled universally by app.js setupUniversalClock()
+  // This function is kept for backward compatibility
 }
 
 var _apiAssignHistory = null;
