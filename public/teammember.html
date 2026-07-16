@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.tailwindcdn.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -140,7 +140,10 @@
         .main-content {
             margin-left: 260px;
             flex: 1;
-            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .topbar {
@@ -208,6 +211,15 @@
 
         .content-wrapper {
             padding: 28px 32px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .page-header {
@@ -757,8 +769,8 @@
             display: none;
             position: absolute;
             top: 56px;
-            left: -155px;
-            right: auto;
+            right: 0;
+            left: auto;
             width: 360px;
             background: #fff;
             border-radius: var(--radius);
@@ -1056,20 +1068,23 @@
   </div>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-brand" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 20px;">
-        <div class="sidebar-brand-left" style="display: flex; align-items: center; gap: 12px;">
+    <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 20px;">
+        <div class="sidebar-brand" style="display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; background: transparent;">
             <div class="sidebar-brand-icon" style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink: 0;">
                 <i class="fas fa-graduation-cap"></i>
             </div>
             <h2 class="sidebar-brand-text" style="color:#fff;font-size:16px;font-weight:700;line-height:1.3; margin: 0;">AlumniMS</h2>
         </div>
-        <button class="topbar-btn" id="sidebarToggle" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: var(--transition);">
+        <button class="sidebar-toggle" id="sidebarToggle" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: var(--transition);">
             <i class="fas fa-bars"></i>
         </button>
     </div>
     <div class="nav-section"><span class="nav-section-text">Main Menu</span></div>
     <a class="nav-item active" data-page="dashboard">
         <i class="fas fa-th-large"></i> <span class="nav-item-text">Dashboard</span>
+    </a>
+    <a class="nav-item" data-page="preview">
+        <i class="fas fa-file-invoice"></i> <span class="nav-item-text">Preview Sheet</span>
     </a>
 
     <a class="nav-item" data-page="settings">
@@ -1085,12 +1100,9 @@
     <div class="topbar">
         <div class="topbar-left">
             <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;">Welcome, <span id="memberName">Rahul</span></h1>
-            <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">
-                <i class="fas fa-user-tie" style="color: var(--primary); margin-right: 4px;"></i> Team Leader: <span id="memberLeaderName" style="font-weight: 600; color: var(--text-primary);">Loading...</span>
-            </p>
         </div>
-        <div class="topbar-right">
 
+        <div class="topbar-right">
             <div style="position:relative;">
                 <button class="topbar-btn" id="notifBtn">
                     <i class="fas fa-bell"></i>
@@ -1142,73 +1154,61 @@
 
     <div class="content-wrapper">
         <div id="section-dashboard" class="content-section active">
-            <div class="page-header">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h2>Team Member Dashboard</h2>
                     <p>Manage and update alumni professional details efficiently</p>
                 </div>
-            <div class="breadcrumb">
-                <a href="#">Home</a>
-                <i class="fas fa-chevron-right" style="font-size:10px;"></i>
-                <span>Dashboard</span>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; background: var(--bg-white); border: 1px solid var(--border); padding: 8px 16px; border-radius: 30px; box-shadow: var(--shadow-sm); line-height: 1; margin: 5px 0; box-sizing: border-box !important;">
+                    <i class="fas fa-user-tie" style="color: var(--primary);"></i> Team Leader: <span id="memberLeaderName" style="font-weight: 600; color: var(--text-primary);">Loading...</span>
+                </div>
             </div>
-        </div>
 
-        <div class="cards-row">
-            <div class="stat-card">
-                <div class="card-icon blue"><i class="fas fa-folder-open"></i></div>
-                <div class="card-value" id="assignedCount">56</div>
-                <div class="card-label">Assigned Records</div>
+            <div class="cards-row">
+                <div class="stat-card">
+                    <div class="card-icon blue"><i class="fas fa-folder-open"></i></div>
+                    <div class="card-value" id="assignedCount">0</div>
+                    <div class="card-label">Assigned Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="card-icon green"><i class="fas fa-check-double"></i></div>
+                    <div class="card-value" id="completedCount">0</div>
+                    <div class="card-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="card-icon amber"><i class="fas fa-pen"></i></div>
+                    <div class="card-value" id="draftCount">0</div>
+                    <div class="card-label">Drafts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="card-icon orange"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="card-value" id="remainingCount">0</div>
+                    <div class="card-label">Remaining</div>
+                </div>
+                <div class="stat-card">
+                    <div class="card-icon purple"><i class="fas fa-calendar-day"></i></div>
+                    <div class="card-value" id="todayCount">0</div>
+                    <div class="card-label">Today's Updates</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="card-icon green"><i class="fas fa-check-double"></i></div>
-                <div class="card-value" id="completedCount">38</div>
-                <div class="card-label">Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="card-icon amber"><i class="fas fa-pen"></i></div>
-                <div class="card-value" id="draftCount">0</div>
-                <div class="card-label">Drafts</div>
-            </div>
-            <div class="stat-card">
-                <div class="card-icon orange"><i class="fas fa-hourglass-half"></i></div>
-                <div class="card-value" id="remainingCount">18</div>
-                <div class="card-label">Remaining</div>
-            </div>
-            <div class="stat-card">
-                <div class="card-icon purple"><i class="fas fa-calendar-day"></i></div>
-                <div class="card-value" id="todayCount">0</div>
-                <div class="card-label">Today's Updates</div>
-            </div>
-        </div>
 
-        <div class="table-container">
-            <div class="table-header">
-                <h3><i class="fas fa-list" style="margin-right:8px;color:var(--primary);"></i> Alumni Records</h3>
-                <div class="table-actions">
-                    <input type="text" class="table-search" id="tableSearch" placeholder="Search records...">
-                    <select class="filter-select" id="filterDept">
-                        <option value="">All Departments</option>
-                        <option value="CSE">CSE</option>
-                        <option value="ECE">ECE</option>
-                        <option value="EEE">EEE</option>
-                        <option value="ME">ME</option>
-                        <option value="CE">CE</option>
-                        <option value="IT">IT</option>
-                    </select>
-                    <select class="filter-select" id="filterBatch">
-                        <option value="">All Batches</option>
-                        <option value="2020">2020</option>
-                        <option value="2021">2021</option>
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                    </select>
-                    <select class="filter-select" id="filterStatus">
-                        <option value="">All Status</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Draft">Draft</option>
-                    </select>
+            <div class="table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-list" style="margin-right:8px;color:var(--primary);"></i> Alumni Records</h3>
+                    <div class="table-actions">
+                        <input type="text" class="table-search" id="tableSearch" placeholder="Search records..." style="width: 240px; min-width: 200px;">
+                        <select class="filter-select" id="filterDept" style="width: 160px; min-width: 140px;">
+                            <option value="">All Departments</option>
+                        </select>
+                        <select class="filter-select" id="filterBatch" style="width: 120px; min-width: 110px;">
+                            <option value="">All Batches</option>
+                        </select>
+                        <select class="filter-select" id="filterStatus" style="width: 120px; min-width: 110px;">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Draft">Draft</option>
+                        </select>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -1245,16 +1245,85 @@
         </div>
     </div> <!-- Close section-dashboard -->
 
+    <div id="section-preview" class="content-section" style="display:none; padding: 20px;">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div>
+                <h2>Alumni Records Sheet View</h2>
+                <p>Full-screen spreadsheet view of your assigned alumni records.</p>
+            </div>
+        </div>
+
+        <div class="card" style="background:#fff;padding:20px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;display:flex;flex-direction:column;height:calc(100vh - 200px);">
+            <div class="table-header" style="border-bottom:none;padding-bottom:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:0;">
+                <h3 style="font-size:1.1rem;font-weight:600;color:var(--text-dark);margin:0;"><i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>Spreadsheet View</h3>
+                <div class="table-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
+                    <input type="text" class="table-search" id="previewSearch" placeholder="Search records..." style="width:240px;min-width:200px;" oninput="onPreviewFilterChange()">
+                    <select class="filter-select" id="previewFilterDept" style="width:160px;min-width:140px;" onchange="onPreviewFilterChange()">
+                        <option value="">All Departments</option>
+                    </select>
+                    <select class="filter-select" id="previewFilterBatch" style="width:120px;min-width:110px;" onchange="onPreviewFilterChange()">
+                        <option value="">All Batches</option>
+                    </select>
+                    <select class="filter-select" id="previewFilterStatus" style="width:120px;min-width:110px;" onchange="onPreviewFilterChange()">
+                        <option value="">All Status</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Draft">Draft</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container" style="flex:1;overflow:auto;position:relative;border:1px solid var(--border);border-radius:8px;">
+                <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;" id="previewSpreadsheetTable">
+                    <thead>
+                        <tr style="background:var(--bg-light);position:sticky;top:0;z-index:10;border-bottom:2px solid var(--border);">
+                            <th class="sticky-col" style="padding:12px 16px;text-align:left;left:0;z-index:4;">S.No</th>
+                            <th style="padding:12px 16px;text-align:left;">Name</th>
+                            <th style="padding:12px 16px;text-align:left;">Register No</th>
+                            <th style="padding:12px 16px;text-align:left;">Father's Name</th>
+                            <th style="padding:12px 16px;text-align:left;">Department</th>
+                            <th style="padding:12px 16px;text-align:left;">Batch</th>
+                            <th style="padding:12px 16px;text-align:left;">Email</th>
+                            <th style="padding:12px 16px;text-align:left;">Phone</th>
+                            <th style="padding:12px 16px;text-align:left;">Company</th>
+                            <th style="padding:12px 16px;text-align:left;">Designation</th>
+                            <th style="padding:12px 16px;text-align:left;">Experience</th>
+                            <th style="padding:12px 16px;text-align:left;">City</th>
+                            <th style="padding:12px 16px;text-align:left;">Country</th>
+                            <th style="padding:12px 16px;text-align:left;">LinkedIn Profile</th>
+                            <th style="padding:12px 16px;text-align:left;">Current Status</th>
+                            <th style="padding:12px 16px;text-align:left;">Updated Date</th>
+                            <th style="padding:12px 16px;text-align:left;">Working Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewSpreadsheetBody">
+                        <tr><td colspan="17" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-footer" style="display:flex;justify-content:space-between;align-items:center;padding-top:15px;margin-top:15px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:0.85rem;color:var(--text-secondary);">Show</span>
+                    <select class="filter-select" id="previewLimit" style="padding:4px 8px;font-size:0.85rem;width:100px;" onchange="onPreviewFilterChange()">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span style="font-size:0.85rem;color:var(--text-secondary);">entries</span>
+                </div>
+                <div style="font-size:0.85rem;color:var(--text-secondary);" id="previewTableInfo">Showing 0 of 0 entries</div>
+                <div class="pagination" id="previewPagination" style="display:flex;gap:6px;"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="section-settings" class="content-section" style="display:none;">
         <div class="page-header">
             <div>
                 <h2>Settings</h2>
                 <p>Manage your account settings and preferences.</p>
-            </div>
-            <div class="breadcrumb">
-                <a href="#">Home</a>
-                <i class="fas fa-chevron-right" style="font-size:10px;"></i>
-                <span>Settings</span>
             </div>
         </div>
         <div class="card" style="background:#fff;padding:24px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:28px;">
@@ -1288,26 +1357,32 @@
             </button>
           </div>
           <div class="tab-content" id="tab-security" style="display:none;">
-            <div class="form-group" style="margin-bottom:16px; position:relative;">
+            <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Current Password</label>
-              <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password" style="max-width:400px;width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
-              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsOldPass', this)" style="position:absolute;right:15px;top:38px;background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
-                <i class="far fa-eye"></i>
-              </button>
+              <div style="position:relative; max-width:400px;">
+                <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsOldPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:16px; position:relative;">
+            <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">New Password</label>
-              <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password" style="max-width:400px;width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
-              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsNewPass', this)" style="position:absolute;right:15px;top:38px;background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
-                <i class="far fa-eye"></i>
-              </button>
+              <div style="position:relative; max-width:400px;">
+                <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsNewPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:16px; position:relative;">
+            <div class="form-group" style="margin-bottom:16px;">
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Confirm Password</label>
-              <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password" style="max-width:400px;width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
-              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsConfirmPass', this)" style="position:absolute;right:15px;top:38px;background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
-                <i class="far fa-eye"></i>
-              </button>
+              <div style="position:relative; max-width:400px;">
+                <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsConfirmPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
+                  <i class="far fa-eye"></i>
+                </button>
+              </div>
             </div>
             <button class="btn btn-primary" onclick="saveMemberPassword()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
               <i class="fas fa-save"></i> Update Password
@@ -1334,6 +1409,13 @@
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
                     <span style="font-size:13px;color:var(--text-secondary);font-weight:500;">Current Status:</span>
                     <span class="status-badge pending" id="modalStatusBadge"><i class="fas fa-clock"></i> Pending</span>
+                </div>
+                <!-- Smart Profile Parser -->
+                <div class="form-group" style="margin-bottom: 20px; background: var(--bg-light); padding: 15px; border-radius: 8px; border: 1px dashed var(--primary-light);">
+                    <label style="font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <i class="fab fa-linkedin"></i> Smart Paste Profile Header (LinkedIn)
+                    </label>
+                    <textarea id="fieldSmartParser" placeholder="Paste the LinkedIn profile summary (e.g., 'Software Engineer at Google', 'https://linkedin.com/in/username') here. The parser will automatically extract and autofill the fields below." rows="2" style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical;" oninput="parseProfileHeader()"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1463,7 +1545,7 @@
                     </div>
                 </div>
                 <input type="hidden" id="fieldIndex" value="">
-                <div class="submit-row">
+                <div class="submit-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <button type="button" class="btn btn-outline" id="saveDraftBtn">
                         <span class="spinner"></span>
                         <span class="btn-text">Save Draft</span>
@@ -1472,6 +1554,11 @@
                     <button type="button" class="btn btn-primary" id="submitRecordBtn">
                         <span class="spinner"></span>
                         <span class="btn-text">Submit Record</span>
+                        <span class="btn-loading-text">Submitting...</span>
+                    </button>
+                    <button type="button" class="btn btn-success" id="submitNextBtn" style="background-color: var(--success); border-color: var(--success); color: #fff;">
+                        <span class="spinner"></span>
+                        <span class="btn-text"><i class="fas fa-arrow-right"></i> Submit & Next</span>
                         <span class="btn-loading-text">Submitting...</span>
                     </button>
                     <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>

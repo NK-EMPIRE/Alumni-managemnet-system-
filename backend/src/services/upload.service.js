@@ -52,13 +52,14 @@ async function processExcelImport(filePath, originalName, currentUser) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
       const fieldsToUpdate = {};
-      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation', 'facultyAssigned'];
+      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation', 'facultyAssigned', 'fatherName'];
       
       checkFields.forEach(f => {
         const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
                         f === 'workingDetails' ? 'working_details' :
                         f === 'linkedinProfile' ? 'linkedin_profile' :
                         f === 'facultyAssigned' ? 'faculty_assigned' :
+                        f === 'fatherName' ? 'father_name' :
                         f.replace(/([A-Z])/g, '_$1').toLowerCase();
 
         const incomingVal = row[f];

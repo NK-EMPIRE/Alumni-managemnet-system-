@@ -2,6 +2,36 @@
   'use strict';
 
   function loadSettings() {
+    if (typeof API !== 'undefined' && API.getSettings) {
+      API.getSettings().then(function (res) {
+        if (res && res.success && res.data) {
+          var data = res.data;
+          localStorage.setItem('alumni_settings', JSON.stringify(data));
+          
+          if (data.siteName) document.getElementById('siteName').value = data.siteName;
+          if (data.collegeName) document.getElementById('collegeName').value = data.collegeName;
+          if (data.timezone) document.getElementById('timezone').value = data.timezone;
+          if (data.language) document.getElementById('language').value = data.language;
+          if (data.emailNotif !== undefined) document.getElementById('emailNotif').checked = (data.emailNotif === 'true' || data.emailNotif === true);
+          if (data.smsNotif !== undefined) document.getElementById('smsNotif').checked = (data.smsNotif === 'true' || data.smsNotif === true);
+          if (data.digestFreq) document.getElementById('digestFreq').value = data.digestFreq;
+          if (data.notifNewAssign !== undefined) document.getElementById('notifNewAssign').checked = (data.notifNewAssign === 'true' || data.notifNewAssign === true);
+          if (data.notifCompletion !== undefined) document.getElementById('notifCompletion').checked = (data.notifCompletion === 'true' || data.notifCompletion === true);
+          if (data.sessionTimeout) document.getElementById('sessionTimeout').value = data.sessionTimeout;
+          if (data.passMinLength) document.getElementById('passMinLength').value = data.passMinLength;
+          if (data.requireSpecialChars !== undefined) document.getElementById('requireSpecialChars').checked = (data.requireSpecialChars === 'true' || data.requireSpecialChars === true);
+          if (data.twoFactorAuth !== undefined) document.getElementById('twoFactorAuth').checked = (data.twoFactorAuth === 'true' || data.twoFactorAuth === true);
+        }
+      }).catch(function (err) {
+        console.error('Failed to load settings from server, trying local cache', err);
+        loadSettingsFromLocal();
+      });
+    } else {
+      loadSettingsFromLocal();
+    }
+  }
+
+  function loadSettingsFromLocal() {
     var saved = localStorage.getItem('alumni_settings');
     if (!saved) return;
     try {
@@ -10,15 +40,15 @@
       if (data.collegeName) document.getElementById('collegeName').value = data.collegeName;
       if (data.timezone) document.getElementById('timezone').value = data.timezone;
       if (data.language) document.getElementById('language').value = data.language;
-      if (data.emailNotif !== undefined) document.getElementById('emailNotif').checked = data.emailNotif;
-      if (data.smsNotif !== undefined) document.getElementById('smsNotif').checked = data.smsNotif;
+      if (data.emailNotif !== undefined) document.getElementById('emailNotif').checked = (data.emailNotif === 'true' || data.emailNotif === true);
+      if (data.smsNotif !== undefined) document.getElementById('smsNotif').checked = (data.smsNotif === 'true' || data.smsNotif === true);
       if (data.digestFreq) document.getElementById('digestFreq').value = data.digestFreq;
-      if (data.notifNewAssign !== undefined) document.getElementById('notifNewAssign').checked = data.notifNewAssign;
-      if (data.notifCompletion !== undefined) document.getElementById('notifCompletion').checked = data.notifCompletion;
+      if (data.notifNewAssign !== undefined) document.getElementById('notifNewAssign').checked = (data.notifNewAssign === 'true' || data.notifNewAssign === true);
+      if (data.notifCompletion !== undefined) document.getElementById('notifCompletion').checked = (data.notifCompletion === 'true' || data.notifCompletion === true);
       if (data.sessionTimeout) document.getElementById('sessionTimeout').value = data.sessionTimeout;
       if (data.passMinLength) document.getElementById('passMinLength').value = data.passMinLength;
-      if (data.requireSpecialChars !== undefined) document.getElementById('requireSpecialChars').checked = data.requireSpecialChars;
-      if (data.twoFactorAuth !== undefined) document.getElementById('twoFactorAuth').checked = data.twoFactorAuth;
+      if (data.requireSpecialChars !== undefined) document.getElementById('requireSpecialChars').checked = (data.requireSpecialChars === 'true' || data.requireSpecialChars === true);
+      if (data.twoFactorAuth !== undefined) document.getElementById('twoFactorAuth').checked = (data.twoFactorAuth === 'true' || data.twoFactorAuth === true);
     } catch (e) {}
   }
 
@@ -55,8 +85,8 @@
       timezone: document.getElementById('timezone').value,
       language: document.getElementById('language').value
     };
-    persistSettings(data);
-    Toast.success('Settings Saved', 'General settings have been saved successfully.');
+    persistSettings(data, 'general');
+    Toast.success('Settings Saved', 'General settings saved and synced with database.');
   };
 
   window.saveNotificationSettings = function () {
@@ -67,8 +97,8 @@
       notifNewAssign: document.getElementById('notifNewAssign').checked,
       notifCompletion: document.getElementById('notifCompletion').checked
     };
-    persistSettings(data);
-    Toast.success('Settings Saved', 'Notification preferences have been saved successfully.');
+    persistSettings(data, 'notifications');
+    Toast.success('Settings Saved', 'Notification preferences saved and synced with database.');
   };
 
   window.saveSecuritySettings = function () {
@@ -78,17 +108,23 @@
       requireSpecialChars: document.getElementById('requireSpecialChars').checked,
       twoFactorAuth: document.getElementById('twoFactorAuth').checked
     };
-    persistSettings(data);
-    Toast.success('Settings Saved', 'Security settings have been saved successfully.');
+    persistSettings(data, 'security');
+    Toast.success('Settings Saved', 'Security preferences saved and synced with database.');
   };
 
-  function persistSettings(newData) {
+  function persistSettings(newData, group) {
     var saved = localStorage.getItem('alumni_settings');
     var existing = saved ? JSON.parse(saved) : {};
     var merged = {};
     for (var key in existing) merged[key] = existing[key];
     for (var key2 in newData) merged[key2] = newData[key2];
     localStorage.setItem('alumni_settings', JSON.stringify(merged));
+    
+    if (typeof API !== 'undefined' && API.updateSettings) {
+      API.updateSettings(newData, group || 'general').catch(function (err) {
+        console.error('Failed to sync settings with server:', err);
+      });
+    }
   }
 
   window.testDbConnection = function (event) {

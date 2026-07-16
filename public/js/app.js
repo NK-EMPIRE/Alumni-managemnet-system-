@@ -233,39 +233,46 @@
     var rightContainer = document.querySelector('.navbar-right') || document.querySelector('.topbar-right');
     if (!rightContainer) return;
 
+    // Remove any existing clock inserted previously
+    var existing = document.getElementById('universalLiveClock');
+    if (existing) existing.remove();
+
     var clockDiv = document.createElement('div');
     clockDiv.id = 'universalLiveClock';
-    clockDiv.style.fontSize = '0.85rem';
-    clockDiv.style.color = 'var(--text-muted)';
-    clockDiv.style.fontWeight = '500';
-    clockDiv.style.marginRight = '16px';
-    clockDiv.style.display = 'inline-flex';
-    clockDiv.style.alignItems = 'center';
-    clockDiv.style.gap = '8px';
-    clockDiv.innerHTML = '<i class="far fa-clock" style="color:var(--primary);"></i><span id="universalClockSpan">-</span>';
+    clockDiv.style.cssText = [
+      'display:flex', 'flex-direction:column', 'align-items:flex-end',
+      'justify-content:center', 'padding:0 4px 0 12px',
+      'border-left:1px solid rgba(0,0,0,0.07)', 'min-width:140px'
+    ].join(';');
+    clockDiv.innerHTML = [
+      '<div id="uClockDate" style="font-size:0.78rem;font-weight:600;color:#1E293B;display:flex;align-items:center;gap:5px;white-space:nowrap;">',
+        '<i class="far fa-calendar-alt" style="color:#3B82F6;font-size:0.75rem;"></i>',
+        '<span>-</span>',
+      '</div>',
+      '<div id="uClockTime" style="font-size:0.72rem;color:#64748B;font-weight:500;margin-top:2px;display:flex;align-items:center;gap:4px;white-space:nowrap;">',
+        '<i class="far fa-clock" style="color:#64748B;font-size:0.68rem;"></i>',
+        '<span>-</span>',
+      '</div>'
+    ].join('');
 
-    // Insert at the beginning of the container
-    rightContainer.insertBefore(clockDiv, rightContainer.firstChild);
+    // Append AFTER all existing buttons (end of container)
+    rightContainer.appendChild(clockDiv);
 
     function updateClock() {
-      var d = new Date();
-      var options = {
-        timeZone: 'Asia/Kolkata',
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-      };
-      var span = document.getElementById('universalClockSpan');
-      if (span) {
-        span.textContent = d.toLocaleString('en-IN', options);
+      var now = new Date();
+      var dateSpan = clockDiv.querySelector('#uClockDate span');
+      var timeSpan = clockDiv.querySelector('#uClockTime span');
+      if (dateSpan) {
+        dateSpan.textContent = now.toLocaleDateString('en-IN', {
+          timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+        });
+      }
+      if (timeSpan) {
+        timeSpan.textContent = now.toLocaleTimeString('en-IN', {
+          timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        }).toLowerCase();
       }
     }
-
     updateClock();
     setInterval(updateClock, 1000);
   }
@@ -323,24 +330,38 @@
     }
 
     // 2. Security / Password Settings
-    var saveSecurityBtn = document.querySelector('#tab-security button.btn-primary');
+    var saveSecurityBtn = document.getElementById('saveSecurityBtn') ||
+                          document.querySelector('#tab-security button.btn-primary');
     if (saveSecurityBtn) {
       saveSecurityBtn.removeAttribute('onclick');
       saveSecurityBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        var passInputs = document.querySelectorAll('#tab-security input[type="password"]');
-        if (passInputs.length < 3) return;
-        var oldPassword = passInputs[0].value;
-        var newPassword = passInputs[1].value;
-        var confirmPassword = passInputs[2].value;
+
+        var oldPasswordInput    = document.getElementById('secCurrentPassword') || document.querySelectorAll('#tab-security input[type="password"]')[0];
+        var newPasswordInput    = document.getElementById('secNewPassword')     || document.querySelectorAll('#tab-security input[type="password"]')[1];
+        var confirmPasswordInput= document.getElementById('secConfirmPassword') || document.querySelectorAll('#tab-security input[type="password"]')[2];
+
+        if (!oldPasswordInput || !newPasswordInput || !confirmPasswordInput) return;
+
+        var oldPassword     = oldPasswordInput.value.trim();
+        var newPassword     = newPasswordInput.value.trim();
+        var confirmPassword = confirmPasswordInput.value.trim();
 
         if (!oldPassword || !newPassword || !confirmPassword) {
-          if (window.Toast) Toast.error('Security', 'All fields are required');
+          if (window.Toast) Toast.error('Security', 'All password fields are required');
+          else if (window.showToast) showToast('All password fields are required', 'error');
+          return;
+        }
+
+        if (newPassword.length < 6) {
+          if (window.Toast) Toast.error('Security', 'New password must be at least 6 characters');
+          else if (window.showToast) showToast('New password must be at least 6 characters', 'error');
           return;
         }
 
         if (newPassword !== confirmPassword) {
           if (window.Toast) Toast.error('Security', 'New passwords do not match');
+          else if (window.showToast) showToast('New passwords do not match', 'error');
           return;
         }
 
@@ -350,17 +371,19 @@
         API.changePassword(oldPassword, newPassword)
           .then(function (res) {
             if (res && res.success !== false) {
-              if (window.Toast) Toast.success('Security', 'Password changed successfully!');
-              else if (window.showToast) showToast('Password changed successfully!', 'success');
-              passInputs[0].value = '';
-              passInputs[1].value = '';
-              passInputs[2].value = '';
+              if (window.Toast) Toast.success('Security', 'Password updated successfully!');
+              else if (window.showToast) showToast('Password updated successfully!', 'success');
+              oldPasswordInput.value = '';
+              newPasswordInput.value = '';
+              confirmPasswordInput.value = '';
             } else {
               if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
+              else if (window.showToast) showToast(res.message || 'Failed to change password', 'error');
             }
           })
           .catch(function (err) {
-            if (window.Toast) Toast.error('Security', err.message || 'Failed to change password');
+            if (window.Toast) Toast.error('Security', err.message || 'Incorrect current password');
+            else if (window.showToast) showToast(err.message || 'Incorrect current password', 'error');
           })
           .finally(function () {
             saveSecurityBtn.disabled = false;
@@ -372,6 +395,7 @@
 
   function initUniversalWidgets() {
     setupUniversalDarkMode();
+    setupUniversalClock();
     // Wait for other scripts to populate settings values before binding settings tab handlers
     setTimeout(setupGlobalSettings, 200);
   }

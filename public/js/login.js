@@ -74,10 +74,10 @@
     const icon = getPasswordToggleIcon();
     if (passwordInput.type === 'password') {
       passwordInput.type = 'text';
-      icon.className = 'fas fa-eye-slash';
+      icon.className = 'fas fa-eye-slash fa-solid';
     } else {
       passwordInput.type = 'password';
-      icon.className = 'fas fa-eye';
+      icon.className = 'fas fa-eye fa-solid';
     }
     passwordInput.focus();
   });
@@ -281,53 +281,7 @@ function sendTempPassword() {
       document.getElementById('forgotStep1').style.display = 'none';
       document.getElementById('forgotStep2').style.display = 'block';
     } else {
-      errEl.textContent = res.message || 'Failed to send temporary password.';
-      errEl.style.display = 'block';
-    }
-  }).catch(function(err) {
-    spinner.style.display = 'none';
-    btn.disabled = false;
-    errEl.textContent = err.message || 'An error occurred. Try again.';
-    errEl.style.display = 'block';
-  });
-}
-
-function setNewPassword() {
-  var tempPwd = document.getElementById('tempPasswordInput').value.trim();
-  var newPwd = document.getElementById('newPasswordInput').value.trim();
-  var confirmPwd = document.getElementById('confirmNewPasswordInput').value.trim();
-  var errEl = document.getElementById('resetPasswordError');
-  errEl.style.display = 'none';
-
-  if (!tempPwd || !newPwd || !confirmPwd) {
-    errEl.textContent = 'All fields are required.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (newPwd !== confirmPwd) {
-    errEl.textContent = 'New passwords do not match.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (newPwd.length < 6) {
-    errEl.textContent = 'Password must be at least 6 characters.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  var spinner = document.getElementById('setNewPwdSpinner');
-  var btn = document.getElementById('setNewPasswordBtn');
-  spinner.style.display = 'inline';
-  btn.disabled = true;
-
-  API.resetPasswordWithTemp({ email: _forgotEmail, temporaryPassword: tempPwd, newPassword: newPwd }).then(function(res) {
-    spinner.style.display = 'none';
-    btn.disabled = false;
-    if (res && res.success) {
-      closeForgotModal();
-      alert('✅ Password reset successfully! You can now login with your new password.');
-    } else {
-      errEl.textContent = res.message || 'Reset failed. Check your temporary password.';
+      errEl.textContent = res.message || 'Failed to submit reset request.';
       errEl.style.display = 'block';
     }
   }).catch(function(err) {

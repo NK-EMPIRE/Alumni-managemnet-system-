@@ -168,6 +168,17 @@ document.addEventListener('DOMContentLoaded', function () {
     initSpreadsheetHandlers();
     initProgressWatch();
     fetchAllData();
+    initRealtimeClock();
+    // Real-time polling every 30 seconds for notifications + reset requests
+    setInterval(function() {
+      API.getAuditLogs({ page: 1, limit: 1000 }).then(function(res) {
+        if (res && res.success) {
+          _apiAuditLogs = res.data;
+          populateNotifications();
+        }
+      }).catch(function() {});
+      if (window.fetchResetRequests) window.fetchResetRequests();
+    }, 30000);
   } catch (err) {
     console.error('Admin init error:', err);
   }
@@ -181,7 +192,27 @@ var _apiAlumni = null;
 var _apiImportHistory = null;
 var _apiTeams = null;
 var _apiAuditLogs = null;
+var _apiStats = null;
+
+function parseUTCDateTime(dateStr) {
+  if (!dateStr) return new Date();
+  if (typeof dateStr === 'string') {
+    var cleanStr = dateStr.trim();
+    if (!cleanStr.endsWith('Z') && !cleanStr.includes('+')) {
+      cleanStr = cleanStr.replace(' ', 'T') + 'Z';
+    }
+    return new Date(cleanStr);
+  }
+  return new Date(dateStr);
+}
+
+function initRealtimeClock() {
+  // Clock is now handled universally by app.js setupUniversalClock()
+  // This function is kept for backward compatibility
+}
+
 var _apiAssignHistory = null;
+var _apiAlumniFilters = null;
 var _importErrorDetails = [];
 
 function setUserInfo() {
@@ -206,7 +237,8 @@ function fetchAllData() {
     API.getImportHistory().catch(function () { return null; }),
     API.getTeams().catch(function () { return null; }),
     API.getAuditLogs({ page: 1, limit: 1000 }).catch(function () { return null; }),
-    API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; })
+    API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; }),
+    API.getAlumniFilters().catch(function () { return null; })
   ]).then(function (results) {
     _dashboardData = results[0] && results[0].success ? results[0].data : null;
     _apiUsers = results[1] && results[1].success ? results[1].data : null;
@@ -216,7 +248,12 @@ function fetchAllData() {
     _apiTeams = results[5] && results[5].success ? results[5].data : null;
     _apiAuditLogs = results[6] && results[6].success ? results[6].data : null;
     _apiAssignHistory = results[7] && results[7].success ? results[7].data : null;
+    _apiAlumniFilters = results[8] && results[8].success ? results[8].data : null;
     _apiDataLoaded = true;
+    
+    // Populate dynamic filters first
+    populateDynamicFilters(_apiAlumniFilters);
+
     populateDashboardStats();
     populateActivityFeed();
     populateTable();
@@ -229,8 +266,8 @@ function fetchAllData() {
     populateImportHistory();
     populateAuditLogTable();
     populateTeamLeaderDropdowns();
-    // Fill progress watch leader dropdown
     populateProgressLeaderDropdown();
+    if (window.fetchResetRequests) window.fetchResetRequests();
     // Dismiss loading screen
     var ls = document.getElementById('loadingScreen');
     if (ls) { ls.classList.add('hide'); setTimeout(function() { ls.style.display = 'none'; }, 600); }
@@ -902,7 +939,7 @@ function populateNotifications() {
       return {
         id: nid,
         text: (r.username || 'System') + ' — ' + (r.action || '').replace(/_/g, ' ').toLowerCase(),
-        time: r.created_at ? new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
+        time: r.created_at ? parseUTCDateTime(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
         unread: true
       };
     });
@@ -986,11 +1023,47 @@ function showAllNotifications() {
   Toast.info('Notifications', 'Showing all notifications');
 }
 
+function populateDynamicFilters(filters) {
+  if (!filters || !filters.success || !filters.data) return;
+  var depts = filters.data.departments || [];
+  var batches = filters.data.batches || [];
+  
+  // Populate all department selects
+  var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment'];
+  deptSelects.forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var currentVal = sel.value;
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('ssFilter');
+    var html = isFilter ? '<option value="">All Depts</option>' : '<option value="" disabled selected hidden>Select Department</option>';
+    depts.forEach(function(d) {
+      if (d) html += '<option value="' + d + '">' + d + '</option>';
+    });
+    sel.innerHTML = html;
+    if (currentVal) sel.value = currentVal;
+  });
+
+  // Populate all batch selects
+  var batchSelects = ['filterBatch', 'ssFilterBatch', 'assignBatch'];
+  batchSelects.forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var currentVal = sel.value;
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('ssFilter');
+    var html = isFilter ? '<option value="">All Batches</option>' : '<option value="" disabled selected hidden>Select Batch</option>';
+    batches.forEach(function(b) {
+      if (b) html += '<option value="' + b + '">' + b + '</option>';
+    });
+    sel.innerHTML = html;
+    if (currentVal) sel.value = currentVal;
+  });
+}
+
 /* ────────────────────────────────────────────────────────────
    15. TEAM LEADER DROPDOWNS (for modals)
    ──────────────────────────────────────────────────────────── */
 function populateTeamLeaderDropdowns() {
-  var selects = ['tmTeamLeader', 'assignTeamLeader'];
+  var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader', 'tmFilterLeader'];
   var leaders;
   if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
     leaders = _apiUsers.records.map(function (u) {
@@ -1003,7 +1076,8 @@ function populateTeamLeaderDropdowns() {
   selects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
-    sel.innerHTML = '<option value="" disabled selected hidden>Select Team Leader</option>';
+    var isFilter = id === 'ssFilterLeader' || id === 'tmFilterLeader';
+    sel.innerHTML = isFilter ? '<option value="">All Leaders</option>' : '<option value="" disabled selected hidden>Select Team Leader</option>';
     leaders.forEach(function (tl) {
       var opt = document.createElement('option');
       opt.value = tl.id || tl.name;
@@ -1188,10 +1262,9 @@ function closeMobileSidebar() {
    20. SUBMENU TOGGLE
    ──────────────────────────────────────────────────────────── */
 function toggleSubmenu(el) {
-  var sidebar = document.getElementById('sidebar');
-  // Don't toggle submenu if sidebar is collapsed
-  if (sidebar && sidebar.classList && sidebar.classList.contains('collapsed')) {
-    return; // On mobile/collapsed, submenus shouldn't show
+  if (document.body.classList.contains('sidebar-collapsed')) {
+    document.body.classList.remove('sidebar-collapsed');
+    localStorage.setItem('sidebar_collapsed', 'false');
   }
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
@@ -1223,6 +1296,106 @@ function toggleNotifications(event) {
 }
 
 /* ────────────────────────────────────────────────────────────
+   22b. RESET REQUESTS DROPDOWN
+   ──────────────────────────────────────────────────────────── */
+window.toggleResetRequests = function(event) {
+  event.stopPropagation();
+  closeDropdown('profileMenu');
+  closeDropdown('notifMenu');
+  var menu = document.getElementById('resetReqMenu');
+  if (menu) {
+    menu.classList.toggle('show');
+    if (menu.classList.contains('show')) {
+      fetchResetRequests();
+    }
+  }
+};
+
+window.fetchResetRequests = function() {
+  var list = document.getElementById('resetReqList');
+  if (!list) return;
+  
+  API.getResetRequests().then(function(res) {
+    if (res && res.success && Array.isArray(res.data)) {
+      var reqs = res.data;
+      var count = reqs.length;
+      
+      // Update badge counts
+      var countEl = document.getElementById('resetReqCount');
+      var badgeEl = document.getElementById('resetReqCountBadge');
+      if (countEl) {
+        countEl.textContent = count;
+        countEl.style.display = count > 0 ? 'flex' : 'none';
+      }
+      if (badgeEl) {
+        badgeEl.textContent = count + ' pending';
+        badgeEl.style.display = count > 0 ? 'inline-block' : 'none';
+      }
+      
+      if (count === 0) {
+        list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.85rem;">No pending reset requests</div>';
+        return;
+      }
+      
+      var html = '';
+      reqs.forEach(function(r) {
+        var dateStr = '';
+        if (r.created_at) {
+          var d = parseUTCDateTime(r.created_at);
+          dateStr = d.toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+        html += '<div class="reset-item" style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;">' +
+          '<div style="display:flex;justify-content:space-between;font-size:0.85rem;">' +
+            '<div><strong>' + r.name + '</strong> <span style="font-size:0.75rem;color:#64748B;">(' + r.role + ')</span></div>' +
+            '<div style="font-size:0.75rem;color:#94A3B8;">' + dateStr + '</div>' +
+          '</div>' +
+          '<div style="font-size:0.8rem;color:#64748B;word-break:break-all;">' + r.email + '</div>' +
+          '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+            '<button class="btn btn-sm btn-primary" onclick="handleResetRequest(' + r.request_id + ', \'Accepted\', this)" style="padding:4px 8px;font-size:0.75rem;">' +
+              '<span class="spinner spinner-xs" style="display:none;margin-right:4px;"></span>Accept' +
+            '</button>' +
+            '<button class="btn btn-sm btn-outline-danger" onclick="handleResetRequest(' + r.request_id + ', \'Declined\', this)" style="padding:4px 8px;font-size:0.75rem;border-color:#EF4444;color:#EF4444;">' +
+              '<span class="spinner spinner-xs" style="display:none;margin-right:4px;"></span>Decline' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      });
+      list.innerHTML = html;
+    }
+  }).catch(function(err) {
+    console.error('Failed to load reset requests:', err);
+  });
+};
+
+window.handleResetRequest = function(requestId, status, btn) {
+  if (btn.classList.contains('loading') || btn.disabled) return;
+  var spinner = btn.querySelector('.spinner');
+  if (spinner) spinner.style.display = 'inline-block';
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  API.updateResetRequestStatus(requestId, status).then(function(res) {
+    if (spinner) spinner.style.display = 'none';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    Toast.success('Password Reset', 'Request ' + (status === 'Accepted' ? 'approved' : 'declined') + ' successfully!');
+    fetchResetRequests();
+  }).catch(function(err) {
+    if (spinner) spinner.style.display = 'none';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    Toast.danger('Password Reset', err.message || 'Failed to update request.');
+  });
+};
+
+/* ────────────────────────────────────────────────────────────
    23. DROPDOWN HELPERS
    ──────────────────────────────────────────────────────────── */
 function closeDropdown(id) {
@@ -1235,6 +1408,7 @@ function setupClickOutside() {
     if (!e.target.closest('.dropdown')) {
       closeDropdown('profileMenu');
       closeDropdown('notifMenu');
+      closeDropdown('resetReqMenu');
     }
   });
 }
@@ -1673,10 +1847,34 @@ function filterTeamLeaders() {
 
 function filterTeamMembers() {
   var q = getVal('tmSearch').toLowerCase();
+  var leaderFilter = document.getElementById('tmFilterLeader') ? document.getElementById('tmFilterLeader').value.toLowerCase() : '';
+  
   var rows = document.querySelectorAll('#tmBody tr');
   rows.forEach(function (row) {
     var text = row.textContent.toLowerCase();
-    row.style.display = text.indexOf(q) === -1 ? 'none' : '';
+    
+    // Check search query matches
+    var matchesSearch = text.indexOf(q) !== -1;
+    
+    // Check leader matches
+    var matchesLeader = true;
+    if (leaderFilter) {
+      // Find the 6th column (index 5)
+      var leaderCol = row.cells[5];
+      var leaderText = leaderCol ? leaderCol.textContent.trim().toLowerCase() : '';
+      
+      // Resolve option name
+      var select = document.getElementById('tmFilterLeader');
+      var selectedOpt = select.options[select.selectedIndex];
+      var leaderName = selectedOpt ? selectedOpt.getAttribute('data-name') : null;
+      if (leaderName) {
+        matchesLeader = leaderText.indexOf(leaderName.toLowerCase()) !== -1;
+      } else {
+        matchesLeader = leaderText.indexOf(leaderFilter) !== -1;
+      }
+    }
+    
+    row.style.display = (matchesSearch && matchesLeader) ? '' : 'none';
   });
 }
 
@@ -1858,7 +2056,7 @@ function handleLogout() {
   API.clearToken();
   Toast.warning('Logout', 'You have been logged out successfully.');
   setTimeout(function () {
-    window.location.href = 'index.html';
+    window.location.href = 'index.html?logout=success';
   }, 1500);
 }
 
@@ -1941,13 +2139,22 @@ function initImportHandlers() {
               '</tr>';
           });
           if (previewBody) previewBody.innerHTML = html;
+          var statusEl = document.getElementById('importPreviewStatus');
+          if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.textContent = 'Showing ' + res.data.length + ' rows in file (scroll to view).';
+          }
           importBtn.disabled = false;
         } else {
           if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">No valid rows to preview.</td></tr>';
+          var statusEl = document.getElementById('importPreviewStatus');
+          if (statusEl) statusEl.style.display = 'none';
           importBtn.disabled = true;
         }
       }).catch(function (err) {
         if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">Failed to generate preview: ' + err.message + '</td></tr>';
+        var statusEl = document.getElementById('importPreviewStatus');
+        if (statusEl) statusEl.style.display = 'none';
         importBtn.disabled = true;
       });
 
@@ -2023,7 +2230,7 @@ function populateImportHistory() {
       };
     });
   } else {
-    data = importHistory;
+    data = [];
   }
   _importErrorDetails = data;
   var html = '';
@@ -2444,6 +2651,7 @@ function populateViewModal(record) {
   document.getElementById('vAlumniRegNo').innerText = record.register_no || record.registerNo || '-';
   document.getElementById('vAlumniGender').innerText = record.gender || '-';
   document.getElementById('vAlumniDOB').innerText = record.date_of_birth || record.dob || '-';
+  document.getElementById('vAlumniFatherName').innerText = record.father_name || record.fatherName || '-';
   document.getElementById('vAlumniEmail').innerText = record.email || '-';
   document.getElementById('vAlumniPhone').innerText = record.phone || '-';
   
@@ -2518,6 +2726,7 @@ window.fetchSpreadsheetData = function() {
   var dept = document.getElementById('ssFilterDept').value;
   var batch = document.getElementById('ssFilterBatch').value;
   var status = document.getElementById('ssFilterStatus').value;
+  var leaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
 
   // Load stats
   API.getAlumniStats().then(function(res) {
@@ -2550,7 +2759,8 @@ window.fetchSpreadsheetData = function() {
     search: ssSearchQuery || undefined,
     department: dept || undefined,
     batch: batch || undefined,
-    status: status || undefined
+    status: status || undefined,
+    leaderId: leaderId || undefined
   };
 
   API.getAlumni(params).then(function(res) {

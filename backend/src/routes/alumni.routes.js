@@ -23,7 +23,7 @@ router.get(
 
 router.get(
   '/filters',
-  authorize(ROLES.ADMIN, ROLES.LEADER),
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
   alumniController.getFilters
 );
 

@@ -50,10 +50,25 @@ const resetPasswordWithTemp = asyncHandler(async (req, res) => {
   success(res, null, 'Password reset successfully. You can now log in with your new password.');
 });
 
+const getResetRequests = asyncHandler(async (req, res) => {
+  const result = await authService.getResetRequests();
+  success(res, result, 'Reset requests retrieved successfully');
+});
+
+const updateResetRequestStatus = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+  const { status } = req.body;
+  const adminUser = req.user;
+  await authService.updateResetRequestStatus(requestId, status, adminUser);
+  success(res, null, `Reset request status updated to ${status}`);
+});
+
 module.exports = {
   login,
   refreshToken,
   changePassword,
   forgotPassword,
-  resetPasswordWithTemp
+  resetPasswordWithTemp,
+  getResetRequests,
+  updateResetRequestStatus
 };

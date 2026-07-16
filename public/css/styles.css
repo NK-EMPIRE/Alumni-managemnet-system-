@@ -389,7 +389,7 @@ ul {
 }
 
 .sidebar-collapsed .sidebar-brand {
-  justify-content: center;
+  display: none !important;
 }
 
 .sidebar-collapsed .sidebar-header {
@@ -442,10 +442,12 @@ ul {
   -webkit-backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity var(--transition-speed) ease;
+  pointer-events: none;
 }
 
 .sidebar-overlay.show {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -1097,6 +1099,7 @@ ul {
   color: #CBD5E1;
 }
 
+select.form-control ~ .floating-label,
 .form-control:not(:placeholder-shown)~.floating-label,
 .form-control:focus~.floating-label {
   top: 0;
@@ -1135,14 +1138,32 @@ ul {
 }
 
 /* Select styling */
-.form-select {
+select, .filter-select, .form-select {
+  background-color: #ffffff;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: var(--radius-sm, 6px);
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: var(--text-dark, #1E293B);
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 36px;
-  cursor: pointer;
+}
+
+select:hover, .filter-select:hover, .form-select:hover {
+  border-color: var(--primary, #2563EB);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+select:focus, .filter-select:focus, .form-select:focus {
+  border-color: var(--primary, #2563EB);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 /* Textarea */
@@ -2246,9 +2267,13 @@ textarea.form-control {
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
 }
 
 .spinner-dots {
@@ -4683,11 +4708,7 @@ th {
   border-top-color: rgba(30, 41, 59, 0.8);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+
 
 .form-group.loading .form-control {
   opacity: 0.5;
@@ -5047,6 +5068,7 @@ th {
 .text-line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -5054,6 +5076,7 @@ th {
 .text-line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

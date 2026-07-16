@@ -52,9 +52,7 @@
         </div>
         <span class="sidebar-brand-text">AlumniMS</span>
       </div>
-      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
-        <i class="fas fa-bars"></i>
-      </button>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
     </div>
 
     <nav class="sidebar-nav">
@@ -70,11 +68,6 @@
         <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
-        <a class="sidebar-item sub-item" data-section="teamLeaders" data-sub="viewAll"
-          onclick="navigateTo('teamLeaders', this)">
-          <i class="fas fa-list"></i>
-          <span class="sidebar-item-text">View All</span>
-        </a>
         <a class="sidebar-item sub-item" data-section="addTeamLeader" onclick="openModal('addTeamLeaderModal')">
           <i class="fas fa-plus-circle"></i>
           <span class="sidebar-item-text">Add New</span>
@@ -87,11 +80,6 @@
         <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
-        <a class="sidebar-item sub-item" data-section="teamMembers" data-sub="viewAll"
-          onclick="navigateTo('teamMembers', this)">
-          <i class="fas fa-list"></i>
-          <span class="sidebar-item-text">View All</span>
-        </a>
         <a class="sidebar-item sub-item" data-section="addTeamMember" onclick="openModal('addTeamMemberModal')">
           <i class="fas fa-plus-circle"></i>
           <span class="sidebar-item-text">Add New</span>
@@ -169,13 +157,31 @@
           </div>
         </div>
       </div>
+
       <div class="navbar-right">
+        <!-- Reset Requests Dropdown -->
+        <div class="dropdown" id="resetReqDropdown" style="position:relative;margin-right:12px;">
+          <button class="navbar-btn" onclick="toggleResetRequests(event)" style="position:relative;">
+            <i class="fas fa-user-shield"></i>
+            <span class="notification-count" id="resetReqCount" style="display:none;background:#EF4444;color:#fff;">0</span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-left" id="resetReqMenu" style="width:360px;padding:12px 0;">
+            <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-weight:600;font-size:0.9rem;border-bottom:1px solid var(--border);margin-bottom:8px;">
+              <span>Reset Requests</span>
+              <span class="badge badge-danger" id="resetReqCountBadge" style="display:none;padding:2px 6px;border-radius:10px;font-size:10px;">0 pending</span>
+            </div>
+            <div id="resetReqList" style="max-height:280px;overflow-y:auto;padding:0 16px;">
+              <div style="padding:16px;text-align:center;color:#64748B;font-size:0.85rem;">No pending requests</div>
+            </div>
+          </div>
+        </div>
+
         <div class="dropdown" id="notifDropdown">
           <button class="navbar-btn" onclick="toggleNotifications(event)">
             <i class="fas fa-bell"></i>
             <span class="notification-count">5</span>
           </button>
-          <div class="dropdown-menu dropdown-menu-left" id="notifMenu" style="width:340px;">
+          <div class="dropdown-menu" id="notifMenu" style="width:340px; right:0; left:auto !important;">
             <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
               <span>Notifications</span>
               <button onclick="clearAllNotifications()"
@@ -207,16 +213,7 @@
             <h1>Dashboard</h1>
             <p>Welcome back! Here is what is happening with your alumni data today.</p>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:0.85rem;color:var(--text-muted);">
-              <i class="far fa-calendar-alt" style="margin-right:6px;"></i>
-              <span id="currentDate"></span>
-            </div>
-            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">
-              <i class="far fa-clock" style="margin-right:4px;"></i>
-              <span id="currentTime"></span>
-            </div>
-          </div>
+
         </div>
 
         <!-- Overview Cards -->
@@ -425,6 +422,9 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
               </div>
+              <select class="form-control" id="ssFilterLeader" onchange="fetchSpreadsheetData()" style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Leaders</option>
+              </select>
               <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()" style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
                 <option value="">All Depts</option>
                 <option value="CSE">CSE</option>
@@ -554,6 +554,9 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search team members..." id="tmSearch" oninput="filterTeamMembers()">
               </div>
+              <select class="form-control" id="tmFilterLeader" onchange="filterTeamMembers()" style="max-width:200px;height:36px;font-size:0.8rem;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);">
+                <option value="">All Leaders</option>
+              </select>
             </div>
             <div class="table-container">
               <table class="table" id="tmTable">
@@ -703,26 +706,32 @@
               </button>
             </div>
             <div class="tab-content" id="tab-security">
-              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
-                <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="max-width:400px; padding-right: 40px;">
-                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
-                  <i class="far fa-eye"></i>
-                </button>
+                <div style="position:relative; max-width:400px;">
+                  <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                    <i class="far fa-eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
-                <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="max-width:400px; padding-right: 40px;">
-                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
-                  <i class="far fa-eye"></i>
-                </button>
+                <div style="position:relative; max-width:400px;">
+                  <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                    <i class="far fa-eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="form-group" style="position:relative; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
-                <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="max-width:400px; padding-right: 40px;">
-                <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsConfirmPass', this)" style="position:absolute;right:15px;top:35px;background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
-                  <i class="far fa-eye"></i>
-                </button>
+                <div style="position:relative; max-width:400px;">
+                  <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsConfirmPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                    <i class="far fa-eye"></i>
+                  </button>
+                </div>
               </div>
               <button class="btn btn-primary" onclick="saveAdminPassword()">
                 <i class="fas fa-save"></i> Update Password
@@ -775,7 +784,7 @@
           </div>
           <div id="importPreviewContainer" style="display:none;margin-top:24px;border-top:1px solid var(--border);padding-top:24px;">
             <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:12px;">Import Preview</h3>
-            <div class="table-container" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
+            <div class="table-container" style="max-height:500px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
               <table class="table" style="width:100%;font-size:0.85rem;">
                 <thead>
                   <tr style="background:var(--bg-light);position:sticky;top:0;">
@@ -791,6 +800,7 @@
                 <tbody id="importPreviewBody"></tbody>
               </table>
             </div>
+            <div id="importPreviewStatus" style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;display:none;font-weight:500;"></div>
           </div>
 
           <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
@@ -1083,7 +1093,7 @@
 
   <!-- Assign Alumni Modal -->
   <div class="modal-overlay" id="assignAlumniModal">
-    <div class="modal">
+    <div class="modal" style="max-width: 520px; width: 95%;">
       <div class="modal-header">
         <h3><i class="fas fa-user-graduate" style="color:var(--primary);margin-right:8px;"></i>Assign Alumni Data</h3>
         <button class="modal-close" onclick="closeModal('assignAlumniModal')">&times;</button>
@@ -1269,6 +1279,11 @@
               style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Date
               of Birth</label>
             <span id="vAlumniDOB" style="font-weight:500;">-</span>
+          </div>
+          <div>
+            <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Father's Name</label>
+            <span id="vAlumniFatherName" style="font-weight:500;">-</span>
           </div>
           <div>
             <label

@@ -3,6 +3,7 @@ const { hashPassword, comparePassword } = require('../utils/password');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { AuthenticationError } = require('../middleware/errorHandler');
 const { logger } = require('../utils/logger');
+const { getPool, sql } = require('../config/database');
 
 async function login(loginId, password, ip, userAgent) {
   const user = await authRepo.findByLoginId(loginId);
@@ -114,20 +115,33 @@ async function refreshToken(token) {
 async function forgotPassword(email) {
   const user = await authRepo.findByEmail(email);
   if (!user) {
-    // Return early to prevent timing attacks / email discovery, but log it
-    logger.info(`Forgot password request for non-existent email: ${email}`);
-    return;
+    throw new Error('No account found with this email address.');
   }
 
-  const { generateTemporaryPassword } = require('../utils/password');
-  const { sendPasswordResetEmail } = require('../helpers/email');
+  const pool = await getPool();
   
-  const tempPass = generateTemporaryPassword();
-  const hashed = await hashPassword(tempPass);
-  
-  await authRepo.updatePassword(user.user_id, hashed);
-  await sendPasswordResetEmail(user.email, tempPass);
-  logger.auditLog('Password reset requested via forgot password', { userId: user.user_id });
+  // Check duplicate pending request
+  const checkReq = await pool.request()
+    .input('email', sql.VarChar, email)
+    .query(`SELECT * FROM ResetRequests WHERE email = @email AND status = 'Pending'`);
+    
+  if (checkReq.recordset.length > 0) {
+    throw new Error('A password reset request is already pending for this account.');
+  }
+
+  const name = (user.first_name + ' ' + (user.last_name || '')).trim();
+  const roleName = user.role_name || 'USER';
+
+  await pool.request()
+    .input('email', sql.VarChar, email)
+    .input('name', sql.NVarChar, name)
+    .input('role', sql.VarChar, roleName)
+    .query(`
+      INSERT INTO ResetRequests (email, name, role, status, created_at, updated_at)
+      VALUES (@email, @name, @role, 'Pending', SYSUTCDATETIME(), SYSUTCDATETIME())
+    `);
+
+  logger.auditLog('Password reset request submitted to admin', { email });
 }
 
 async function resetPasswordWithTemp(email, temporaryPassword, newPassword) {
@@ -147,10 +161,67 @@ async function resetPasswordWithTemp(email, temporaryPassword, newPassword) {
   logger.auditLog('Password reset with temporary password', { userId: user.user_id });
 }
 
+async function getResetRequests() {
+  const pool = await getPool();
+  const res = await pool.request().query(`
+    SELECT request_id, email, name, role, status, created_at
+    FROM ResetRequests
+    WHERE status = 'Pending'
+    ORDER BY created_at DESC
+  `);
+  return res.recordset;
+}
+
+async function updateResetRequestStatus(requestId, status, adminUser) {
+  const pool = await getPool();
+  
+  // Find request
+  const requestRes = await pool.request()
+    .input('requestId', sql.Int, requestId)
+    .query(`SELECT * FROM ResetRequests WHERE request_id = @requestId`);
+  
+  if (requestRes.recordset.length === 0) {
+    throw new Error('Reset request not found');
+  }
+  
+  const req = requestRes.recordset[0];
+  
+  if (status === 'Accepted') {
+    // Hash default password "mzcet@123"
+    const defaultPassword = 'mzcet@123';
+    const hashed = await hashPassword(defaultPassword);
+    
+    // Find user by email
+    const user = await authRepo.findByEmail(req.email);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    // Update password
+    await authRepo.updatePassword(user.user_id, hashed);
+    
+    // Update request status
+    await pool.request()
+      .input('requestId', sql.Int, requestId)
+      .query(`UPDATE ResetRequests SET status = 'Accepted', updated_at = SYSUTCDATETIME() WHERE request_id = @requestId`);
+      
+    logger.auditLog('Password reset request accepted by admin', { email: req.email, adminId: adminUser.userId });
+  } else {
+    // Update request status to Declined
+    await pool.request()
+      .input('requestId', sql.Int, requestId)
+      .query(`UPDATE ResetRequests SET status = 'Declined', updated_at = SYSUTCDATETIME() WHERE request_id = @requestId`);
+      
+    logger.auditLog('Password reset request declined by admin', { email: req.email, adminId: adminUser.userId });
+  }
+}
+
 module.exports = {
   login,
   changePassword,
   refreshToken,
   forgotPassword,
-  resetPasswordWithTemp
+  resetPasswordWithTemp,
+  getResetRequests,
+  updateResetRequestStatus
 };

@@ -9,6 +9,7 @@ const reportRoutes = require('./report.routes');
 const uploadRoutes = require('./upload.routes');
 const assignmentRoutes = require('./assignment.routes');
 const auditRoutes = require('./audit.routes');
+const settingsRoutes = require('./settings.routes');
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/reports', reportRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/assignments', assignmentRoutes);
 router.use('/audit-logs', auditRoutes);
+router.use('/settings', settingsRoutes);
 
 module.exports = router;

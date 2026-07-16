@@ -1,20 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Alumni Professional Details Update Management System - Login">
   <meta name="theme-color" content="#2563EB">
-  <title>APIUMS | Alumni Professional Information Update Management System</title>
+  <title>AMS | Alumni Management System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js" type="module"></script>
+  <style>
+    body {
+      background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('https://www.mzcet.in/assets/img/mzcet1.webp') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-attachment: fixed !important;
+      background-repeat: no-repeat !important;
+    }
+
+    .login-page {
+      background: transparent !important;
+    }
+
+    .login-illustration {
+      background: linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .login-form-wrapper {
+      background: rgba(248, 250, 252, 0.92) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+    }
+
+    .login-card {
+      background: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.8) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* Premium Animated Loading Overlay */
+    .login-loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999 !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .login-loading-overlay.active {
+      display: flex !important;
+      animation: overlay-fadein 0.3s ease;
+    }
+    @keyframes overlay-fadein {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+
+    /* Orbiting rings container */
+    .ll-spinner-wrap {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ll-ring {
+      position: absolute;
+      border-radius: 50%;
+      border-style: solid;
+      border-color: transparent;
+    }
+    .ll-ring-1 {
+      width: 90px; height: 90px;
+      border-width: 3px;
+      border-top-color: #2563EB;
+      border-right-color: #2563EB33;
+      animation: ll-spin 1s linear infinite;
+    }
+    .ll-ring-2 {
+      width: 68px; height: 68px;
+      border-width: 3px;
+      border-top-color: #7C3AED;
+      border-right-color: #7C3AED33;
+      animation: ll-spin 1.4s linear infinite reverse;
+    }
+    .ll-ring-3 {
+      width: 46px; height: 46px;
+      border-width: 3px;
+      border-top-color: #10B981;
+      border-right-color: #10B98133;
+      animation: ll-spin 0.8s linear infinite;
+    }
+    .ll-inner-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563EB, #7C3AED);
+      animation: ll-pulse 1.2s ease-in-out infinite;
+      box-shadow: 0 0 12px rgba(37,99,235,0.5);
+    }
+    @keyframes ll-spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes ll-pulse {
+      0%, 100% { transform: scale(0.85); opacity: 0.7; }
+      50%       { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* Animated dots under text */
+    .ll-dots span {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #2563EB;
+      margin: 0 3px;
+      animation: ll-bounce 1.2s ease-in-out infinite;
+    }
+    .ll-dots span:nth-child(2) { animation-delay: 0.2s; background: #7C3AED; }
+    .ll-dots span:nth-child(3) { animation-delay: 0.4s; background: #10B981; }
+    @keyframes ll-bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%            { transform: translateY(-8px); }
+    }
+
+    .login-loading-overlay .loading-text {
+      font-size: 1.15rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px;
+      color: #1E293B !important;
+      margin: 0 !important;
+    }
+    .login-loading-overlay .loading-subtext {
+      font-size: 0.82rem !important;
+      color: #64748B !important;
+      margin: 0 !important;
+    }
+  </style>
 </head>
+
 <body>
   <div class="login-page">
     <!-- Left Illustration -->
@@ -41,14 +178,14 @@
     <div class="login-form-wrapper">
       <div class="login-card stagger-children">
         <!-- Logo -->
-        <div class="logo-container">
-          <div class="logo-circle">
-            <i class="fas fa-graduation-cap"></i>
+        <div class="logo-container" style="display: flex; justify-content: center; margin-bottom: 16px;">
+          <div class="logo-circle" style="width: 90px; height: 90px; background: transparent; display: flex; align-items: center; justify-content: center; box-shadow: none;">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsBQrOWb5-VNesMiElYbcVsplTCFZRXy3USvYBN2zBKw&s" alt="MZCET Logo" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
         </div>
 
         <!-- Title -->
-        <h1 class="login-title">Alumni Professional Information<br>Update Management System</h1>
+        <h1 class="login-title">Alumni Management System</h1>
         <p class="login-subtitle">Sign in to your account</p>
 
         <!-- Login Form -->
@@ -62,11 +199,14 @@
           </div>
 
           <!-- Password -->
-          <div class="form-group floating">
+          <div class="form-group floating" style="position: relative;">
             <i class="fas fa-lock input-icon"></i>
-            <input type="password" class="form-control" id="password" placeholder="Password" autocomplete="off" required>
+            <input type="password" class="form-control" id="password" placeholder="Password" autocomplete="off" required
+              style="padding-right: 48px;">
             <label for="password" class="floating-label">Password</label>
-            <button type="button" class="password-toggle" id="passwordToggle" tabindex="-1" aria-label="Toggle password visibility">
+            <button type="button" class="password-toggle" id="passwordToggle" tabindex="-1"
+              aria-label="Toggle password visibility"
+              style="position: absolute; right: 12px; top: 27px !important; transform: translateY(-50%); z-index: 10 !important; background: none; border: none; cursor: pointer; pointer-events: auto !important; display: flex; align-items: center; justify-content: center;">
               <i class="fas fa-eye"></i>
             </button>
             <div class="form-error" id="passwordError"></div>
@@ -106,60 +246,115 @@
 
   <!-- Loading Overlay -->
   <div class="login-loading-overlay" id="loginLoadingOverlay">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Signing in...</p>
-    <p class="loading-subtext">Please wait while we verify your credentials</p>
+    <dotlottie-wc src="https://lottie.host/cc244a01-f247-45d6-9115-7e6a0a4a59a3/7Lb3UMZJo7.lottie"
+      style="width: 400px; height: 240px; display: block; margin: 0 auto;" autoplay loop></dotlottie-wc>
+    <p class="loading-text" style="margin-top: -10px;">Signing in...</p>
+    <p class="loading-subtext">Please wait while we verify your credentials 😊</p>
   </div>
 
   <!-- Forgot Password Modal -->
-  <div id="forgotPasswordModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:95%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+  <div id="forgotPasswordModal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:95%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="width:56px;height:56px;background:#EFF6FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><i class="fas fa-lock" style="font-size:1.4rem;color:#3B82F6;"></i></div>
-        <h3 style="font-size:1.2rem;font-weight:700;color:#1E293B;margin:0 0 6px;">Forgot Password</h3>
-        <p style="font-size:0.85rem;color:#64748B;margin:0;">Enter your email. We'll send a temporary password.</p>
+        <div
+          style="width:56px;height:56px;background:#EFF6FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="fas fa-lock" style="font-size:1.4rem;color:#3B82F6;"></i>
+        </div>
+        <h3 style="font-size:1.2rem;font-weight:700;color:#1E293B;margin:0 0 6px;">Reset Password</h3>
+        <p style="font-size:0.85rem;color:#64748B;margin:0;">Request admin to reset your password to default "mzcet@123"
+        </p>
       </div>
       <div id="forgotStep1">
         <div style="margin-bottom:16px;">
-          <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px;">Email Address</label>
-          <input type="email" id="forgotEmail" placeholder="Enter your email" style="width:100%;padding:11px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px;">Email
+            Address</label>
+          <input type="email" id="forgotEmail" placeholder="Enter your registered email"
+            style="width:100%;padding:11px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;">
           <div id="forgotEmailError" style="color:#EF4444;font-size:12px;margin-top:4px;display:none;"></div>
         </div>
-        <button id="sendTempPasswordBtn" onclick="sendTempPassword()" style="width:100%;padding:12px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;">
-          <span id="sendTempBtnSpinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i> </span>Send Temporary Password
+        <button id="sendTempPasswordBtn" onclick="sendTempPassword()"
+          style="width:100%;padding:12px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;">
+          <span id="sendTempBtnSpinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i> </span>Request
+          Password Reset
         </button>
       </div>
       <div id="forgotStep2" style="display:none;">
-        <p style="font-size:0.83rem;color:#10B981;text-align:center;margin-bottom:16px;"><i class="fas fa-check-circle"></i> Temporary password sent! Check your email.</p>
-        <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px;">Temporary Password</label>
-          <input type="password" id="tempPasswordInput" placeholder="Enter temporary password" style="width:100%;padding:11px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;">
-        </div>
-        <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px;">New Password</label>
-          <div style="position:relative;">
-            <input type="password" id="newPasswordInput" placeholder="Enter new password" style="width:100%;padding:11px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;">
-            <button type="button" onclick="toggleForgotPwd('newPasswordInput',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94A3B8;"><i class="far fa-eye"></i></button>
-          </div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px;">Confirm New Password</label>
-          <div style="position:relative;">
-            <input type="password" id="confirmNewPasswordInput" placeholder="Confirm new password" style="width:100%;padding:11px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;">
-            <button type="button" onclick="toggleForgotPwd('confirmNewPasswordInput',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94A3B8;"><i class="far fa-eye"></i></button>
-          </div>
-          <div id="resetPasswordError" style="color:#EF4444;font-size:12px;margin-top:4px;display:none;"></div>
-        </div>
-        <button id="setNewPasswordBtn" onclick="setNewPassword()" style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;">
-          <span id="setNewPwdSpinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i> </span>Set New Password
-        </button>
+        <p id="resetSuccessMsg"
+          style="font-size:0.85rem;color:#10B981;text-align:center;margin-bottom:16px;font-weight:500;line-height:1.4;">
+          <i class="fas fa-check-circle"></i> Password reset request submitted successfully. Please ask your Admin to
+          approve the request.
+        </p>
       </div>
-      <button onclick="closeForgotModal()" style="width:100%;margin-top:12px;padding:10px;background:transparent;border:1.5px solid #E2E8F0;border-radius:10px;font-size:0.85rem;color:#64748B;cursor:pointer;">Cancel</button>
+      <button onclick="closeForgotModal()"
+        style="width:100%;margin-top:12px;padding:10px;background:transparent;border:1.5px solid #E2E8F0;border-radius:10px;font-size:0.85rem;color:#64748B;cursor:pointer;">Cancel</button>
     </div>
   </div>
+
+  <!-- Loading Overlay -->
+  <div class="login-loading-overlay" id="loginLoadingOverlay">
+    <div class="ll-spinner-wrap">
+      <div class="ll-ring ll-ring-1"></div>
+      <div class="ll-ring ll-ring-2"></div>
+      <div class="ll-ring ll-ring-3"></div>
+      <div class="ll-inner-dot"></div>
+    </div>
+    <p class="loading-text">Signing in...</p>
+    <p class="loading-subtext">Please wait while we verify your credentials</p>
+    <div class="ll-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Logout Success Modal -->
+
+  <div id="logoutSuccessModal"
+    style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:99999;align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:20px;padding:40px 32px;max-width:380px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.15);text-align:center;border:1px solid rgba(255,255,255,0.8);transform:scale(0.9);transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div
+        style="width:64px;height:64px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 0 8px #F0FDF4;">
+        <i class="fas fa-check" style="font-size:1.8rem;color:#10B981;"></i>
+      </div>
+      <h3 style="font-size:1.3rem;font-weight:700;color:#1E293B;margin:0 0 8px;">Logged Out!</h3>
+      <p style="font-size:0.9rem;color:#64748B;margin:0 0 24px;line-height:1.5;">You have been logged out of your account successfully. See you again!</p>
+      <button onclick="closeLogoutModal()"
+        style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:12px;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.2);transition:all 0.2s ease;">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('logout') === 'success') {
+        const modal = document.getElementById('logoutSuccessModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          setTimeout(() => {
+            modal.firstElementChild.style.transform = 'scale(1)';
+          }, 50);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
+
+    function closeLogoutModal() {
+      const modal = document.getElementById('logoutSuccessModal');
+      if (modal) {
+        modal.firstElementChild.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          modal.style.display = 'none';
+        }, 150);
+      }
+    }
+  </script>
 
   <script src="js/services/api.js"></script>
   <script src="js/app.js"></script>
   <script src="js/login.js"></script>
 </body>
+
 </html>
