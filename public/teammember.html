@@ -1341,7 +1341,7 @@
               <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Email Address</label>
               <input class="form-control" type="email" id="settingsEmail" value="member@test.com" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
             </div>
-            <button class="btn btn-primary" onclick="showToast('Profile settings updated successfully!', 'success')" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+            <button class="btn btn-primary" onclick="saveMemberProfile()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
               <i class="fas fa-save"></i> Save Settings
             </button>
           </div>
@@ -1569,6 +1569,20 @@
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- Success Popup for Password Update -->
+<div class="modal-overlay" id="passwordSuccessModal" onclick="if(event.target===this)closePasswordSuccessModal()">
+    <div class="modal" style="max-width:420px;text-align:center;padding:40px 32px;">
+        <div style="font-size:56px;color:#10B981;margin-bottom:16px;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Password Updated!</h3>
+        <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your password has been changed successfully.</p>
+        <button class="btn btn-primary" onclick="closePasswordSuccessModal()" style="padding:10px 32px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+            <i class="fas fa-check"></i> OK
+        </button>
+    </div>
+</div>
 
 <script src="js/app.js"></script>
 <script src="js/charts.js"></script>

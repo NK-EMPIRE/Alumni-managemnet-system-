@@ -992,6 +992,41 @@
 
         window.togglePassword = window.togglePasswordVisibility; // Alias just in case
 
+        window.saveMemberProfile = function() {
+            var user = API.getUser();
+            if (!user || !user.id) return;
+            var name = document.getElementById('settingsName').value.trim();
+            var email = document.getElementById('settingsEmail').value.trim();
+            if (!name || !email) {
+                showToast('Name and Email are required.', 'error');
+                return;
+            }
+
+            var parts = name.split(' ');
+            var fName = parts[0];
+            var lName = parts.slice(1).join(' ') || '';
+
+            API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function(res) {
+                showToast('Profile settings updated successfully!', 'success');
+                user.name = name;
+                user.email = email;
+                localStorage.setItem('user', JSON.stringify(user));
+                setMemberUserInfo();
+            }).catch(function(err) {
+                showToast(err.message || 'Failed to update profile.', 'error');
+            });
+        };
+
+        window.showPasswordSuccessModal = function() {
+            var modal = document.getElementById('passwordSuccessModal');
+            if (modal) modal.classList.add('show');
+        };
+
+        window.closePasswordSuccessModal = function() {
+            var modal = document.getElementById('passwordSuccessModal');
+            if (modal) modal.classList.remove('show');
+        };
+
         window.saveMemberPassword = function() {
             var oldPass = document.getElementById('settingsOldPass').value;
             var newPass = document.getElementById('settingsNewPass').value;
@@ -1007,10 +1042,10 @@
             }
 
             API.changePassword(oldPass, newPass).then(function(res) {
-                showToast('Password changed successfully!', 'success');
                 document.getElementById('settingsOldPass').value = '';
                 document.getElementById('settingsNewPass').value = '';
                 document.getElementById('settingsConfirmPass').value = '';
+                window.showPasswordSuccessModal();
             }).catch(function(err) {
                 showToast(err.message || 'Failed to update password.', 'error');
             });

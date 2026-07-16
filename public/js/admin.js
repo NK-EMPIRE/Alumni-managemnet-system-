@@ -1942,6 +1942,16 @@ window.saveAdminProfile = function() {
   });
 };
 
+window.showPasswordSuccessModal = function() {
+  var modal = document.getElementById('passwordSuccessModal');
+  if (modal) modal.classList.add('show');
+};
+
+window.closePasswordSuccessModal = function() {
+  var modal = document.getElementById('passwordSuccessModal');
+  if (modal) modal.classList.remove('show');
+};
+
 window.saveAdminPassword = function() {
   var oldPass = document.getElementById('adminSettingsOldPass').value;
   var newPass = document.getElementById('adminSettingsNewPass').value;
@@ -1957,10 +1967,10 @@ window.saveAdminPassword = function() {
   }
 
   API.changePassword(oldPass, newPass).then(function(res) {
-    Toast.success('Security', 'Password changed successfully!');
     document.getElementById('adminSettingsOldPass').value = '';
     document.getElementById('adminSettingsNewPass').value = '';
     document.getElementById('adminSettingsConfirmPass').value = '';
+    window.showPasswordSuccessModal();
   }).catch(function(err) {
     Toast.danger('Error', err.message || 'Failed to update password.');
   });

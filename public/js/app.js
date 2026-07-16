@@ -371,19 +371,24 @@
         API.changePassword(oldPassword, newPassword)
           .then(function (res) {
             if (res && res.success !== false) {
-              if (window.Toast) Toast.success('Security', 'Password updated successfully!');
-              else if (window.showToast) showToast('Password updated successfully!', 'success');
               oldPasswordInput.value = '';
               newPasswordInput.value = '';
               confirmPasswordInput.value = '';
+              if (typeof window.showPasswordSuccessModal === 'function') {
+                window.showPasswordSuccessModal();
+              } else if (window.Toast) {
+                Toast.success('Security', 'Password updated successfully!');
+              } else if (window.showToast) {
+                window.showToast('Success', 'Password updated successfully!', 'success');
+              }
             } else {
               if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
-              else if (window.showToast) showToast(res.message || 'Failed to change password', 'error');
+              else if (window.showToast) window.showToast('Error', res.message || 'Failed to change password', 'danger');
             }
           })
           .catch(function (err) {
             if (window.Toast) Toast.error('Security', err.message || 'Incorrect current password');
-            else if (window.showToast) showToast(err.message || 'Incorrect current password', 'error');
+            else if (window.showToast) window.showToast('Error', err.message || 'Incorrect current password', 'danger');
           })
           .finally(function () {
             saveSecurityBtn.disabled = false;

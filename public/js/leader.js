@@ -1863,6 +1863,16 @@
   
   window.togglePassword = window.togglePasswordVisibility; // Alias just in case
   
+  window.showPasswordSuccessModal = function() {
+    var modal = document.getElementById('passwordSuccessModal');
+    if (modal) modal.classList.add('show');
+  };
+
+  window.closePasswordSuccessModal = function() {
+    var modal = document.getElementById('passwordSuccessModal');
+    if (modal) modal.classList.remove('show');
+  };
+
   window.saveLeaderPassword = function() {
     var oldPassEl    = document.getElementById('settingsOldPass');
     var newPassEl    = document.getElementById('settingsNewPass');
@@ -1902,10 +1912,10 @@
 
     API.changePassword(oldVal, newVal)
       .then(function(res) {
-        showToast('Success', 'Password updated successfully!', 'success');
         oldPassEl.value    = '';
         newPassEl.value    = '';
         confirmPassEl.value = '';
+        window.showPasswordSuccessModal();
       })
       .catch(function(err) {
         showToast('Error', err.message || 'Failed to update password. Please try again.', 'danger');

@@ -1104,6 +1104,20 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Success Popup for Password Update -->
+  <div class="modal-overlay" id="passwordSuccessModal" onclick="if(event.target===this)closePasswordSuccessModal()">
+    <div class="modal" style="max-width:420px;text-align:center;padding:40px 32px;">
+      <div style="font-size:56px;color:#10B981;margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Password Updated!</h3>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your password has been changed successfully.</p>
+      <button class="btn btn-primary" onclick="closePasswordSuccessModal()" style="padding:10px 32px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+        <i class="fas fa-check"></i> OK
+      </button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/app.js"></script>
   <script src="js/charts.js"></script>
