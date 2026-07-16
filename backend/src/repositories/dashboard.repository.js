@@ -131,7 +131,8 @@ async function getTeamMemberStats(teamId) {
         ISNULL(aa.total_assigned, 0) AS total_assigned,
         ISNULL(aa.completed, 0) AS completed,
         ISNULL(aa.pending, 0) AS pending,
-        ISNULL(aa.draft, 0) AS draft
+        ISNULL(aa.draft, 0) AS draft,
+        0 AS is_leader
       FROM TeamMembers tm
       INNER JOIN Users u ON tm.user_id = u.user_id
       LEFT JOIN (
@@ -142,10 +143,34 @@ async function getTeamMemberStats(teamId) {
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending,
           SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draft
         FROM AlumniAssignments
-        WHERE team_id = @teamId
+        WHERE team_id = @teamId AND member_id IS NOT NULL
         GROUP BY member_id
       ) aa ON tm.user_id = aa.member_id
       WHERE tm.team_id = @teamId
+
+      UNION ALL
+
+      SELECT
+        u.user_id, u.first_name, u.last_name, u.email,
+        ISNULL(aa.total_assigned, 0) AS total_assigned,
+        ISNULL(aa.completed, 0) AS completed,
+        ISNULL(aa.pending, 0) AS pending,
+        ISNULL(aa.draft, 0) AS draft,
+        1 AS is_leader
+      FROM Teams t
+      INNER JOIN Users u ON t.leader_id = u.user_id
+      LEFT JOIN (
+        SELECT 
+          team_id,
+          COUNT(assignment_id) AS total_assigned,
+          SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed,
+          SUM(CASE WHEN status = 'Pending' OR status = 'ASSIGNED_TO_LEADER' THEN 1 ELSE 0 END) AS pending,
+          SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draft
+        FROM AlumniAssignments
+        WHERE member_id IS NULL
+        GROUP BY team_id
+      ) aa ON t.team_id = aa.team_id
+      WHERE t.team_id = @teamId
     `);
   return result.recordset;
 }

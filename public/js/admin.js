@@ -894,8 +894,14 @@ function loadTeamProgressData(leaderId) {
       members.forEach(function(m, i) {
         var bg = i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.02)';
         var sc = m.progress >= 75 ? '#10B981' : m.progress >= 50 ? '#F59E0B' : '#EF4444';
+        
+        var nameHtml = escapeHtml(m.name);
+        if (m.isLeader) {
+          nameHtml += ' <span class="badge" style="background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;font-size:0.7rem;padding:1.5px 6px;border-radius:4px;margin-left:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-crown"></i> Team Leader</span>';
+        }
+        
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border);">';
-        html += '<td style="padding:10px 10px;font-size:0.83rem;font-weight:500;">' + escapeHtml(m.name) + '</td>';
+        html += '<td style="padding:10px 10px;font-size:0.83rem;font-weight:500;display:flex;align-items:center;">' + nameHtml + '</td>';
         html += '<td style="text-align:center;padding:8px;font-size:0.83rem;">' + m.assigned + '</td>';
         html += '<td style="text-align:center;padding:8px;font-size:0.83rem;color:#10B981;font-weight:600;">' + m.completed + '</td>';
         html += '<td style="text-align:center;padding:8px;font-size:0.83rem;color:#F59E0B;">' + m.pending + '</td>';
