@@ -25,7 +25,7 @@ const FIELD_TYPES = {
   father_name: sql.NVarChar(150)
 };
 
-async function findAll({ page, limit, offset, search, department, batch, status, leaderId }) {
+async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId }) {
   const pool = await getPool();
   const request = pool.request()
     .input('offset', sql.Int, offset)
@@ -34,7 +34,8 @@ async function findAll({ page, limit, offset, search, department, batch, status,
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
-    .input('leaderId', sql.Int, leaderId || null);
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
 
   const result = await request.query(`
     WITH AlumniCTE AS (
@@ -62,6 +63,7 @@ async function findAll({ page, limit, offset, search, department, batch, status,
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@leaderId IS NULL OR t.leader_id = @leaderId)
+        AND (@memberId IS NULL OR aa.member_id = @memberId)
         AND (
           @status IS NULL
           OR (@status = 'Available' AND aa.status IS NULL)

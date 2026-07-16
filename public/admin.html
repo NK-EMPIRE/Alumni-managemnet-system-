@@ -163,12 +163,15 @@
         <div class="dropdown" id="resetReqDropdown" style="position:relative;margin-right:12px;">
           <button class="navbar-btn" onclick="toggleResetRequests(event)" style="position:relative;">
             <i class="fas fa-user-shield"></i>
-            <span class="notification-count" id="resetReqCount" style="display:none;background:#EF4444;color:#fff;">0</span>
+            <span class="notification-count" id="resetReqCount"
+              style="display:none;background:#EF4444;color:#fff;">0</span>
           </button>
           <div class="dropdown-menu dropdown-menu-left" id="resetReqMenu" style="width:360px;padding:12px 0;">
-            <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-weight:600;font-size:0.9rem;border-bottom:1px solid var(--border);margin-bottom:8px;">
+            <div class="dropdown-header"
+              style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-weight:600;font-size:0.9rem;border-bottom:1px solid var(--border);margin-bottom:8px;">
               <span>Reset Requests</span>
-              <span class="badge badge-danger" id="resetReqCountBadge" style="display:none;padding:2px 6px;border-radius:10px;font-size:10px;">0 pending</span>
+              <span class="badge badge-danger" id="resetReqCountBadge"
+                style="display:none;padding:2px 6px;border-radius:10px;font-size:10px;">0 pending</span>
             </div>
             <div id="resetReqList" style="max-height:280px;overflow-y:auto;padding:0 16px;">
               <div style="padding:16px;text-align:center;color:#64748B;font-size:0.85rem;">No pending requests</div>
@@ -378,35 +381,45 @@
         <!-- Quick Summary statistics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon blue" style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;"><i class="fas fa-graduation-cap"></i></div>
+            <div class="stat-card-icon blue"
+              style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+              <i class="fas fa-graduation-cap"></i></div>
             <div style="margin-left:12px;">
               <div style="font-size:1.1rem;font-weight:700;" id="sumTotalAlumni">0</div>
               <div style="font-size:0.75rem;color:var(--text-muted);">Total Alumni</div>
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon green" style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-card-icon green"
+              style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+              <i class="fas fa-check-circle"></i></div>
             <div style="margin-left:12px;">
               <div style="font-size:1.1rem;font-weight:700;" id="sumAvailable">0</div>
               <div style="font-size:0.75rem;color:var(--text-muted);">Available</div>
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon purple" style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;"><i class="fas fa-user-tie"></i></div>
+            <div class="stat-card-icon purple"
+              style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+              <i class="fas fa-user-tie"></i></div>
             <div style="margin-left:12px;">
               <div style="font-size:1.1rem;font-weight:700;" id="sumAssigned">0</div>
               <div style="font-size:0.75rem;color:var(--text-muted);">Assigned to Leader</div>
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon" style="background:#CCFBF1;color:#0D9488;width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;"><i class="fas fa-tasks"></i></div>
+            <div class="stat-card-icon"
+              style="background:#CCFBF1;color:#0D9488;width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+              <i class="fas fa-tasks"></i></div>
             <div style="margin-left:12px;">
               <div style="font-size:1.1rem;font-weight:700;" id="sumCompleted">0</div>
               <div style="font-size:0.75rem;color:var(--text-muted);">Completed</div>
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon yellow" style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;"><i class="fas fa-clock"></i></div>
+            <div class="stat-card-icon yellow"
+              style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+              <i class="fas fa-clock"></i></div>
             <div style="margin-left:12px;">
               <div style="font-size:1.1rem;font-weight:700;" id="sumPending">0</div>
               <div style="font-size:0.75rem;color:var(--text-muted);">Pending Member</div>
@@ -416,16 +429,23 @@
 
         <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
           <!-- Spreadsheet Toolbar -->
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
+          <div
+            style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
               <div class="search-bar" style="width:200px;margin-bottom:0;">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
               </div>
-              <select class="form-control" id="ssFilterLeader" onchange="fetchSpreadsheetData()" style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <select class="form-control" id="ssFilterLeader" onchange="fetchSpreadsheetData()"
+                style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
                 <option value="">All Leaders</option>
               </select>
-              <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()" style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()"
+                style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Members</option>
+              </select>
+              <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()"
+                style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
                 <option value="">All Depts</option>
                 <option value="CSE">CSE</option>
                 <option value="ECE">ECE</option>
@@ -434,7 +454,8 @@
                 <option value="CE">CE</option>
                 <option value="IT">IT</option>
               </select>
-              <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()" style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()"
+                style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
                 <option value="">All Batches</option>
                 <option value="2020">2020</option>
                 <option value="2021">2021</option>
@@ -442,7 +463,8 @@
                 <option value="2023">2023</option>
                 <option value="2024">2024</option>
               </select>
-              <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()" style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()"
+                style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
                 <option value="">All Statuses</option>
                 <option value="Available">Available</option>
                 <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
@@ -452,14 +474,18 @@
               </select>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
-              <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn" style="height:36px;"><i class="fas fa-columns"></i> Columns</button>
-              <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i class="fas fa-file-csv"></i> Export CSV</button>
-              <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i class="fas fa-rotate"></i> Refresh</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
+                style="height:36px;"><i class="fas fa-columns"></i> Columns</button>
+              <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i
+                  class="fas fa-file-csv"></i> Export CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i
+                  class="fas fa-rotate"></i> Refresh</button>
             </div>
           </div>
 
           <!-- Column Show/Hide Dropdown Menu -->
-          <div id="columnVisibilityMenu" class="dropdown-menu" style="display:none;position:absolute;z-index:100;width:200px;max-height:300px;overflow-y:auto;padding:10px;">
+          <div id="columnVisibilityMenu" class="dropdown-menu"
+            style="display:none;position:absolute;z-index:100;width:200px;max-height:300px;overflow-y:auto;padding:10px;">
             <!-- Generated Dynamically -->
           </div>
 
@@ -478,10 +504,12 @@
           </div>
 
           <!-- Spreadsheet Pagination Footer -->
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:12px 20px;border-top:1px solid var(--border);background:#F8FAFC;">
+          <div
+            style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:12px 20px;border-top:1px solid var(--border);background:#F8FAFC;">
             <div style="display:flex;align-items:center;gap:8px;">
               <span style="font-size:0.8rem;color:var(--text-muted);">Rows per page:</span>
-              <select class="form-control" id="ssRowsPerPage" onchange="changeSpreadsheetPageSize(this.value)" style="width:auto;padding:4px 8px;font-size:0.8rem;height:30px;">
+              <select class="form-control" id="ssRowsPerPage" onchange="changeSpreadsheetPageSize(this.value)"
+                style="width:auto;padding:4px 8px;font-size:0.8rem;height:30px;">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -554,7 +582,8 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search team members..." id="tmSearch" oninput="filterTeamMembers()">
               </div>
-              <select class="form-control" id="tmFilterLeader" onchange="filterTeamMembers()" style="max-width:200px;height:36px;font-size:0.8rem;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);">
+              <select class="form-control" id="tmFilterLeader" onchange="filterTeamMembers()"
+                style="max-width:200px;height:36px;font-size:0.8rem;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);">
                 <option value="">All Leaders</option>
               </select>
             </div>
@@ -640,16 +669,19 @@
         </div>
         <!-- Team Progress Watch -->
         <div class="card fade-in-up" style="margin-bottom:24px;">
-          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div class="card-header"
+            style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <h3><i class="fas fa-eye" style="color:var(--primary);margin-right:8px;"></i>Team Progress Watch</h3>
             <div style="display:flex;align-items:center;gap:10px;">
-              <select id="progressLeaderSelect" style="padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;cursor:pointer;min-width:240px;">
+              <select id="progressLeaderSelect"
+                style="padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;cursor:pointer;min-width:240px;">
                 <option value="">— Select Team Leader —</option>
               </select>
             </div>
           </div>
           <div class="card-body" id="teamProgressPanel" style="min-height:80px;">
-            <p style="color:var(--text-muted);text-align:center;padding:24px;">Select a team leader from the dropdown to view their team's progress and member statistics.</p>
+            <p style="color:var(--text-muted);text-align:center;padding:24px;">Select a team leader from the dropdown to
+              view their team's progress and member statistics.</p>
           </div>
         </div>
       </section>
@@ -707,10 +739,13 @@
             </div>
             <div class="tab-content" id="tab-security">
               <div class="form-group" style="margin-bottom: 16px;">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current Password</label>
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Current
+                  Password</label>
                 <div style="position:relative; max-width:400px;">
-                  <input class="form-control" type="password" id="adminSettingsOldPass" placeholder="Enter current password" style="width:100%; padding-right: 40px;">
-                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <input class="form-control" type="password" id="adminSettingsOldPass"
+                    placeholder="Enter current password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsOldPass', this)"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
                     <i class="far fa-eye"></i>
                   </button>
                 </div>
@@ -718,17 +753,23 @@
               <div class="form-group" style="margin-bottom: 16px;">
                 <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">New Password</label>
                 <div style="position:relative; max-width:400px;">
-                  <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password" style="width:100%; padding-right: 40px;">
-                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <input class="form-control" type="password" id="adminSettingsNewPass" placeholder="Enter new password"
+                    style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsNewPass', this)"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
                     <i class="far fa-eye"></i>
                   </button>
                 </div>
               </div>
               <div class="form-group" style="margin-bottom: 16px;">
-                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm Password</label>
+                <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;">Confirm
+                  Password</label>
                 <div style="position:relative; max-width:400px;">
-                  <input class="form-control" type="password" id="adminSettingsConfirmPass" placeholder="Confirm new password" style="width:100%; padding-right: 40px;">
-                  <button type="button" class="password-toggle" onclick="togglePassword('adminSettingsConfirmPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
+                  <input class="form-control" type="password" id="adminSettingsConfirmPass"
+                    placeholder="Confirm new password" style="width:100%; padding-right: 40px;">
+                  <button type="button" class="password-toggle"
+                    onclick="togglePassword('adminSettingsConfirmPass', this)"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);z-index:3;">
                     <i class="far fa-eye"></i>
                   </button>
                 </div>
@@ -782,9 +823,11 @@
             </button>
             <div id="fileName" style="margin-top:12px;font-size:0.85rem;color:#10B981;display:none;"></div>
           </div>
-          <div id="importPreviewContainer" style="display:none;margin-top:24px;border-top:1px solid var(--border);padding-top:24px;">
+          <div id="importPreviewContainer"
+            style="display:none;margin-top:24px;border-top:1px solid var(--border);padding-top:24px;">
             <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:12px;">Import Preview</h3>
-            <div class="table-container" style="max-height:500px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
+            <div class="table-container"
+              style="max-height:500px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
               <table class="table" style="width:100%;font-size:0.85rem;">
                 <thead>
                   <tr style="background:var(--bg-light);position:sticky;top:0;">
@@ -800,7 +843,9 @@
                 <tbody id="importPreviewBody"></tbody>
               </table>
             </div>
-            <div id="importPreviewStatus" style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;display:none;font-weight:500;"></div>
+            <div id="importPreviewStatus"
+              style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;display:none;font-weight:500;">
+            </div>
           </div>
 
           <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
@@ -1112,14 +1157,16 @@
           </select>
           <label class="floating-label">Select Department <span style="color:var(--danger);">*</span></label>
         </div>
-        
+
         <div id="assignCountGroup" style="display:none; margin-top: 15px;">
-          <div style="background:var(--bg-light);padding:10px 14px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-dark);margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+          <div
+            style="background:var(--bg-light);padding:10px 14px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-dark);margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
             <span>Available Alumni Count:</span>
             <strong id="availableAlumniCount" style="font-size:1.1rem;color:var(--primary);">0</strong>
           </div>
           <div class="form-group">
-            <input class="form-control" type="number" id="assignCount" placeholder="Number of Alumni" min="1" required oninput="updateAssignPreviewSummary()">
+            <input class="form-control" type="number" id="assignCount" placeholder="Number of Alumni" min="1" required
+              oninput="updateAssignPreviewSummary()">
             <label class="floating-label">Number of Alumni to Assign <span style="color:var(--danger);">*</span></label>
           </div>
           <div class="form-group">
@@ -1128,7 +1175,8 @@
             </select>
             <label class="floating-label">Select Team Leader <span style="color:var(--danger);">*</span></label>
           </div>
-          <div id="assignPreviewSummary" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;padding:12px;border-radius:var(--radius-sm);font-size:0.8rem;color:#166534;margin-bottom:15px;">
+          <div id="assignPreviewSummary"
+            style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;padding:12px;border-radius:var(--radius-sm);font-size:0.8rem;color:#166534;margin-bottom:15px;">
           </div>
         </div>
       </div>
@@ -1146,7 +1194,8 @@
     <div class="modal" style="max-width: 400px; width: 90%; text-align: center; padding: 24px;">
       <div id="assignmentResultIcon" style="font-size: 3.5rem; margin-bottom: 16px;"></div>
       <h3 id="assignmentResultTitle" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 8px;"></h3>
-      <p id="assignmentResultMsg" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;"></p>
+      <p id="assignmentResultMsg"
+        style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;"></p>
       <button class="btn btn-primary" onclick="closeModal('assignmentResultModal')" style="width: 100%;">OK</button>
     </div>
   </div>
@@ -1203,8 +1252,12 @@
               Alumni</label><span id="tlDetailAssigned" style="font-weight:500;">-</span></div>
         </div>
         <div style="margin-top:20px;border-top:1px solid #E2E8F0;padding-top:16px;">
-          <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:8px;">Teammates / Members</label>
-          <div id="tlDetailTeammatesList" style="font-size:0.85rem;color:#1E293B;max-height:120px;overflow-y:auto;background:#F8FAFC;padding:8px 12px;border-radius:6px;border:1px solid #E2E8F0;line-height:1.6;">-</div>
+          <label
+            style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:8px;">Teammates
+            / Members</label>
+          <div id="tlDetailTeammatesList"
+            style="font-size:0.85rem;color:#1E293B;max-height:120px;overflow-y:auto;background:#F8FAFC;padding:8px 12px;border-radius:6px;border:1px solid #E2E8F0;line-height:1.6;">
+            -</div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1292,7 +1345,8 @@
           </div>
           <div>
             <label
-              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Father's Name</label>
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Father's
+              Name</label>
             <span id="vAlumniFatherName" style="font-weight:500;">-</span>
           </div>
           <div>
@@ -1427,7 +1481,8 @@
           <label class="floating-label">Phone Number</label>
         </div>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:16px 0;">
-        <h5 style="margin:0 0 12px 0;font-weight:600;color:var(--primary);"><i class="fas fa-briefcase"></i> Professional Details</h5>
+        <h5 style="margin:0 0 12px 0;font-weight:600;color:var(--primary);"><i class="fas fa-briefcase"></i>
+          Professional Details</h5>
         <div class="form-group">
           <input class="form-control" type="text" id="editCompany" placeholder="Company">
           <label class="floating-label">Company</label>
@@ -1486,7 +1541,9 @@
         <button class="modal-close" onclick="closeModal('importErrorModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div id="importErrorContent" style="font-size:0.85rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:16px;color:#991B1B;"></div>
+        <div id="importErrorContent"
+          style="font-size:0.85rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:16px;color:#991B1B;">
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('importErrorModal')">Close</button>
@@ -1497,9 +1554,12 @@
   <!-- Assignment History Drawer -->
   <div id="assignmentHistoryDrawer" class="drawer-overlay" onclick="if(event.target===this)closeDrawer()">
     <div class="drawer-content">
-      <div class="drawer-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border);">
-        <h3 style="margin:0; font-size:1.1rem; font-weight:600;"><i class="fas fa-history" style="color:var(--primary); margin-right:8px;"></i>Assignment History</h3>
-        <button onclick="closeDrawer()" style="font-size:1.4rem; background:none; border:none; cursor:pointer; color:var(--text-secondary);">&times;</button>
+      <div class="drawer-header"
+        style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border);">
+        <h3 style="margin:0; font-size:1.1rem; font-weight:600;"><i class="fas fa-history"
+            style="color:var(--primary); margin-right:8px;"></i>Assignment History</h3>
+        <button onclick="closeDrawer()"
+          style="font-size:1.4rem; background:none; border:none; cursor:pointer; color:var(--text-secondary);">&times;</button>
       </div>
       <div class="drawer-body" id="assignmentHistoryList" style="padding:20px; overflow-y:auto; flex:1;">
         <!-- Populated by JS -->
@@ -1512,17 +1572,24 @@
        ============================================================ -->
   <div class="toast-container"></div>
 
-  <!-- Success Popup for Password Update -->
-  <div class="modal-overlay" id="passwordSuccessModal" onclick="if(event.target===this)closePasswordSuccessModal()">
-    <div class="modal" style="max-width:420px;text-align:center;padding:40px 32px;">
-      <div style="font-size:56px;color:#10B981;margin-bottom:16px;">
-        <i class="fas fa-check-circle"></i>
+  <!-- Import Result Modal -->
+  <div class="modal-overlay" id="importResultModal" style="z-index:99999;">
+    <div class="modal"
+      style="max-width: 420px; width: 90%; border-radius: 20px; padding: 36px 24px; text-align: center; border: 1px solid rgba(255,255,255,0.8); background:#ffffff;">
+      <div id="importResultIcon"
+        style="width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem; box-shadow:0 10px 20px rgba(0,0,0,0.05);">
       </div>
-      <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Password Updated!</h3>
-      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your password has been changed successfully.</p>
-      <button class="btn btn-primary" onclick="closePasswordSuccessModal()" style="padding:10px 32px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
-        <i class="fas fa-check"></i> OK
-      </button>
+      <h3 id="importResultTitle" style="font-size:1.3rem; font-weight:700; color:#1E293B; margin-bottom:8px;">Import
+        Status</h3>
+      <div id="importTimeBadge"
+        style="display:inline-block; background:#EFF6FF; color:#2563EB; font-weight:600; font-size:0.75rem; padding:4px 10px; border-radius:30px; margin-bottom:16px;">
+        <i class="fas fa-stopwatch"></i> Execution Time: <span id="importDurationSec">0.00</span>s
+      </div>
+      <div id="importResultDetails"
+        style="font-size:0.9rem; color:#64748B; margin-bottom:24px; line-height:1.6; text-align:left; background:#F8FAFC; padding:16px; border-radius:12px; border:1px solid #E2E8F0;">
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('importResultModal')"
+        style="width:100%; padding:12px; font-weight:600; border-radius:12px; cursor:pointer;">Close</button>
     </div>
   </div>
 
