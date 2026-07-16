@@ -1106,14 +1106,62 @@ function populateTeamLeaderDropdowns() {
     if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
       members = _apiMembers.records.map(function (u) {
         var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
-        return { id: u.user_id, name: name.trim(), dept: u.department || '' };
+        return { id: u.user_id, name: name.trim(), dept: u.department || '', leaderId: u.team_leader_id };
       });
     }
+    
+    // Get current leader selection if any
+    var currentLeaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
+    
     members.forEach(function (m) {
+      if (currentLeaderId && String(m.leaderId) !== String(currentLeaderId)) {
+        return;
+      }
       var opt = document.createElement('option');
       opt.value = m.id;
       opt.textContent = m.name + (m.dept ? ' (' + m.dept + ')' : '');
       memberSel.appendChild(opt);
+    });
+  }
+
+  // Bind change event to ssFilterLeader to filter ssFilterMember options dynamically
+  var leaderSel = document.getElementById('ssFilterLeader');
+  if (leaderSel && !leaderSel.dataset.hasMemberFilterBound) {
+    leaderSel.dataset.hasMemberFilterBound = 'true';
+    leaderSel.addEventListener('change', function () {
+      var selectedLeaderId = this.value;
+      var memberSelElement = document.getElementById('ssFilterMember');
+      if (!memberSelElement) return;
+      
+      var membersList = [];
+      if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
+        membersList = _apiMembers.records.map(function (u) {
+          var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
+          return { id: u.user_id, name: name.trim(), dept: u.department || '', leaderId: u.team_leader_id };
+        });
+      }
+      
+      var selectedMemberVal = memberSelElement.value;
+      memberSelElement.innerHTML = '<option value="">All Members</option>';
+      
+      var hasSelectedMemberStillVisible = false;
+      membersList.forEach(function (m) {
+        if (selectedLeaderId && String(m.leaderId) !== String(selectedLeaderId)) {
+          return;
+        }
+        var opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name + (m.dept ? ' (' + m.dept + ')' : '');
+        if (String(m.id) === String(selectedMemberVal)) {
+          opt.selected = true;
+          hasSelectedMemberStillVisible = true;
+        }
+        memberSelElement.appendChild(opt);
+      });
+      
+      if (!hasSelectedMemberStillVisible) {
+        memberSelElement.value = "";
+      }
     });
   }
 
