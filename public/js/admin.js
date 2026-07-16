@@ -236,8 +236,8 @@ function fetchAllData() {
     populateImportHistory();
     populateAuditLogTable();
     populateTeamLeaderDropdowns();
-    // Fill progress watch leader dropdown
     populateProgressLeaderDropdown();
+    if (window.fetchResetRequests) window.fetchResetRequests();
     // Dismiss loading screen
     var ls = document.getElementById('loadingScreen');
     if (ls) { ls.classList.add('hide'); setTimeout(function() { ls.style.display = 'none'; }, 600); }
@@ -1033,7 +1033,7 @@ function populateDynamicFilters(filters) {
    15. TEAM LEADER DROPDOWNS (for modals)
    ──────────────────────────────────────────────────────────── */
 function populateTeamLeaderDropdowns() {
-  var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader'];
+  var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader', 'tmFilterLeader'];
   var leaders;
   if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
     leaders = _apiUsers.records.map(function (u) {
@@ -1046,7 +1046,7 @@ function populateTeamLeaderDropdowns() {
   selects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
-    var isFilter = id === 'ssFilterLeader';
+    var isFilter = id === 'ssFilterLeader' || id === 'tmFilterLeader';
     sel.innerHTML = isFilter ? '<option value="">All Leaders</option>' : '<option value="" disabled selected hidden>Select Team Leader</option>';
     leaders.forEach(function (tl) {
       var opt = document.createElement('option');
@@ -1232,10 +1232,9 @@ function closeMobileSidebar() {
    20. SUBMENU TOGGLE
    ──────────────────────────────────────────────────────────── */
 function toggleSubmenu(el) {
-  var sidebar = document.getElementById('sidebar');
-  // Don't toggle submenu if sidebar is collapsed
-  if (sidebar && sidebar.classList && sidebar.classList.contains('collapsed')) {
-    return; // On mobile/collapsed, submenus shouldn't show
+  if (document.body.classList.contains('sidebar-collapsed')) {
+    document.body.classList.remove('sidebar-collapsed');
+    localStorage.setItem('sidebar_collapsed', 'false');
   }
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
@@ -1267,6 +1266,99 @@ function toggleNotifications(event) {
 }
 
 /* ────────────────────────────────────────────────────────────
+   22b. RESET REQUESTS DROPDOWN
+   ──────────────────────────────────────────────────────────── */
+window.toggleResetRequests = function(event) {
+  event.stopPropagation();
+  closeDropdown('profileMenu');
+  closeDropdown('notifMenu');
+  var menu = document.getElementById('resetReqMenu');
+  if (menu) {
+    menu.classList.toggle('show');
+    if (menu.classList.contains('show')) {
+      fetchResetRequests();
+    }
+  }
+};
+
+window.fetchResetRequests = function() {
+  var list = document.getElementById('resetReqList');
+  if (!list) return;
+  
+  API.getResetRequests().then(function(res) {
+    if (res && res.success && Array.isArray(res.data)) {
+      var reqs = res.data;
+      var count = reqs.length;
+      
+      // Update badge counts
+      var countEl = document.getElementById('resetReqCount');
+      var badgeEl = document.getElementById('resetReqCountBadge');
+      if (countEl) {
+        countEl.textContent = count;
+        countEl.style.display = count > 0 ? 'flex' : 'none';
+      }
+      if (badgeEl) {
+        badgeEl.textContent = count + ' pending';
+        badgeEl.style.display = count > 0 ? 'inline-block' : 'none';
+      }
+      
+      if (count === 0) {
+        list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.85rem;">No pending reset requests</div>';
+        return;
+      }
+      
+      var html = '';
+      reqs.forEach(function(r) {
+        var dateStr = '';
+        if (r.created_at) {
+          var d = new Date(r.created_at);
+          dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        html += '<div class="reset-item" style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;">' +
+          '<div style="display:flex;justify-content:space-between;font-size:0.85rem;">' +
+            '<div><strong>' + r.name + '</strong> <span style="font-size:0.75rem;color:#64748B;">(' + r.role + ')</span></div>' +
+            '<div style="font-size:0.75rem;color:#94A3B8;">' + dateStr + '</div>' +
+          '</div>' +
+          '<div style="font-size:0.8rem;color:#64748B;word-break:break-all;">' + r.email + '</div>' +
+          '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+            '<button class="btn btn-sm btn-primary" onclick="handleResetRequest(' + r.request_id + ', \'Accepted\', this)" style="padding:4px 8px;font-size:0.75rem;">' +
+              '<span class="spinner spinner-xs" style="display:none;margin-right:4px;"></span>Accept' +
+            '</button>' +
+            '<button class="btn btn-sm btn-outline-danger" onclick="handleResetRequest(' + r.request_id + ', \'Declined\', this)" style="padding:4px 8px;font-size:0.75rem;border-color:#EF4444;color:#EF4444;">' +
+              '<span class="spinner spinner-xs" style="display:none;margin-right:4px;"></span>Decline' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      });
+      list.innerHTML = html;
+    }
+  }).catch(function(err) {
+    console.error('Failed to load reset requests:', err);
+  });
+};
+
+window.handleResetRequest = function(requestId, status, btn) {
+  if (btn.classList.contains('loading') || btn.disabled) return;
+  var spinner = btn.querySelector('.spinner');
+  if (spinner) spinner.style.display = 'inline-block';
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  API.updateResetRequestStatus(requestId, status).then(function(res) {
+    if (spinner) spinner.style.display = 'none';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    Toast.success('Password Reset', 'Request ' + (status === 'Accepted' ? 'approved' : 'declined') + ' successfully!');
+    fetchResetRequests();
+  }).catch(function(err) {
+    if (spinner) spinner.style.display = 'none';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    Toast.danger('Password Reset', err.message || 'Failed to update request.');
+  });
+};
+
+/* ────────────────────────────────────────────────────────────
    23. DROPDOWN HELPERS
    ──────────────────────────────────────────────────────────── */
 function closeDropdown(id) {
@@ -1279,6 +1371,7 @@ function setupClickOutside() {
     if (!e.target.closest('.dropdown')) {
       closeDropdown('profileMenu');
       closeDropdown('notifMenu');
+      closeDropdown('resetReqMenu');
     }
   });
 }
@@ -2009,13 +2102,22 @@ function initImportHandlers() {
               '</tr>';
           });
           if (previewBody) previewBody.innerHTML = html;
+          var statusEl = document.getElementById('importPreviewStatus');
+          if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.textContent = 'Showing ' + res.data.length + ' rows in file (scroll to view).';
+          }
           importBtn.disabled = false;
         } else {
           if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">No valid rows to preview.</td></tr>';
+          var statusEl = document.getElementById('importPreviewStatus');
+          if (statusEl) statusEl.style.display = 'none';
           importBtn.disabled = true;
         }
       }).catch(function (err) {
         if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">Failed to generate preview: ' + err.message + '</td></tr>';
+        var statusEl = document.getElementById('importPreviewStatus');
+        if (statusEl) statusEl.style.display = 'none';
         importBtn.disabled = true;
       });
 

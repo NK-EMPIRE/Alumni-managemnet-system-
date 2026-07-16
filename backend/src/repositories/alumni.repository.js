@@ -70,7 +70,7 @@ async function findAll({ page, limit, offset, search, department, batch, status,
     )
     SELECT *, (SELECT COUNT(*) FROM AlumniCTE) AS total_count
     FROM AlumniCTE
-    ORDER BY alumni_id DESC
+    ORDER BY name ASC
     OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY;
   `);
 
@@ -250,12 +250,16 @@ async function getProfessionalHistory(alumniId) {
   return result.recordset;
 }
 
-async function getAssignmentsByMember(memberId, { page, limit, offset }) {
+async function getAssignmentsByMember(memberId, { page, limit, offset, search, department, batch, status }) {
   const pool = await getPool();
   const request = pool.request()
     .input('memberId', sql.Int, memberId)
     .input('offset', sql.Int, offset)
-    .input('limit', sql.Int, limit);
+    .input('limit', sql.Int, limit)
+    .input('search', sql.NVarChar(200), (search && search !== 'undefined' && search !== 'null') ? `%${search}%` : null)
+    .input('department', sql.NVarChar(50), (department && department !== 'undefined' && department !== 'null') ? department : null)
+    .input('batch', sql.NVarChar(10), (batch && batch !== 'undefined' && batch !== 'null') ? batch : null)
+    .input('status', sql.NVarChar(30), (status && status !== 'undefined' && status !== 'null') ? status : null);
 
   const result = await request.query(`
     WITH MemberAssignments AS (
@@ -263,16 +267,20 @@ async function getAssignmentsByMember(memberId, { page, limit, offset }) {
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at,
+        a.updated_date, a.created_at, a.father_name,
         aa.assignment_id, aa.team_id, aa.status,
         aa.assigned_date, aa.completed_date
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
       WHERE aa.member_id = @memberId
+        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
+        AND (@department IS NULL OR a.department = @department)
+        AND (@batch IS NULL OR a.batch = @batch)
+        AND (@status IS NULL OR aa.status = @status)
     )
     SELECT *, (SELECT COUNT(*) FROM MemberAssignments) AS total_count
     FROM MemberAssignments
-    ORDER BY assigned_date DESC
+    ORDER BY name ASC
     OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY;
   `);
 
@@ -282,12 +290,16 @@ async function getAssignmentsByMember(memberId, { page, limit, offset }) {
   return { data, totalCount, page, limit };
 }
 
-async function getAssignmentsByLeader(leaderId, { page, limit, offset }) {
+async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, department, batch, status }) {
   const pool = await getPool();
   const request = pool.request()
     .input('leaderId', sql.Int, leaderId)
     .input('offset', sql.Int, offset)
-    .input('limit', sql.Int, limit);
+    .input('limit', sql.Int, limit)
+    .input('search', sql.NVarChar(200), (search && search !== 'undefined' && search !== 'null') ? `%${search}%` : null)
+    .input('department', sql.NVarChar(50), (department && department !== 'undefined' && department !== 'null') ? department : null)
+    .input('batch', sql.NVarChar(10), (batch && batch !== 'undefined' && batch !== 'null') ? batch : null)
+    .input('status', sql.NVarChar(30), (status && status !== 'undefined' && status !== 'null') ? status : null);
 
   const result = await request.query(`
     WITH TeamAssignments AS (
@@ -295,7 +307,7 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset }) {
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at,
+        a.updated_date, a.created_at, a.father_name,
         aa.assignment_id, aa.team_id, aa.member_id, aa.status,
         aa.assigned_date, aa.completed_date,
         u.first_name + ' ' + u.last_name AS assigned_to
@@ -304,10 +316,14 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset }) {
       INNER JOIN Users u ON aa.member_id = u.user_id
       INNER JOIN Teams t ON aa.team_id = t.team_id
       WHERE t.leader_id = @leaderId
+        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
+        AND (@department IS NULL OR a.department = @department)
+        AND (@batch IS NULL OR a.batch = @batch)
+        AND (@status IS NULL OR aa.status = @status)
     )
     SELECT *, (SELECT COUNT(*) FROM TeamAssignments) AS total_count
     FROM TeamAssignments
-    ORDER BY assigned_date DESC
+    ORDER BY name ASC
     OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY;
   `);
 

@@ -24,7 +24,7 @@
   var completionChart = null;
   var sessionTimerInterval = null;
   var sessionTimeoutDuration = 60;
-  var isSidebarCollapsed = true;
+  var isSidebarCollapsed = false;
 
   var isDistributionLocked = false;
 
@@ -568,6 +568,7 @@
   function setupProfileDropdown() {
     var profileBtn = document.getElementById('profileBtn');
     var dropdown = document.getElementById('profileDropdown');
+    if (!profileBtn || !dropdown) return;
 
     profileBtn.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -577,7 +578,7 @@
 
     document.addEventListener('click', function (e) {
       var container = document.getElementById('profileDropdownContainer');
-      if (!container.contains(e.target)) {
+      if (container && !container.contains(e.target)) {
         dropdown.classList.remove('show');
       }
     });
@@ -591,11 +592,13 @@
   }
 
   function closeNotifDropdown() {
-    document.getElementById('notifDropdown').classList.remove('show');
+    var el = document.getElementById('notifDropdown');
+    if (el) el.classList.remove('show');
   }
 
   function closeProfileDropdown() {
-    document.getElementById('profileDropdown').classList.remove('show');
+    var el = document.getElementById('profileDropdown');
+    if (el) el.classList.remove('show');
   }
 
   function setupSearchAndFilter() {
@@ -958,6 +961,9 @@
           document.getElementById('higherStudiesDetails').style.display = 'none';
         }
 
+        document.getElementById('fieldSmartParser').value = '';
+        loadAutosave(alumniId);
+
         overlay.classList.add('show');
       }
     });
@@ -1002,11 +1008,136 @@
     return isValid;
   }
 
+  // Auto-save form progress to localStorage
+  var autosaveTimeout = null;
+  function triggerAutosave() {
+    if (autosaveTimeout) clearTimeout(autosaveTimeout);
+    autosaveTimeout = setTimeout(function () {
+      saveAutosave();
+    }, 1000);
+  }
+
+  function saveAutosave() {
+    if (!currentSelectedAlumniId) return;
+    var data = {
+      name: document.getElementById('fieldName').value,
+      department: document.getElementById('fieldDept').value,
+      batch: document.getElementById('fieldBatch').value,
+      fatherName: document.getElementById('fieldFatherName').value,
+      company: document.getElementById('fieldCompany').value,
+      designation: document.getElementById('fieldDesignation').value,
+      city: document.getElementById('fieldCity').value,
+      state: document.getElementById('fieldState').value,
+      country: document.getElementById('fieldCountry').value,
+      email: document.getElementById('fieldEmail').value,
+      phone: document.getElementById('fieldPhone').value,
+      linkedin_profile: document.getElementById('fieldLinkedin').value,
+      working_details: document.getElementById('fieldWorkingDetails').value,
+      higherStudies: document.getElementById('fieldHigherStudies').value,
+      higherDetails: document.getElementById('fieldHigherDetails').value,
+      entrepreneur: document.getElementById('fieldEntrepreneur').value,
+      govtJob: document.getElementById('fieldGovtJob').value,
+      otherOcc: document.getElementById('fieldOtherOcc').value,
+      remarks: document.getElementById('fieldRemarks').value,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('autosave_leader_alumni_' + currentSelectedAlumniId, JSON.stringify(data));
+  }
+
+  function loadAutosave(alumniId) {
+    var saved = localStorage.getItem('autosave_leader_alumni_' + alumniId);
+    if (saved) {
+      try {
+        var data = JSON.parse(saved);
+        if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
+          document.getElementById('fieldName').value = data.name || '';
+          document.getElementById('fieldDept').value = data.department || '';
+          document.getElementById('fieldBatch').value = data.batch || '';
+          document.getElementById('fieldFatherName').value = data.fatherName || '';
+          document.getElementById('fieldCompany').value = data.company || '';
+          document.getElementById('fieldDesignation').value = data.designation || '';
+          document.getElementById('fieldCity').value = data.city || '';
+          document.getElementById('fieldState').value = data.state || '';
+          document.getElementById('fieldCountry').value = data.country || '';
+          document.getElementById('fieldEmail').value = data.email || '';
+          document.getElementById('fieldPhone').value = data.phone || '';
+          document.getElementById('fieldLinkedin').value = data.linkedin_profile || '';
+          document.getElementById('fieldWorkingDetails').value = data.working_details || '';
+          document.getElementById('fieldHigherStudies').value = data.higherStudies || 'No';
+          document.getElementById('fieldHigherDetails').value = data.higherDetails || '';
+          document.getElementById('fieldEntrepreneur').value = data.entrepreneur || 'No';
+          document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
+          document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
+          document.getElementById('fieldRemarks').value = data.remarks || '';
+          
+          document.getElementById('higherStudiesDetails').style.display = data.higherStudies === 'Yes' ? 'block' : 'none';
+          showToast('Info', 'Loaded unsaved changes from auto-save draft.', 'info');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  function clearAutosave(alumniId) {
+    localStorage.removeItem('autosave_leader_alumni_' + alumniId);
+  }
+
+  // Smart Profile Parser
+  window.parseProfileHeader = function () {
+    var val = document.getElementById('fieldSmartParser').value || '';
+    if (!val.trim()) return;
+
+    var linkedinRegex = /(https?:\/\/(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+)/i;
+    var linkedinMatch = val.match(linkedinRegex);
+    if (linkedinMatch) {
+      document.getElementById('fieldLinkedin').value = linkedinMatch[1];
+    }
+
+    var headlineRegex = /([A-Za-z0-9\s\-&]+?)\s+(?:at|@|\|)\s+([A-Za-z0-9\s\-&]+)/i;
+    var headlineMatch = val.match(headlineRegex);
+    if (headlineMatch) {
+      document.getElementById('fieldDesignation').value = headlineMatch[1].trim();
+      document.getElementById('fieldCompany').value = headlineMatch[2].trim();
+    }
+
+    var locationRegex = /([A-Za-z\s]+),\s*([A-Za-z\s]+)(?:,\s*([A-Za-z\s]+))?/i;
+    var lines = val.split('\n');
+    lines.forEach(function (line) {
+      var locMatch = line.match(locationRegex);
+      if (locMatch && !linkedinRegex.test(line) && !headlineRegex.test(line)) {
+        var city = locMatch[1].trim();
+        var country = (locMatch[3] || locMatch[2]).trim();
+        if (city.toLowerCase() !== 'linkedin' && country.toLowerCase() !== 'linkedin') {
+          document.getElementById('fieldCity').value = city;
+          document.getElementById('fieldCountry').value = country;
+        }
+      }
+    });
+
+    if (val.length > 10) {
+      document.getElementById('fieldWorkingDetails').value = val.substring(0, 500);
+    }
+
+    showToast('Success', 'Parsed profile details auto-filled successfully!', 'success');
+    saveAutosave();
+  };
+
   function setupUpdateModalEvents() {
     var select = document.getElementById('fieldHigherStudies');
     if (select) {
       select.addEventListener('change', function () {
         document.getElementById('higherStudiesDetails').style.display = this.value === 'Yes' ? 'block' : 'none';
+      });
+    }
+
+    var form = document.getElementById('updateForm');
+    if (form) {
+      form.querySelectorAll('input, select, textarea').forEach(function (inputEl) {
+        if (inputEl.id !== 'fieldSmartParser') {
+          inputEl.addEventListener('input', triggerAutosave);
+          inputEl.addEventListener('change', triggerAutosave);
+        }
       });
     }
 
@@ -1016,6 +1147,7 @@
       var data = readFormValues();
       API.saveAlumniDraft(currentSelectedAlumniId, data).then(function (res) {
         showToast('Success', 'Draft saved successfully.', 'success');
+        clearAutosave(currentSelectedAlumniId);
         document.getElementById('updateModal').classList.remove('show');
         loadMyAssignments();
       }).catch(function (err) {
@@ -1035,6 +1167,7 @@
       var data = readFormValues();
       API.submitAlumni(currentSelectedAlumniId, data).then(function (res) {
         showToast('Success', 'Record submitted successfully.', 'success');
+        clearAutosave(currentSelectedAlumniId);
         document.getElementById('updateModal').classList.remove('show');
         loadMyAssignments();
         fetchLeaderData();
@@ -1043,6 +1176,63 @@
       }).finally(function () {
         submitBtn.disabled = false;
       });
+    });
+
+    var nextBtn = document.getElementById('submitNextBtn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        if (!validateForm()) {
+          showToast('Validation Error', 'Please fill in all required fields.', 'danger');
+          return;
+        }
+        var submitNextBtn = this;
+        submitNextBtn.disabled = true;
+        var data = readFormValues();
+        API.submitAlumni(currentSelectedAlumniId, data).then(function (res) {
+          showToast('Success', 'Record submitted successfully.', 'success');
+          clearAutosave(currentSelectedAlumniId);
+          loadMyAssignments();
+          fetchLeaderData();
+
+          // Find the next pending/draft record
+          var nextRecord = myAssignmentsData.find(function (r) {
+            return r.status !== 'Completed' && String(r.alumni_id) !== String(currentSelectedAlumniId);
+          });
+
+          if (nextRecord) {
+            openUpdateModal(nextRecord.alumni_id);
+          } else {
+            document.getElementById('updateModal').classList.remove('show');
+            showToast('Success', 'All assigned records completed! Great job!', 'success');
+          }
+        }).catch(function (err) {
+          showToast('Error', err.message || 'Failed to submit record.', 'danger');
+        }).finally(function () {
+          submitNextBtn.disabled = false;
+        });
+      });
+    }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', function (e) {
+      var modal = document.getElementById('updateModal');
+      if (!modal || !modal.classList.contains('show')) return;
+
+      if (e.key === 'Escape') {
+        modal.classList.remove('show');
+      }
+
+      // Ctrl + S: Save Draft
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        document.getElementById('saveDraftBtn').click();
+      }
+
+      // Ctrl + Enter: Submit Record
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('submitRecordBtn').click();
+      }
     });
   }
 
@@ -1304,6 +1494,12 @@
       avatarEls.forEach(function (el) { if (el) el.textContent = user.name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2); });
       var greeting = document.querySelector('#globalPageHeader p, .page-header p');
       if (greeting) greeting.textContent = 'Welcome back, ' + user.name.split(' ')[0] + '! Here\'s your team\'s progress overview.';
+      
+      var roleEl = document.querySelector('.sidebar-user-role');
+      if (roleEl) {
+        var role = user.role || 'LEADER';
+        roleEl.textContent = (role === 'LEADER' || role === 'ADMIN') ? 'Team Leader' : 'Team Member';
+      }
       
       // Populate General Settings fields
       var settingsName = document.getElementById('settingsName');

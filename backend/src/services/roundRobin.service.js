@@ -171,7 +171,26 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
 
   if (method === 'BatchWise') {
     if (!allocations || !Array.isArray(allocations) || allocations.length === 0) {
-      throw new AppError('Allocations array is required for BatchWise distribution.', 400);
+      const usersResult = await pool.request()
+        .input('teamId', sql.Int, teamId)
+        .query(`
+          SELECT u.user_id, u.first_name + ' ' + u.last_name AS name
+          FROM Users u
+          WHERE u.user_id IN (
+            SELECT user_id FROM TeamMembers WHERE team_id = @teamId
+            UNION
+            SELECT leader_id FROM Teams WHERE team_id = @teamId
+          ) AND u.is_active = 1
+        `);
+      const activeUsers = usersResult.recordset;
+      if (activeUsers.length === 0) {
+        throw new AppError('No active team members or leaders found to distribute to.', 400);
+      }
+      allocations = activeUsers.map((u, index) => {
+        const base = Math.floor(poolAlumni.length / activeUsers.length);
+        const extra = index < (poolAlumni.length % activeUsers.length) ? 1 : 0;
+        return { userId: u.user_id, count: base + extra };
+      });
     }
 
     let sum = 0;

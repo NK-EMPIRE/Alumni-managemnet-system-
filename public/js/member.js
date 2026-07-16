@@ -10,6 +10,8 @@
     let _apiMemberData = null;
     let _apiAlumniData = null;
     let _apiDataLoaded = false;
+    let previewPage = 1;
+    let previewLimit = 10;
 
     const toastContainer = document.getElementById('toastContainer');
     const recordsBody = document.getElementById('recordsBody');
@@ -24,6 +26,7 @@
     const modalClose = document.getElementById('modalClose');
     const saveDraftBtn = document.getElementById('saveDraftBtn');
     const submitRecordBtn = document.getElementById('submitRecordBtn');
+    const submitNextBtn = document.getElementById('submitNextBtn');
     const cancelModalBtn = document.getElementById('cancelModalBtn');
     const modalTitle = document.getElementById('modalTitle');
     const modalSubtitle = document.getElementById('modalSubtitle');
@@ -298,11 +301,18 @@
             higherStudiesDetails.classList.remove('active');
         }
 
+        document.getElementById('fieldSmartParser').value = '';
+        loadAutosave(record.id);
+
         clearErrors();
         saveDraftBtn.classList.remove('loading');
         saveDraftBtn.disabled = false;
         submitRecordBtn.classList.remove('loading');
         submitRecordBtn.disabled = false;
+        if (submitNextBtn) {
+            submitNextBtn.classList.remove('loading');
+            submitNextBtn.disabled = false;
+        }
         updateModal.classList.add('show');
         document.body.style.overflow = 'hidden';
     }
@@ -314,8 +324,136 @@
         saveDraftBtn.disabled = false;
         submitRecordBtn.classList.remove('loading');
         submitRecordBtn.disabled = false;
+        if (submitNextBtn) {
+            submitNextBtn.classList.remove('loading');
+            submitNextBtn.disabled = false;
+        }
         clearErrors();
     }
+
+    // Auto-save form progress to localStorage
+    let autosaveTimeout = null;
+    function triggerAutosave() {
+        if (autosaveTimeout) clearTimeout(autosaveTimeout);
+        autosaveTimeout = setTimeout(function () {
+            saveAutosave();
+        }, 1000); // Debounce autosave by 1 second
+    }
+
+    function saveAutosave() {
+        var idx = fieldIndex.value;
+        if (!idx) return;
+        var data = {
+            name: document.getElementById('fieldName').value,
+            department: document.getElementById('fieldDept').value,
+            batch: document.getElementById('fieldBatch').value,
+            fatherName: document.getElementById('fieldFatherName').value,
+            company: document.getElementById('fieldCompany').value,
+            designation: document.getElementById('fieldDesignation').value,
+            city: document.getElementById('fieldCity').value,
+            state: document.getElementById('fieldState').value,
+            country: document.getElementById('fieldCountry').value,
+            email: document.getElementById('fieldEmail').value,
+            phone: document.getElementById('fieldPhone').value,
+            linkedin_profile: document.getElementById('fieldLinkedin').value,
+            working_details: document.getElementById('fieldWorkingDetails').value,
+            higherStudies: document.getElementById('fieldHigherStudies').value,
+            higherDetails: document.getElementById('fieldHigherDetails').value,
+            entrepreneur: document.getElementById('fieldEntrepreneur').value,
+            govtJob: document.getElementById('fieldGovtJob').value,
+            otherOcc: document.getElementById('fieldOtherOcc').value,
+            remarks: document.getElementById('fieldRemarks').value,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('autosave_member_alumni_' + idx, JSON.stringify(data));
+    }
+
+    function loadAutosave(idx) {
+        var saved = localStorage.getItem('autosave_member_alumni_' + idx);
+        if (saved) {
+            try {
+                var data = JSON.parse(saved);
+                if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
+                    document.getElementById('fieldName').value = data.name || '';
+                    document.getElementById('fieldDept').value = data.department || '';
+                    document.getElementById('fieldBatch').value = data.batch || '';
+                    document.getElementById('fieldFatherName').value = data.fatherName || '';
+                    document.getElementById('fieldCompany').value = data.company || '';
+                    document.getElementById('fieldDesignation').value = data.designation || '';
+                    document.getElementById('fieldCity').value = data.city || '';
+                    document.getElementById('fieldState').value = data.state || '';
+                    document.getElementById('fieldCountry').value = data.country || '';
+                    document.getElementById('fieldEmail').value = data.email || '';
+                    document.getElementById('fieldPhone').value = data.phone || '';
+                    document.getElementById('fieldLinkedin').value = data.linkedin_profile || '';
+                    document.getElementById('fieldWorkingDetails').value = data.working_details || '';
+                    document.getElementById('fieldHigherStudies').value = data.higherStudies || 'No';
+                    document.getElementById('fieldHigherDetails').value = data.higherDetails || '';
+                    document.getElementById('fieldEntrepreneur').value = data.entrepreneur || 'No';
+                    document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
+                    document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
+                    document.getElementById('fieldRemarks').value = data.remarks || '';
+                    
+                    if (data.higherStudies === 'Yes') {
+                        higherStudiesDetails.classList.add('active');
+                    } else {
+                        higherStudiesDetails.classList.remove('active');
+                    }
+                    showToast('Loaded unsaved changes from auto-save draft.', 'success');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+
+    function clearAutosave(idx) {
+        localStorage.removeItem('autosave_member_alumni_' + idx);
+    }
+
+    // Smart Copy-Paste Parser (LinkedIn Profile Parser)
+    window.parseProfileHeader = function () {
+        var val = document.getElementById('fieldSmartParser').value || '';
+        if (!val.trim()) return;
+
+        // Try extracting LinkedIn URL
+        var linkedinRegex = /(https?:\/\/(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+)/i;
+        var linkedinMatch = val.match(linkedinRegex);
+        if (linkedinMatch) {
+            document.getElementById('fieldLinkedin').value = linkedinMatch[1];
+        }
+
+        // Try extracting "Company" and "Designation" from patterns like "Software Engineer at Google" or "Software Engineer | Google"
+        var headlineRegex = /([A-Za-z0-9\s\-&]+?)\s+(?:at|@|\|)\s+([A-Za-z0-9\s\-&]+)/i;
+        var headlineMatch = val.match(headlineRegex);
+        if (headlineMatch) {
+            document.getElementById('fieldDesignation').value = headlineMatch[1].trim();
+            document.getElementById('fieldCompany').value = headlineMatch[2].trim();
+        }
+
+        // Try extracting location (e.g., "Bangalore, India" or "Chennai, Tamil Nadu, India")
+        var locationRegex = /([A-Za-z\s]+),\s*([A-Za-z\s]+)(?:,\s*([A-Za-z\s]+))?/i;
+        var lines = val.split('\n');
+        lines.forEach(function (line) {
+            var locMatch = line.match(locationRegex);
+            if (locMatch && !linkedinRegex.test(line) && !headlineRegex.test(line)) {
+                var city = locMatch[1].trim();
+                var country = (locMatch[3] || locMatch[2]).trim();
+                if (city.toLowerCase() !== 'linkedin' && country.toLowerCase() !== 'linkedin') {
+                    document.getElementById('fieldCity').value = city;
+                    document.getElementById('fieldCountry').value = country;
+                }
+            }
+        });
+        
+        // Also set working details to full pasted text as a fallback
+        if (val.length > 10) {
+            document.getElementById('fieldWorkingDetails').value = val.substring(0, 500);
+        }
+        
+        showToast('Parsed profile details auto-filled successfully!', 'success');
+        saveAutosave(); // Save progress immediately
+    };
 
     function clearErrors() {
         document.querySelectorAll('.form-group input, .form-group select').forEach(function (el) {
@@ -387,6 +525,7 @@
                 readFormValues(record);
                 record.status = 'Draft';
             }
+            clearAutosave(idx);
             saveDraftBtn.classList.remove('loading');
             saveDraftBtn.disabled = false;
             renderTable();
@@ -422,8 +561,10 @@
             };
             API.saveAlumniDraft(record.id, draftData).then(function () {
                 doLocalSave();
-            }).catch(function () {
-                doLocalSave();
+            }).catch(function (err) {
+                saveDraftBtn.classList.remove('loading');
+                saveDraftBtn.disabled = false;
+                showToast(err.message || 'Failed to save draft.', 'error');
             });
         } else {
             setTimeout(doLocalSave, 1000);
@@ -447,6 +588,7 @@
                 readFormValues(record);
                 record.status = 'Completed';
             }
+            clearAutosave(idx);
             submitRecordBtn.classList.remove('loading');
             submitRecordBtn.disabled = false;
             renderTable();
@@ -476,18 +618,99 @@
                 is_entrepreneur: record.entrepreneur === 'Yes' ? 1 : 0,
                 is_government_job: record.govtJob === 'Yes' ? 1 : 0
             };
-            // submitAlumni is allowed for MEMBERs (PATCH /:alumniId/submit)
             API.submitAlumni(record.id, submitData).then(function () {
                 if (record.assignment_id) {
                     return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
                 }
             }).then(function () {
                 doLocalSubmit();
-            }).catch(function () {
-                doLocalSubmit();
+            }).catch(function (err) {
+                submitRecordBtn.classList.remove('loading');
+                submitRecordBtn.disabled = false;
+                showToast(err.message || 'Failed to submit record.', 'error');
             });
         } else {
             setTimeout(doLocalSubmit, 1500);
+        }
+    }
+
+    function handleSubmitNext() {
+        if (!validateForm()) {
+            showToast('Please fill all required fields', 'error');
+            return;
+        }
+
+        if (submitNextBtn) {
+            submitNextBtn.classList.add('loading');
+            submitNextBtn.disabled = true;
+        }
+
+        var idx = parseInt(fieldIndex.value, 10);
+        var record = alumniData.find(function (r) { return r.id === idx; });
+
+        function doLocalSubmitAndNext() {
+            if (record) {
+                readFormValues(record);
+                record.status = 'Completed';
+            }
+            clearAutosave(idx);
+            if (submitNextBtn) {
+                submitNextBtn.classList.remove('loading');
+                submitNextBtn.disabled = false;
+            }
+            renderTable();
+            incrementTodayCount();
+            showToast('Record submitted successfully!', 'success');
+            
+            // Find the next pending/draft record
+            var nextRecord = alumniData.find(function (r) { 
+                return r.status !== 'Completed' && r.id !== idx; 
+            });
+
+            if (nextRecord) {
+                openModal(nextRecord.id);
+            } else {
+                closeModal();
+                showToast('All assigned records completed! Great job!', 'success');
+            }
+        }
+
+        if (_apiDataLoaded && record && record.id) {
+            readFormValues(record);
+            var submitData = {
+                name: record.name,
+                department: record.department,
+                batch: record.batch,
+                company: record.company,
+                designation: record.designation,
+                current_city: record.city,
+                state: record.state,
+                country: record.country,
+                email: record.email,
+                phone: record.phone,
+                linkedin_url: record.linkedin_profile,
+                working_details: record.working_details,
+                higher_studies: record.higherStudies,
+                other_occupation: record.otherOcc,
+                remarks: record.remarks,
+                is_entrepreneur: record.entrepreneur === 'Yes' ? 1 : 0,
+                is_government_job: record.govtJob === 'Yes' ? 1 : 0
+            };
+            API.submitAlumni(record.id, submitData).then(function () {
+                if (record.assignment_id) {
+                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
+                }
+            }).then(function () {
+                doLocalSubmitAndNext();
+            }).catch(function (err) {
+                if (submitNextBtn) {
+                    submitNextBtn.classList.remove('loading');
+                    submitNextBtn.disabled = false;
+                }
+                showToast(err.message || 'Failed to submit record.', 'error');
+            });
+        } else {
+            setTimeout(doLocalSubmitAndNext, 1500);
         }
     }
 
@@ -515,8 +738,22 @@
     }
 
     function handleKeyboard(e) {
-        if (e.key === 'Escape' && updateModal.classList.contains('show')) {
+        if (!updateModal.classList.contains('show')) return;
+        
+        if (e.key === 'Escape') {
             closeModal();
+        }
+        
+        // Ctrl + S: Save Draft
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            handleSaveDraft();
+        }
+        
+        // Ctrl + Enter: Submit Record
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmitRecord();
         }
     }
 
@@ -566,12 +803,20 @@
                 // Toggle sections
                 var dashboardSection = document.getElementById('section-dashboard');
                 var settingsSection = document.getElementById('section-settings');
+                var previewSection = document.getElementById('section-preview');
                 if (page === 'dashboard') {
                     if (dashboardSection) dashboardSection.style.display = 'block';
                     if (settingsSection) settingsSection.style.display = 'none';
+                    if (previewSection) previewSection.style.display = 'none';
                 } else if (page === 'settings') {
                     if (dashboardSection) dashboardSection.style.display = 'none';
                     if (settingsSection) settingsSection.style.display = 'block';
+                    if (previewSection) previewSection.style.display = 'none';
+                } else if (page === 'preview') {
+                    if (dashboardSection) dashboardSection.style.display = 'none';
+                    if (settingsSection) settingsSection.style.display = 'none';
+                    if (previewSection) previewSection.style.display = 'block';
+                    loadPreviewSpreadsheet();
                 }
 
                 if (window.innerWidth <= 992) {
@@ -579,6 +824,139 @@
                 }
             });
         });
+
+        window.onPreviewFilterChange = function() {
+            previewPage = 1;
+            loadPreviewSpreadsheet();
+        };
+
+        window.loadPreviewSpreadsheet = function() {
+            var body = document.getElementById('previewSpreadsheetBody');
+            if (!body) return;
+            body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
+            
+            var search = document.getElementById('previewSearch').value || '';
+            var dept = document.getElementById('previewFilterDept').value || '';
+            var batch = document.getElementById('previewFilterBatch').value || '';
+            var status = document.getElementById('previewFilterStatus').value || '';
+            var limitVal = parseInt(document.getElementById('previewLimit').value, 10) || 10;
+            previewLimit = limitVal;
+
+            API.getAssignedAlumni({
+                page: previewPage,
+                limit: previewLimit,
+                search: search || undefined,
+                department: dept || undefined,
+                batch: batch || undefined,
+                status: status || undefined
+            }).then(function (res) {
+                var records = [];
+                var total = 0;
+                if (res && res.success && res.data) {
+                    records = res.data.records || (Array.isArray(res.data) ? res.data : []);
+                    var pag = res.data.pagination;
+                    total = (pag && pag.total) ? pag.total : records.length;
+                }
+                
+                var infoEl = document.getElementById('previewTableInfo');
+                if (infoEl) {
+                    var start = records.length > 0 ? (previewPage - 1) * previewLimit + 1 : 0;
+                    var end = (previewPage - 1) * previewLimit + records.length;
+                    infoEl.textContent = 'Showing ' + start + ' to ' + end + ' of ' + total + ' entries';
+                }
+
+                if (records.length === 0) {
+                    body.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:24px;color:var(--text-secondary);">No records found matching filters.</td></tr>';
+                    renderPreviewPagination(total);
+                    return;
+                }
+
+                // Sort alphabetically by default
+                records.sort(function(a, b) {
+                    var nameA = (a.name || '').toLowerCase();
+                    var nameB = (b.name || '').toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
+
+                var html = '';
+                records.forEach(function (row, idx) {
+                    var serial = (previewPage - 1) * previewLimit + idx + 1;
+                    var status = row.assignment_status || 'Available';
+                    var badgeClass = 'badge-secondary';
+                    if (status === 'Completed') badgeClass = 'badge-success';
+                    else if (status === 'Pending') badgeClass = 'badge-warning';
+                    else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
+                    else if (status === 'Draft') badgeClass = 'badge-info';
+                    
+                    var linkedin = row.linkedin_profile ? '<a href="' + (row.linkedin_profile.startsWith('http') ? row.linkedin_profile : 'https://' + row.linkedin_profile) + '" target="_blank" style="color:var(--primary);"><i class="fab fa-linkedin"></i> View</a>' : '-';
+                    var updatedDateStr = row.updated_date ? new Date(row.updated_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+                    
+                    html += '<tr>' +
+                        '<td class="sticky-col" style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; left:0;">' + serial + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600;">' + (row.name || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.register_no || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.father_name || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.department || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.batch || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.email || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.phone || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.company || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.designation || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.experience || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.city || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.country || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + linkedin + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + updatedDateStr + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.working_details || '-') + '</td>' +
+                        '</tr>';
+                });
+                body.innerHTML = html;
+                renderPreviewPagination(total);
+            }).catch(function (err) {
+                console.error(err);
+                body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
+            });
+        };
+
+        function renderPreviewPagination(total) {
+            var pagContainer = document.getElementById('previewPagination');
+            if (!pagContainer) return;
+            var totalPages = Math.ceil(total / previewLimit) || 1;
+            
+            var html = '';
+            // Prev button
+            html += '<button class="prev" ' + (previewPage <= 1 ? 'disabled' : '') + ' onclick="changePreviewPage(\'prev\')"><i class="fas fa-chevron-left"></i></button>';
+            
+            for (var i = 1; i <= totalPages; i++) {
+                if (totalPages > 6) {
+                    if (i === 1 || i === totalPages || Math.abs(i - previewPage) <= 1) {
+                        html += '<button class="' + (i === previewPage ? 'active' : '') + '" onclick="changePreviewPage(' + i + ')">' + i + '</button>';
+                    } else if (i === 2 || i === totalPages - 1) {
+                        html += '<span class="dots">...</span>';
+                    }
+                } else {
+                    html += '<button class="' + (i === previewPage ? 'active' : '') + '" onclick="changePreviewPage(' + i + ')">' + i + '</button>';
+                }
+            }
+            // Remove duplicate consecutive dots
+            html = html.replace(/(<span class="dots">\.\.\.<\/span>\s*)+/g, '<span class="dots">...</span>');
+
+            // Next button
+            html += '<button class="next" ' + (previewPage >= totalPages ? 'disabled' : '') + ' onclick="changePreviewPage(\'next\')"><i class="fas fa-chevron-right"></i></button>';
+            pagContainer.innerHTML = html;
+        }
+
+        window.changePreviewPage = function(target) {
+            if (target === 'prev') {
+                if (previewPage > 1) previewPage--;
+            } else if (target === 'next') {
+                previewPage++;
+            } else {
+                previewPage = parseInt(target, 10) || 1;
+            }
+            loadPreviewSpreadsheet();
+        };
 
         window.switchSettingsTab = function(tabName, btn) {
             var tabsContainer = btn.closest('.card') || btn.closest('.card-body');
@@ -764,12 +1142,12 @@
                 });
                 alumniData = _apiAlumniData;
             } else {
-                alumniData = buildAlumniData();
+                alumniData = [];
             }
             renderTable();
             populateNotifications();
         }).catch(function () {
-            alumniData = buildAlumniData();
+            alumniData = [];
             renderTable();
             populateNotifications();
         });
@@ -794,8 +1172,23 @@
                         filterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
                     });
                 }
+                var pDept = document.getElementById('previewFilterDept');
+                var pBatch = document.getElementById('previewFilterBatch');
+                if (pDept) {
+                    pDept.innerHTML = '<option value="">All Departments</option>';
+                    depts.forEach(d => {
+                        pDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
+                    });
+                }
+                if (pBatch) {
+                    pBatch.innerHTML = '<option value="">All Batches</option>';
+                    batches.forEach(b => {
+                        pBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
+                    });
+                }
             }
-        }).catch(err => {
+        }
+        ).catch(err => {
             console.error('Failed to load dynamic filters in member:', err);
         });
 
@@ -829,6 +1222,19 @@
 
         saveDraftBtn.addEventListener('click', handleSaveDraft);
         submitRecordBtn.addEventListener('click', handleSubmitRecord);
+        if (submitNextBtn) {
+            submitNextBtn.addEventListener('click', handleSubmitNext);
+        }
+
+        // Set up input autosave listeners for all fields in the update modal form
+        if (updateForm) {
+            updateForm.querySelectorAll('input, select, textarea').forEach(function (inputEl) {
+                if (inputEl.id !== 'fieldSmartParser') {
+                    inputEl.addEventListener('input', triggerAutosave);
+                    inputEl.addEventListener('change', triggerAutosave);
+                }
+            });
+        }
 
         modalClose.addEventListener('click', handleModalClose);
         cancelModalBtn.addEventListener('click', handleModalClose);

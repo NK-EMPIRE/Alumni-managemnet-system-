@@ -80,7 +80,7 @@ async function findAll({ page, limit, offset, search, role, isActive }) {
     FROM Users u
     INNER JOIN Roles r ON u.role_id = r.role_id
     ${whereClause}
-    ORDER BY u.created_at DESC
+    ORDER BY u.first_name ASC, u.last_name ASC
     OFFSET ${offset} ROWS
     FETCH NEXT ${limit} ROWS ONLY
   `);

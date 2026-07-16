@@ -114,12 +114,12 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
   return professionalInfo;
 }
 
-async function getMyAssignments(userId, role, { page, limit, onlyMe }) {
+async function getMyAssignments(userId, role, { page, limit, onlyMe, search, department, batch, status }) {
   const p = computeOffset(page, limit);
   if (role === 'LEADER' && !onlyMe) {
-    return alumniRepository.getAssignmentsByLeader(userId, { page: p.page, limit: p.limit, offset: p.offset });
+    return alumniRepository.getAssignmentsByLeader(userId, { page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status });
   }
-  return alumniRepository.getAssignmentsByMember(userId, { page: p.page, limit: p.limit, offset: p.offset });
+  return alumniRepository.getAssignmentsByMember(userId, { page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status });
 }
 
 async function updateAssignmentStatus(assignmentId, status, currentUser) {

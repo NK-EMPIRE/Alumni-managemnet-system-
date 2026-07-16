@@ -270,6 +270,22 @@
     // Additional export method
     downloadImportTemplate: function () {
         return this.downloadTemplate();
+    },
+
+    // Reset password requests
+    getResetRequests: function () {
+        return get('/auth/reset-password-requests');
+    },
+    updateResetRequestStatus: function (requestId, status) {
+        return patch('/auth/reset-password-requests/' + requestId, { status: status });
+    },
+
+    // Settings sync
+    getSettings: function () {
+        return get('/settings');
+    },
+    updateSettings: function (settings, group) {
+        return post('/settings', { settings: settings, group: group });
     }
     };
 
