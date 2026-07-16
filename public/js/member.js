@@ -1269,3 +1269,123 @@
     }
 
 })();
+
+/* ── Global helpers for Security Settings (called via onclick in HTML) ── */
+
+window.switchSettingsTab = function (tabName, btn) {
+    // Deactivate all tab buttons
+    document.querySelectorAll('#settingsTabs .tab-item').forEach(function (b) {
+        b.classList.remove('active');
+        b.style.color = '';
+        b.style.borderBottom = '';
+    });
+    // Hide all tab content panels
+    document.querySelectorAll('.tab-content').forEach(function (p) {
+        p.style.display = 'none';
+        p.classList.remove('active');
+    });
+    // Activate clicked button
+    if (btn) {
+        btn.classList.add('active');
+        btn.style.color = 'var(--primary)';
+        btn.style.borderBottom = '2px solid var(--primary)';
+    }
+    // Show the target panel
+    var panel = document.getElementById('tab-' + tabName);
+    if (panel) {
+        panel.style.display = '';
+        panel.classList.add('active');
+    }
+};
+
+window.togglePasswordVisibility = function (inputId, btn) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    var icon = btn ? btn.querySelector('i') : null;
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+    } else {
+        input.type = 'password';
+        if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+    }
+};
+
+window.saveMemberPassword = function () {
+    var oldPass     = document.getElementById('settingsOldPass');
+    var newPass     = document.getElementById('settingsNewPass');
+    var confirmPass = document.getElementById('settingsConfirmPass');
+    var btn         = document.querySelector('#tab-security .btn-primary');
+
+    if (!oldPass || !newPass || !confirmPass) return;
+
+    var oldVal     = oldPass.value.trim();
+    var newVal     = newPass.value.trim();
+    var confirmVal = confirmPass.value.trim();
+
+    // --- Validation ---
+    if (!oldVal) {
+        _memberShowToast('Please enter your current password.', 'warning');
+        oldPass.focus();
+        return;
+    }
+    if (!newVal || newVal.length < 6) {
+        _memberShowToast('New password must be at least 6 characters.', 'warning');
+        newPass.focus();
+        return;
+    }
+    if (newVal !== confirmVal) {
+        _memberShowToast('New password and confirm password do not match.', 'error');
+        confirmPass.focus();
+        return;
+    }
+    if (oldVal === newVal) {
+        _memberShowToast('New password must be different from the current password.', 'warning');
+        newPass.focus();
+        return;
+    }
+
+    // --- Call API ---
+    if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
+
+    API.changePassword(oldVal, newVal)
+        .then(function (res) {
+            _memberShowToast('Password updated successfully!', 'success');
+            // Clear all fields after success
+            oldPass.value = '';
+            newPass.value = '';
+            confirmPass.value = '';
+        })
+        .catch(function (err) {
+            var msg = (err && err.message) ? err.message : 'Failed to update password. Please try again.';
+            _memberShowToast(msg, 'error');
+        })
+        .finally(function () {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Update Password';
+            }
+        });
+};
+
+/* Internal toast helper so the global functions can show toasts */
+function _memberShowToast(message, type) {
+    type = type || 'success';
+    var container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    var icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+    toast.innerHTML = '<i class="fas ' + (icons[type] || 'fa-info-circle') + '"></i> ' + message;
+    container.appendChild(toast);
+    setTimeout(function () {
+        toast.classList.add('removing');
+        setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+    }, 3500);
+}
+
