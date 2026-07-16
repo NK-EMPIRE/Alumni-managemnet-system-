@@ -1141,6 +1141,16 @@
     </div>
   </div>
 
+  <!-- Assignment Status Feedback Modal -->
+  <div class="modal-overlay" id="assignmentResultModal">
+    <div class="modal" style="max-width: 400px; width: 90%; text-align: center; padding: 24px;">
+      <div id="assignmentResultIcon" style="font-size: 3.5rem; margin-bottom: 16px;"></div>
+      <h3 id="assignmentResultTitle" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 8px;"></h3>
+      <p id="assignmentResultMsg" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;"></p>
+      <button class="btn btn-primary" onclick="closeModal('assignmentResultModal')" style="width: 100%;">OK</button>
+    </div>
+  </div>
+
   <!-- ============================================================
        SESSION TIMEOUT OVERLAY
        ============================================================ -->
