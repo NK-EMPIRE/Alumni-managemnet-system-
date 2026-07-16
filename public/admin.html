@@ -1515,6 +1515,19 @@
        ============================================================ -->
   <div class="toast-container"></div>
 
+  <!-- Import Result Modal -->
+  <div class="modal-overlay" id="importResultModal" style="z-index:99999;">
+    <div class="modal" style="max-width: 420px; width: 90%; border-radius: 20px; padding: 36px 24px; text-align: center; border: 1px solid rgba(255,255,255,0.8); background:#ffffff;">
+      <div id="importResultIcon" style="width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem; box-shadow:0 10px 20px rgba(0,0,0,0.05);"></div>
+      <h3 id="importResultTitle" style="font-size:1.3rem; font-weight:700; color:#1E293B; margin-bottom:8px;">Import Status</h3>
+      <div id="importTimeBadge" style="display:inline-block; background:#EFF6FF; color:#2563EB; font-weight:600; font-size:0.75rem; padding:4px 10px; border-radius:30px; margin-bottom:16px;">
+        <i class="fas fa-stopwatch"></i> Execution Time: <span id="importDurationSec">0.00</span>s
+      </div>
+      <div id="importResultDetails" style="font-size:0.9rem; color:#64748B; margin-bottom:24px; line-height:1.6; text-align:left; background:#F8FAFC; padding:16px; border-radius:12px; border:1px solid #E2E8F0;"></div>
+      <button class="btn btn-primary" onclick="closeModal('importResultModal')" style="width:100%; padding:12px; font-weight:600; border-radius:12px; cursor:pointer;">Close</button>
+    </div>
+  </div>
+
   <!-- ============================================================
        SCRIPTS
        ============================================================ -->

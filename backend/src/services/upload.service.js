@@ -15,8 +15,8 @@ function runPythonImporter(filePath, stdinData = "") {
 
     if (stdinData) {
       child.stdin.write(stdinData);
-      child.stdin.end();
     }
+    child.stdin.end();
 
     child.stdout.on('data', (data) => {
       stdoutData += data.toString();

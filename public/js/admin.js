@@ -268,6 +268,7 @@ function fetchAllData() {
     populateTeamLeaderDropdowns();
     populateProgressLeaderDropdown();
     if (window.fetchResetRequests) window.fetchResetRequests();
+    if (window.fetchSpreadsheetData) window.fetchSpreadsheetData();
     // Dismiss loading screen
     var ls = document.getElementById('loadingScreen');
     if (ls) { ls.classList.add('hide'); setTimeout(function() { ls.style.display = 'none'; }, 600); }
@@ -1346,10 +1347,20 @@ function toggleSubmenu(el) {
   }
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
-    var isOpen = submenu.style.display === 'block';
-    submenu.style.display = isOpen ? 'none' : 'block';
+    submenu.style.display = 'block';
     var chevron = el.querySelector('.fa-chevron-down');
-    if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    
+    var firstSub = submenu.querySelector('.sub-item');
+    if (firstSub) {
+      // Direct navigate
+      var section = firstSub.getAttribute('data-section');
+      if (typeof navigateTo === 'function') {
+        navigateTo(section, firstSub);
+      } else {
+        firstSub.click();
+      }
+    }
   }
 }
 
@@ -2266,28 +2277,82 @@ function initImportHandlers() {
     if (!selectedImportFile) return;
     importBtn.disabled = true;
     importBtn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Importing...';
+    
+    var startTime = performance.now();
     var formData = new FormData();
     formData.append('file', selectedImportFile);
+    
     API.uploadImport(formData).then(function (res) {
+      var duration = ((performance.now() - startTime) / 1000).toFixed(2);
       importBtn.disabled = false;
       importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
       var pc = document.getElementById('importPreviewContainer');
       if (pc) pc.style.display = 'none';
+      
+      // Update UI modal values
+      var iconEl = document.getElementById('importResultIcon');
+      var titleEl = document.getElementById('importResultTitle');
+      var detailsEl = document.getElementById('importResultDetails');
+      var durationEl = document.getElementById('importDurationSec');
+      
+      if (durationEl) durationEl.textContent = duration;
+      
       if (res.success) {
-        var msg = 'Imported: ' + res.data.imported + ', Merged: ' + (res.data.merged || 0) + ', Skipped: ' + (res.data.skipped || 0) + ', Duplicates: ' + res.data.duplicates + ', Errors: ' + res.data.errors;
-        if (res.data.errors > 0 && res.data.errorDetails) {
-          msg += '. Check import history for details.';
+        if (iconEl) {
+          iconEl.style.background = '#ECFDF5';
+          iconEl.style.color = '#10B981';
+          iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
         }
-        Toast.success('Import Completed', msg);
+        if (titleEl) titleEl.textContent = 'Import Completed Successfully';
+        
+        var detailsHtml = 
+          '<strong>Total Rows:</strong> ' + res.data.totalRows + '<br>' +
+          '<strong>Imported:</strong> ' + res.data.imported + '<br>' +
+          '<strong>Merged/Updated:</strong> ' + (res.data.merged || 0) + '<br>' +
+          '<strong>Skipped:</strong> ' + (res.data.skipped || 0) + '<br>' +
+          '<strong>Duplicates:</strong> ' + res.data.duplicates + '<br>' +
+          '<strong>Errors:</strong> ' + res.data.errors;
+          
+        if (detailsEl) detailsEl.innerHTML = detailsHtml;
+        Toast.success('Import Completed', 'Import finished in ' + duration + 's');
+        
+        // Refresh all dashboards and data in real-time
         if (_apiDataLoaded) fetchAllData();
       } else {
+        if (iconEl) {
+          iconEl.style.background = '#FEF2F2';
+          iconEl.style.color = '#EF4444';
+          iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
+        }
+        if (titleEl) titleEl.textContent = 'Import Failed';
+        if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (res.message || 'Unknown import error');
         Toast.danger('Import Failed', res.message || 'Import failed');
       }
+      
+      openModal('importResultModal');
     }).catch(function (err) {
+      var duration = ((performance.now() - startTime) / 1000).toFixed(2);
       importBtn.disabled = false;
       importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+      
+      var iconEl = document.getElementById('importResultIcon');
+      var titleEl = document.getElementById('importResultTitle');
+      var detailsEl = document.getElementById('importResultDetails');
+      var durationEl = document.getElementById('importDurationSec');
+      
+      if (durationEl) durationEl.textContent = duration;
+      if (iconEl) {
+        iconEl.style.background = '#FEF2F2';
+        iconEl.style.color = '#EF4444';
+        iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
+      }
+      if (titleEl) titleEl.textContent = 'Import Failed';
+      if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (err.message || 'An unexpected error occurred.');
+      
+      openModal('importResultModal');
       Toast.danger('Import Failed', err.message || 'Import failed');
     });
+    
     if (fileNameEl) { fileNameEl.style.display = 'none'; }
     fileInput.value = '';
     selectedImportFile = null;
@@ -2296,8 +2361,30 @@ function initImportHandlers() {
   /* Download template button */
   if (downloadBtn) {
     downloadBtn.addEventListener('click', function () {
-      API.downloadTemplate();
       Toast.info('Template', 'Downloading alumni import template...');
+      fetch('/api/v1/upload/template', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Failed to download template');
+        return res.blob();
+      })
+      .then(function (blob) {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'alumni_import_template.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        Toast.success('Template', 'Template downloaded successfully');
+      })
+      .catch(function (err) {
+        Toast.danger('Download Failed', err.message);
+      });
     });
   }
 }
