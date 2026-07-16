@@ -4,7 +4,7 @@ const path = require('path');
 const { logger } = require('../utils/logger');
 const { AppError } = require('../middleware/errorHandler');
 
-function runPythonImporter(filePath) {
+function runPythonImporter(filePath, stdinData = "") {
   return new Promise((resolve, reject) => {
     const pythonPath = 'python';
     const scriptPath = path.join(__dirname, '..', 'utils', 'excel_importer.py');
@@ -12,6 +12,11 @@ function runPythonImporter(filePath) {
 
     let stdoutData = '';
     let stderrData = '';
+
+    if (stdinData) {
+      child.stdin.write(stdinData);
+      child.stdin.end();
+    }
 
     child.stdout.on('data', (data) => {
       stdoutData += data.toString();
@@ -38,8 +43,19 @@ function runPythonImporter(filePath) {
   });
 }
 
+async function getFacultyAndAliasStdin() {
+  try {
+    const data = await uploadRepository.getFacultiesAndAliases();
+    return JSON.stringify(data);
+  } catch (err) {
+    logger.warn('Failed to load faculty metadata for import engine: ' + err.message);
+    return '{}';
+  }
+}
+
 async function processExcelImport(filePath, originalName, currentUser) {
-  const importerResult = await runPythonImporter(filePath);
+  const stdinData = await getFacultyAndAliasStdin();
+  const importerResult = await runPythonImporter(filePath, stdinData);
   const { summary, records, errors } = importerResult;
 
   const totalRows = summary.totalRecords;
@@ -78,6 +94,48 @@ async function processExcelImport(filePath, originalName, currentUser) {
       } else {
         skippedCount++;
       }
+      
+      // Update AlumniAssignments if resolved facultyId is present
+      if (row.facultyId) {
+        const { getPool } = require('../config/database');
+        const sql = require('mssql');
+        const pool = await getPool();
+        
+        // Find existing assignment
+        const checkAssign = await pool.request()
+          .input('alumniId', sql.Int, existing.alumni_id)
+          .query('SELECT assignment_id, member_id FROM AlumniAssignments WHERE alumni_id = @alumniId');
+        
+        if (checkAssign.recordset.length > 0) {
+          const assignId = checkAssign.recordset[0].assignment_id;
+          const currentMember = checkAssign.recordset[0].member_id;
+          
+          // Reassign directly to leader if not already assigned to someone else
+          if (!currentMember) {
+            await pool.request()
+              .input('assignId', sql.Int, assignId)
+              .input('leaderId', sql.Int, row.facultyId)
+              .query('UPDATE AlumniAssignments SET member_id = NULL, status = \'ASSIGNED_TO_LEADER\' WHERE assignment_id = @assignId');
+          }
+        } else {
+          // Find team_id for this leader
+          const teamRes = await pool.request()
+            .input('leaderId', sql.Int, row.facultyId)
+            .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1');
+          
+          if (teamRes.recordset.length > 0) {
+            const teamId = teamRes.recordset[0].team_id;
+            await pool.request()
+              .input('alumniId', sql.Int, existing.alumni_id)
+              .input('teamId', sql.Int, teamId)
+              .input('assignedBy', sql.Int, currentUser.userId)
+              .query(`
+                INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
+                VALUES (@alumniId, @teamId, NULL, 'ASSIGNED_TO_LEADER', GETUTCDATE(), @assignedBy, 'ADMIN_TO_LEADER')
+              `);
+          }
+        }
+      }
     } else {
       if (!row.name || !row.department || !row.batch) {
         errors.push({
@@ -91,10 +149,43 @@ async function processExcelImport(filePath, originalName, currentUser) {
       }
       newRows.push(row);
     }
+
+    // Auto-learn alias if flagged high/medium confidence
+    if (row.facultyId && row.facultyAliasToSave) {
+      await uploadRepository.saveFacultyAlias(row.facultyId, row.facultyAliasToSave.toLowerCase());
+    }
   }
 
   if (newRows.length > 0) {
     await uploadRepository.batchInsertAlumni(newRows);
+    
+    // Create initial assignments for newly inserted records
+    const { getPool } = require('../config/database');
+    const sql = require('mssql');
+    const pool = await getPool();
+    
+    for (const record of newRows) {
+      if (record.facultyId) {
+        const alumniRes = await uploadRepository.findByRegisterNo(record.registerNo);
+        if (alumniRes) {
+          const teamRes = await pool.request()
+            .input('leaderId', sql.Int, record.facultyId)
+            .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1');
+          
+          if (teamRes.recordset.length > 0) {
+            const teamId = teamRes.recordset[0].team_id;
+            await pool.request()
+              .input('alumniId', sql.Int, alumniRes.alumni_id)
+              .input('teamId', sql.Int, teamId)
+              .input('assignedBy', sql.Int, currentUser.userId)
+              .query(`
+                INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
+                VALUES (@alumniId, @teamId, NULL, 'ASSIGNED_TO_LEADER', GETUTCDATE(), @assignedBy, 'ADMIN_TO_LEADER')
+              `);
+          }
+        }
+      }
+    }
   }
 
   const finalStatus = errors.length > 0 ? 'Partial' : 'Completed';
@@ -137,7 +228,8 @@ async function processExcelImport(filePath, originalName, currentUser) {
 }
 
 async function getExcelPreview(filePath) {
-  const importerResult = await runPythonImporter(filePath);
+  const stdinData = await getFacultyAndAliasStdin();
+  const importerResult = await runPythonImporter(filePath, stdinData);
   const { records, errors } = importerResult;
 
   const preview = [];
