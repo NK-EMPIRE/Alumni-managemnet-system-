@@ -215,6 +215,25 @@ async function startServer() {
       `);
 
       await pool.request().query(`
+        IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'member_id' AND is_nullable = 0
+        )
+        BEGIN
+          -- Drop foreign key constraint if it prevents changing nullability
+          IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_AA_Member' AND parent_object_id = OBJECT_ID('dbo.AlumniAssignments'))
+          BEGIN
+            ALTER TABLE dbo.AlumniAssignments DROP CONSTRAINT FK_AA_Member;
+          END
+          
+          ALTER TABLE dbo.AlumniAssignments ALTER COLUMN member_id INT NULL;
+          
+          -- Re-add the foreign key constraint
+          ALTER TABLE dbo.AlumniAssignments ADD CONSTRAINT FK_AA_Member FOREIGN KEY (member_id) REFERENCES dbo.Users(user_id);
+        END
+      `);
+
+      await pool.request().query(`
         IF NOT EXISTS (
           SELECT * FROM sys.columns 
           WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'reassignment_reason'
