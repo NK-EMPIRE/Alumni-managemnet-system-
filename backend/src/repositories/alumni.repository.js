@@ -310,10 +310,10 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
         a.updated_date, a.created_at, a.father_name,
         aa.assignment_id, aa.team_id, aa.member_id, aa.status,
         aa.assigned_date, aa.completed_date,
-        u.first_name + ' ' + u.last_name AS assigned_to
+        ISNULL(u.first_name + ' ' + u.last_name, 'Unassigned') AS assigned_to
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
-      INNER JOIN Users u ON aa.member_id = u.user_id
+      LEFT JOIN Users u ON aa.member_id = u.user_id
       INNER JOIN Teams t ON aa.team_id = t.team_id
       WHERE t.leader_id = @leaderId
         AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
