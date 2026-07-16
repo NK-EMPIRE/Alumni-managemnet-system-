@@ -301,6 +301,17 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     });
 
   } else if (method === 'FacultyWise') {
+    // Helper to normalize names exactly like python resolver
+    const normalizeName = (nameStr) => {
+      if (!nameStr) return "";
+      var n = nameStr.trim().toLowerCase();
+      var titlesPattern = /\b(dr|prof|mr|mrs|ms|miss|mam|madam|ma'am|sir|assistant|associate|professor)\b/gi;
+      n = n.replace(titlesPattern, '');
+      n = n.replace(/[^\w\s]/g, ' ');
+      n = n.replace(/\s+/g, ' ').trim();
+      return n;
+    };
+
     // Get active members of the team
     const usersResult = await pool.request()
       .input('teamId', sql.Int, teamId)
@@ -321,23 +332,23 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     // Build a map: normalized member name -> user_id
     const memberNameToId = {};
     activeUsers.forEach(u => {
-      memberNameToId[u.name.trim().toLowerCase()] = u.user_id;
+      memberNameToId[normalizeName(u.name)] = u.user_id;
     });
 
     const matchedGroups = {};
     const unmatched = [];
 
     for (const alumni of poolAlumni) {
-      const faculty = (alumni.faculty_assigned || '').trim().toLowerCase();
+      const facultyNorm = normalizeName(alumni.faculty_assigned);
       let matchedId = null;
-      if (faculty) {
+      if (facultyNorm) {
         // Try exact match first, then partial match
-        if (memberNameToId[faculty]) {
-          matchedId = memberNameToId[faculty];
+        if (memberNameToId[facultyNorm]) {
+          matchedId = memberNameToId[facultyNorm];
         } else {
           // partial: faculty string contains member name or member name contains faculty string
           for (const [mname, mid] of Object.entries(memberNameToId)) {
-            if (mname.includes(faculty) || faculty.includes(mname)) {
+            if (mname.includes(facultyNorm) || facultyNorm.includes(mname)) {
               matchedId = mid;
               break;
             }
@@ -402,10 +413,11 @@ async function leaderDistribute(currentUser, params) {
         await transaction.request()
           .input('alumniId', sql.Int, alumni.alumni_id)
           .input('memberId', sql.Int, group.userId)
+          .input('teamId', sql.Int, params.teamId)
           .query(`
             UPDATE AlumniAssignments
             SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
-            WHERE alumni_id = @alumniId AND status = 'ASSIGNED_TO_LEADER'
+            WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER'
           `);
         totalUpdated++;
       }
@@ -416,10 +428,11 @@ async function leaderDistribute(currentUser, params) {
       await transaction.request()
         .input('alumniId', sql.Int, ma.alumniId)
         .input('memberId', sql.Int, ma.memberId)
+        .input('teamId', sql.Int, params.teamId)
         .query(`
           UPDATE AlumniAssignments
           SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
-          WHERE alumni_id = @alumniId AND status = 'ASSIGNED_TO_LEADER'
+          WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER'
         `);
       totalUpdated++;
     }

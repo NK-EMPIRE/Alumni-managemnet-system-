@@ -101,10 +101,10 @@ async function processExcelImport(filePath, originalName, currentUser) {
         const sql = require('mssql');
         const pool = await getPool();
         
-        // Find existing assignment
+        // Find existing assignment (get the most recent one)
         const checkAssign = await pool.request()
           .input('alumniId', sql.Int, existing.alumni_id)
-          .query('SELECT assignment_id, member_id FROM AlumniAssignments WHERE alumni_id = @alumniId');
+          .query('SELECT TOP 1 assignment_id, member_id, team_id FROM AlumniAssignments WHERE alumni_id = @alumniId ORDER BY assigned_date DESC, assignment_id DESC');
         
         if (checkAssign.recordset.length > 0) {
           const assignId = checkAssign.recordset[0].assignment_id;
@@ -112,10 +112,17 @@ async function processExcelImport(filePath, originalName, currentUser) {
           
           // Reassign directly to leader if not already assigned to someone else
           if (!currentMember) {
-            await pool.request()
-              .input('assignId', sql.Int, assignId)
+            const teamRes = await pool.request()
               .input('leaderId', sql.Int, row.facultyId)
-              .query('UPDATE AlumniAssignments SET member_id = NULL, status = \'ASSIGNED_TO_LEADER\' WHERE assignment_id = @assignId');
+              .query('SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1');
+            
+            if (teamRes.recordset.length > 0) {
+              const teamId = teamRes.recordset[0].team_id;
+              await pool.request()
+                .input('assignId', sql.Int, assignId)
+                .input('teamId', sql.Int, teamId)
+                .query('UPDATE AlumniAssignments SET team_id = @teamId, member_id = NULL, status = \'ASSIGNED_TO_LEADER\' WHERE assignment_id = @assignId');
+            }
           }
         } else {
           // Find team_id for this leader

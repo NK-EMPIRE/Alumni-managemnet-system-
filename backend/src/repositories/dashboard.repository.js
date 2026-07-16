@@ -118,7 +118,15 @@ async function getLeaderStats(leaderId) {
       WHERE t.leader_id = @leaderId
       GROUP BY t.team_id
     `);
-  return result.recordset[0];
+  return result.recordset[0] || {
+    total_assigned: 0,
+    completed: 0,
+    pending: 0,
+    draft: 0,
+    undistributed_count: 0,
+    distributed_count: 0,
+    member_count: 0
+  };
 }
 
 async function getTeamMemberStats(teamId) {
