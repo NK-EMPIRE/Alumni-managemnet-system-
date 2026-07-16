@@ -2304,7 +2304,7 @@ function initImportHandlers() {
         if (titleEl) titleEl.textContent = 'Import Completed Successfully';
         
         var detailsHtml = 
-          '<strong>Total Rows:</strong> ' + res.data.totalRows + '<br>' +
+          '<strong>Total Rows:</strong> ' + (res.data.total !== undefined ? res.data.total : (res.data.totalRows !== undefined ? res.data.totalRows : '')) + '<br>' +
           '<strong>Imported:</strong> ' + res.data.imported + '<br>' +
           '<strong>Merged/Updated:</strong> ' + (res.data.merged || 0) + '<br>' +
           '<strong>Skipped:</strong> ' + (res.data.skipped || 0) + '<br>' +
