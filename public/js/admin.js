@@ -1567,8 +1567,8 @@ function submitAddTeamLeader() {
   API.createUser({ firstName: firstName, lastName: lastName, email: email, phone: phone, password: pass, roleId: 2, department: dept }).then(function (res) {
     hideLoading(btn);
     if (res.success) {
-      var tmpPwd = res.data && res.data.temporaryPassword;
-      Toast.success('Success', 'Team Leader added successfully!' + (tmpPwd ? ' Password: ' + tmpPwd : ''));
+      var tmpPwd = (res.data && res.data.temporaryPassword) || pass || 'mzcet@123';
+      Toast.success('Success', 'Team Leader added successfully! Password: ' + tmpPwd);
       closeModal('addTeamLeaderModal');
       fetchAllData();
     } else {
@@ -1636,7 +1636,8 @@ function submitAddTeamMember() {
         return API.addTeamMember(teamId, { userId: createdUserId });
       }).then(function () {
         hideLoading(btn);
-        Toast.success('Success', 'Team Member added successfully!' + (tmpPwd ? ' Password: ' + tmpPwd : ''));
+        var showPwd = tmpPwd || pass || 'mzcet@123';
+        Toast.success('Success', 'Team Member added successfully! Password: ' + showPwd);
         closeModal('addTeamMemberModal');
         fetchAllData();
       }).catch(function (err) {
