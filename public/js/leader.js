@@ -1750,23 +1750,32 @@
         document.getElementById('distEmptyMsg').textContent = 'Click Preview to load distribution.';
         document.getElementById('confirmDistributeBtn').style.display = 'none';
 
-        // Fetch batches and populate select dropdown
+        // Fetch batches and populate select dropdown from assigned alumni data
         var batchInput = document.getElementById('distBatchInput');
         if (batchInput) {
-          batchInput.innerHTML = '<option value="">Loading...</option>';
-          API.getAlumniFilters().then(function (res) {
-            if (res && res.success && res.data && res.data.batches) {
-              var opts = '<option value="">Select Batch...</option>';
-              res.data.batches.forEach(function (b) {
-                opts += '<option value="' + b + '">' + b + '</option>';
-              });
-              batchInput.innerHTML = opts;
-            } else {
-              batchInput.innerHTML = '<option value="">No batches found</option>';
-            }
-          }).catch(function () {
-            batchInput.innerHTML = '<option value="">Error loading batches</option>';
-          });
+          var batches = [];
+          if (_apiAssignedAlumni && Array.isArray(_apiAssignedAlumni.records)) {
+            var batchSet = {};
+            _apiAssignedAlumni.records.forEach(function (a) {
+              if (a.batch) {
+                var bStr = String(a.batch).trim();
+                if (bStr && bStr !== '-') {
+                  batchSet[bStr] = true;
+                }
+              }
+            });
+            batches = Object.keys(batchSet).sort();
+          }
+
+          if (batches.length > 0) {
+            var opts = '<option value="">Select Batch...</option>';
+            batches.forEach(function (b) {
+              opts += '<option value="' + b + '">' + b + '</option>';
+            });
+            batchInput.innerHTML = opts;
+          } else {
+            batchInput.innerHTML = '<option value="">No batches found in assigned alumni</option>';
+          }
         }
 
         document.getElementById('distributeModalOverlay').classList.add('show');

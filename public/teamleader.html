@@ -492,32 +492,28 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; padding:16px 20px;">
           <div style="display:flex; align-items:center;">
-            <h3><i class="fas fa-list" style="margin-right:8px;color:#2563EB;"></i> My Assigned Alumni</h3>
+            <h3 style="margin:0;"><i class="fas fa-list" style="margin-right:8px;color:#2563EB;"></i> My Assigned Alumni</h3>
           </div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:100%;justify-content:space-between;">
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <div class="search-bar" style="max-width:220px">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
-              </div>
-              <select id="myAssignmentsDeptFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-                <option value="all">All Depts</option>
-              </select>
-              <select id="myAssignmentsBatchFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-                <option value="all">All Batches</option>
-              </select>
-              <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-                <option value="all">All Status</option>
-                <option value="Completed">Completed</option>
-                <option value="Pending">Pending</option>
-                <option value="Draft">Draft</option>
-              </select>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:flex-end; flex:1;">
+            <div class="search-bar" style="max-width:220px; margin:0;">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem; height:36px;" />
             </div>
-            <div>
-              <span id="myAssignmentsFilteredCount" class="badge-record-count" style="font-size: 0.9rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block;">0 Records</span>
-            </div>
+            <select id="myAssignmentsDeptFilter" class="form-control form-select" style="width:auto; height:36px; padding:6px 32px 6px 12px; font-size:0.8rem; margin:0;">
+              <option value="all">All Depts</option>
+            </select>
+            <select id="myAssignmentsBatchFilter" class="form-control form-select" style="width:auto; height:36px; padding:6px 32px 6px 12px; font-size:0.8rem; margin:0;">
+              <option value="all">All Batches</option>
+            </select>
+            <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:auto; height:36px; padding:6px 32px 6px 12px; font-size:0.8rem; margin:0;">
+              <option value="all">All Status</option>
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+            </select>
+            <span id="myAssignmentsFilteredCount" class="badge-record-count" style="font-size: 0.85rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-flex; align-items:center; height:36px;">0 Records</span>
           </div>
         </div>
         <div class="card-body" style="padding:0">
