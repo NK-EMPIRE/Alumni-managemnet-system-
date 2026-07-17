@@ -1049,3 +1049,11 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:43:26.554"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:43:26.555"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:43:26.555"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 11:02:12.738"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 11:02:12.743"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 11:02:12.744"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 11:02:12.745"}
+{"ip":"::1","level":"info","loginId":"sara1873@mountzion.ac.in","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-17 11:02:51.629"}
+{"ip":"::1","level":"info","loginId":"sara1873@mountzion.ac.in","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-17 11:02:58.181"}
+{"ip":"::1","level":"info","loginId":"sara1873@mountzion.ac.in","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-17 11:03:03.813"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-17 11:03:30.443","userId":28}

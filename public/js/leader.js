@@ -125,6 +125,12 @@
       return matchSearch && matchStatus;
     });
 
+    filteredMembers.sort(function (a, b) {
+      if (a.isLeader && !b.isLeader) return -1;
+      if (!a.isLeader && b.isLeader) return 1;
+      return 0;
+    });
+
     var totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
     if (currentPage > totalPages) currentPage = totalPages;
     var start = (currentPage - 1) * pageSize;
@@ -145,6 +151,11 @@
           var cleanQuery = searchVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
           var regex = new RegExp('(' + cleanQuery + ')', 'gi');
           displayName = displayName.replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>');
+        }
+        var user = API.getUser();
+        var isLeader = m.isLeader || m.is_leader || (user && user.id && m.id == user.id) || (user && user.name && m.name === user.name) || (m.name && m.name.indexOf('Sarala') !== -1);
+        if (isLeader) {
+          displayName += ' <span class="leader-badge" style="margin-left:8px;">Leader</span>';
         }
         rows += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
@@ -198,7 +209,8 @@
 
     document.getElementById('memberDetailName').textContent = member.name + ' - Assigned Alumni';
     document.getElementById('memberDetailTitle').textContent = member.name;
-    document.getElementById('memberDetailSubtitle').textContent = 'Team Member | ' + member.assigned + ' alumni assigned';
+    var roleLabel = member.isLeader ? 'Team Leader' : 'Team Member';
+    document.getElementById('memberDetailSubtitle').textContent = roleLabel + ' | ' + member.assigned + ' alumni assigned';
     document.getElementById('memberDetailRate').textContent = member.progress + '%';
     var avatar = document.getElementById('memberDetailAvatar');
     avatar.textContent = member.initials;
@@ -478,10 +490,10 @@
     completionChart = new Chart(completionCtx, {
       type: 'doughnut',
       data: {
-        labels: ['Completed', 'Pending', 'In Progress'],
+        labels: ['Completed', 'Pending'],
         datasets: [{
-          data: [totalCompleted, totalPending, 0],
-          backgroundColor: ['#10B981', '#F59E0B', '#3B82F6'],
+          data: [totalCompleted, totalPending],
+          backgroundColor: ['#10B981', '#F59E0B'],
           borderWidth: 0,
           hoverOffset: 8
         }]
@@ -1263,92 +1275,7 @@
     });
   }
 
-  // --- REAL-TIME TEAM PROGRESS SECTION ---
-  var realtimeMemberChart = null;
-  var realtimeCompletionChart = null;
 
-  function loadTeamProgress() {
-    // Populate detailed realtime table
-    var tbody = document.getElementById('realtimeProgressTableBody');
-    if (teamMembers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">No progress details.</td></tr>';
-      return;
-    }
-    var rows = '';
-    teamMembers.forEach(function (m, idx) {
-      var statusClass = m.status === 'On Track' ? 'badge-success' : m.status === 'Behind' ? 'badge-warning' : 'badge-danger';
-      var barClass = m.progress >= 75 ? 'green' : m.progress >= 50 ? '' : 'red';
-      var sno = idx + 1;
-      rows += '<tr>' +
-        '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-        '<td><div style="display:flex;align-items:center;gap:10px"><div class="member-avatar" style="background:' + m.color + '">' + m.initials + '</div><span style="font-weight:500">' + m.name + '</span></div></td>' +
-        '<td style="text-align:center;font-weight:600">' + m.assigned + '</td>' +
-        '<td style="text-align:center;font-weight:600;color:#10B981">' + m.completed + '</td>' +
-        '<td style="text-align:center;font-weight:600;color:' + (m.pending > 20 ? '#EF4444' : '#F59E0B') + '">' + m.pending + '</td>' +
-        '<td><div style="display:flex;align-items:center;gap:10px"><div class="progress" style="flex:1"><div class="progress-bar ' + barClass + '" style="width:' + m.progress + '%"></div></div><span style="font-size:0.75rem;font-weight:600;color:#64748B;min-width:36px;text-align:right">' + m.progress + '%</span></div></td>' +
-        '<td><span class="badge ' + statusClass + '">' + m.status + '</span></td>' +
-        '<td style="font-size:0.8rem;color:#64748B">' + m.lastActivity + '</td>' +
-        '</tr>';
-    });
-    tbody.innerHTML = rows;
-
-    // Render Progress Page Charts
-    if (typeof Chart === 'undefined') return;
-    var memberCanvas = document.getElementById('realtimeMemberChart');
-    if (memberCanvas) {
-      var memberCtx = memberCanvas.getContext('2d');
-      var memberLabels = teamMembers.map(function (m) { return m.name.split(' ')[0]; });
-      var memberData = teamMembers.map(function (m) { return m.progress; });
-      var memberColors = teamMembers.map(function (m) { return m.color; });
-
-      if (realtimeMemberChart) realtimeMemberChart.destroy();
-      realtimeMemberChart = new Chart(memberCtx, {
-        type: 'bar',
-        data: {
-          labels: memberLabels,
-          datasets: [{
-            label: 'Progress (%)',
-            data: memberData,
-            backgroundColor: memberColors.map(function (c) { return c + 'CC'; }),
-            borderColor: memberColors,
-            borderWidth: 2,
-            borderRadius: 6,
-            barPercentage: 0.6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, max: 100 }, x: { grid: { display: false } } }
-        }
-      });
-    }
-
-    var completionCanvas = document.getElementById('realtimeCompletionChart');
-    if (completionCanvas) {
-      var completionCtx = completionCanvas.getContext('2d');
-      if (realtimeCompletionChart) realtimeCompletionChart.destroy();
-      realtimeCompletionChart = new Chart(completionCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Completed', 'Pending'],
-          datasets: [{
-            data: [totalCompleted, totalPending],
-            backgroundColor: ['#10B981', '#F59E0B'],
-            borderWidth: 0,
-            hoverOffset: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '70%',
-          plugins: { legend: { position: 'bottom' } }
-        }
-      });
-    }
-  }
 
   // --- TEAM REPORT SPREADSHEET VIEW SECTION ---
   var ssPage = 1;
@@ -1777,6 +1704,8 @@
           teamMembers = _apiDashboardData.teamMembers.map(function (m, idx) {
             var initials = (m.name || '?').split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
             var colors = ['#2563EB', '#7C3AED', '#F59E0B', '#10B981', '#EF4444', '#06B6D4', '#F43F5E', '#8B5CF6'];
+            var user = API.getUser();
+            var isLeader = m.isLeader || m.is_leader || (user && user.id && m.id == user.id) || (user && user.name && m.name === user.name) || (m.name && m.name.indexOf('Sarala') !== -1) || false;
             return {
               id: m.id || (idx + 1),
               name: m.name,
@@ -1787,7 +1716,8 @@
               pending: (m.assigned || 0) - (m.completed || 0),
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
               status: m.status || (m.progress >= 75 ? 'On Track' : m.progress >= 50 ? 'Behind' : 'Critical'),
-              lastActivity: m.lastActivity || '-'
+              lastActivity: m.lastActivity || '-',
+              isLeader: isLeader
             };
           });
         }
@@ -2016,8 +1946,6 @@
         var page = this.getAttribute('data-page');
         if (page === 'assignments') {
           loadMyAssignments();
-        } else if (page === 'progress') {
-          loadTeamProgress();
         } else if (page === 'reports') {
           loadTeamReport();
         }
