@@ -40,9 +40,25 @@ const downloadTemplate = asyncHandler(async (req, res) => {
   res.send(buf);
 });
 
+const confirmAliases = asyncHandler(async (req, res) => {
+  const { pairs } = req.body;
+  if (!pairs || !Array.isArray(pairs)) {
+    return res.status(400).json({ success: false, message: 'Invalid payload: pairs array required.' });
+  }
+
+  for (const pair of pairs) {
+    if (pair.excelName && pair.leaderId) {
+      await uploadService.confirmAlias(pair.leaderId, pair.excelName);
+    }
+  }
+
+  success(res, null, 'Faculty aliases confirmed and saved successfully', 200);
+});
+
 module.exports = {
   uploadExcel,
   previewExcel,
   getImportHistory,
-  downloadTemplate
+  downloadTemplate,
+  confirmAliases
 };

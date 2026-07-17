@@ -233,7 +233,7 @@ function fetchAllData() {
     API.getAdminDashboard().catch(function () { return null; }),
     API.getUsers({ role: 'LEADER', page: 1, limit: 100 }).catch(function () { return null; }),
     API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).catch(function () { return null; }),
-    API.getAlumni({ page: 1, limit: 500 }).catch(function () { return null; }),
+    API.getAlumni({ page: 1, limit: 10000 }).catch(function () { return null; }),
     API.getImportHistory().catch(function () { return null; }),
     API.getTeams().catch(function () { return null; }),
     API.getAuditLogs({ page: 1, limit: 1000 }).catch(function () { return null; }),
@@ -268,6 +268,7 @@ function fetchAllData() {
     populateTeamLeaderDropdowns();
     populateProgressLeaderDropdown();
     if (window.fetchResetRequests) window.fetchResetRequests();
+    if (window.fetchSpreadsheetData) window.fetchSpreadsheetData();
     // Dismiss loading screen
     var ls = document.getElementById('loadingScreen');
     if (ls) { ls.classList.add('hide'); setTimeout(function() { ls.style.display = 'none'; }, 600); }
@@ -866,6 +867,11 @@ function loadTeamProgressData(leaderId) {
     var pct = d.completionPercentage || 0;
     var members = d.teamMembers || [];
     
+    // Sort team leader to the top
+    members.sort(function(a, b) {
+      return (b.isLeader ? 1 : 0) - (a.isLeader ? 1 : 0);
+    });
+    
     // Leader card
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px;">';
     html += mkStatBox('Total Assigned', d.totalAssigned || 0, '#3B82F6');
@@ -894,8 +900,14 @@ function loadTeamProgressData(leaderId) {
       members.forEach(function(m, i) {
         var bg = i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.02)';
         var sc = m.progress >= 75 ? '#10B981' : m.progress >= 50 ? '#F59E0B' : '#EF4444';
+        
+        var nameHtml = escapeHtml(m.name);
+        if (m.isLeader) {
+          nameHtml += ' <span class="badge" style="background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;font-size:0.7rem;padding:1.5px 6px;border-radius:4px;margin-left:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-crown"></i> Team Leader</span>';
+        }
+        
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border);">';
-        html += '<td style="padding:10px 10px;font-size:0.83rem;font-weight:500;">' + escapeHtml(m.name) + '</td>';
+        html += '<td style="padding:10px 10px;font-size:0.83rem;font-weight:500;display:flex;align-items:center;">' + nameHtml + '</td>';
         html += '<td style="text-align:center;padding:8px;font-size:0.83rem;">' + m.assigned + '</td>';
         html += '<td style="text-align:center;padding:8px;font-size:0.83rem;color:#10B981;font-weight:600;">' + m.completed + '</td>';
         html += '<td style="text-align:center;padding:8px;font-size:0.83rem;color:#F59E0B;">' + m.pending + '</td>';
@@ -1087,6 +1099,73 @@ function populateTeamLeaderDropdowns() {
     });
   });
 
+  // Populate ssFilterMember dropdown
+  var memberSel = document.getElementById('ssFilterMember');
+  if (memberSel) {
+    memberSel.innerHTML = '<option value="">All Members</option>';
+    var members = [];
+    if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
+      members = _apiMembers.records.map(function (u) {
+        var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
+        return { id: u.user_id, name: name.trim(), dept: u.department || '', leaderId: u.team_leader_id };
+      });
+    }
+    
+    // Get current leader selection if any
+    var currentLeaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
+    
+    members.forEach(function (m) {
+      if (currentLeaderId && String(m.leaderId) !== String(currentLeaderId)) {
+        return;
+      }
+      var opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.name + (m.dept ? ' (' + m.dept + ')' : '');
+      memberSel.appendChild(opt);
+    });
+  }
+
+  // Bind change event to ssFilterLeader to filter ssFilterMember options dynamically
+  var leaderSel = document.getElementById('ssFilterLeader');
+  if (leaderSel && !leaderSel.dataset.hasMemberFilterBound) {
+    leaderSel.dataset.hasMemberFilterBound = 'true';
+    leaderSel.addEventListener('change', function () {
+      var selectedLeaderId = this.value;
+      var memberSelElement = document.getElementById('ssFilterMember');
+      if (!memberSelElement) return;
+      
+      var membersList = [];
+      if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
+        membersList = _apiMembers.records.map(function (u) {
+          var name = u.name || (u.first_name + ' ' + (u.last_name || ''));
+          return { id: u.user_id, name: name.trim(), dept: u.department || '', leaderId: u.team_leader_id };
+        });
+      }
+      
+      var selectedMemberVal = memberSelElement.value;
+      memberSelElement.innerHTML = '<option value="">All Members</option>';
+      
+      var hasSelectedMemberStillVisible = false;
+      membersList.forEach(function (m) {
+        if (selectedLeaderId && String(m.leaderId) !== String(selectedLeaderId)) {
+          return;
+        }
+        var opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name + (m.dept ? ' (' + m.dept + ')' : '');
+        if (String(m.id) === String(selectedMemberVal)) {
+          opt.selected = true;
+          hasSelectedMemberStillVisible = true;
+        }
+        memberSelElement.appendChild(opt);
+      });
+      
+      if (!hasSelectedMemberStillVisible) {
+        memberSelElement.value = "";
+      }
+    });
+  }
+
   var batchSel = document.getElementById('assignBatch');
   if (batchSel) {
     var currentVal = batchSel.value;
@@ -1262,16 +1341,18 @@ function closeMobileSidebar() {
    20. SUBMENU TOGGLE
    ──────────────────────────────────────────────────────────── */
 function toggleSubmenu(el) {
-  if (document.body.classList.contains('sidebar-collapsed')) {
-    document.body.classList.remove('sidebar-collapsed');
-    localStorage.setItem('sidebar_collapsed', 'false');
-  }
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
+    if (document.body.classList.contains('sidebar-collapsed')) {
+      if (window.showCollapsedPopover) window.showCollapsedPopover(el, submenu);
+      return;
+    }
     var isOpen = submenu.style.display === 'block';
     submenu.style.display = isOpen ? 'none' : 'block';
     var chevron = el.querySelector('.fa-chevron-down');
-    if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    if (chevron) {
+      chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
   }
 }
 
@@ -1942,6 +2023,16 @@ window.saveAdminProfile = function() {
   });
 };
 
+window.showPasswordSuccessModal = function() {
+  var modal = document.getElementById('passwordSuccessModal');
+  if (modal) modal.classList.add('show');
+};
+
+window.closePasswordSuccessModal = function() {
+  var modal = document.getElementById('passwordSuccessModal');
+  if (modal) modal.classList.remove('show');
+};
+
 window.saveAdminPassword = function() {
   var oldPass = document.getElementById('adminSettingsOldPass').value;
   var newPass = document.getElementById('adminSettingsNewPass').value;
@@ -1957,10 +2048,10 @@ window.saveAdminPassword = function() {
   }
 
   API.changePassword(oldPass, newPass).then(function(res) {
-    Toast.success('Security', 'Password changed successfully!');
     document.getElementById('adminSettingsOldPass').value = '';
     document.getElementById('adminSettingsNewPass').value = '';
     document.getElementById('adminSettingsConfirmPass').value = '';
+    window.showPasswordSuccessModal();
   }).catch(function(err) {
     Toast.danger('Error', err.message || 'Failed to update password.');
   });
@@ -2188,28 +2279,137 @@ function initImportHandlers() {
     if (!selectedImportFile) return;
     importBtn.disabled = true;
     importBtn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Importing...';
+    
+    var startTime = performance.now();
     var formData = new FormData();
     formData.append('file', selectedImportFile);
+    
     API.uploadImport(formData).then(function (res) {
+      var duration = ((performance.now() - startTime) / 1000).toFixed(2);
       importBtn.disabled = false;
       importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
       var pc = document.getElementById('importPreviewContainer');
       if (pc) pc.style.display = 'none';
+      
+      // Update UI modal values
+      var iconEl = document.getElementById('importResultIcon');
+      var titleEl = document.getElementById('importResultTitle');
+      var detailsEl = document.getElementById('importResultDetails');
+      var durationEl = document.getElementById('importDurationSec');
+      
+      if (durationEl) durationEl.textContent = duration;
+      
       if (res.success) {
-        var msg = 'Imported: ' + res.data.imported + ', Merged: ' + (res.data.merged || 0) + ', Skipped: ' + (res.data.skipped || 0) + ', Duplicates: ' + res.data.duplicates + ', Errors: ' + res.data.errors;
-        if (res.data.errors > 0 && res.data.errorDetails) {
-          msg += '. Check import history for details.';
+        if (iconEl) {
+          iconEl.style.background = '#ECFDF5';
+          iconEl.style.color = '#10B981';
+          iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
         }
-        Toast.success('Import Completed', msg);
+        if (titleEl) titleEl.textContent = 'Import Completed Successfully';
+        
+        var detailsHtml = 
+          '<strong>Total Rows:</strong> ' + (res.data.summary.totalRows !== undefined ? res.data.summary.totalRows : '') + '<br>' +
+          '<strong>Imported:</strong> ' + (res.data.summary.imported !== undefined ? res.data.summary.imported : 0) + '<br>' +
+          '<strong>Merged/Updated:</strong> ' + (res.data.summary.merged || 0) + '<br>' +
+          '<strong>Skipped:</strong> ' + (res.data.summary.skipped || 0) + '<br>' +
+          '<strong>Duplicates:</strong> ' + (res.data.summary.duplicates !== undefined ? res.data.summary.duplicates : 0) + '<br>' +
+          '<strong>Errors:</strong> ' + (res.data.summary.errors !== undefined ? res.data.summary.errors : 0);
+
+        if (res.data.pendingAliasReview && res.data.pendingAliasReview.length > 0) {
+          detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #F3F4F6; border-radius: 6px; text-align: left;">' +
+            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Faculty Aliases to Confirm:</h4>';
+          
+          res.data.pendingAliasReview.forEach(function (item, idx) {
+            detailsHtml += '<div style="display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;">' +
+              '<input type="checkbox" class="alias-review-cb" id="alias_review_' + idx + '" checked data-excel-name="' + item.excelName + '" data-leader-id="' + item.suggestedLeaderId + '" style="margin-right: 8px;">' +
+              '<label for="alias_review_' + idx + '">Save alias "<strong>' + item.excelName + '</strong>" for Leader <strong>' + item.suggestedLeaderName + '</strong></label>' +
+              '</div>';
+          });
+
+          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Aliases</button></div>';
+          
+          setTimeout(function () {
+            var btn = document.getElementById('confirmAliasesBtn');
+            if (btn) {
+              btn.addEventListener('click', function () {
+                var checkboxes = document.querySelectorAll('.alias-review-cb');
+                var pairs = [];
+                checkboxes.forEach(function (cb) {
+                  if (cb.checked) {
+                    pairs.push({
+                      excelName: cb.getAttribute('data-excel-name'),
+                      leaderId: parseInt(cb.getAttribute('data-leader-id'), 10)
+                    });
+                  }
+                });
+                if (pairs.length > 0) {
+                  btn.disabled = true;
+                  btn.textContent = 'Saving...';
+                  API.confirmAliases({ pairs: pairs }).then(function () {
+                    Toast.success('Aliases Confirmed', 'Selected faculty aliases saved successfully.');
+                    btn.textContent = 'Aliases Saved';
+                  }).catch(function (err) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Aliases';
+                    Toast.danger('Failed to save aliases', err.message);
+                  });
+                }
+              });
+            }
+          }, 100);
+        }
+
+        if (res.data.unmappedColumns && res.data.unmappedColumns.length > 0) {
+          detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 6px; text-align: left;">' +
+            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #D97706;"><i class="fas fa-exclamation-triangle"></i> Unmapped Columns (Skipped):</h4>';
+          res.data.unmappedColumns.forEach(function (col) {
+            detailsHtml += '<div style="font-size: 12px; margin-bottom: 6px; color: #B45309;">' +
+              '• <strong>' + col.columnName + '</strong> (e.g. ' + col.sampleValues.join(', ') + ')' +
+              '</div>';
+          });
+          detailsHtml += '</div>';
+        }
+          
+        if (detailsEl) detailsEl.innerHTML = detailsHtml;
+        Toast.success('Import Completed', 'Import finished in ' + duration + 's');
+        
+        // Refresh all dashboards and data in real-time
         if (_apiDataLoaded) fetchAllData();
       } else {
+        if (iconEl) {
+          iconEl.style.background = '#FEF2F2';
+          iconEl.style.color = '#EF4444';
+          iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
+        }
+        if (titleEl) titleEl.textContent = 'Import Failed';
+        if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (res.message || 'Unknown import error');
         Toast.danger('Import Failed', res.message || 'Import failed');
       }
+      
+      openModal('importResultModal');
     }).catch(function (err) {
+      var duration = ((performance.now() - startTime) / 1000).toFixed(2);
       importBtn.disabled = false;
       importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+      
+      var iconEl = document.getElementById('importResultIcon');
+      var titleEl = document.getElementById('importResultTitle');
+      var detailsEl = document.getElementById('importResultDetails');
+      var durationEl = document.getElementById('importDurationSec');
+      
+      if (durationEl) durationEl.textContent = duration;
+      if (iconEl) {
+        iconEl.style.background = '#FEF2F2';
+        iconEl.style.color = '#EF4444';
+        iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
+      }
+      if (titleEl) titleEl.textContent = 'Import Failed';
+      if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (err.message || 'An unexpected error occurred.');
+      
+      openModal('importResultModal');
       Toast.danger('Import Failed', err.message || 'Import failed');
     });
+    
     if (fileNameEl) { fileNameEl.style.display = 'none'; }
     fileInput.value = '';
     selectedImportFile = null;
@@ -2218,8 +2418,30 @@ function initImportHandlers() {
   /* Download template button */
   if (downloadBtn) {
     downloadBtn.addEventListener('click', function () {
-      API.downloadTemplate();
       Toast.info('Template', 'Downloading alumni import template...');
+      fetch('/api/v1/upload/template', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Failed to download template');
+        return res.blob();
+      })
+      .then(function (blob) {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'alumni_import_template.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        Toast.success('Template', 'Template downloaded successfully');
+      })
+      .catch(function (err) {
+        Toast.danger('Download Failed', err.message);
+      });
     });
   }
 }
@@ -2692,7 +2914,7 @@ function populateViewModal(record) {
   document.getElementById('vAlumniGovtJob').innerText = record.govt_job || record.govtJob || '-';
   
   var avatar = document.getElementById('vAlumniAvatar');
-  var initials = (record.name || 'A').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+  var initials = (record.name || 'A').trim().split(/\s+/).map(function(w) { return w ? w[0] : ''; }).join('').toUpperCase().slice(0, 2);
   avatar.innerText = initials;
 
   openModal('viewAlumniModal');
@@ -2743,6 +2965,7 @@ window.fetchSpreadsheetData = function() {
   var batch = document.getElementById('ssFilterBatch').value;
   var status = document.getElementById('ssFilterStatus').value;
   var leaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
+  var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
 
   // Load stats
   API.getAlumniStats().then(function(res) {
@@ -2776,7 +2999,8 @@ window.fetchSpreadsheetData = function() {
     department: dept || undefined,
     batch: batch || undefined,
     status: status || undefined,
-    leaderId: leaderId || undefined
+    leaderId: leaderId || undefined,
+    memberId: memberId || undefined
   };
 
   API.getAlumni(params).then(function(res) {
@@ -3153,8 +3377,11 @@ window.editAlumniRecord = function(id) {
       document.getElementById('editBatch').value = record.batch || '';
       document.getElementById('editDepartment').value = record.department || '';
       document.getElementById('editFatherName').value = record.father_name || record.pi_father_name || '';
+      document.getElementById('editDOB').value = record.date_of_birth || record.dob || '';
       document.getElementById('editEmail').value = record.email || '';
       document.getElementById('editPhone').value = record.phone || '';
+      document.getElementById('editSecondaryEmail').value = record.secondary_email || '';
+      document.getElementById('editSecondaryPhone').value = record.secondary_phone || '';
       document.getElementById('editLinkedIn').value = record.linkedin_profile || '';
       document.getElementById('editCompany').value = record.company || '';
       document.getElementById('editDesignation').value = record.designation || '';
@@ -3162,6 +3389,27 @@ window.editAlumniRecord = function(id) {
       document.getElementById('editState').value = record.state || '';
       document.getElementById('editCountry').value = record.country || '';
       
+      // Auto-toggle secondary containers if values exist
+      var secEmailContainer = document.getElementById('editSecondaryEmailContainer');
+      var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('.btn-add-secondary');
+      if (record.secondary_email) {
+        secEmailContainer.style.display = 'block';
+        if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>';
+      } else {
+        secEmailContainer.style.display = 'none';
+        if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+      }
+
+      var secPhoneContainer = document.getElementById('editSecondaryPhoneContainer');
+      var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('.btn-add-secondary');
+      if (record.secondary_phone) {
+        secPhoneContainer.style.display = 'block';
+        if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>';
+      } else {
+        secPhoneContainer.style.display = 'none';
+        if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+      }
+
       // Populate leader dropdown
       populateEditLeaderDropdown(record.assigned_leader_id || (record.assignedTo ? record.assignedTo.userId : null));
       
@@ -3209,8 +3457,11 @@ window.submitEditAlumni = function() {
     batch: document.getElementById('editBatch').value,
     department: document.getElementById('editDepartment').value,
     father_name: document.getElementById('editFatherName').value,
+    date_of_birth: document.getElementById('editDOB').value,
     email: document.getElementById('editEmail').value,
     phone: document.getElementById('editPhone').value,
+    secondary_email: document.getElementById('editSecondaryEmail').value,
+    secondary_phone: document.getElementById('editSecondaryPhone').value,
     linkedin_profile: document.getElementById('editLinkedIn').value,
     company: document.getElementById('editCompany').value,
     designation: document.getElementById('editDesignation').value,

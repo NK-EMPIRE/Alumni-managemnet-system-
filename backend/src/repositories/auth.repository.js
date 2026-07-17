@@ -36,7 +36,7 @@ async function updatePassword(userId, passwordHash) {
   const pool = await getPool();
   const result = await pool.request()
     .input('userId', sql.Int, userId)
-    .input('passwordHash', sql.VarChar(255), passwordHash)
+    .input('passwordHash', sql.NVarChar(255), passwordHash)
     .query('UPDATE Users SET password_hash = @passwordHash, updated_at = GETUTCDATE() WHERE user_id = @userId');
   return result.rowsAffected[0];
 }
@@ -52,7 +52,7 @@ async function findByEmail(email) {
   const pool = await getPool();
   const result = await pool.request()
     .input('email', sql.NVarChar(150), email)
-    .query('SELECT user_id, first_name, last_name, email FROM Users WHERE email = @email AND deleted_at IS NULL');
+    .query('SELECT user_id, first_name, last_name, email, password_hash FROM Users WHERE email = @email AND deleted_at IS NULL');
   return result.recordset[0];
 }
 

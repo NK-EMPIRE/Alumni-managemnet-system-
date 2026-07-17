@@ -118,7 +118,15 @@ async function getLeaderStats(leaderId) {
       WHERE t.leader_id = @leaderId
       GROUP BY t.team_id
     `);
-  return result.recordset[0];
+  return result.recordset[0] || {
+    total_assigned: 0,
+    completed: 0,
+    pending: 0,
+    draft: 0,
+    undistributed_count: 0,
+    distributed_count: 0,
+    member_count: 0
+  };
 }
 
 async function getTeamMemberStats(teamId) {
@@ -131,7 +139,8 @@ async function getTeamMemberStats(teamId) {
         ISNULL(aa.total_assigned, 0) AS total_assigned,
         ISNULL(aa.completed, 0) AS completed,
         ISNULL(aa.pending, 0) AS pending,
-        ISNULL(aa.draft, 0) AS draft
+        ISNULL(aa.draft, 0) AS draft,
+        0 AS is_leader
       FROM TeamMembers tm
       INNER JOIN Users u ON tm.user_id = u.user_id
       LEFT JOIN (
@@ -142,10 +151,23 @@ async function getTeamMemberStats(teamId) {
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending,
           SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draft
         FROM AlumniAssignments
-        WHERE team_id = @teamId
+        WHERE team_id = @teamId AND member_id IS NOT NULL
         GROUP BY member_id
       ) aa ON tm.user_id = aa.member_id
       WHERE tm.team_id = @teamId
+
+      UNION ALL
+
+      SELECT
+        u.user_id, u.first_name, u.last_name, u.email,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id)) AS total_assigned,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND status = 'Completed') AS completed,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND (status = 'Pending' OR status = 'ASSIGNED_TO_LEADER')) AS pending,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND status = 'Draft') AS draft,
+        1 AS is_leader
+      FROM Teams t
+      INNER JOIN Users u ON t.leader_id = u.user_id
+      WHERE t.team_id = @teamId
     `);
   return result.recordset;
 }

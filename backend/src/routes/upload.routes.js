@@ -36,4 +36,10 @@ router.get(
   uploadController.downloadTemplate
 );
 
+router.post(
+  '/aliases/confirm',
+  authorize(ROLES.ADMIN, ROLES.LEADER),
+  uploadController.confirmAliases
+);
+
 module.exports = router;

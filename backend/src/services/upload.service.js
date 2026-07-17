@@ -4,14 +4,19 @@ const path = require('path');
 const { logger } = require('../utils/logger');
 const { AppError } = require('../middleware/errorHandler');
 
-function runPythonImporter(filePath) {
+function runPythonImporter(filePath, stdinData = "") {
   return new Promise((resolve, reject) => {
     const pythonPath = 'python';
-    const scriptPath = path.join(__dirname, '..', 'utils', 'excel_importer.py');
+    const scriptPath = path.join(__dirname, 'import_engine', 'main.py');
     const child = spawn(pythonPath, [scriptPath, filePath]);
 
     let stdoutData = '';
     let stderrData = '';
+
+    if (stdinData) {
+      child.stdin.write(stdinData);
+    }
+    child.stdin.end();
 
     child.stdout.on('data', (data) => {
       stdoutData += data.toString();
@@ -38,9 +43,20 @@ function runPythonImporter(filePath) {
   });
 }
 
+async function getFacultyAndAliasStdin() {
+  try {
+    const data = await uploadRepository.getFacultiesAndAliases();
+    return JSON.stringify(data);
+  } catch (err) {
+    logger.warn('Failed to load faculty metadata for import engine: ' + err.message);
+    return '{}';
+  }
+}
+
 async function processExcelImport(filePath, originalName, currentUser) {
-  const importerResult = await runPythonImporter(filePath);
-  const { summary, records, errors } = importerResult;
+  const stdinData = await getFacultyAndAliasStdin();
+  const importerResult = await runPythonImporter(filePath, stdinData);
+  const { summary, records, errors, unmappedColumns } = importerResult;
 
   const totalRows = summary.totalRecords;
   const newRows = [];
@@ -48,11 +64,19 @@ async function processExcelImport(filePath, originalName, currentUser) {
   let mergedCount = 0;
   let skippedCount = 0;
 
+  const pendingAliasReviewMap = {}; // Use map to deduplicate by excelName
+
   for (const row of records) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
       const fieldsToUpdate = {};
-      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation', 'facultyAssigned', 'fatherName'];
+      const checkFields = [
+        'name', 'email', 'phone', 'department', 'batch', 'gender', 
+        'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 
+        'designation', 'facultyAssigned', 'fatherName', 'facultyId',
+        'experience', 'salary', 'city', 'country', 'address', 'state',
+        'secondaryPhone', 'secondaryEmail'
+      ];
       
       checkFields.forEach(f => {
         const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
@@ -60,6 +84,9 @@ async function processExcelImport(filePath, originalName, currentUser) {
                         f === 'linkedinProfile' ? 'linkedin_profile' :
                         f === 'facultyAssigned' ? 'faculty_assigned' :
                         f === 'fatherName' ? 'father_name' :
+                        f === 'facultyId' ? 'resolved_faculty_user_id' :
+                        f === 'secondaryPhone' ? 'secondary_phone' :
+                        f === 'secondaryEmail' ? 'secondary_email' :
                         f.replace(/([A-Z])/g, '_$1').toLowerCase();
 
         const incomingVal = row[f];
@@ -67,7 +94,7 @@ async function processExcelImport(filePath, originalName, currentUser) {
 
         if (incomingVal !== null && incomingVal !== undefined && String(incomingVal).trim() !== '') {
           if (existingVal === null || existingVal === undefined || String(existingVal).trim() === '' || String(existingVal).trim() !== String(incomingVal).trim()) {
-            fieldsToUpdate[dbField] = String(incomingVal).trim();
+            fieldsToUpdate[dbField] = incomingVal;
           }
         }
       });
@@ -79,17 +106,35 @@ async function processExcelImport(filePath, originalName, currentUser) {
         skippedCount++;
       }
     } else {
-      if (!row.name || !row.department || !row.batch) {
+      if (!row.registerNo || !row.name || !row.department || !row.batch) {
         errors.push({
           sheet: row.sheet,
           row: 0,
-          registerNo: row.registerNo,
+          registerNo: row.registerNo || '-',
           errorType: "Missing Fields",
-          errorDescription: `Record ${row.registerNo} is missing Name, Department, or Batch for insertion.`
+          errorDescription: `Record ${row.registerNo || '-'} is missing Name, Department, or Batch for insertion.`
         });
         continue;
       }
       newRows.push(row);
+    }
+
+    // Auto-learn alias ONLY if confidence >= 95% (facultyAliasToSave is populated)
+    if (row.facultyId && row.facultyAliasToSave) {
+      await uploadRepository.saveFacultyAlias(row.facultyId, row.facultyAliasToSave.toLowerCase());
+    }
+
+    // Accumulate pending reviews if confidence is 80-95%
+    if (row.facultyId && row.facultyAliasPendingReview) {
+      const aliasName = row.facultyAliasPendingReview.toLowerCase();
+      if (!pendingAliasReviewMap[aliasName]) {
+        pendingAliasReviewMap[aliasName] = {
+          excelName: row.facultyAliasPendingReview,
+          suggestedLeaderId: row.facultyId,
+          suggestedLeaderName: row.facultyAssigned,
+          confidence: row.facultyConfidence
+        };
+      }
     }
   }
 
@@ -99,6 +144,8 @@ async function processExcelImport(filePath, originalName, currentUser) {
 
   const finalStatus = errors.length > 0 ? 'Partial' : 'Completed';
   
+  const pendingAliasReview = Object.values(pendingAliasReviewMap);
+
   await uploadRepository.createImportLog({
     fileName: filePath.split('\\').pop().split('/').pop(),
     originalName: originalName || null,
@@ -119,25 +166,30 @@ async function processExcelImport(filePath, originalName, currentUser) {
     merged: mergedCount,
     skipped: skippedCount,
     duplicates: duplicateCount,
-    errors: errors.length,
-    total: totalRows,
-    userId: currentUser.userId
+    errors: errors.length
   });
 
   return {
-    imported: newRows.length,
-    merged: mergedCount,
-    skipped: skippedCount,
-    duplicates: duplicateCount,
-    errors: errors.length,
-    total: totalRows,
-    summary,
-    errorReport: errors
+    success: true,
+    summary: {
+      totalSheets: summary.totalSheets,
+      totalRows,
+      imported: newRows.length,
+      merged: mergedCount,
+      skipped: skippedCount,
+      duplicates: duplicateCount,
+      errors: errors.length,
+      executionTime: summary.executionTime
+    },
+    errors,
+    unmappedColumns: unmappedColumns || [],
+    pendingAliasReview
   };
 }
 
 async function getExcelPreview(filePath) {
-  const importerResult = await runPythonImporter(filePath);
+  const stdinData = await getFacultyAndAliasStdin();
+  const importerResult = await runPythonImporter(filePath, stdinData);
   const { records, errors } = importerResult;
 
   const preview = [];
@@ -158,13 +210,23 @@ async function getExcelPreview(filePath) {
     const existing = await uploadRepository.findByRegisterNo(row.registerNo);
     if (existing) {
       const fieldsToUpdate = {};
-      const checkFields = ['name', 'email', 'phone', 'department', 'batch', 'gender', 'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 'designation', 'facultyAssigned'];
+      const checkFields = [
+        'name', 'email', 'phone', 'department', 'batch', 'gender', 
+        'dateOfBirth', 'workingDetails', 'linkedinProfile', 'company', 
+        'designation', 'facultyAssigned', 'fatherName', 'facultyId',
+        'experience', 'salary', 'city', 'country', 'address', 'state',
+        'secondaryPhone', 'secondaryEmail'
+      ];
       
       checkFields.forEach(f => {
         const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
                         f === 'workingDetails' ? 'working_details' :
                         f === 'linkedinProfile' ? 'linkedin_profile' :
                         f === 'facultyAssigned' ? 'faculty_assigned' :
+                        f === 'fatherName' ? 'father_name' :
+                        f === 'facultyId' ? 'resolved_faculty_user_id' :
+                        f === 'secondaryPhone' ? 'secondary_phone' :
+                        f === 'secondaryEmail' ? 'secondary_email' :
                         f.replace(/([A-Z])/g, '_$1').toLowerCase();
 
         const incomingVal = row[f];
@@ -234,8 +296,13 @@ async function getImportHistory({ page, limit }) {
   return { ...result, page, limit };
 }
 
+async function confirmAlias(leaderId, excelName) {
+  return uploadRepository.saveFacultyAlias(leaderId, excelName.toLowerCase());
+}
+
 module.exports = {
   processExcelImport,
   getExcelPreview,
-  getImportHistory
+  getImportHistory,
+  confirmAlias
 };

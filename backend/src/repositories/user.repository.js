@@ -75,7 +75,13 @@ async function findAll({ page, limit, offset, search, role, isActive }) {
       u.first_name, u.last_name, u.email, u.phone,
       u.is_active, u.last_login, u.created_at, u.updated_at,
       (SELECT COUNT(*) FROM TeamMembers tm INNER JOIN Teams t ON tm.team_id = t.team_id WHERE t.leader_id = u.user_id) AS member_count,
-      (SELECT COUNT(*) FROM AlumniAssignments aa INNER JOIN Teams t ON aa.team_id = t.team_id WHERE t.leader_id = u.user_id) AS assigned_count,
+      CASE 
+        WHEN r.role_name = 'LEADER' THEN 
+          (SELECT COUNT(*) FROM AlumniAssignments aa INNER JOIN Teams t ON aa.team_id = t.team_id WHERE t.leader_id = u.user_id)
+        ELSE 
+          (SELECT COUNT(*) FROM AlumniAssignments aa WHERE aa.member_id = u.user_id)
+      END AS assigned_count,
+      (SELECT t.leader_id FROM Teams t INNER JOIN TeamMembers tm ON tm.team_id = t.team_id WHERE tm.user_id = u.user_id) AS team_leader_id,
       (SELECT RTRIM(CONCAT(ul.first_name, ' ', ul.last_name)) FROM Teams t INNER JOIN Users ul ON t.leader_id = ul.user_id INNER JOIN TeamMembers tm ON tm.team_id = t.team_id WHERE tm.user_id = u.user_id) AS team_leader_name
     FROM Users u
     INNER JOIN Roles r ON u.role_id = r.role_id

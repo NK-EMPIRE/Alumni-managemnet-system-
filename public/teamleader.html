@@ -590,62 +590,100 @@
       <div class="page-header fade-in">
         <div class="page-header-left">
           <h1>Team Report</h1>
-          <p>Read-only overview of all updates submitted by the team.</p>
+          <p>Spreadsheet-style overview of all updates submitted by the team.</p>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <h3><i class="fas fa-file-invoice" style="color:#2563EB;margin-right:8px"></i> Alumni Update History</h3>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <div class="search-bar" style="max-width:200px">
+      <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+        <!-- Spreadsheet Toolbar -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="search-bar" style="width:200px;margin-bottom:0;">
               <i class="fas fa-search search-icon"></i>
-              <input type="text" id="reportSearch" placeholder="Search alumni..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
+              <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
             </div>
-            <select id="reportUserFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-              <option value="all">All Members</option>
+            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()"
+              style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <option value="">All Members</option>
             </select>
-            <select id="reportStatusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-              <option value="all">All Status</option>
-              <option value="Completed">Completed</option>
+            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()"
+              style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <option value="">All Depts</option>
+              <option value="CSE">CSE</option>
+              <option value="ECE">ECE</option>
+              <option value="EEE">EEE</option>
+              <option value="ME">ME</option>
+              <option value="CE">CE</option>
+              <option value="IT">IT</option>
+            </select>
+            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()"
+              style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <option value="">All Batches</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+            </select>
+            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()"
+              style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+              <option value="">All Statuses</option>
+              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
+              <option value="Pending">Pending Member</option>
               <option value="Draft">Draft</option>
-              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
             </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
+              style="height:36px;"><i class="fas fa-columns"></i> Columns</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i
+                class="fas fa-file-csv"></i> Export CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i
+                class="fas fa-rotate"></i> Refresh</button>
           </div>
         </div>
-        <div class="card-body" style="padding:0">
-          <div class="table-container">
-            <table class="table" id="teamReportTable">
-              <thead>
-                <tr>
-                  <th style="width:50px">S.No</th>
-                  <th>Alumni Name</th>
-                  <th>Department</th>
-                  <th>Batch</th>
-                  <th>Updated By</th>
-                  <th>Company</th>
-                  <th>Designation</th>
-                  <th>Status</th>
-                  <th>Completion Date</th>
-                </tr>
-              </thead>
-              <tbody id="teamReportTableBody">
-                <tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8;">Loading report details...</td></tr>
-              </tbody>
-            </table>
+
+        <!-- Column Visibility Dropdown -->
+        <div id="colVisibilityMenu" class="dropdown-menu"
+          style="display:none;position:absolute;z-index:100;width:200px;max-height:300px;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);padding:10px;">
+        </div>
+
+        <!-- Spreadsheet Table Container -->
+        <div style="flex:1;overflow:auto;max-height:60vh;border-bottom:1px solid var(--border);">
+          <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;">
+            <thead>
+              <tr id="ssTableHeadRow">
+                <th class="sticky-col" style="width: 50px; z-index: 5;">S.No</th>
+              </tr>
+            </thead>
+            <tbody id="ssTableBody">
+              <tr>
+                <td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Loading spreadsheet data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Spreadsheet Pagination Footer -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#F8FAFC;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.8rem;color:var(--text-muted);">Rows per page:</span>
+            <select class="form-control" id="ssRowsPerPage" onchange="changeSpreadsheetPageSize(this.value)"
+              style="width:auto;padding:4px 8px;font-size:0.8rem;height:30px;">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="250">250</option>
+              <option value="500">500</option>
+              <option value="1000">1000</option>
+              <option value="5000">5000</option>
+            </select>
           </div>
-          <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
-              <select class="form-control" id="reportRowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid #E2E8F0;border-radius:6px;background:#fff;outline:none;">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
-            </div>
-            <div class="pagination-info" id="reportPaginationInfo">Showing 0 of 0 entries</div>
-            <div class="pagination" id="reportPagination"></div>
-          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted);" id="ssPaginationInfo">Showing 0-0 of 0 entries</div>
+          <div class="pagination" id="ssPagination"></div>
         </div>
       </div>
     </section>
@@ -921,12 +959,34 @@
               <input type="text" id="fieldFatherName" placeholder="Enter father's name" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Email</label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Date of Birth</label>
+              <input type="text" id="fieldDOB" placeholder="DD-MM-YYYY" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email</label>
+                <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
+              </div>
               <input type="email" id="fieldEmail" placeholder="email@example.com" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
-            <div class="form-group" style="grid-column: span 2;">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Phone</label>
+            <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; margin-top: 5px;">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Secondary Email</label>
+              <input type="email" id="fieldSecondaryEmail" placeholder="secondary@example.com" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone</label>
+                <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
+              </div>
               <input type="text" id="fieldPhone" placeholder="Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            </div>
+            <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; margin-top: 5px;">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Secondary Phone</label>
+              <input type="text" id="fieldSecondaryPhone" placeholder="Secondary Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
@@ -1042,7 +1102,9 @@
         <!-- Batch filter (shown only for BatchWise) -->
         <div id="distBatchRow" style="display:none;margin-bottom:14px">
           <label style="font-size:0.85rem;font-weight:600;color:#374151">Filter by Batch:</label>
-          <input type="text" id="distBatchInput" placeholder="e.g. 2020" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;width:150px;margin-left:8px">
+          <select id="distBatchInput" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;width:160px;margin-left:8px">
+            <option value="">Select Batch...</option>
+          </select>
         </div>
 
         <!-- Preview Table -->
@@ -1080,6 +1142,20 @@
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Success Popup for Password Update -->
+  <div class="modal-overlay" id="passwordSuccessModal" onclick="if(event.target===this)closePasswordSuccessModal()">
+    <div class="modal" style="max-width:420px;text-align:center;padding:40px 32px;">
+      <div style="font-size:56px;color:#10B981;margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Password Updated!</h3>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your password has been changed successfully.</p>
+      <button class="btn btn-primary" onclick="closePasswordSuccessModal()" style="padding:10px 32px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+        <i class="fas fa-check"></i> OK
+      </button>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/app.js"></script>

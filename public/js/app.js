@@ -314,7 +314,7 @@
               user.email = email;
               localStorage.setItem('user', JSON.stringify(user));
               if (window.Toast) Toast.success('Settings', 'Profile settings updated successfully!');
-              else if (window.showToast) showToast('Profile settings updated successfully!', 'success');
+              else if (window.showToast) window.showToast('Settings', 'Profile settings updated successfully!', 'success');
             } else {
               if (window.Toast) Toast.error('Settings', res.message || 'Failed to update profile');
             }
@@ -330,67 +330,8 @@
     }
 
     // 2. Security / Password Settings
-    var saveSecurityBtn = document.getElementById('saveSecurityBtn') ||
-                          document.querySelector('#tab-security button.btn-primary');
-    if (saveSecurityBtn) {
-      saveSecurityBtn.removeAttribute('onclick');
-      saveSecurityBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        var oldPasswordInput    = document.getElementById('secCurrentPassword') || document.querySelectorAll('#tab-security input[type="password"]')[0];
-        var newPasswordInput    = document.getElementById('secNewPassword')     || document.querySelectorAll('#tab-security input[type="password"]')[1];
-        var confirmPasswordInput= document.getElementById('secConfirmPassword') || document.querySelectorAll('#tab-security input[type="password"]')[2];
-
-        if (!oldPasswordInput || !newPasswordInput || !confirmPasswordInput) return;
-
-        var oldPassword     = oldPasswordInput.value.trim();
-        var newPassword     = newPasswordInput.value.trim();
-        var confirmPassword = confirmPasswordInput.value.trim();
-
-        if (!oldPassword || !newPassword || !confirmPassword) {
-          if (window.Toast) Toast.error('Security', 'All password fields are required');
-          else if (window.showToast) showToast('All password fields are required', 'error');
-          return;
-        }
-
-        if (newPassword.length < 6) {
-          if (window.Toast) Toast.error('Security', 'New password must be at least 6 characters');
-          else if (window.showToast) showToast('New password must be at least 6 characters', 'error');
-          return;
-        }
-
-        if (newPassword !== confirmPassword) {
-          if (window.Toast) Toast.error('Security', 'New passwords do not match');
-          else if (window.showToast) showToast('New passwords do not match', 'error');
-          return;
-        }
-
-        saveSecurityBtn.disabled = true;
-        saveSecurityBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-
-        API.changePassword(oldPassword, newPassword)
-          .then(function (res) {
-            if (res && res.success !== false) {
-              if (window.Toast) Toast.success('Security', 'Password updated successfully!');
-              else if (window.showToast) showToast('Password updated successfully!', 'success');
-              oldPasswordInput.value = '';
-              newPasswordInput.value = '';
-              confirmPasswordInput.value = '';
-            } else {
-              if (window.Toast) Toast.error('Security', res.message || 'Failed to change password');
-              else if (window.showToast) showToast(res.message || 'Failed to change password', 'error');
-            }
-          })
-          .catch(function (err) {
-            if (window.Toast) Toast.error('Security', err.message || 'Incorrect current password');
-            else if (window.showToast) showToast(err.message || 'Incorrect current password', 'error');
-          })
-          .finally(function () {
-            saveSecurityBtn.disabled = false;
-            saveSecurityBtn.innerHTML = '<i class="fas fa-save"></i> Update Password';
-          });
-      });
-    }
+    // Handled by page-specific scripts (admin.js, leader.js, member.js, settings.js)
+    // to avoid conflicts with role-specific input IDs and UX flows.
   }
 
   function initUniversalWidgets() {
@@ -405,4 +346,83 @@
   } else {
     initUniversalWidgets();
   }
+  window.showCollapsedPopover = function (el, submenu) {
+    var existing = document.getElementById('sidebar-collapsed-popover');
+    if (existing) existing.remove();
+
+    var popover = document.createElement('div');
+    popover.id = 'sidebar-collapsed-popover';
+    popover.className = 'collapsed-popover';
+    
+    popover.innerHTML = submenu.innerHTML;
+    document.body.appendChild(popover);
+    
+    var rect = el.getBoundingClientRect();
+    popover.style.position = 'fixed';
+    popover.style.top = rect.top + 'px';
+    popover.style.left = (rect.right + 8) + 'px';
+    popover.style.background = document.body.classList.contains('dark-mode') ? '#1E293B' : '#ffffff';
+    popover.style.border = document.body.classList.contains('dark-mode') ? '1px solid #334155' : '1px solid #E2E8F0';
+    popover.style.borderRadius = '8px';
+    popover.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+    popover.style.zIndex = '99999';
+    popover.style.minWidth = '160px';
+    popover.style.padding = '8px 0';
+    popover.style.display = 'flex';
+    popover.style.flexDirection = 'column';
+    popover.style.gap = '4px';
+
+    var items = popover.querySelectorAll('.sidebar-item');
+    items.forEach(function (item) {
+      item.style.padding = '8px 16px';
+      item.style.display = 'flex';
+      item.style.alignItems = 'center';
+      item.style.gap = '10px';
+      item.style.textDecoration = 'none';
+      item.style.color = document.body.classList.contains('dark-mode') ? '#F1F5F9' : '#1E293B';
+      item.style.fontSize = '13px';
+      item.style.cursor = 'pointer';
+      item.style.transition = 'background 0.2s';
+      
+      var oldClick = item.getAttribute('onclick');
+      if (oldClick) {
+        item.setAttribute('onclick', oldClick + '; document.getElementById("sidebar-collapsed-popover").remove();');
+      }
+
+      item.addEventListener('mouseenter', function () {
+        item.style.background = document.body.classList.contains('dark-mode') ? '#334155' : '#F1F5F9';
+      });
+      item.addEventListener('mouseleave', function () {
+        item.style.background = 'transparent';
+      });
+    });
+
+    setTimeout(function () {
+      function clickOutside(e) {
+        var pop = document.getElementById('sidebar-collapsed-popover');
+        if (pop && !pop.contains(e.target) && !el.contains(e.target)) {
+          pop.remove();
+          document.removeEventListener('click', clickOutside);
+        }
+      }
+      document.addEventListener('click', clickOutside);
+    }, 50);
+  };
+
+  window.toggleSecondaryField = function (containerId, btn) {
+    var container = document.getElementById(containerId);
+    if (container) {
+      var isHidden = container.style.display === 'none' || container.style.display === '';
+      container.style.display = isHidden ? 'block' : 'none';
+      if (btn) {
+        var hasText = btn.textContent.trim().length > 0;
+        if (isHidden) {
+          btn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>' + (hasText ? ' Remove Secondary' : '');
+        } else {
+          btn.innerHTML = '<i class="fas fa-plus-circle"></i>' + (hasText ? ' Add Secondary' : '');
+        }
+      }
+    }
+  };
+
 })();

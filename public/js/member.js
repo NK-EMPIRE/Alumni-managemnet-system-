@@ -227,6 +227,8 @@
         record.batch = document.getElementById('fieldBatch').value;
         record.fatherName = document.getElementById('fieldFatherName').value.trim();
         record.father_name = record.fatherName;
+        record.date_of_birth = document.getElementById('fieldDOB').value.trim();
+        record.dob = record.date_of_birth;
         record.company = document.getElementById('fieldCompany').value.trim();
         record.designation = document.getElementById('fieldDesignation').value.trim();
         record.city = document.getElementById('fieldCity').value.trim();
@@ -234,6 +236,8 @@
         record.country = document.getElementById('fieldCountry').value.trim();
         record.email = document.getElementById('fieldEmail').value.trim();
         record.phone = document.getElementById('fieldPhone').value.trim();
+        record.secondary_email = document.getElementById('fieldSecondaryEmail').value.trim();
+        record.secondary_phone = document.getElementById('fieldSecondaryPhone').value.trim();
         record.linkedin_profile = document.getElementById('fieldLinkedin').value.trim();
         record.working_details = document.getElementById('fieldWorkingDetails').value.trim();
         record.higherStudies = document.getElementById('fieldHigherStudies').value;
@@ -279,6 +283,7 @@
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
         document.getElementById('fieldFatherName').value = record.fatherName || record.father_name || record.pi_father_name || '';
+        document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
         document.getElementById('fieldCompany').value = record.company || '';
         document.getElementById('fieldDesignation').value = record.designation || '';
         document.getElementById('fieldCity').value = record.city || record.current_city || '';
@@ -286,6 +291,8 @@
         document.getElementById('fieldCountry').value = record.country || '';
         document.getElementById('fieldEmail').value = record.email || '';
         document.getElementById('fieldPhone').value = record.phone || '';
+        document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
+        document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldWorkingDetails').value = record.working_details || '';
         document.getElementById('fieldHigherStudies').value = record.higherStudies || record.higher_studies || 'No';
@@ -294,6 +301,27 @@
         document.getElementById('fieldGovtJob').value = record.govtJob || (record.is_government_job ? 'Yes' : 'No') || 'No';
         document.getElementById('fieldOtherOcc').value = record.otherOcc || record.other_occupation || '';
         document.getElementById('fieldRemarks').value = record.remarks || '';
+
+        // Auto-toggle secondary containers if values exist
+        var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
+        var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
+        if (record.secondary_email) {
+            secEmailContainer.style.display = 'block';
+            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+        } else {
+            secEmailContainer.style.display = 'none';
+            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+        }
+
+        var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
+        var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('button');
+        if (record.secondary_phone) {
+            secPhoneContainer.style.display = 'block';
+            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+        } else {
+            secPhoneContainer.style.display = 'none';
+            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+        }
 
         if (record.higherStudies === 'Yes') {
             higherStudiesDetails.classList.add('active');
@@ -393,7 +421,7 @@
                     document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
                     document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
                     document.getElementById('fieldRemarks').value = data.remarks || '';
-                    
+
                     if (data.higherStudies === 'Yes') {
                         higherStudiesDetails.classList.add('active');
                     } else {
@@ -445,12 +473,12 @@
                 }
             }
         });
-        
+
         // Also set working details to full pasted text as a fallback
         if (val.length > 10) {
             document.getElementById('fieldWorkingDetails').value = val.substring(0, 500);
         }
-        
+
         showToast('Parsed profile details auto-filled successfully!', 'success');
         saveAutosave(); // Save progress immediately
     };
@@ -545,8 +573,12 @@
                 batch: record.batch,
                 company: record.company,
                 designation: record.designation,
+                father_name: record.father_name,
+                date_of_birth: record.date_of_birth,
                 email: record.email,
                 phone: record.phone,
+                secondary_email: record.secondary_email,
+                secondary_phone: record.secondary_phone,
                 working_details: record.working_details,
                 linkedin_profile: record.linkedin_profile,
                 linkedin_url: record.linkedin_profile,
@@ -605,11 +637,15 @@
                 batch: record.batch,
                 company: record.company,
                 designation: record.designation,
+                father_name: record.father_name,
+                date_of_birth: record.date_of_birth,
                 current_city: record.city,
                 state: record.state,
                 country: record.country,
                 email: record.email,
                 phone: record.phone,
+                secondary_email: record.secondary_email,
+                secondary_phone: record.secondary_phone,
                 linkedin_url: record.linkedin_profile,
                 working_details: record.working_details,
                 higher_studies: record.higherStudies,
@@ -661,10 +697,10 @@
             renderTable();
             incrementTodayCount();
             showToast('Record submitted successfully!', 'success');
-            
+
             // Find the next pending/draft record
-            var nextRecord = alumniData.find(function (r) { 
-                return r.status !== 'Completed' && r.id !== idx; 
+            var nextRecord = alumniData.find(function (r) {
+                return r.status !== 'Completed' && r.id !== idx;
             });
 
             if (nextRecord) {
@@ -739,17 +775,17 @@
 
     function handleKeyboard(e) {
         if (!updateModal.classList.contains('show')) return;
-        
+
         if (e.key === 'Escape') {
             closeModal();
         }
-        
+
         // Ctrl + S: Save Draft
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault();
             handleSaveDraft();
         }
-        
+
         // Ctrl + Enter: Submit Record
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
@@ -772,11 +808,11 @@
             if (list) {
                 list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
             }
-            var pendingIds = alumniData.filter(function(r) { return r.status === 'Pending' || r.status === 'Draft'; }).map(function(r) { return String(r.id); });
+            var pendingIds = alumniData.filter(function (r) { return r.status === 'Pending' || r.status === 'Draft'; }).map(function (r) { return String(r.id); });
             var cleared = JSON.parse(localStorage.getItem('cleared_notifications_member') || '[]');
-            pendingIds.forEach(function(id) { if (cleared.indexOf(id) === -1) cleared.push(id); });
+            pendingIds.forEach(function (id) { if (cleared.indexOf(id) === -1) cleared.push(id); });
             localStorage.setItem('cleared_notifications_member', JSON.stringify(cleared));
-            
+
             var dot = document.querySelector('#notifBtn .notif-dot');
             if (dot) dot.style.display = 'none';
             showToast('All notifications cleared', 'success');
@@ -796,7 +832,7 @@
                     }, 1500);
                     return;
                 }
-                
+
                 document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
                 item.classList.add('active');
 
@@ -825,16 +861,16 @@
             });
         });
 
-        window.onPreviewFilterChange = function() {
+        window.onPreviewFilterChange = function () {
             previewPage = 1;
             loadPreviewSpreadsheet();
         };
 
-        window.loadPreviewSpreadsheet = function() {
+        window.loadPreviewSpreadsheet = function () {
             var body = document.getElementById('previewSpreadsheetBody');
             if (!body) return;
             body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
-            
+
             var search = document.getElementById('previewSearch').value || '';
             var dept = document.getElementById('previewFilterDept').value || '';
             var batch = document.getElementById('previewFilterBatch').value || '';
@@ -857,7 +893,7 @@
                     var pag = res.data.pagination;
                     total = (pag && pag.total) ? pag.total : records.length;
                 }
-                
+
                 var infoEl = document.getElementById('previewTableInfo');
                 if (infoEl) {
                     var start = records.length > 0 ? (previewPage - 1) * previewLimit + 1 : 0;
@@ -872,7 +908,7 @@
                 }
 
                 // Sort alphabetically by default
-                records.sort(function(a, b) {
+                records.sort(function (a, b) {
                     var nameA = (a.name || '').toLowerCase();
                     var nameB = (b.name || '').toLowerCase();
                     return nameA.localeCompare(nameB);
@@ -887,10 +923,10 @@
                     else if (status === 'Pending') badgeClass = 'badge-warning';
                     else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
                     else if (status === 'Draft') badgeClass = 'badge-info';
-                    
+
                     var linkedin = row.linkedin_profile ? '<a href="' + (row.linkedin_profile.startsWith('http') ? row.linkedin_profile : 'https://' + row.linkedin_profile) + '" target="_blank" style="color:var(--primary);"><i class="fab fa-linkedin"></i> View</a>' : '-';
                     var updatedDateStr = row.updated_date ? new Date(row.updated_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-                    
+
                     html += '<tr>' +
                         '<td class="sticky-col" style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; left:0;">' + serial + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600;">' + (row.name || '-') + '</td>' +
@@ -923,11 +959,11 @@
             var pagContainer = document.getElementById('previewPagination');
             if (!pagContainer) return;
             var totalPages = Math.ceil(total / previewLimit) || 1;
-            
+
             var html = '';
             // Prev button
             html += '<button class="prev" ' + (previewPage <= 1 ? 'disabled' : '') + ' onclick="changePreviewPage(\'prev\')"><i class="fas fa-chevron-left"></i></button>';
-            
+
             for (var i = 1; i <= totalPages; i++) {
                 if (totalPages > 6) {
                     if (i === 1 || i === totalPages || Math.abs(i - previewPage) <= 1) {
@@ -947,7 +983,7 @@
             pagContainer.innerHTML = html;
         }
 
-        window.changePreviewPage = function(target) {
+        window.changePreviewPage = function (target) {
             if (target === 'prev') {
                 if (previewPage > 1) previewPage--;
             } else if (target === 'next') {
@@ -958,6 +994,98 @@
             loadPreviewSpreadsheet();
         };
 
+        window.switchSettingsTab = function (tabName, btn) {
+            var tabsContainer = btn.closest('.card') || btn.closest('.card-body');
+            tabsContainer.querySelectorAll('.tab-item').forEach(function (item) {
+                item.classList.remove('active');
+                item.style.fontWeight = 'normal';
+            });
+            tabsContainer.querySelectorAll('.tab-content').forEach(function (content) {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            btn.classList.add('active');
+            btn.style.fontWeight = 'bold';
+            var target = document.getElementById('tab-' + tabName);
+            if (target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+        };
+
+        window.togglePasswordVisibility = function (id, btn) {
+            var input = document.getElementById(id);
+            var icon = btn.querySelector('i');
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'far fa-eye';
+            }
+        };
+
+        window.togglePassword = window.togglePasswordVisibility; // Alias just in case
+
+        window.saveMemberProfile = function () {
+            var user = API.getUser();
+            if (!user || !user.id) return;
+            var name = document.getElementById('settingsName').value.trim();
+            var email = document.getElementById('settingsEmail').value.trim();
+            if (!name || !email) {
+                showToast('Name and Email are required.', 'error');
+                return;
+            }
+
+            var parts = name.split(' ');
+            var fName = parts[0];
+            var lName = parts.slice(1).join(' ') || '';
+
+            API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function (res) {
+                showToast('Profile settings updated successfully!', 'success');
+                user.name = name;
+                user.email = email;
+                localStorage.setItem('user', JSON.stringify(user));
+                setMemberUserInfo();
+            }).catch(function (err) {
+                showToast(err.message || 'Failed to update profile.', 'error');
+            });
+        };
+
+        window.showPasswordSuccessModal = function () {
+            var modal = document.getElementById('passwordSuccessModal');
+            if (modal) modal.classList.add('show');
+        };
+
+        window.closePasswordSuccessModal = function () {
+            var modal = document.getElementById('passwordSuccessModal');
+            if (modal) modal.classList.remove('show');
+        };
+
+        window.saveMemberPassword = function () {
+            var oldPass = document.getElementById('settingsOldPass').value;
+            var newPass = document.getElementById('settingsNewPass').value;
+            var confirmPass = document.getElementById('settingsConfirmPass').value;
+
+            if (!oldPass || !newPass || !confirmPass) {
+                showToast('All password fields are required.', 'error');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                showToast('Passwords do not match.', 'error');
+                return;
+            }
+
+            API.changePassword(oldPass, newPass).then(function (res) {
+                document.getElementById('settingsOldPass').value = '';
+                document.getElementById('settingsNewPass').value = '';
+                document.getElementById('settingsConfirmPass').value = '';
+                window.showPasswordSuccessModal();
+            }).catch(function (err) {
+                showToast(err.message || 'Failed to update password.', 'error');
+            });
+        };
     }
 
     function initSessionTimeout() {
@@ -995,7 +1123,7 @@
                 }
                 sidebarAvatar.textContent = initials;
             }
-            
+
             // Populate General Settings with real user data
             var settingsName = document.getElementById('settingsName');
             var settingsEmail = document.getElementById('settingsEmail');
@@ -1007,25 +1135,25 @@
     function populateNotifications() {
         var list = document.getElementById('notifList');
         if (!list) return;
-        
+
         var cleared = JSON.parse(localStorage.getItem('cleared_notifications_member') || '[]');
-        var pendingRecords = alumniData.filter(function(r) { 
-            return (r.status === 'Pending' || r.status === 'Draft') && cleared.indexOf(String(r.id)) === -1; 
+        var pendingRecords = alumniData.filter(function (r) {
+            return (r.status === 'Pending' || r.status === 'Draft') && cleared.indexOf(String(r.id)) === -1;
         });
         var dot = document.querySelector('#notifBtn .notif-dot');
-        
+
         if (pendingRecords.length === 0) {
             list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
             if (dot) dot.style.display = 'none';
             return;
         }
-        
+
         if (dot) {
             dot.style.display = 'block';
         }
-        
+
         var html = '';
-        pendingRecords.slice(0, 5).forEach(function(r) {
+        pendingRecords.slice(0, 5).forEach(function (r) {
             var iconClass = r.status === 'Draft' ? 'orange' : 'blue';
             var icon = r.status === 'Draft' ? 'fa-pen' : 'fa-clock';
             var text = r.status === 'Draft' ? 'Draft saved: ' + r.name : 'Pending update: ' + r.name;
@@ -1058,7 +1186,7 @@
                 var todayVal = d.todayUpdates || d.todayCount || 0;
                 todayUpdateCount = todayVal;
                 document.getElementById('todayCount').textContent = todayVal;
-                
+
                 // Set the Team Leader name label
                 var leaderNameEl = document.getElementById('memberLeaderName');
                 if (leaderNameEl) {
@@ -1109,9 +1237,9 @@
     }
     function init() {
         setMemberUserInfo();
-        
+
         // Populate dynamic filters from database
-        API.getAlumniFilters().then(function(res) {
+        API.getAlumniFilters().then(function (res) {
             if (res && res.success && res.data) {
                 const depts = res.data.departments || [];
                 const batches = res.data.batches || [];
@@ -1266,16 +1394,26 @@ window.togglePasswordVisibility = function (inputId, btn) {
     }
 };
 
+window.showPasswordSuccessModal = function () {
+    var modal = document.getElementById('passwordSuccessModal');
+    if (modal) modal.classList.add('show');
+};
+
+window.closePasswordSuccessModal = function () {
+    var modal = document.getElementById('passwordSuccessModal');
+    if (modal) modal.classList.remove('show');
+};
+
 window.saveMemberPassword = function () {
-    var oldPass     = document.getElementById('settingsOldPass');
-    var newPass     = document.getElementById('settingsNewPass');
+    var oldPass = document.getElementById('settingsOldPass');
+    var newPass = document.getElementById('settingsNewPass');
     var confirmPass = document.getElementById('settingsConfirmPass');
-    var btn         = document.querySelector('#tab-security .btn-primary');
+    var btn = document.querySelector('#tab-security .btn-primary');
 
     if (!oldPass || !newPass || !confirmPass) return;
 
-    var oldVal     = oldPass.value.trim();
-    var newVal     = newPass.value.trim();
+    var oldVal = oldPass.value.trim();
+    var newVal = newPass.value.trim();
     var confirmVal = confirmPass.value.trim();
 
     // --- Validation ---
@@ -1305,11 +1443,10 @@ window.saveMemberPassword = function () {
 
     API.changePassword(oldVal, newVal)
         .then(function (res) {
-            _memberShowToast('Password updated successfully!', 'success');
-            // Clear all fields after success
             oldPass.value = '';
             newPass.value = '';
             confirmPass.value = '';
+            window.showPasswordSuccessModal();
         })
         .catch(function (err) {
             var msg = (err && err.message) ? err.message : 'Failed to update password. Please try again.';

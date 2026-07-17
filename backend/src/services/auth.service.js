@@ -70,7 +70,20 @@ async function changePassword(userId, oldPassword, newPassword) {
   logger.info(`[changePassword] New password hashed successfully. Length: ${hashed.length}`);
   
   const rowsAffected = await authRepo.updatePassword(userId, hashed);
-  logger.info(`[changePassword] updatePassword executed. Rows affected: ${rowsAffected}`);
+  logger.info(`[changePassword] updatePassword execute result. rowsAffected=${rowsAffected}`);
+
+  if (rowsAffected === 0) {
+    logger.error(`[changePassword] No rows updated for userId: ${userId}`);
+    throw new AuthenticationError('Failed to update password. User not found.');
+  }
+
+  const updatedUser = await authRepo.findById(userId);
+  const verifyMatch = await comparePassword(newPassword, updatedUser.password_hash);
+  if (!verifyMatch) {
+    logger.error(`[changePassword] Password verification FAILED for userId: ${userId} - hash mismatch after update`);
+    throw new AuthenticationError('Password update verification failed. Please try again.');
+  }
+  logger.info(`[changePassword] Password verification PASSED for userId: ${userId}`);
 
   logger.auditLog('Password changed', { userId, rowsAffected });
 }

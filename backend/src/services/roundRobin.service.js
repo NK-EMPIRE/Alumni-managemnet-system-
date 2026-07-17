@@ -147,12 +147,23 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     throw new AppError('Active team not found or you are not the leader of this team.', 403);
   }
 
-  // Get undistributed alumni assigned to this leader
+  // Get undistributed alumni: either assigned to this team or unassigned but resolved to a member/leader of this team
   let undistributedQuery = `
-    SELECT a.alumni_id, a.name, a.register_no, a.batch, a.department
-    FROM AlumniAssignments aa
-    INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
-    WHERE aa.team_id = @teamId AND aa.status = 'ASSIGNED_TO_LEADER'
+    SELECT DISTINCT a.alumni_id, a.name, a.register_no, a.batch, a.department, a.faculty_assigned, a.resolved_faculty_user_id
+    FROM Alumni a
+    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+    WHERE (
+      (aa.team_id = @teamId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
+      OR
+      (
+        a.resolved_faculty_user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = @teamId
+          UNION
+          SELECT leader_id FROM Teams WHERE team_id = @teamId
+        )
+        AND aa.assignment_id IS NULL
+      )
+    )
   `;
   const undistReq = pool.request().input('teamId', sql.Int, teamId);
 
@@ -301,7 +312,7 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     });
 
   } else if (method === 'FacultyWise') {
-    // Get active members of the team
+    // Get active users of the team (including leader)
     const usersResult = await pool.request()
       .input('teamId', sql.Int, teamId)
       .query(`
@@ -318,44 +329,22 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     const activeUserMap = {};
     activeUsers.forEach(u => { activeUserMap[u.user_id] = u.name; });
 
-    // Build a map: normalized member name -> user_id
-    const memberNameToId = {};
-    activeUsers.forEach(u => {
-      memberNameToId[u.name.trim().toLowerCase()] = u.user_id;
-    });
-
     const matchedGroups = {};
     const unmatched = [];
 
     for (const alumni of poolAlumni) {
-      const faculty = (alumni.faculty_assigned || '').trim().toLowerCase();
-      let matchedId = null;
-      if (faculty) {
-        // Try exact match first, then partial match
-        if (memberNameToId[faculty]) {
-          matchedId = memberNameToId[faculty];
-        } else {
-          // partial: faculty string contains member name or member name contains faculty string
-          for (const [mname, mid] of Object.entries(memberNameToId)) {
-            if (mname.includes(faculty) || faculty.includes(mname)) {
-              matchedId = mid;
-              break;
-            }
-          }
-        }
-      }
-
-      if (matchedId) {
-        if (!matchedGroups[matchedId]) {
-          matchedGroups[matchedId] = {
-            userId: matchedId,
-            userName: activeUserMap[matchedId],
+      const fid = alumni.resolved_faculty_user_id;
+      if (fid && activeUserMap[fid]) {
+        if (!matchedGroups[fid]) {
+          matchedGroups[fid] = {
+            userId: fid,
+            userName: activeUserMap[fid],
             count: 0,
             alumniList: []
           };
         }
-        matchedGroups[matchedId].alumniList.push(alumni);
-        matchedGroups[matchedId].count++;
+        matchedGroups[fid].alumniList.push(alumni);
+        matchedGroups[fid].count++;
       } else {
         unmatched.push({ ...alumni, originalFaculty: alumni.faculty_assigned });
       }
@@ -399,28 +388,64 @@ async function leaderDistribute(currentUser, params) {
     for (const group of preview) {
       if (group.userId === -1) continue; // skip unmatched sentinel
       for (const alumni of group.alumniList) {
-        await transaction.request()
+        const checkExist = await transaction.request()
           .input('alumniId', sql.Int, alumni.alumni_id)
-          .input('memberId', sql.Int, group.userId)
-          .query(`
-            UPDATE AlumniAssignments
-            SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
-            WHERE alumni_id = @alumniId AND status = 'ASSIGNED_TO_LEADER'
-          `);
+          .input('teamId', sql.Int, params.teamId)
+          .query('SELECT assignment_id FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId');
+
+        if (checkExist.recordset.length > 0) {
+          await transaction.request()
+            .input('alumniId', sql.Int, alumni.alumni_id)
+            .input('memberId', sql.Int, group.userId)
+            .input('teamId', sql.Int, params.teamId)
+            .query(`
+              UPDATE AlumniAssignments
+              SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
+              WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER'
+            `);
+        } else {
+          await transaction.request()
+            .input('alumniId', sql.Int, alumni.alumni_id)
+            .input('memberId', sql.Int, group.userId)
+            .input('teamId', sql.Int, params.teamId)
+            .input('assignedBy', sql.Int, currentUser.userId)
+            .query(`
+              INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
+              VALUES (@alumniId, @teamId, @memberId, 'Pending', GETUTCDATE(), @assignedBy, 'LEADER_DISTRIBUTION')
+            `);
+        }
         totalUpdated++;
       }
     }
 
     for (const ma of manualAssignments) {
       if (!ma.alumniId || !ma.memberId) continue;
-      await transaction.request()
+      const checkExist = await transaction.request()
         .input('alumniId', sql.Int, ma.alumniId)
-        .input('memberId', sql.Int, ma.memberId)
-        .query(`
-          UPDATE AlumniAssignments
-          SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
-          WHERE alumni_id = @alumniId AND status = 'ASSIGNED_TO_LEADER'
-        `);
+        .input('teamId', sql.Int, params.teamId)
+        .query('SELECT assignment_id FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId');
+
+      if (checkExist.recordset.length > 0) {
+        await transaction.request()
+          .input('alumniId', sql.Int, ma.alumniId)
+          .input('memberId', sql.Int, ma.memberId)
+          .input('teamId', sql.Int, params.teamId)
+          .query(`
+            UPDATE AlumniAssignments
+            SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
+            WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER'
+          `);
+      } else {
+        await transaction.request()
+          .input('alumniId', sql.Int, ma.alumniId)
+          .input('memberId', sql.Int, ma.memberId)
+          .input('teamId', sql.Int, params.teamId)
+          .input('assignedBy', sql.Int, currentUser.userId)
+          .query(`
+            INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
+            VALUES (@alumniId, @teamId, @memberId, 'Pending', GETUTCDATE(), @assignedBy, 'LEADER_DISTRIBUTION')
+          `);
+      }
       totalUpdated++;
     }
 
@@ -514,27 +539,49 @@ async function getUndistributedAlumni(leaderId, { page, limit, offset, search, b
     .input('limit', sql.Int, limit);
 
   const countQuery = `
-    SELECT COUNT(*) AS total
-    FROM AlumniAssignments aa
-    INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
-    INNER JOIN Teams t ON aa.team_id = t.team_id
-    WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER'
-      AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
-      AND (@batch IS NULL OR a.batch = @batch)
+    SELECT COUNT(DISTINCT a.alumni_id) AS total
+    FROM Alumni a
+    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+    WHERE (
+      (aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1) AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
+      OR
+      (
+        a.resolved_faculty_user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
+          UNION
+          SELECT leader_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1
+        )
+        AND aa.assignment_id IS NULL
+      )
+    )
+    AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
+    AND (@batch IS NULL OR a.batch = @batch)
   `;
 
   const countResult = await request.query(countQuery);
   const total = countResult.recordset[0].total;
 
   const dataQuery = `
-    SELECT a.alumni_id, a.name, a.register_no, a.department, a.batch, aa.assigned_date, aa.status
-    FROM AlumniAssignments aa
-    INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
-    INNER JOIN Teams t ON aa.team_id = t.team_id
-    WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER'
-      AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
-      AND (@batch IS NULL OR a.batch = @batch)
-    ORDER BY aa.assigned_date DESC
+    SELECT DISTINCT a.alumni_id, a.name, a.register_no, a.department, a.batch, 
+      COALESCE(aa.assigned_date, GETUTCDATE()) AS assigned_date,
+      COALESCE(aa.status, 'ASSIGNED_TO_LEADER') AS status
+    FROM Alumni a
+    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+    WHERE (
+      (aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1) AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
+      OR
+      (
+        a.resolved_faculty_user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
+          UNION
+          SELECT leader_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1
+        )
+        AND aa.assignment_id IS NULL
+      )
+    )
+    AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
+    AND (@batch IS NULL OR a.batch = @batch)
+    ORDER BY assigned_date DESC
     OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
   `;
 
@@ -560,10 +607,21 @@ async function getUndistributedCount(leaderId) {
   const result = await pool.request()
     .input('leaderId', sql.Int, leaderId)
     .query(`
-      SELECT COUNT(*) AS count
-      FROM AlumniAssignments aa
-      INNER JOIN Teams t ON aa.team_id = t.team_id
-      WHERE t.leader_id = @leaderId AND aa.status = 'ASSIGNED_TO_LEADER'
+      SELECT COUNT(DISTINCT a.alumni_id) AS count
+      FROM Alumni a
+      LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+      WHERE (
+        (aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1) AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
+        OR
+        (
+          a.resolved_faculty_user_id IN (
+            SELECT user_id FROM TeamMembers WHERE team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
+            UNION
+            SELECT leader_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1
+          )
+          AND aa.assignment_id IS NULL
+        )
+      )
     `);
   return result.recordset[0].count;
 }

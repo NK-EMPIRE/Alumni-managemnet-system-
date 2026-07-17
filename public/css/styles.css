@@ -362,7 +362,6 @@ ul {
 .sidebar-collapsed .nav-item-text,
 .sidebar-collapsed .nav-section-text,
 .sidebar-collapsed .nav-item .badge,
-.sidebar-collapsed .submenu,
 .sidebar-collapsed .sidebar-item i::after,
 .sidebar-collapsed .sidebar-item svg::after,
 .sidebar-collapsed .sidebar-item .fa-chevron-down {
@@ -373,6 +372,14 @@ ul {
   margin: 0 !important;
   display: none !important;
   overflow: hidden;
+}
+
+.sidebar-collapsed .submenu {
+  padding-left: 0 !important;
+}
+.sidebar-collapsed .submenu .sidebar-item {
+  padding: 10px 0;
+  justify-content: center;
 }
 
 .sidebar-collapsed .sidebar-item,
