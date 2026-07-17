@@ -406,6 +406,12 @@ function populateTable() {
   } else {
     state.filteredData = [];
   }
+
+  var cntEl = document.getElementById('dashboardFilteredCount');
+  if (cntEl) {
+    cntEl.textContent = state.filteredData.length + ' Records';
+  }
+
   state.currentPage = 1;
   renderTable();
 }
@@ -554,6 +560,8 @@ function filterTable() {
 
   if (!source || source.length === 0) {
     state.filteredData = [];
+    var cntEl = document.getElementById('dashboardFilteredCount');
+    if (cntEl) cntEl.textContent = '0 Records';
     state.currentPage = 1;
     renderTable();
     return;
@@ -566,6 +574,12 @@ function filterTable() {
     if (batch && String(item.batch) !== batch) match = false;
     return match;
   });
+
+  var cntEl = document.getElementById('dashboardFilteredCount');
+  if (cntEl) {
+    cntEl.textContent = state.filteredData.length + ' Records';
+  }
+
   state.currentPage = 1;
   renderTable();
 }
@@ -961,7 +975,7 @@ function populateNotifications() {
 
   if (notifs.length === 0) {
     list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No notifications</div>';
-    var count = document.querySelector('.notification-count');
+    var count = document.getElementById('notifCount');
     if (count) { count.textContent = '0'; count.style.display = 'none'; }
     return;
   }
@@ -977,7 +991,7 @@ function populateNotifications() {
   });
   list.innerHTML = html;
 
-  var count = document.querySelector('.notification-count');
+  var count = document.getElementById('notifCount');
   var unreadCount = notifs.filter(function(n) { return n.unread; }).length;
   if (count) {
     if (unreadCount > 0) { count.textContent = unreadCount; count.style.display = 'inline-flex'; }
@@ -2205,6 +2219,34 @@ function initImportHandlers() {
   /* Click upload zone or browse button triggers file input */
   if (uploadZone) {
     uploadZone.addEventListener('click', function () { fileInput.click(); });
+    
+    uploadZone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.style.borderColor = 'var(--primary)';
+      uploadZone.style.background = 'rgba(99, 102, 241, 0.04)';
+    });
+
+    uploadZone.addEventListener('dragleave', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.style.borderColor = 'var(--border)';
+      uploadZone.style.background = '';
+    });
+
+    uploadZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.style.borderColor = 'var(--border)';
+      uploadZone.style.background = '';
+      
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        // Trigger the change handler manually
+        var event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+      }
+    });
   }
   if (browseBtn) {
     browseBtn.addEventListener('click', function (e) {
@@ -2307,26 +2349,34 @@ function initImportHandlers() {
         }
         if (titleEl) titleEl.textContent = 'Import Completed Successfully';
         
+        var s = res.data && (res.data.summary || res.data) ? (res.data.summary || res.data) : {};
+        function cleanNum(val) {
+          if (val === undefined || val === null || String(val) === 'undefined' || String(val) === 'null' || String(val).trim() === '') {
+            return 0;
+          }
+          return val;
+        }
+
         var detailsHtml = 
-          '<strong>Total Rows:</strong> ' + (res.data.summary.totalRows !== undefined ? res.data.summary.totalRows : '') + '<br>' +
-          '<strong>Imported:</strong> ' + (res.data.summary.imported !== undefined ? res.data.summary.imported : 0) + '<br>' +
-          '<strong>Merged/Updated:</strong> ' + (res.data.summary.merged || 0) + '<br>' +
-          '<strong>Skipped:</strong> ' + (res.data.summary.skipped || 0) + '<br>' +
-          '<strong>Duplicates:</strong> ' + (res.data.summary.duplicates !== undefined ? res.data.summary.duplicates : 0) + '<br>' +
-          '<strong>Errors:</strong> ' + (res.data.summary.errors !== undefined ? res.data.summary.errors : 0);
+          '<strong>Total Rows:</strong> ' + cleanNum(s.totalRows || s.total_rows || s.totalRecords) + '<br>' +
+          '<strong>Imported:</strong> ' + cleanNum(s.imported) + '<br>' +
+          '<strong>Merged/Updated:</strong> ' + cleanNum(s.merged) + '<br>' +
+          '<strong>Skipped:</strong> ' + cleanNum(s.skipped) + '<br>' +
+          '<strong>Duplicates:</strong> ' + cleanNum(s.duplicates) + '<br>' +
+          '<strong>Errors:</strong> ' + cleanNum(s.errors);
 
         if (res.data.pendingAliasReview && res.data.pendingAliasReview.length > 0) {
           detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #F3F4F6; border-radius: 6px; text-align: left;">' +
-            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Faculty Aliases to Confirm:</h4>';
+            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Memory of Faculty to Confirm:</h4>';
           
           res.data.pendingAliasReview.forEach(function (item, idx) {
             detailsHtml += '<div style="display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;">' +
               '<input type="checkbox" class="alias-review-cb" id="alias_review_' + idx + '" checked data-excel-name="' + item.excelName + '" data-leader-id="' + item.suggestedLeaderId + '" style="margin-right: 8px;">' +
-              '<label for="alias_review_' + idx + '">Save alias "<strong>' + item.excelName + '</strong>" for Leader <strong>' + item.suggestedLeaderName + '</strong></label>' +
+              '<label for="alias_review_' + idx + '">Save memory "<strong>' + item.excelName + '</strong>" for Faculty <strong>' + item.suggestedLeaderName + '</strong></label>' +
               '</div>';
           });
 
-          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Aliases</button></div>';
+          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Memories</button></div>';
           
           setTimeout(function () {
             var btn = document.getElementById('confirmAliasesBtn');
@@ -2346,12 +2396,12 @@ function initImportHandlers() {
                   btn.disabled = true;
                   btn.textContent = 'Saving...';
                   API.confirmAliases({ pairs: pairs }).then(function () {
-                    Toast.success('Aliases Confirmed', 'Selected faculty aliases saved successfully.');
-                    btn.textContent = 'Aliases Saved';
+                    Toast.success('Memories Confirmed', 'Selected faculty memories saved successfully.');
+                    btn.textContent = 'Memories Saved';
                   }).catch(function (err) {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Aliases';
-                    Toast.danger('Failed to save aliases', err.message);
+                    btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Memories';
+                    Toast.danger('Failed to save memories', err.message);
                   });
                 }
               });

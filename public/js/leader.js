@@ -782,6 +782,47 @@
   var myCurrentPage = 1;
   var myPageSize = 10;
 
+  function populateMyAssignmentsFilters() {
+    var depts = {};
+    var batches = {};
+    
+    myAssignmentsData.forEach(function (r) {
+      if (r.department) {
+        var d = String(r.department).trim();
+        if (d) depts[d] = true;
+      }
+      if (r.batch) {
+        var b = String(r.batch).trim();
+        if (b) batches[b] = true;
+      }
+    });
+
+    var deptFilter = document.getElementById('myAssignmentsDeptFilter');
+    var batchFilter = document.getElementById('myAssignmentsBatchFilter');
+
+    if (deptFilter) {
+      var currentVal = deptFilter.value;
+      var deptHtml = '<option value="all">All Depts</option>';
+      Object.keys(depts).sort().forEach(function (d) {
+        deptHtml += '<option value="' + d + '">' + d + '</option>';
+      });
+      deptFilter.innerHTML = deptHtml;
+      if (depts[currentVal]) deptFilter.value = currentVal;
+      else deptFilter.value = 'all';
+    }
+
+    if (batchFilter) {
+      var currentVal = batchFilter.value;
+      var batchHtml = '<option value="all">All Batches</option>';
+      Object.keys(batches).sort().forEach(function (b) {
+        batchHtml += '<option value="' + b + '">' + b + '</option>';
+      });
+      batchFilter.innerHTML = batchHtml;
+      if (batches[currentVal]) batchFilter.value = currentVal;
+      else batchFilter.value = 'all';
+    }
+  }
+
   function loadMyAssignments() {
     var tbody = document.getElementById('myAssignmentsTableBody');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading assignments...</td></tr>';
@@ -789,6 +830,7 @@
     API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 10000 }).then(function (res) {
       if (res && res.success) {
         myAssignmentsData = res.data.records || res.data || [];
+        populateMyAssignmentsFilters();
         renderMyAssignmentsTable();
       } else {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Failed to load assignments.</td></tr>';
@@ -801,6 +843,8 @@
   function renderMyAssignmentsTable() {
     var searchVal = (document.getElementById('myAssignmentsSearch').value || '').toLowerCase().trim();
     var statusVal = document.getElementById('myAssignmentsStatusFilter').value;
+    var deptValFilter = document.getElementById('myAssignmentsDeptFilter') ? document.getElementById('myAssignmentsDeptFilter').value : 'all';
+    var batchValFilter = document.getElementById('myAssignmentsBatchFilter') ? document.getElementById('myAssignmentsBatchFilter').value : 'all';
 
     myFilteredAssignments = myAssignmentsData.filter(function (r) {
       var matchSearch = !searchVal ||
@@ -810,8 +854,15 @@
         (r.company || '').toLowerCase().indexOf(searchVal) !== -1 ||
         (r.designation || '').toLowerCase().indexOf(searchVal) !== -1;
       var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
-      return matchSearch && matchStatus;
+      var matchDept = deptValFilter === 'all' || String(r.department) === deptValFilter;
+      var matchBatch = batchValFilter === 'all' || String(r.batch) === batchValFilter;
+      return matchSearch && matchStatus && matchDept && matchBatch;
     });
+
+    var countEl = document.getElementById('myAssignmentsFilteredCount');
+    if (countEl) {
+      countEl.textContent = myFilteredAssignments.length + ' Records';
+    }
 
     var totalPages = Math.max(1, Math.ceil(myFilteredAssignments.length / myPageSize));
     if (myCurrentPage > totalPages) myCurrentPage = totalPages;
@@ -2027,6 +2078,10 @@
     // Bind my assignments sub-filters
     document.getElementById('myAssignmentsSearch').addEventListener('input', renderMyAssignmentsTable);
     document.getElementById('myAssignmentsStatusFilter').addEventListener('change', renderMyAssignmentsTable);
+    var myDeptF = document.getElementById('myAssignmentsDeptFilter');
+    if (myDeptF) myDeptF.addEventListener('change', renderMyAssignmentsTable);
+    var myBatchF = document.getElementById('myAssignmentsBatchFilter');
+    if (myBatchF) myBatchF.addEventListener('change', renderMyAssignmentsTable);
 
     // Bind report sub-filters
     document.getElementById('reportSearch').addEventListener('input', renderTeamReportTable);
