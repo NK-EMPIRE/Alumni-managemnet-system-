@@ -12,3 +12,5 @@ node_modules
 *.md.old
 tmp/
 .tempmediaStorage/
+backend/logs/
+
