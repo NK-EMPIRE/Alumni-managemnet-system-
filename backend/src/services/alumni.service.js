@@ -48,7 +48,20 @@ async function updateAlumni(alumniId, data, currentUser) {
     throw new NotFoundError('Alumni');
   }
 
+  // Detect which fields changed
+  const changes = [];
+  for (const key in data) {
+    let dbKey = key;
+    if (key === 'registerNo') dbKey = 'register_no';
+    if (key === 'date_of_birth') dbKey = 'date_of_birth';
+    if (key === 'linkedin_profile') dbKey = 'linkedin_profile';
+    if (data[key] !== undefined && String(alumni[dbKey] || '').trim() !== String(data[key] || '').trim()) {
+      changes.push(key);
+    }
+  }
+
   const updated = await alumniRepository.update(alumniId, data);
+  const changeDesc = changes.length > 0 ? ` (Fields changed: ${changes.join(', ')})` : '';
 
   await createAuditLog({
     userId: currentUser.userId,
@@ -56,7 +69,7 @@ async function updateAlumni(alumniId, data, currentUser) {
     roleName: currentUser.role,
     action: 'ALUMNI_UPDATED',
     target: `Alumni#${alumniId}`,
-    description: `Updated alumni ${alumni.name} (${alumni.register_no})`
+    description: `Updated alumni ${alumni.name} (${alumni.register_no})${changeDesc}`
   });
 
   return updated;
@@ -81,6 +94,15 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
     secondary_email: info.secondary_email || null,
     secondary_phone: info.secondary_phone || null
   };
+
+  // Detect which fields changed
+  const changes = [];
+  for (const key in alumniUpdate) {
+    if (alumniUpdate[key] !== undefined && alumniUpdate[key] !== null && String(alumni[key] || '').trim() !== String(alumniUpdate[key] || '').trim()) {
+      changes.push(key);
+    }
+  }
+
   await alumniRepository.update(alumniId, alumniUpdate);
 
   const professionalInfo = await alumniRepository.createProfessionalInfo({
@@ -105,13 +127,15 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
     await alumniRepository.updateAssignmentStatus(assignmentId, 'Completed');
   }
 
+  const changeDesc = changes.length > 0 ? ` (Fields changed: ${changes.join(', ')})` : '';
+
   await createAuditLog({
     userId: currentUser.userId,
     username: `${currentUser.firstName} ${currentUser.lastName}`,
     roleName: currentUser.role,
     action: 'PROFESSIONAL_INFO_SUBMITTED',
     target: `Alumni#${alumniId}`,
-    description: `Professional info submitted for ${alumni.name} (${alumni.register_no})`
+    description: `Professional info submitted for ${alumni.name} (${alumni.register_no})${changeDesc}`
   });
 
   return professionalInfo;

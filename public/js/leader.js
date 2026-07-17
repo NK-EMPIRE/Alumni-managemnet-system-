@@ -294,23 +294,30 @@
 
     var html = '';
     var unreadCount = 0;
-    // Show top 5 recent updates
-    updatedRecords.slice(0, 5).forEach(function (r, idx) {
-      var isUnread = idx < 3; // treat first 3 as unread
-      if (isUnread) unreadCount++;
-      var memberName = r.assigned_to || r.assignedTo || r.teamMember || 'A team member';
-      var text = memberName + ' marked ' + r.name + ' as ' + r.status;
-      var bgColor = r.status === 'Completed' ? '#D1FAE5' : '#FEF3C7';
-      var iconColor = r.status === 'Completed' ? '#10B981' : '#F59E0B';
-      var icon = r.status === 'Completed' ? 'fa-check-circle' : 'fa-pen';
+    
+    var completedList = updatedRecords.filter(function(r) { return r.status === 'Completed'; });
+    var draftList = updatedRecords.filter(function(r) { return r.status === 'Draft'; });
 
-      html += '<div class="notification-item ' + (isUnread ? 'unread' : '') + '">' +
-        '<div class="notif-icon" style="background:' + bgColor + ';color:' + iconColor + ';"><i class="fas ' + icon + '"></i></div>' +
+    if (completedList.length > 0) {
+      unreadCount++;
+      html += '<div class="notification-item unread">' +
+        '<div class="notif-icon" style="background:#D1FAE5;color:#10B981;"><i class="fas fa-check-circle"></i></div>' +
         '<div class="notif-text">' +
-        '<h5>' + r.status + ' Update</h5>' +
-        '<p>' + text + '</p>' +
+        '<h5>Completed Updates</h5>' +
+        '<p>' + completedList.length + ' alumni details successfully updated by your team</p>' +
         '</div></div>';
-    });
+    }
+
+    if (draftList.length > 0) {
+      unreadCount++;
+      html += '<div class="notification-item unread">' +
+        '<div class="notif-icon" style="background:#FEF3C7;color:#F59E0B;"><i class="fas fa-pen"></i></div>' +
+        '<div class="notif-text">' +
+        '<h5>Draft Updates</h5>' +
+        '<p>' + draftList.length + ' updates saved as draft by your team</p>' +
+        '</div></div>';
+    }
+
     list.innerHTML = html;
     if (nc) { nc.textContent = unreadCount; nc.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
   }
@@ -726,6 +733,47 @@
   var myCurrentPage = 1;
   var myPageSize = 10;
 
+  function populateMyAssignmentsFilters() {
+    var depts = {};
+    var batches = {};
+    
+    myAssignmentsData.forEach(function (r) {
+      if (r.department) {
+        var d = String(r.department).trim();
+        if (d) depts[d] = true;
+      }
+      if (r.batch) {
+        var b = String(r.batch).trim();
+        if (b) batches[b] = true;
+      }
+    });
+
+    var deptFilter = document.getElementById('myAssignmentsDeptFilter');
+    var batchFilter = document.getElementById('myAssignmentsBatchFilter');
+
+    if (deptFilter) {
+      var currentVal = deptFilter.value;
+      var deptHtml = '<option value="all">All Depts</option>';
+      Object.keys(depts).sort().forEach(function (d) {
+        deptHtml += '<option value="' + d + '">' + d + '</option>';
+      });
+      deptFilter.innerHTML = deptHtml;
+      if (depts[currentVal]) deptFilter.value = currentVal;
+      else deptFilter.value = 'all';
+    }
+
+    if (batchFilter) {
+      var currentVal = batchFilter.value;
+      var batchHtml = '<option value="all">All Batches</option>';
+      Object.keys(batches).sort().forEach(function (b) {
+        batchHtml += '<option value="' + b + '">' + b + '</option>';
+      });
+      batchFilter.innerHTML = batchHtml;
+      if (batches[currentVal]) batchFilter.value = currentVal;
+      else batchFilter.value = 'all';
+    }
+  }
+
   function loadMyAssignments() {
     var tbody = document.getElementById('myAssignmentsTableBody');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading assignments...</td></tr>';
@@ -733,6 +781,7 @@
     API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 10000 }).then(function (res) {
       if (res && res.success) {
         myAssignmentsData = res.data.records || res.data || [];
+        populateMyAssignmentsFilters();
         renderMyAssignmentsTable();
       } else {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Failed to load assignments.</td></tr>';
@@ -745,6 +794,8 @@
   function renderMyAssignmentsTable() {
     var searchVal = (document.getElementById('myAssignmentsSearch').value || '').toLowerCase().trim();
     var statusVal = document.getElementById('myAssignmentsStatusFilter').value;
+    var deptValFilter = document.getElementById('myAssignmentsDeptFilter') ? document.getElementById('myAssignmentsDeptFilter').value : 'all';
+    var batchValFilter = document.getElementById('myAssignmentsBatchFilter') ? document.getElementById('myAssignmentsBatchFilter').value : 'all';
 
     myFilteredAssignments = myAssignmentsData.filter(function (r) {
       var matchSearch = !searchVal ||
@@ -754,8 +805,15 @@
         (r.company || '').toLowerCase().indexOf(searchVal) !== -1 ||
         (r.designation || '').toLowerCase().indexOf(searchVal) !== -1;
       var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
-      return matchSearch && matchStatus;
+      var matchDept = deptValFilter === 'all' || String(r.department) === deptValFilter;
+      var matchBatch = batchValFilter === 'all' || String(r.batch) === batchValFilter;
+      return matchSearch && matchStatus && matchDept && matchBatch;
     });
+
+    var countEl = document.getElementById('myAssignmentsFilteredCount');
+    if (countEl) {
+      countEl.textContent = myFilteredAssignments.length + ' Records';
+    }
 
     var totalPages = Math.max(1, Math.ceil(myFilteredAssignments.length / myPageSize));
     if (myCurrentPage > totalPages) myCurrentPage = totalPages;
@@ -1811,17 +1869,21 @@
 
     var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem">' +
       '<thead><tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0">' +
-      '<th style="padding:8px 12px;text-align:left;font-weight:600;color:#374151">Member</th>' +
-      '<th style="padding:8px 12px;text-align:center;font-weight:600;color:#374151">Count</th>' +
-      '<th style="padding:8px 12px;text-align:left;font-weight:600;color:#374151">Alumni</th>' +
+      '<th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;white-space:nowrap;width:180px">Member</th>' +
+      '<th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;width:70px">Count</th>' +
+      '<th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151">Alumni</th>' +
       '</tr></thead><tbody>';
 
     matchedGroups.forEach(function (g) {
-      var names = g.alumniList.map(function (a) { return a.name; }).join(', ');
-      html += '<tr style="border-bottom:1px solid #F1F5F9">' +
-        '<td style="padding:8px 12px;font-weight:600;color:#1E293B">' + g.userName + '</td>' +
-        '<td style="padding:8px 12px;text-align:center"><span class="badge badge-info">' + g.count + '</span></td>' +
-        '<td style="padding:8px 12px;color:#64748B;max-width:300px;word-break:break-word">' + (names || '-') + '</td>' +
+      var nameTags = g.alumniList.map(function (a) {
+        return '<span style="display:inline-block;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;' +
+          'border-radius:4px;padding:2px 8px;font-size:0.75rem;margin:2px 3px 2px 0;white-space:nowrap;">' +
+          (a.name || '-') + '</span>';
+      }).join('');
+      html += '<tr style="border-bottom:1px solid #F1F5F9;vertical-align:top">' +
+        '<td style="padding:10px 14px;font-weight:600;color:#1E293B;white-space:nowrap">' + g.userName + '</td>' +
+        '<td style="padding:10px 14px;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;background:#DBEAFE;color:#1D4ED8;font-weight:700;font-size:0.8rem;border-radius:20px;min-width:28px;height:28px;padding:0 8px;">' + g.count + '</span></td>' +
+        '<td style="padding:8px 14px;line-height:1.8">' + (nameTags || '-') + '</td>' +
         '</tr>';
     });
     html += '</tbody></table>';
@@ -1886,6 +1948,10 @@
     // Bind my assignments sub-filters
     document.getElementById('myAssignmentsSearch').addEventListener('input', renderMyAssignmentsTable);
     document.getElementById('myAssignmentsStatusFilter').addEventListener('change', renderMyAssignmentsTable);
+    var myDeptF = document.getElementById('myAssignmentsDeptFilter');
+    if (myDeptF) myDeptF.addEventListener('change', renderMyAssignmentsTable);
+    var myBatchF = document.getElementById('myAssignmentsBatchFilter');
+    if (myBatchF) myBatchF.addEventListener('change', renderMyAssignmentsTable);
 
     // Bind report sub-filters
     document.getElementById('reportSearch').addEventListener('input', renderTeamReportTable);
@@ -2053,6 +2119,19 @@
         }
       });
   };
+
+  // Auto refresh dashboard data every 20 seconds silently in the background
+  setInterval(function () {
+    // Only refresh if no modals are open to avoid disrupting typing or interactions
+    var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
+    var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
+    if (openModals.length === 0 && !isInputFocused) {
+      if (typeof fetchLeaderData === 'function') fetchLeaderData();
+      if (typeof fetchSpreadsheetData === 'function' && document.getElementById('section-myAssignments') && document.getElementById('section-myAssignments').style.display !== 'none') {
+        fetchSpreadsheetData();
+      }
+    }
+  }, 20000);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

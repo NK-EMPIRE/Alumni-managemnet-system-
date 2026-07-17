@@ -178,7 +178,7 @@
         <div class="dropdown" id="notifDropdown">
           <button class="navbar-btn" onclick="toggleNotifications(event)">
             <i class="fas fa-bell"></i>
-            <span class="notification-count">5</span>
+            <span class="notification-count" id="notifCount" style="display:none;background:#EF4444;color:#fff;">0</span>
           </button>
           <div class="dropdown-menu" id="notifMenu" style="width:340px; right:0; left:auto !important;">
             <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
@@ -283,8 +283,10 @@
 
         <!-- Recent Assignments Table -->
         <div class="card fade-in-up">
-          <div class="card-header">
-            <h3><i class="fas fa-tasks" style="color:var(--primary);margin-right:8px;"></i>Recent Assignments</h3>
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center;">
+              <h3><i class="fas fa-tasks" style="color:var(--primary);margin-right:8px;"></i>Recent Assignments</h3>
+            </div>
             <div style="display:flex;gap:8px;align-items:center;">
               <button class="btn btn-sm btn-primary" onclick="openModal('assignAlumniModal')">
                 <i class="fas fa-plus"></i> Assign New
@@ -297,34 +299,39 @@
           <div class="card-body" style="padding:0;">
             <!-- Filters -->
             <div
-              style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;">
-              <div class="search-bar" style="max-width:280px;flex:1;">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" placeholder="Search alumni..." id="tableSearch" oninput="filterTable()">
+              style="display:flex;flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--border);align-items:center;justify-content:space-between;">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;flex:1;">
+                <div class="search-bar" style="max-width:280px;flex:1;">
+                  <i class="fas fa-search search-icon"></i>
+                  <input type="text" placeholder="Search alumni..." id="tableSearch" oninput="filterTable()">
+                </div>
+                <select class="form-control form-select" id="filterDepartment" style="width:140px;"
+                  onchange="filterTable()">
+                  <option value="">All Depts</option>
+                  <option value="CSE">CSE</option>
+                  <option value="ECE">ECE</option>
+                  <option value="EEE">EEE</option>
+                  <option value="ME">ME</option>
+                  <option value="CE">CE</option>
+                  <option value="IT">IT</option>
+                </select>
+                <select class="form-control form-select" id="filterStatus" style="width:140px;" onchange="filterTable()">
+                  <option value="">All Status</option>
+                  <option value="Completed">Completed</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Pending">Pending</option>
+                </select>
+                <select class="form-control form-select" id="filterBatch" style="width:120px;" onchange="filterTable()">
+                  <option value="">All Batch</option>
+                  <option value="2020">2020</option>
+                  <option value="2021">2021</option>
+                  <option value="2022">2022</option>
+                  <option value="2023">2023</option>
+                </select>
               </div>
-              <select class="form-control form-select" id="filterDepartment" style="width:140px;"
-                onchange="filterTable()">
-                <option value="">All Depts</option>
-                <option value="CSE">CSE</option>
-                <option value="ECE">ECE</option>
-                <option value="EEE">EEE</option>
-                <option value="ME">ME</option>
-                <option value="CE">CE</option>
-                <option value="IT">IT</option>
-              </select>
-              <select class="form-control form-select" id="filterStatus" style="width:140px;" onchange="filterTable()">
-                <option value="">All Status</option>
-                <option value="Completed">Completed</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Pending">Pending</option>
-              </select>
-              <select class="form-control form-select" id="filterBatch" style="width:120px;" onchange="filterTable()">
-                <option value="">All Batch</option>
-                <option value="2020">2020</option>
-                <option value="2021">2021</option>
-                <option value="2022">2022</option>
-                <option value="2023">2023</option>
-              </select>
+              <div style="margin-left:12px;">
+                <span id="dashboardFilteredCount" class="badge-record-count" style="font-size: 0.9rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block;">0 Records</span>
+              </div>
             </div>
             <!-- Table -->
             <div class="table-container">
@@ -475,7 +482,7 @@
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
               <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
-                style="height:36px;"><i class="fas fa-columns"></i> Columns</button>
+                style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
               <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i
                   class="fas fa-file-csv"></i> Export CSV</button>
               <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i
@@ -798,9 +805,9 @@
             style="border:2px dashed #CBD5E1;border-radius:12px;padding:48px;text-align:center;background:#F8FAFC;cursor:pointer;transition:all 0.3s;">
             <i class="fas fa-cloud-upload-alt"
               style="font-size:3rem;color:#2563EB;margin-bottom:16px;display:block;"></i>
-            <h4 style="font-size:1rem;color:#1E293B;margin-bottom:8px;font-weight:600;">Drag & drop your file here</h4>
-            <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:16px;">or click to browse files</p>
-            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+            <h4 style="font-size:1rem;color:#1E293B;margin-bottom:8px;font-weight:600;">Drag & drop your files here</h4>
+            <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:16px;">or click to browse files (multiple files supported)</p>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;" multiple>
             <button class="btn btn-primary" id="browseBtn" type="button">
               <i class="fas fa-folder-open"></i> Browse Files
             </button>
@@ -873,6 +880,7 @@
                   <th>Errors</th>
                   <th>Imported By</th>
                   <th>Date</th>
+                  <th>Duration</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -956,6 +964,7 @@
       </section>
 
       <!-- ─── QUICK ACTIONS ─── -->
+      <div id="quickActionOverlay" onclick="toggleQuickActions()" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.15);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:1015;display:none;transition:all 0.3s ease;"></div>
       <div
         style="position:fixed;bottom:24px;right:24px;z-index:1020;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
         <div id="quickActionMenu" style="display:none;flex-direction:column;gap:8px;margin-bottom:8px;">
@@ -1038,10 +1047,10 @@
           <label class="floating-label">Department <span style="color:var(--danger);">*</span></label>
         </div>
         <div class="form-group">
-          <input class="form-control" type="password" id="tlPassword" value="mzcet@123" placeholder="Password" required>
+          <input class="form-control" type="text" id="tlPassword" value="mzcet@123" placeholder="Password" required>
           <label class="floating-label">Password <span style="color:var(--danger);">*</span></label>
           <button class="password-toggle" onclick="togglePassword('tlPassword',this)" type="button">
-            <i class="far fa-eye"></i>
+            <i class="far fa-eye-slash"></i>
           </button>
         </div>
       </div>
@@ -1095,10 +1104,10 @@
           <label class="floating-label">Select Team Leader <span style="color:var(--danger);">*</span></label>
         </div>
         <div class="form-group">
-          <input class="form-control" type="password" id="tmPassword" value="mzcet@123" placeholder="Password" required>
+          <input class="form-control" type="text" id="tmPassword" value="mzcet@123" placeholder="Password" required>
           <label class="floating-label">Password <span style="color:var(--danger);">*</span></label>
           <button class="password-toggle" onclick="togglePassword('tmPassword',this)" type="button">
-            <i class="far fa-eye"></i>
+            <i class="far fa-eye-slash"></i>
           </button>
         </div>
       </div>
@@ -1292,7 +1301,7 @@
         <div
           style="display:flex;align-items:center;gap:15px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:15px;">
           <div id="vAlumniAvatar"
-            style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;">
+            style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;">
             A</div>
           <div>
             <h2 id="vAlumniName" style="margin:0;font-size:1.4rem;font-weight:600;">John Doe</h2>
@@ -1332,15 +1341,25 @@
           </div>
           <div>
             <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Secondary Email</label>
+            <span id="vAlumniSecEmail" style="font-weight:500;">-</span>
+          </div>
+          <div>
+            <label
               style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Phone
               Number</label>
             <span id="vAlumniPhone" style="font-weight:500;">-</span>
           </div>
           <div>
             <label
+              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Secondary Phone</label>
+            <span id="vAlumniSecPhone" style="font-weight:500;">-</span>
+          </div>
+          <div>
+            <label
               style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">LinkedIn
               Profile</label>
-            <a id="vAlumniLinkedIn" href="#" target="_blank" style="color:var(--primary);font-weight:500;">-</a>
+            <div id="vAlumniLinkedIn" style="font-weight:500;">-</div>
           </div>
         </div>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:20px 0;">
@@ -1564,7 +1583,7 @@
   <!-- Import Result Modal -->
   <div class="modal-overlay" id="importResultModal" style="z-index:99999;">
     <div class="modal"
-      style="max-width: 420px; width: 90%; border-radius: 20px; padding: 36px 24px; text-align: center; border: 1px solid rgba(255,255,255,0.8); background:#ffffff;">
+      style="max-width: 600px; width: 90%; border-radius: 20px; padding: 36px 24px; text-align: center; border: 1px solid rgba(255,255,255,0.8); background:#ffffff;">
       <div id="importResultIcon"
         style="width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem; box-shadow:0 10px 20px rgba(0,0,0,0.05);">
       </div>

@@ -81,7 +81,7 @@ var auditState = {
   filteredData: []
 };
 
-var selectedImportFile = null;
+var selectedImportFiles = [];
 
 function initSpreadsheetHandlers() {
   // Initialize leader dropdown for edit modal
@@ -408,6 +408,12 @@ function populateTable() {
   } else {
     state.filteredData = [];
   }
+
+  var cntEl = document.getElementById('dashboardFilteredCount');
+  if (cntEl) {
+    cntEl.textContent = state.filteredData.length + ' Records';
+  }
+
   state.currentPage = 1;
   renderTable();
 }
@@ -556,6 +562,8 @@ function filterTable() {
 
   if (!source || source.length === 0) {
     state.filteredData = [];
+    var cntEl = document.getElementById('dashboardFilteredCount');
+    if (cntEl) cntEl.textContent = '0 Records';
     state.currentPage = 1;
     renderTable();
     return;
@@ -568,6 +576,12 @@ function filterTable() {
     if (batch && String(item.batch) !== batch) match = false;
     return match;
   });
+
+  var cntEl = document.getElementById('dashboardFilteredCount');
+  if (cntEl) {
+    cntEl.textContent = state.filteredData.length + ' Records';
+  }
+
   state.currentPage = 1;
   renderTable();
 }
@@ -948,11 +962,26 @@ function populateNotifications() {
   // Use real audit log data when available
   var rawNotifs = [];
   if (_apiAuditLogs && _apiAuditLogs.records && _apiAuditLogs.records.length > 0) {
-    rawNotifs = _apiAuditLogs.records.slice(0, 10).map(function(r) {
+    var filteredLogs = _apiAuditLogs.records.filter(function(r) {
+      var role = (r.role_name || r.roleName || '').toLowerCase().trim();
+      return role !== 'admin' && role !== '';
+    });
+    rawNotifs = filteredLogs.slice(0, 10).map(function(r) {
       var nid = 'al_' + (r.audit_id || r.created_at + '_' + r.action);
+      var actionStr = (r.action || '').replace(/_/g, ' ').toLowerCase();
+      var text = (r.username || 'Faculty') + ' — ' + actionStr;
+      if (r.action === 'USER_CREATED') {
+        text = 'New Faculty user created';
+      } else if (r.action === 'EXCEL_IMPORTED') {
+        text = 'Excel import completed';
+      } else if (r.action === 'ALUMNI_UPDATED' || r.action === 'ALUMNI_UPDATE') {
+        text = 'Alumni details updated by faculty';
+      } else if (r.action === 'ASSIGNMENT_DISTRIBUTED') {
+        text = 'Alumni records distributed';
+      }
       return {
         id: nid,
-        text: (r.username || 'System') + ' — ' + (r.action || '').replace(/_/g, ' ').toLowerCase(),
+        text: text,
         time: r.created_at ? parseUTCDateTime(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '',
         unread: true
       };
@@ -963,7 +992,7 @@ function populateNotifications() {
 
   if (notifs.length === 0) {
     list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No notifications</div>';
-    var count = document.querySelector('.notification-count');
+    var count = document.getElementById('notifCount');
     if (count) { count.textContent = '0'; count.style.display = 'none'; }
     return;
   }
@@ -979,7 +1008,7 @@ function populateNotifications() {
   });
   list.innerHTML = html;
 
-  var count = document.querySelector('.notification-count');
+  var count = document.getElementById('notifCount');
   var unreadCount = notifs.filter(function(n) { return n.unread; }).length;
   if (count) {
     if (unreadCount > 0) { count.textContent = unreadCount; count.style.display = 'inline-flex'; }
@@ -1254,6 +1283,11 @@ function updateChartsWithData(dashData) {
    17. SIDEBAR NAVIGATION
    ──────────────────────────────────────────────────────────── */
 function navigateTo(section, el) {
+  /* Auto-close FAB menu if open */
+  if (typeof fabOpen !== 'undefined' && fabOpen) {
+    toggleQuickActions();
+  }
+
   /* Update sidebar active state */
   var items = document.querySelectorAll('.sidebar-item');
   items.forEach(function (item) { item.classList.remove('active'); });
@@ -1555,8 +1589,8 @@ function submitAddTeamLeader() {
   API.createUser({ firstName: firstName, lastName: lastName, email: email, phone: phone, password: pass, roleId: 2, department: dept }).then(function (res) {
     hideLoading(btn);
     if (res.success) {
-      var tmpPwd = res.data && res.data.temporaryPassword;
-      Toast.success('Success', 'Team Leader added successfully!' + (tmpPwd ? ' Password: ' + tmpPwd : ''));
+      var tmpPwd = (res.data && res.data.temporaryPassword) || pass || 'mzcet@123';
+      Toast.success('Success', 'Team Leader added successfully! Password: ' + tmpPwd);
       closeModal('addTeamLeaderModal');
       fetchAllData();
     } else {
@@ -1624,7 +1658,8 @@ function submitAddTeamMember() {
         return API.addTeamMember(teamId, { userId: createdUserId });
       }).then(function () {
         hideLoading(btn);
-        Toast.success('Success', 'Team Member added successfully!' + (tmpPwd ? ' Password: ' + tmpPwd : ''));
+        var showPwd = tmpPwd || pass || 'mzcet@123';
+        Toast.success('Success', 'Team Member added successfully! Password: ' + showPwd);
         closeModal('addTeamMemberModal');
         fetchAllData();
       }).catch(function (err) {
@@ -2096,11 +2131,14 @@ function toggleQuickActions() {
   fabOpen = !fabOpen;
   var menu = document.getElementById('quickActionMenu');
   var icon = document.getElementById('fabIcon');
+  var overlay = document.getElementById('quickActionOverlay');
   if (fabOpen) {
     menu.style.display = 'flex';
+    if (overlay) overlay.style.display = 'block';
     icon.className = 'fas fa-times';
   } else {
     menu.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
     icon.className = 'fas fa-plus';
   }
 }
@@ -2207,6 +2245,34 @@ function initImportHandlers() {
   /* Click upload zone or browse button triggers file input */
   if (uploadZone) {
     uploadZone.addEventListener('click', function () { fileInput.click(); });
+    
+    uploadZone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.style.borderColor = 'var(--primary)';
+      uploadZone.style.background = 'rgba(99, 102, 241, 0.04)';
+    });
+
+    uploadZone.addEventListener('dragleave', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.style.borderColor = 'var(--border)';
+      uploadZone.style.background = '';
+    });
+
+    uploadZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.style.borderColor = 'var(--border)';
+      uploadZone.style.background = '';
+      
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        // Trigger the change handler manually
+        var event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+      }
+    });
   }
   if (browseBtn) {
     browseBtn.addEventListener('click', function (e) {
@@ -2218,40 +2284,58 @@ function initImportHandlers() {
   /* File selection handler */
   fileInput.addEventListener('change', function () {
     if (fileInput.files && fileInput.files.length > 0) {
-      selectedImportFile = fileInput.files[0];
+      selectedImportFiles = Array.prototype.slice.call(fileInput.files);
       if (fileNameEl) {
         fileNameEl.style.display = 'block';
-        fileNameEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + selectedImportFile.name + ' (' + (selectedImportFile.size / 1024 / 1024).toFixed(2) + ' MB)';
+        fileNameEl.innerHTML = selectedImportFiles.map(function (f) {
+          return '<div style="margin-top: 4px; font-weight: 500;"><i class="fas fa-check-circle"></i> ' + f.name + ' (' + (f.size / 1024 / 1024).toFixed(2) + ' MB)</div>';
+        }).join('');
       }
       
-      // Generate Preview
-      var formData = new FormData();
-      formData.append('file', selectedImportFile);
       var previewBody = document.getElementById('importPreviewBody');
       var previewContainer = document.getElementById('importPreviewContainer');
       if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;"><span class="spinner spinner-sm"></span> Loading Preview...</td></tr>';
       if (previewContainer) previewContainer.style.display = 'block';
       
-      API.uploadPreview(formData).then(function (res) {
-        if (res.success && res.data && res.data.length > 0) {
+      // Parallel preview calls
+      var previewPromises = selectedImportFiles.map(function (file) {
+        var formData = new FormData();
+        formData.append('file', file);
+        return API.uploadPreview(formData).then(function (res) {
+          return res.success && res.data ? res.data : [];
+        }).catch(function () { return []; });
+      });
+
+      Promise.all(previewPromises).then(function (results) {
+        var combinedData = [];
+        results.forEach(function (rows) {
+          combinedData = combinedData.concat(rows);
+        });
+
+        if (combinedData.length > 0) {
           var html = '';
-          res.data.forEach(function (row, idx) {
+          combinedData.forEach(function (row, idx) {
             var badgeClass = row.action === 'Insert' ? 'badge-success' : row.action === 'Update' ? 'badge-primary' : 'badge-danger';
+            var regNo = row.registerNo || row.register_no || '<span style="color:#EF4444;font-style:italic;">[Missing Reg No]</span>';
+            var name = row.name || '<span style="color:#EF4444;font-style:italic;">[Missing Name]</span>';
+            var dept = row.department || row.dept || '<span style="color:#EF4444;font-style:italic;">[Missing Dept]</span>';
+            var batch = row.batch || '<span style="color:#EF4444;font-style:italic;">[Missing Batch]</span>';
+            
             html += '<tr>' +
               '<td style="padding:10px 12px;font-weight:600;color:#64748B;">' + (idx + 1) + '</td>' +
-              '<td style="padding:10px 12px;">' + row.registerNo + '</td>' +
-              '<td style="padding:10px 12px;"><strong>' + row.name + '</strong></td>' +
-              '<td style="padding:10px 12px;">' + row.department + '</td>' +
-              '<td style="padding:10px 12px;">' + row.batch + '</td>' +
+              '<td style="padding:10px 12px;">' + regNo + '</td>' +
+              '<td style="padding:10px 12px;"><strong>' + name + '</strong></td>' +
+              '<td style="padding:10px 12px;">' + dept + '</td>' +
+              '<td style="padding:10px 12px;">' + batch + '</td>' +
               '<td style="padding:10px 12px;"><span class="badge ' + badgeClass + '">' + row.action + '</span></td>' +
-              '<td style="padding:10px 12px;color:#64748B;">' + row.reason + '</td>' +
+              '<td style="padding:10px 12px;color:#64748B;">' + (row.reason || '-') + '</td>' +
               '</tr>';
           });
           if (previewBody) previewBody.innerHTML = html;
           var statusEl = document.getElementById('importPreviewStatus');
           if (statusEl) {
             statusEl.style.display = 'block';
-            statusEl.textContent = 'Showing ' + res.data.length + ' rows in file (scroll to view).';
+            statusEl.textContent = 'Showing ' + combinedData.length + ' rows in selected files (scroll to view).';
           }
           importBtn.disabled = false;
         } else {
@@ -2260,15 +2344,10 @@ function initImportHandlers() {
           if (statusEl) statusEl.style.display = 'none';
           importBtn.disabled = true;
         }
-      }).catch(function (err) {
-        if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">Failed to generate preview: ' + err.message + '</td></tr>';
-        var statusEl = document.getElementById('importPreviewStatus');
-        if (statusEl) statusEl.style.display = 'none';
-        importBtn.disabled = true;
       });
 
     } else {
-      selectedImportFile = null;
+      selectedImportFiles = [];
       if (fileNameEl) { fileNameEl.style.display = 'none'; }
       var pc = document.getElementById('importPreviewContainer');
       if (pc) pc.style.display = 'none';
@@ -2278,93 +2357,140 @@ function initImportHandlers() {
 
   /* Import button click */
   importBtn.addEventListener('click', function () {
-    if (!selectedImportFile) return;
+    if (selectedImportFiles.length === 0) return;
     importBtn.disabled = true;
     importBtn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Importing...';
     
     var startTime = performance.now();
-    var formData = new FormData();
-    formData.append('file', selectedImportFile);
-    
-    API.uploadImport(formData).then(function (res) {
+    var importPromises = selectedImportFiles.map(function (file) {
+      var formData = new FormData();
+      formData.append('file', file);
+      return API.uploadImport(formData).then(function (res) {
+        return { file: file.name, success: true, res: res };
+      }).catch(function (err) {
+        return { file: file.name, success: false, message: err.message };
+      });
+    });
+
+    Promise.all(importPromises).then(function (results) {
       var duration = ((performance.now() - startTime) / 1000).toFixed(2);
       importBtn.disabled = false;
       importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
       var pc = document.getElementById('importPreviewContainer');
       if (pc) pc.style.display = 'none';
       
-      // Update UI modal values
       var iconEl = document.getElementById('importResultIcon');
       var titleEl = document.getElementById('importResultTitle');
       var detailsEl = document.getElementById('importResultDetails');
       var durationEl = document.getElementById('importDurationSec');
       
       if (durationEl) durationEl.textContent = duration;
-      
-      if (res.success) {
+
+      var totalRows = 0;
+      var totalImported = 0;
+      var totalMerged = 0;
+      var totalSkipped = 0;
+      var totalDuplicates = 0;
+      var totalErrors = 0;
+      var allPendingAliases = [];
+      var allUnmappedColumns = [];
+      var failCount = 0;
+      var successCount = 0;
+
+      results.forEach(function (item) {
+        if (!item.success) {
+          failCount++;
+          return;
+        }
+        var res = item.res;
+        if (!res.success) {
+          failCount++;
+          return;
+        }
+        successCount++;
+        var s = res.data && (res.data.summary || res.data) ? (res.data.summary || res.data) : {};
+        totalRows += (s.totalRows || s.total_rows || s.totalRecords || 0);
+        totalImported += (s.imported || 0);
+        totalMerged += (s.merged || 0);
+        totalSkipped += (s.skipped || 0);
+        totalDuplicates += (s.duplicates || 0);
+        totalErrors += (s.errors || 0);
+        if (res.data.pendingAliasReview) {
+          allPendingAliases = allPendingAliases.concat(res.data.pendingAliasReview);
+        }
+        if (res.data.unmappedColumns) {
+          allUnmappedColumns = allUnmappedColumns.concat(res.data.unmappedColumns);
+        }
+      });
+
+      if (successCount > 0) {
         if (iconEl) {
           iconEl.style.background = '#ECFDF5';
           iconEl.style.color = '#10B981';
           iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
         }
-        if (titleEl) titleEl.textContent = 'Import Completed Successfully';
+        if (titleEl) titleEl.textContent = 'Import Finished (' + successCount + ' Succeeded, ' + failCount + ' Failed)';
         
         var detailsHtml = 
-          '<strong>Total Rows:</strong> ' + (res.data.summary.totalRows !== undefined ? res.data.summary.totalRows : '') + '<br>' +
-          '<strong>Imported:</strong> ' + (res.data.summary.imported !== undefined ? res.data.summary.imported : 0) + '<br>' +
-          '<strong>Merged/Updated:</strong> ' + (res.data.summary.merged || 0) + '<br>' +
-          '<strong>Skipped:</strong> ' + (res.data.summary.skipped || 0) + '<br>' +
-          '<strong>Duplicates:</strong> ' + (res.data.summary.duplicates !== undefined ? res.data.summary.duplicates : 0) + '<br>' +
-          '<strong>Errors:</strong> ' + (res.data.summary.errors !== undefined ? res.data.summary.errors : 0);
+          '<strong>Total Rows Processed:</strong> ' + totalRows + '<br>' +
+          '<strong>Imported:</strong> ' + totalImported + '<br>' +
+          '<strong>Merged/Updated:</strong> ' + totalMerged + '<br>' +
+          '<strong>Skipped:</strong> ' + totalSkipped + '<br>' +
+          '<strong>Duplicates:</strong> ' + totalDuplicates + '<br>' +
+          '<strong>Errors:</strong> ' + totalErrors;
 
-        if (res.data.pendingAliasReview && res.data.pendingAliasReview.length > 0) {
+        if (allPendingAliases.length > 0) {
           detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #F3F4F6; border-radius: 6px; text-align: left;">' +
-            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Faculty Aliases to Confirm:</h4>';
+            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Memory of Faculty to Confirm:</h4>';
           
-          res.data.pendingAliasReview.forEach(function (item, idx) {
+          allPendingAliases.forEach(function (item, idx) {
             detailsHtml += '<div style="display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;">' +
               '<input type="checkbox" class="alias-review-cb" id="alias_review_' + idx + '" checked data-excel-name="' + item.excelName + '" data-leader-id="' + item.suggestedLeaderId + '" style="margin-right: 8px;">' +
-              '<label for="alias_review_' + idx + '">Save alias "<strong>' + item.excelName + '</strong>" for Leader <strong>' + item.suggestedLeaderName + '</strong></label>' +
+              '<label for="alias_review_' + idx + '">Save memory "<strong>' + item.excelName + '</strong>" for Faculty <strong>' + item.suggestedLeaderName + '</strong></label>' +
               '</div>';
           });
 
-          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Aliases</button></div>';
+          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Memories</button></div>';
           
-          setTimeout(function () {
-            var btn = document.getElementById('confirmAliasesBtn');
-            if (btn) {
-              btn.addEventListener('click', function () {
-                var checkboxes = document.querySelectorAll('.alias-review-cb');
-                var pairs = [];
-                checkboxes.forEach(function (cb) {
-                  if (cb.checked) {
-                    pairs.push({
-                      excelName: cb.getAttribute('data-excel-name'),
-                      leaderId: parseInt(cb.getAttribute('data-leader-id'), 10)
-                    });
-                  }
-                });
-                if (pairs.length > 0) {
-                  btn.disabled = true;
-                  btn.textContent = 'Saving...';
-                  API.confirmAliases({ pairs: pairs }).then(function () {
-                    Toast.success('Aliases Confirmed', 'Selected faculty aliases saved successfully.');
-                    btn.textContent = 'Aliases Saved';
-                  }).catch(function (err) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Aliases';
-                    Toast.danger('Failed to save aliases', err.message);
+          // Event delegation bound once — safe even when modal HTML is re-injected
+          if (!window._aliasConfirmDelegated) {
+            window._aliasConfirmDelegated = true;
+            document.addEventListener('click', function (e) {
+              var btn = e.target.closest('#confirmAliasesBtn');
+              if (!btn) return;
+              var checkboxes = document.querySelectorAll('.alias-review-cb');
+              var pairs = [];
+              checkboxes.forEach(function (cb) {
+                if (cb.checked) {
+                  pairs.push({
+                    excelName: cb.getAttribute('data-excel-name'),
+                    leaderId: parseInt(cb.getAttribute('data-leader-id'), 10)
                   });
                 }
               });
-            }
-          }, 100);
+              if (pairs.length === 0) {
+                Toast.info('No Selection', 'Check at least one memory to save.');
+                return;
+              }
+              btn.disabled = true;
+              btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+              API.confirmAliases({ pairs: pairs }).then(function () {
+                btn.innerHTML = '<i class="fas fa-check"></i> Memories Saved!';
+                btn.style.background = '#10B981';
+                Toast.success('Memories Saved', 'Faculty memories saved successfully.');
+              }).catch(function (err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Memories';
+                Toast.danger('Save Failed', err.message || 'Failed to save memories.');
+              });
+            });
+          }
         }
 
-        if (res.data.unmappedColumns && res.data.unmappedColumns.length > 0) {
+        if (allUnmappedColumns.length > 0) {
           detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 6px; text-align: left;">' +
             '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #D97706;"><i class="fas fa-exclamation-triangle"></i> Unmapped Columns (Skipped):</h4>';
-          res.data.unmappedColumns.forEach(function (col) {
+          allUnmappedColumns.forEach(function (col) {
             detailsHtml += '<div style="font-size: 12px; margin-bottom: 6px; color: #B45309;">' +
               '• <strong>' + col.columnName + '</strong> (e.g. ' + col.sampleValues.join(', ') + ')' +
               '</div>';
@@ -2374,8 +2500,6 @@ function initImportHandlers() {
           
         if (detailsEl) detailsEl.innerHTML = detailsHtml;
         Toast.success('Import Completed', 'Import finished in ' + duration + 's');
-        
-        // Refresh all dashboards and data in real-time
         if (_apiDataLoaded) fetchAllData();
       } else {
         if (iconEl) {
@@ -2384,8 +2508,8 @@ function initImportHandlers() {
           iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
         }
         if (titleEl) titleEl.textContent = 'Import Failed';
-        if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (res.message || 'Unknown import error');
-        Toast.danger('Import Failed', res.message || 'Import failed');
+        if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> All file imports failed.';
+        Toast.danger('Import Failed', 'All file imports failed.');
       }
       
       openModal('importResultModal');
@@ -2406,15 +2530,15 @@ function initImportHandlers() {
         iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
       }
       if (titleEl) titleEl.textContent = 'Import Failed';
-      if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (err.message || 'An unexpected error occurred.');
+      if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + err.message;
       
       openModal('importResultModal');
-      Toast.danger('Import Failed', err.message || 'Import failed');
+      Toast.danger('Import Failed', err.message);
     });
     
     if (fileNameEl) { fileNameEl.style.display = 'none'; }
     fileInput.value = '';
-    selectedImportFile = null;
+    selectedImportFiles = [];
   });
 
   /* Download template button */
@@ -2466,9 +2590,12 @@ function populateImportHistory() {
         by: h.importer_name || h.by || h.importedBy || '-',
         date: h.created_at || h.date || h.importedAt || '-',
         status: h.status || 'Completed',
-        errorDetails: h.error_details || null
+        errorDetails: h.error_details || null,
+        duration: h.duration_sec !== undefined && h.duration_sec !== null ? parseFloat(h.duration_sec).toFixed(1) + 's' : '-'
       };
     });
+    // Reverse array to show oldest first and new imports next
+    data.reverse();
   } else {
     data = [];
   }
@@ -2483,7 +2610,7 @@ function populateImportHistory() {
       try {
         var d = new Date(item.date);
         if (!isNaN(d.getTime())) {
-          formattedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          formattedDate = d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         }
       } catch(e) {}
     }
@@ -2503,6 +2630,7 @@ function populateImportHistory() {
     html += '<td>' + item.errors + errBtn + '</td>';
     html += '<td>' + item.by + '</td>';
     html += '<td>' + formattedDate + '</td>';
+    html += '<td>' + item.duration + '</td>';
     html += '<td>' + statusBadge + '</td>';
     html += '</tr>';
   });
@@ -2916,17 +3044,20 @@ function populateViewModal(record) {
   document.getElementById('vAlumniDOB').innerText = record.date_of_birth || record.dob || '-';
   document.getElementById('vAlumniFatherName').innerText = record.father_name || record.fatherName || '-';
   document.getElementById('vAlumniEmail').innerText = record.email || '-';
+  document.getElementById('vAlumniSecEmail').innerText = record.secondary_email || '-';
   document.getElementById('vAlumniPhone').innerText = record.phone || '-';
+  document.getElementById('vAlumniSecPhone').innerText = record.secondary_phone || '-';
   
   var li = document.getElementById('vAlumniLinkedIn');
   if (record.linkedin_profile || record.linkedin) {
     var url = record.linkedin_profile || record.linkedin;
-    li.innerText = url;
-    li.href = url.startsWith('http') ? url : 'https://' + url;
-    li.style.display = 'inline';
+    var href = url.startsWith('http') ? url : 'https://' + url;
+    li.innerHTML = '<div style="display:flex;align-items:center;gap:14px;">' +
+      '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:5px;color:#0A66C2;font-size:1rem;text-decoration:none;font-weight:600;"><i class="fab fa-linkedin"></i> Profile</a>' +
+      '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:4px;color:#64748B;font-size:0.85rem;text-decoration:none;" title="Preview link"><i class="far fa-eye"></i> Preview</a>' +
+      '</div>';
   } else {
-    li.innerText = '-';
-    li.href = '#';
+    li.innerHTML = '-';
   }
   
   document.getElementById('vAlumniCompany').innerText = record.company || '-';
@@ -2965,7 +3096,6 @@ var ssColumns = [
   { key: 'company', label: 'Company', visible: true, width: 150 },
   { key: 'designation', label: 'Designation', visible: true, width: 150 },
   { key: 'experience', label: 'Experience', visible: true, width: 100 },
-  { key: 'salary', label: 'Salary', visible: true, width: 100 },
   { key: 'city', label: 'City', visible: true, width: 120 },
   { key: 'country', label: 'Country', visible: true, width: 120 },
   { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
@@ -3093,8 +3223,33 @@ window.renderSpreadsheetTable = function(data) {
         else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
         else if (status === 'Draft') badgeClass = 'badge-info';
         val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
+      } else if (col.key === 'email') {
+        var primary = row.email || '';
+        var secondary = row.secondary_email || '';
+        if (primary && secondary) {
+          val = '<div>' + primary + '</div><div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Sec: ' + secondary + '</div>';
+        } else {
+          val = primary || secondary || '-';
+        }
+      } else if (col.key === 'phone') {
+        var primary = row.phone || '';
+        var secondary = row.secondary_phone || '';
+        if (primary && secondary) {
+          val = '<div>' + primary + '</div><div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Sec: ' + secondary + '</div>';
+        } else {
+          val = primary || secondary || '-';
+        }
       } else if (col.key === 'linkedin_profile') {
-        val = val ? '<a href="' + (val.startsWith('http') ? val : 'https://' + val) + '" target="_blank" style="color:var(--primary);"><i class="fab fa-linkedin"></i> View</a>' : '-';
+        var link = row.linkedin_profile || '';
+        if (link) {
+          var href = link.startsWith('http') ? link : 'https://' + link;
+          val = '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.1rem;text-decoration:none;" title="LinkedIn"><i class="fab fa-linkedin"></i></a>' +
+            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#64748B;font-size:0.85rem;text-decoration:none;padding-left:4px;" title="Preview Profile"><i class="far fa-eye"></i></a>' +
+            '</div>';
+        } else {
+          val = '-';
+        }
       } else {
         val = val || '-';
       }
@@ -3330,11 +3485,14 @@ window.openAssignmentHistoryDrawer = function(alumniId, alumniName) {
   if (!drawer || !list) return;
 
   drawer.classList.add('show');
+  drawer.classList.add('open');
   list.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><div style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">Loading history...</div></div>';
 
   API.getAuditLogs({ target: 'Alumni#' + alumniId, page: 1, limit: 100 }).then(function(res) {
     if (res && res.success) {
       var logs = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+      // Reverse array so oldest is at the top, new entries added down at the bottom
+      logs.reverse();
       if (logs.length === 0) {
         list.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--text-muted);"><i class="fas fa-info-circle" style="font-size:1.5rem; margin-bottom:12px; display:block;"></i>No history records found for ' + alumniName + '</div>';
         return;
@@ -3364,7 +3522,10 @@ window.openAssignmentHistoryDrawer = function(alumniId, alumniName) {
 
 window.closeDrawer = function() {
   var drawer = document.getElementById('assignmentHistoryDrawer');
-  if (drawer) drawer.classList.remove('show');
+  if (drawer) {
+    drawer.classList.remove('show');
+    drawer.classList.remove('open');
+  }
 };
 
 window.reopenRecord = function(alumniId) {
@@ -3400,7 +3561,26 @@ window.editAlumniRecord = function(id) {
       document.getElementById('editRegisterNo').value = record.register_no || '';
       document.getElementById('editGender').value = record.gender || 'Male';
       document.getElementById('editBatch').value = record.batch || '';
-      document.getElementById('editDepartment').value = record.department || '';
+      var selectEl = document.getElementById('editDepartment');
+      var rawDept = record.department || '';
+      if (rawDept) {
+        var exists = false;
+        for (var i = 0; i < selectEl.options.length; i++) {
+          if (selectEl.options[i].value === rawDept) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          var opt = document.createElement('option');
+          opt.value = rawDept;
+          opt.text = rawDept;
+          selectEl.appendChild(opt);
+        }
+        selectEl.value = rawDept;
+      } else {
+        selectEl.value = '';
+      }
       document.getElementById('editFatherName').value = record.father_name || record.pi_father_name || '';
       document.getElementById('editDOB').value = record.date_of_birth || record.dob || '';
       document.getElementById('editEmail').value = record.email || '';
@@ -3508,4 +3688,19 @@ window.submitEditAlumni = function() {
     Toast.error('Edit Alumni', 'An error occurred updating the record');
   });
 };
+
+// Auto refresh dashboard data every 20 seconds silently in the background
+setInterval(function () {
+  if (typeof _apiDataLoaded !== 'undefined' && _apiDataLoaded) {
+    // Only refresh if no modals are open to avoid disrupting typing or interactions
+    var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
+    var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
+    if (openModals.length === 0 && !isInputFocused) {
+      if (typeof fetchAllData === 'function') fetchAllData();
+      if (typeof fetchSpreadsheetData === 'function' && document.getElementById('section-spreadsheet') && document.getElementById('section-spreadsheet').style.display !== 'none') {
+        fetchSpreadsheetData();
+      }
+    }
+  }
+}, 20000);
 

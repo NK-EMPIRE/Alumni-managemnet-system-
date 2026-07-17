@@ -1153,19 +1153,30 @@
         }
 
         var html = '';
-        pendingRecords.slice(0, 5).forEach(function (r) {
-            var iconClass = r.status === 'Draft' ? 'orange' : 'blue';
-            var icon = r.status === 'Draft' ? 'fa-pen' : 'fa-clock';
-            var text = r.status === 'Draft' ? 'Draft saved: ' + r.name : 'Pending update: ' + r.name;
+        var drafts = pendingRecords.filter(function (r) { return r.status === 'Draft'; });
+        var pendings = pendingRecords.filter(function (r) { return r.status === 'Pending'; });
+
+        if (pendings.length > 0) {
             html += '<div class="notif-item">' +
-                '<div class="notif-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
+                '<div class="notif-icon blue"><i class="fas fa-clock"></i></div>' +
                 '<div class="notif-text">' +
-                '<p>' + text + '</p>' +
+                '<p>You have ' + pendings.length + ' pending assignments to update</p>' +
                 '<span>Action required</span>' +
                 '</div>' +
                 '<span class="notif-dot"></span>' +
                 '</div>';
-        });
+        }
+
+        if (drafts.length > 0) {
+            html += '<div class="notif-item">' +
+                '<div class="notif-icon orange"><i class="fas fa-pen"></i></div>' +
+                '<div class="notif-text">' +
+                '<p>You have ' + drafts.length + ' saved drafts</p>' +
+                '<span>Action required</span>' +
+                '</div>' +
+                '<span class="notif-dot"></span>' +
+                '</div>';
+        }
         list.innerHTML = html;
     }
 
@@ -1480,4 +1491,14 @@ function _memberShowToast(message, type) {
         setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
     }, 3500);
 }
+
+// Auto refresh dashboard data every 20 seconds silently in the background
+setInterval(function () {
+  // Only refresh if no modals are open to avoid disrupting typing or interactions
+  var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
+  var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
+  if (openModals.length === 0 && !isInputFocused) {
+    if (typeof fetchMemberData === 'function') fetchMemberData();
+  }
+}, 20000);
 
