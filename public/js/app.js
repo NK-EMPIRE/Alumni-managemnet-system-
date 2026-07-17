@@ -490,4 +490,54 @@
     }
   };
 
+  // ─── LinkedIn URL Preview Tooltip ───────────────────────────────────────────
+  window.showLinkPreview = function (el, url) {
+    var existing = document.getElementById('_linkPreviewTooltip');
+    if (existing) { existing.remove(); return; }
+
+    var isDark = document.body.classList.contains('dark-mode');
+    var tip = document.createElement('div');
+    tip.id = '_linkPreviewTooltip';
+    tip.style.cssText = 'position:fixed;z-index:999999;background:' + (isDark ? '#1E293B' : '#fff') +
+      ';border:1px solid ' + (isDark ? '#334155' : '#E2E8F0') +
+      ';border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.18);padding:10px 14px;max-width:400px;min-width:200px;pointer-events:auto;';
+
+    var label = document.createElement('div');
+    label.style.cssText = 'font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.06em;margin-bottom:5px;';
+    label.textContent = 'LINKEDIN URL';
+    tip.appendChild(label);
+
+    var urlText = document.createElement('div');
+    urlText.style.cssText = 'font-size:12px;color:' + (isDark ? '#60A5FA' : '#1D4ED8') + ';word-break:break-all;line-height:1.5;';
+    urlText.textContent = url;
+    tip.appendChild(urlText);
+
+    var copyBtn = document.createElement('button');
+    copyBtn.style.cssText = 'margin-top:8px;padding:3px 10px;font-size:11px;border-radius:5px;border:1px solid #CBD5E1;background:transparent;cursor:pointer;color:' + (isDark ? '#CBD5E1' : '#374151') + ';';
+    copyBtn.innerHTML = '<i class="far fa-copy"></i> Copy';
+    copyBtn.onclick = function (ev) {
+      ev.stopPropagation();
+      navigator.clipboard.writeText(url).then(function () {
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(function () { copyBtn.innerHTML = '<i class="far fa-copy"></i> Copy'; }, 1500);
+      });
+    };
+    tip.appendChild(copyBtn);
+    document.body.appendChild(tip);
+
+    var rect = el.getBoundingClientRect();
+    var left = Math.min(rect.left, window.innerWidth - 410);
+    tip.style.top = (rect.bottom + 6) + 'px';
+    tip.style.left = Math.max(8, left) + 'px';
+
+    var dismiss = function (ev) {
+      if (!tip.contains(ev.target) && ev.target !== el) {
+        tip.remove();
+        document.removeEventListener('click', dismiss, true);
+      }
+    };
+    setTimeout(function () { document.addEventListener('click', dismiss, true); }, 10);
+  };
+
 })();
+

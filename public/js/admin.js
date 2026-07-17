@@ -3052,9 +3052,10 @@ function populateViewModal(record) {
   if (record.linkedin_profile || record.linkedin) {
     var url = record.linkedin_profile || record.linkedin;
     var href = url.startsWith('http') ? url : 'https://' + url;
+    var safeHref = href.replace(/'/g, "\\'");
     li.innerHTML = '<div style="display:flex;align-items:center;gap:14px;">' +
       '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:5px;color:#0A66C2;font-size:1rem;text-decoration:none;font-weight:600;"><i class="fab fa-linkedin"></i> Profile</a>' +
-      '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:4px;color:#64748B;font-size:0.85rem;text-decoration:none;" title="Preview link"><i class="far fa-eye"></i> Preview</a>' +
+      '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + safeHref + '\')" style="display:flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;" title="Show URL"><i class="far fa-eye"></i> Preview</button>' +
       '</div>';
   } else {
     li.innerHTML = '-';
@@ -3244,8 +3245,8 @@ window.renderSpreadsheetTable = function(data) {
         if (link) {
           var href = link.startsWith('http') ? link : 'https://' + link;
           val = '<div style="display:flex;align-items:center;gap:10px;">' +
-            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.1rem;text-decoration:none;" title="LinkedIn"><i class="fab fa-linkedin"></i></a>' +
-            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#64748B;font-size:0.85rem;text-decoration:none;padding-left:4px;" title="Preview Profile"><i class="far fa-eye"></i></a>' +
+            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
+            '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
             '</div>';
         } else {
           val = '-';
