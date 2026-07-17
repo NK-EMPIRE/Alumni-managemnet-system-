@@ -264,6 +264,7 @@ function fetchAllData() {
     populateTLRankings();
     populateNotifications();
     populateImportHistory();
+    populateAuditActionFilter();
     populateAuditLogTable();
     populateTeamLeaderDropdowns();
     populateProgressLeaderDropdown();
@@ -284,6 +285,7 @@ function fetchAllData() {
     populateTLRankings();
     populateNotifications();
     populateImportHistory();
+    populateAuditActionFilter();
     populateAuditLogTable();
     populateTeamLeaderDropdowns();
     populateProgressLeaderDropdown();
@@ -2669,11 +2671,34 @@ function initAuditHandlers() {
   }
 }
 
+function populateAuditActionFilter() {
+  var select = document.getElementById('auditActionFilter');
+  if (!select) return;
+  var currentVal = select.value;
+  var actions = [];
+  if (_apiAuditLogs && _apiAuditLogs.records) {
+    _apiAuditLogs.records.forEach(function (r) {
+      if (r.action && actions.indexOf(r.action) === -1) actions.push(r.action);
+    });
+  } else {
+    auditLogs.forEach(function (r) {
+      if (r.action && actions.indexOf(r.action) === -1) actions.push(r.action);
+    });
+  }
+  actions.sort();
+  select.innerHTML = '<option value="all">All Actions</option>';
+  actions.forEach(function (a) {
+    select.innerHTML += '<option value="' + a + '">' + a.charAt(0).toUpperCase() + a.slice(1) + '</option>';
+  });
+  select.value = currentVal;
+}
+
 function fetchLatestAuditLogs(callback) {
   API.getAuditLogs({ page: 1, limit: 1000 }).then(function (res) {
     if (res.success && res.data) {
       _apiAuditLogs = res.data;
     }
+    populateAuditActionFilter();
     if (callback) callback();
   }).catch(function (err) {
     console.error('Failed to fetch latest audit logs:', err);
