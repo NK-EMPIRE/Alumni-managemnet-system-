@@ -1340,7 +1340,6 @@
         <div class="card" style="background:#fff;padding:24px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:28px;">
           <div class="tabs" id="settingsTabs" style="display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid #E5E7EB;padding-bottom:10px;">
             <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">General</button>
-            <button class="tab-item" data-tab="notifications" onclick="switchSettingsTab('notifications',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Notifications</button>
             <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Security</button>
           </div>
           <div class="tab-content active" id="tab-general">
@@ -1354,17 +1353,6 @@
             </div>
             <button class="btn btn-primary" onclick="saveMemberProfile()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
               <i class="fas fa-save"></i> Save Settings
-            </button>
-          </div>
-          <div class="tab-content" id="tab-notifications" style="display:none;">
-            <div class="form-group" style="margin-bottom:16px;display:flex;flex-direction:column;gap:12px;">
-              <label class="form-switch" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;color:var(--text-secondary);">
-                <input type="checkbox" checked style="width:16px;height:16px;">
-                Email alerts for daily target reminders
-              </label>
-            </div>
-            <button class="btn btn-primary" onclick="showToast('Notification preferences saved!', 'success')" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
-              <i class="fas fa-save"></i> Save Preferences
             </button>
           </div>
           <div class="tab-content" id="tab-security" style="display:none;">

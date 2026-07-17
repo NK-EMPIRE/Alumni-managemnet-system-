@@ -80,22 +80,22 @@
     var lockMsg = document.getElementById('lockMessage');
     var checkboxes = document.querySelectorAll('.member-assign-check');
     var inputs = document.querySelectorAll('.member-count-input');
-    var leaderInput = document.getElementById('leaderCount');
     var saveBtn = document.getElementById('saveAssignmentBtn');
     var autoDistBtn = document.getElementById('autoDistributeBtn');
     var disabled = isDistributionLocked;
     if (lockMsg) lockMsg.style.display = disabled ? 'flex' : 'none';
     checkboxes.forEach(function (cb) { cb.disabled = disabled; });
     inputs.forEach(function (inp) { inp.disabled = disabled; });
-    if (leaderInput) leaderInput.disabled = disabled;
     if (saveBtn) saveBtn.disabled = disabled;
     if (autoDistBtn) autoDistBtn.disabled = disabled;
   }
 
   function populateOverviewCards() {
     var container = document.getElementById('overviewCards');
+    var leaderMember = teamMembers.find(function (m) { return m.isLeader; });
+    var assignedValue = leaderMember ? leaderMember.assigned : Math.max(0, totalAlumni - totalUndistributed - teamMembers.reduce(function (s, m) { return s + m.assigned; }, 0));
     var cards = [
-      { icon: 'fa-user-graduate', color: 'blue', value: totalAlumni, label: 'Assigned Alumni', change: '', changeDir: 'up' },
+      { icon: 'fa-user-graduate', color: 'blue', value: assignedValue, label: 'Assigned Alumni', change: '', changeDir: 'up' },
       { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '', changeDir: 'up' },
       { icon: 'fa-clock', color: 'yellow', value: totalPending, label: 'Pending', change: '', changeDir: 'down' },
       { icon: 'fa-file-alt', color: 'blue', value: totalDraft, label: 'In Draft', change: '', changeDir: 'up' },
@@ -280,9 +280,9 @@
     var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
     var cleared = JSON.parse(localStorage.getItem('cleared_notifications_leader') || '[]');
     // Filter completed or draft records as notifications
-    var updatedRecords = records.filter(function (r) { 
+    var updatedRecords = records.filter(function (r) {
       var key = (r.alumni_id || r.id) + '_' + r.status;
-      return (r.status === 'Completed' || r.status === 'Draft') && cleared.indexOf(key) === -1; 
+      return (r.status === 'Completed' || r.status === 'Draft') && cleared.indexOf(key) === -1;
     });
     var nc = document.getElementById('notifCount');
 
@@ -315,12 +315,12 @@
     if (nc) { nc.textContent = unreadCount; nc.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
   }
 
-  window.clearAllNotifications = function() {
+  window.clearAllNotifications = function () {
     var list = document.getElementById('notifList');
     if (list) {
       list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No new notifications</div>';
     }
-    
+
     var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
     var cleared = JSON.parse(localStorage.getItem('cleared_notifications_leader') || '[]');
     records.forEach(function (r) {
@@ -344,21 +344,6 @@
     if (poolEl) poolEl.textContent = totalAlumni;
     var remainingEl = document.getElementById('remainingToAssign');
     if (remainingEl) remainingEl.textContent = totalPending;
-    var leaderNameEl = document.querySelector('#assignMembersList .leader-name');
-    var user = API.getUser();
-    var leaderName = user && user.name ? user.name : 'Arun Rajan';
-    var leaderInitials = leaderName.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
-    var leaderRow = document.querySelector('#assignMembersList + div .assign-member-row') || document.querySelector('.assign-member-row:first-child');
-    if (leaderRow) {
-      var nameEl = leaderRow.querySelector('div[style*="flex:1"] div:first-child');
-      if (nameEl) {
-        var badgeSpan = nameEl.querySelector('.leader-badge');
-        if (badgeSpan) nameEl.innerHTML = leaderName + ' <span class="leader-badge">Leader</span>';
-        else nameEl.textContent = leaderName;
-      }
-      var avatarEl = leaderRow.querySelector('.member-avatar');
-      if (avatarEl) avatarEl.textContent = leaderInitials;
-    }
 
     var list = document.getElementById('assignMembersList');
     var html = '';
@@ -373,7 +358,7 @@
     });
     list.innerHTML = html;
 
-    document.querySelectorAll('.member-assign-check, .member-count-input, #leaderCount').forEach(function (el) {
+    document.querySelectorAll('.member-assign-check, .member-count-input').forEach(function (el) {
       el.addEventListener('input', updateModalTotal);
       el.addEventListener('change', updateModalTotal);
     });
@@ -390,8 +375,6 @@
 
   function updateModalTotal() {
     var total = 0;
-    var leaderVal = parseInt(document.getElementById('leaderCount').value) || 0;
-    total += leaderVal;
     document.querySelectorAll('.member-count-input').forEach(function (inp) {
       var cb = inp.closest('.assign-member-row').querySelector('.member-assign-check');
       if (cb && cb.checked) {
@@ -410,7 +393,6 @@
     }
     var checkboxes = document.querySelectorAll('.member-assign-check:checked');
     var allCountInputs = document.querySelectorAll('.member-count-input');
-    var leaderInput = document.getElementById('leaderCount');
     var checkedIds = [];
     checkboxes.forEach(function (cb) { checkedIds.push(parseInt(cb.getAttribute('data-id'))); });
 
@@ -421,13 +403,10 @@
       }
     });
 
-    var totalPeople = checkedIds.length + 1;
+    var totalPeople = checkedIds.length || 1;
     var pool = totalPending;
     var base = Math.floor(pool / totalPeople);
     var extra = pool - (base * totalPeople);
-
-    leaderInput.value = base + (extra > 0 ? 1 : 0);
-    extra--;
 
     allCountInputs.forEach(function (inp) {
       var id = parseInt(inp.getAttribute('data-id'));
@@ -438,7 +417,7 @@
     });
 
     updateModalTotal();
-    showToast('Distribution Complete', 'Alumni count evenly distributed among selected members and leader.', 'success');
+    showToast('Distribution Complete', 'Alumni count evenly distributed among selected members.', 'success');
   }
 
   function initCharts() {
@@ -539,7 +518,7 @@
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
-        
+
         var globalHeader = document.getElementById('globalPageHeader');
         if (globalHeader) {
           if (page === 'dashboard') {
@@ -686,9 +665,6 @@
       saveAssignmentBtn.disabled = true;
       saveAssignmentBtn.textContent = 'Saving...';
       var allocations = [];
-      var leaderId = API.getUser().id;
-      var leaderCount = parseInt(document.getElementById('leaderCount').value) || 0;
-      if (leaderCount > 0 && leaderId) allocations.push({ userId: leaderId, count: leaderCount });
       document.querySelectorAll('.member-count-input').forEach(function (inp) {
         var cb = inp.closest('.assign-member-row').querySelector('.member-assign-check');
         if (cb && cb.checked) {
@@ -729,50 +705,6 @@
     }
   }
 
-  function setupExport() {
-    var btn = document.getElementById('exportReportBtn');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      if (!filteredReportData || filteredReportData.length === 0) {
-        showToast('Warning', 'No team progress data available to export.', 'warning');
-        return;
-      }
-      var csv = '\uFEFF';
-      csv += 'S.No,Alumni Name,Department,Batch,Assigned Member,Company,Designation,Status,Update Date\r\n';
-      filteredReportData.forEach(function (r, idx) {
-        var sno = idx + 1;
-        var name = '"' + (r.name || '').replace(/"/g, '""') + '"';
-        var dept = '"' + (r.department || '').replace(/"/g, '""') + '"';
-        var batch = '"' + (r.batch || '').replace(/"/g, '""') + '"';
-        var member = '"' + (r.assigned_to || r.assignedTo || r.teamMember || '').replace(/"/g, '""') + '"';
-        var company = '"' + (r.company || '').replace(/"/g, '""') + '"';
-        var designation = '"' + (r.designation || '').replace(/"/g, '""') + '"';
-        var status = '"' + (r.status || '').replace(/"/g, '""') + '"';
-        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
-        if (compDate !== '-') {
-          compDate = new Date(compDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        }
-        csv += sno + ',' + name + ',' + dept + ',' + batch + ',' + member + ',' + company + ',' + designation + ',' + status + ',"' + compDate + '"\r\n';
-      });
-      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'team_progress_report_' + new Date().toISOString().slice(0, 10) + '.csv';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-      showToast('Success', 'Report exported successfully as CSV.', 'success');
-    });
-    
-    var exp = document.getElementById('exportBtn');
-    if (exp) {
-      exp.addEventListener('click', function () {
-        btn.click();
-      });
-    }
-  }
-
   function setupLockFeatures() {
     updateLockBadge();
   }
@@ -797,7 +729,7 @@
   function loadMyAssignments() {
     var tbody = document.getElementById('myAssignmentsTableBody');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading assignments...</td></tr>';
-    
+
     API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 10000 }).then(function (res) {
       if (res && res.success) {
         myAssignmentsData = res.data.records || res.data || [];
@@ -919,7 +851,7 @@
   function openUpdateModal(alumniId) {
     currentSelectedAlumniId = alumniId;
     var overlay = document.getElementById('updateModal');
-    
+
     // Clear old errors
     document.querySelectorAll('#updateForm input, #updateForm select').forEach(function (el) { el.classList.remove('error'); });
     document.querySelectorAll('#updateForm .error-text').forEach(function (el) { el.style.display = 'none'; });
@@ -931,13 +863,13 @@
         document.getElementById('modalTitle').textContent = record.name || 'Update Profile';
         document.getElementById('modalSubtitle').textContent = (record.department || '') + ' (' + (record.batch || '') + ')';
         document.getElementById('modalAvatar').textContent = (record.name || 'A').charAt(0).toUpperCase();
-        
+
         var status = record.assignment_status || 'Pending';
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
         var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
         var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
-        
+
         var statusBadge = document.getElementById('modalStatusBadge');
         statusBadge.className = 'status-badge ' + badgeClass;
         statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
@@ -974,21 +906,21 @@
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
         var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
         if (record.secondary_email) {
-            secEmailContainer.style.display = 'block';
-            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+          secEmailContainer.style.display = 'block';
+          if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
         } else {
-            secEmailContainer.style.display = 'none';
-            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+          secEmailContainer.style.display = 'none';
+          if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
         var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
         var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('button');
         if (record.secondary_phone) {
-            secPhoneContainer.style.display = 'block';
-            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+          secPhoneContainer.style.display = 'block';
+          if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
         } else {
-            secPhoneContainer.style.display = 'none';
-            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+          secPhoneContainer.style.display = 'none';
+          if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
         if (record.higher_studies === 'Yes') {
@@ -1108,7 +1040,7 @@
           document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
           document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
           document.getElementById('fieldRemarks').value = data.remarks || '';
-          
+
           document.getElementById('higherStudiesDetails').style.display = data.higherStudies === 'Yes' ? 'block' : 'none';
           showToast('Info', 'Loaded unsaved changes from auto-save draft.', 'info');
         }
@@ -1305,16 +1237,16 @@
   ];
 
   var debounceTimer;
-  window.debounceSearch = function() {
+  window.debounceSearch = function () {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(function() {
+    debounceTimer = setTimeout(function () {
       ssSearchQuery = document.getElementById('ssSearch').value;
       ssPage = 1;
       fetchSpreadsheetData();
     }, 300);
   };
 
-  window.fetchSpreadsheetData = function() {
+  window.fetchSpreadsheetData = function () {
     var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
     var dept = document.getElementById('ssFilterDept').value;
     var batch = document.getElementById('ssFilterBatch').value;
@@ -1333,10 +1265,10 @@
 
     var body = document.getElementById('ssTableBody');
     if (body) {
-      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 1) + '" style="text-align: center; padding: 40px;"><div class="spinner"></div> Loading...</td></tr>';
+      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function (c) { return c.visible; }).length + 1) + '" style="text-align: center; padding: 40px;"><div class="spinner"></div> Loading...</td></tr>';
     }
 
-    API.getAssignedAlumni(params).then(function(res) {
+    API.getAssignedAlumni(params).then(function (res) {
       if (res && res.success) {
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
         var pagination = (res.data && res.data.pagination) ? res.data.pagination : null;
@@ -1346,19 +1278,19 @@
       } else {
         showToast('Failed to retrieve records', 'error');
       }
-    }).catch(function(err) {
+    }).catch(function (err) {
       console.error('Error fetching alumni:', err);
       showToast('An error occurred fetching records', 'error');
     });
   };
 
-  window.renderSpreadsheetTable = function(data) {
+  window.renderSpreadsheetTable = function (data) {
     var headRow = document.getElementById('ssTableHeadRow');
     var body = document.getElementById('ssTableBody');
     if (!headRow || !body) return;
 
     var headHtml = '<th class="sticky-col" style="width: 50px; z-index: 5;">S.No</th>';
-    ssColumns.forEach(function(col) {
+    ssColumns.forEach(function (col) {
       if (!col.visible) return;
       var sortIcon = '';
       if (ssSortColumn === col.key) {
@@ -1374,17 +1306,17 @@
     headRow.innerHTML = headHtml;
 
     if (data.length === 0) {
-      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 1) + '" style="text-align: center; padding: 24px; color: var(--text-muted);">No records found</td></tr>';
+      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function (c) { return c.visible; }).length + 1) + '" style="text-align: center; padding: 24px; color: var(--text-muted);">No records found</td></tr>';
       return;
     }
 
     var html = '';
     var startSerial = (ssPage - 1) * ssLimit + 1;
-    data.forEach(function(row, idx) {
+    data.forEach(function (row, idx) {
       var serial = startSerial + idx;
       html += '<tr>';
       html += '<td class="sticky-col" style="text-align: center; font-weight: 500;">' + serial + '</td>';
-      ssColumns.forEach(function(col) {
+      ssColumns.forEach(function (col) {
         if (!col.visible) return;
         var val = '';
         if (col.key === 'assignment_status') {
@@ -1407,7 +1339,7 @@
             val = '-';
           }
         } else {
-          val = row[col.key] || row[col.key.replace(/_([a-z])/g, function(g){return g[1].toUpperCase();})] || '-';
+          val = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '-';
         }
         html += '<td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + val + '</td>';
       });
@@ -1417,7 +1349,7 @@
     setupResizers();
   };
 
-  window.renderSpreadsheetPagination = function() {
+  window.renderSpreadsheetPagination = function () {
     var info = document.getElementById('ssPaginationInfo');
     var container = document.getElementById('ssPagination');
     if (!info || !container) return;
@@ -1441,18 +1373,18 @@
     container.innerHTML = pagHtml;
   };
 
-  window.changeSpreadsheetPage = function(page) {
+  window.changeSpreadsheetPage = function (page) {
     ssPage = page;
     fetchSpreadsheetData();
   };
 
-  window.changeSpreadsheetPageSize = function(size) {
+  window.changeSpreadsheetPageSize = function (size) {
     ssLimit = parseInt(size, 10);
     ssPage = 1;
     fetchSpreadsheetData();
   };
 
-  window.sortSpreadsheet = function(colKey) {
+  window.sortSpreadsheet = function (colKey) {
     if (ssSortColumn === colKey) {
       ssSortDirection = ssSortDirection === 'ASC' ? 'DESC' : 'ASC';
     } else {
@@ -1462,7 +1394,7 @@
     fetchSpreadsheetData();
   };
 
-  window.toggleColumnVisibilityMenu = function() {
+  window.toggleColumnVisibilityMenu = function () {
     var menu = document.getElementById('colVisibilityMenu');
     var btn = document.getElementById('colVisibilityBtn');
     if (!menu || !btn) return;
@@ -1473,7 +1405,7 @@
     }
 
     var html = '<div style="font-weight:600;font-size:0.85rem;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;">Toggle Columns</div>';
-    ssColumns.forEach(function(col) {
+    ssColumns.forEach(function (col) {
       var checked = col.visible ? 'checked' : '';
       html += '<label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;margin:4px 0;cursor:pointer;">' +
         '<input type="checkbox" ' + checked + ' onchange="toggleSpreadsheetColumn(\'' + col.key + '\')"> ' +
@@ -1493,20 +1425,20 @@
         document.removeEventListener('click', closeMenu);
       }
     }
-    setTimeout(function() {
+    setTimeout(function () {
       document.addEventListener('click', closeMenu);
     }, 50);
   };
 
-  window.toggleSpreadsheetColumn = function(key) {
-    var col = ssColumns.find(function(c) { return c.key === key; });
+  window.toggleSpreadsheetColumn = function (key) {
+    var col = ssColumns.find(function (c) { return c.key === key; });
     if (col) {
       col.visible = !col.visible;
       fetchSpreadsheetData();
     }
   };
 
-  window.exportAlumniCSV = function() {
+  window.exportAlumniCSV = function () {
     var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
     var dept = document.getElementById('ssFilterDept').value;
     var batch = document.getElementById('ssFilterBatch').value;
@@ -1523,22 +1455,22 @@
       onlyMe: false
     };
 
-    API.getAssignedAlumni(params).then(function(res) {
+    API.getAssignedAlumni(params).then(function (res) {
       if (res && res.success) {
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
         var csvContent = 'data:text/csv;charset=utf-8,';
-        var headers = ssColumns.map(function(c) { return c.label; });
+        var headers = ssColumns.map(function (c) { return c.label; });
         csvContent += headers.join(',') + '\r\n';
 
-        records.forEach(function(row) {
-          var line = ssColumns.map(function(col) {
+        records.forEach(function (row) {
+          var line = ssColumns.map(function (col) {
             var cellVal = '';
             if (col.key === 'member_name') {
               cellVal = row.member_name || row.teamMember || row.assigned_to || '';
             } else if (col.key === 'updated_date') {
               cellVal = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
             } else {
-              cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function(g){return g[1].toUpperCase();})] || '';
+              cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '';
             }
             var cleanVal = String(cellVal).replace(/"/g, '""');
             return '"' + cleanVal + '"';
@@ -1563,12 +1495,12 @@
     var table = document.querySelector('.spreadsheet-table');
     if (!table) return;
     var cols = table.querySelectorAll('th');
-    cols.forEach(function(col) {
+    cols.forEach(function (col) {
       var resizer = col.querySelector('.resizer');
       if (!resizer) return;
 
       var startX, startWidth;
-      resizer.addEventListener('mousedown', function(e) {
+      resizer.addEventListener('mousedown', function (e) {
         startX = e.pageX;
         startWidth = col.offsetWidth;
         document.addEventListener('mousemove', resize);
@@ -1581,7 +1513,7 @@
         col.style.width = width + 'px';
         col.style.minWidth = width + 'px';
         var colLabel = col.innerText.trim();
-        var match = ssColumns.find(function(c) { return c.label === colLabel; });
+        var match = ssColumns.find(function (c) { return c.label === colLabel; });
         if (match) match.width = width;
       }
 
@@ -1594,12 +1526,12 @@
 
   function loadTeamReport() {
     // Populate filter dropdown with members
-    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function(res) {
+    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function (res) {
       if (res && res.success && Array.isArray(res.data.records)) {
         var dropdown = document.getElementById('ssFilterMember');
         if (dropdown) {
           var html = '<option value="">All Members</option>';
-          res.data.records.forEach(function(m) {
+          res.data.records.forEach(function (m) {
             html += '<option value="' + m.user_id + '">' + m.first_name + ' ' + m.last_name + '</option>';
           });
           dropdown.innerHTML = html;
@@ -1668,13 +1600,13 @@
       avatarEls.forEach(function (el) { if (el) el.textContent = user.name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2); });
       var greeting = document.querySelector('#globalPageHeader p, .page-header p');
       if (greeting) greeting.textContent = 'Welcome back, ' + user.name.split(' ')[0] + '! Here\'s your team\'s progress overview.';
-      
+
       var roleEl = document.querySelector('.sidebar-user-role');
       if (roleEl) {
         var role = user.role || 'LEADER';
         roleEl.textContent = (role === 'LEADER' || role === 'ADMIN') ? 'Team Leader' : 'Team Member';
       }
-      
+
       // Populate General Settings fields
       var settingsName = document.getElementById('settingsName');
       var settingsEmail = document.getElementById('settingsEmail');
@@ -1717,7 +1649,7 @@
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
               status: m.status || (m.progress >= 75 ? 'On Track' : m.progress >= 50 ? 'Behind' : 'Critical'),
               lastActivity: m.lastActivity || '-',
-              isLeader: isLeader
+              isLeader: m.isLeader || false
             };
           });
         }
@@ -1759,7 +1691,7 @@
         document.getElementById('distLoadingState').style.display = 'none';
         document.getElementById('distEmptyMsg').textContent = 'Click Preview to load distribution.';
         document.getElementById('confirmDistributeBtn').style.display = 'none';
-        
+
         // Fetch batches and populate select dropdown
         var batchInput = document.getElementById('distBatchInput');
         if (batchInput) {
@@ -1778,7 +1710,7 @@
             batchInput.innerHTML = '<option value="">Error loading batches</option>';
           });
         }
-        
+
         document.getElementById('distributeModalOverlay').classList.add('show');
       });
     }
@@ -1858,9 +1790,9 @@
         confirmBtn.textContent = 'Distributing...';
         API.leaderDistribute(body).then(function (res) {
           document.getElementById('distributeModalOverlay').classList.remove('show');
-          var count = (res.data && res.data.distributed !== undefined) ? res.data.distributed : 
-                      ((res.data && res.data.data && res.data.data.distributed !== undefined) ? res.data.data.distributed : 
-                       (res.distributed || 0));
+          var count = (res.data && res.data.distributed !== undefined) ? res.data.distributed :
+            ((res.data && res.data.data && res.data.data.distributed !== undefined) ? res.data.data.distributed :
+              (res.distributed || 0));
           showToast('Success', count + ' alumni distributed successfully!', 'success');
           fetchLeaderData();
         }).catch(function (err) {
@@ -1933,7 +1865,6 @@
     setupProfileDropdown();
     setupSearchAndFilter();
     setupModals();
-    setupExport();
     setupLockFeatures();
     setupSessionTimeout();
     setupUpdateModalEvents();
@@ -1997,13 +1928,13 @@
     });
   }
 
-  window.switchSettingsTab = function(tabName, btn) {
+  window.switchSettingsTab = function (tabName, btn) {
     var tabsContainer = btn.closest('.card-body');
-    tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
+    tabsContainer.querySelectorAll('.tab-item').forEach(function (item) {
       item.classList.remove('active');
       item.style.fontWeight = 'normal';
     });
-    tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
+    tabsContainer.querySelectorAll('.tab-content').forEach(function (content) {
       content.style.display = 'none';
       content.classList.remove('active');
     });
@@ -2016,7 +1947,7 @@
     }
   };
 
-  window.saveLeaderProfile = function() {
+  window.saveLeaderProfile = function () {
     var user = API.getUser();
     if (!user || !user.id) return;
     var name = document.getElementById('settingsName').value.trim();
@@ -2025,25 +1956,25 @@
       showToast('Validation Error', 'Name and Email are required.', 'danger');
       return;
     }
-    
+
     // Split name to first and last
     var parts = name.split(' ');
     var fName = parts[0];
     var lName = parts.slice(1).join(' ') || '';
 
-    API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function(res) {
+    API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function (res) {
       showToast('Success', 'Profile settings updated successfully!', 'success');
       // Update local storage representation
       user.name = name;
       user.email = email;
       localStorage.setItem('user', JSON.stringify(user));
       setLeaderUserInfo();
-    }).catch(function(err) {
+    }).catch(function (err) {
       showToast('Error', err.message || 'Failed to update profile.', 'danger');
     });
   };
 
-  window.togglePasswordVisibility = function(id, btn) {
+  window.togglePasswordVisibility = function (id, btn) {
     var input = document.getElementById(id);
     var icon = btn.querySelector('i');
     if (!input || !icon) return;
@@ -2055,29 +1986,29 @@
       icon.className = 'far fa-eye';
     }
   };
-  
+
   window.togglePassword = window.togglePasswordVisibility; // Alias just in case
-  
-  window.showPasswordSuccessModal = function() {
+
+  window.showPasswordSuccessModal = function () {
     var modal = document.getElementById('passwordSuccessModal');
     if (modal) modal.classList.add('show');
   };
 
-  window.closePasswordSuccessModal = function() {
+  window.closePasswordSuccessModal = function () {
     var modal = document.getElementById('passwordSuccessModal');
     if (modal) modal.classList.remove('show');
   };
 
-  window.saveLeaderPassword = function() {
-    var oldPassEl    = document.getElementById('settingsOldPass');
-    var newPassEl    = document.getElementById('settingsNewPass');
+  window.saveLeaderPassword = function () {
+    var oldPassEl = document.getElementById('settingsOldPass');
+    var newPassEl = document.getElementById('settingsNewPass');
     var confirmPassEl = document.getElementById('settingsConfirmPass');
-    var btn          = document.querySelector('#tab-security .btn-primary');
+    var btn = document.querySelector('#tab-security .btn-primary');
 
     if (!oldPassEl || !newPassEl || !confirmPassEl) return;
 
-    var oldVal     = oldPassEl.value.trim();
-    var newVal     = newPassEl.value.trim();
+    var oldVal = oldPassEl.value.trim();
+    var newVal = newPassEl.value.trim();
     var confirmVal = confirmPassEl.value.trim();
 
     // --- Validation ---
@@ -2106,16 +2037,16 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
 
     API.changePassword(oldVal, newVal)
-      .then(function(res) {
-        oldPassEl.value    = '';
-        newPassEl.value    = '';
+      .then(function (res) {
+        oldPassEl.value = '';
+        newPassEl.value = '';
         confirmPassEl.value = '';
         window.showPasswordSuccessModal();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         showToast('Error', err.message || 'Failed to update password. Please try again.', 'danger');
       })
-      .finally(function() {
+      .finally(function () {
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-save"></i> Update Password';
