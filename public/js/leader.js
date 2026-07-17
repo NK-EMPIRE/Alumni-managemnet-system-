@@ -80,22 +80,22 @@
     var lockMsg = document.getElementById('lockMessage');
     var checkboxes = document.querySelectorAll('.member-assign-check');
     var inputs = document.querySelectorAll('.member-count-input');
-    var leaderInput = document.getElementById('leaderCount');
     var saveBtn = document.getElementById('saveAssignmentBtn');
     var autoDistBtn = document.getElementById('autoDistributeBtn');
     var disabled = isDistributionLocked;
     if (lockMsg) lockMsg.style.display = disabled ? 'flex' : 'none';
     checkboxes.forEach(function (cb) { cb.disabled = disabled; });
     inputs.forEach(function (inp) { inp.disabled = disabled; });
-    if (leaderInput) leaderInput.disabled = disabled;
     if (saveBtn) saveBtn.disabled = disabled;
     if (autoDistBtn) autoDistBtn.disabled = disabled;
   }
 
   function populateOverviewCards() {
     var container = document.getElementById('overviewCards');
+    var leaderMember = teamMembers.find(function (m) { return m.isLeader; });
+    var assignedValue = leaderMember ? leaderMember.assigned : Math.max(0, totalAlumni - totalUndistributed - teamMembers.reduce(function (s, m) { return s + m.assigned; }, 0));
     var cards = [
-      { icon: 'fa-user-graduate', color: 'blue', value: totalAlumni, label: 'Assigned Alumni', change: '', changeDir: 'up' },
+      { icon: 'fa-user-graduate', color: 'blue', value: assignedValue, label: 'Assigned Alumni', change: '', changeDir: 'up' },
       { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '', changeDir: 'up' },
       { icon: 'fa-clock', color: 'yellow', value: totalPending, label: 'Pending', change: '', changeDir: 'down' },
       { icon: 'fa-file-alt', color: 'blue', value: totalDraft, label: 'In Draft', change: '', changeDir: 'up' },
@@ -332,21 +332,6 @@
     if (poolEl) poolEl.textContent = totalAlumni;
     var remainingEl = document.getElementById('remainingToAssign');
     if (remainingEl) remainingEl.textContent = totalPending;
-    var leaderNameEl = document.querySelector('#assignMembersList .leader-name');
-    var user = API.getUser();
-    var leaderName = user && user.name ? user.name : 'Arun Rajan';
-    var leaderInitials = leaderName.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
-    var leaderRow = document.querySelector('#assignMembersList + div .assign-member-row') || document.querySelector('.assign-member-row:first-child');
-    if (leaderRow) {
-      var nameEl = leaderRow.querySelector('div[style*="flex:1"] div:first-child');
-      if (nameEl) {
-        var badgeSpan = nameEl.querySelector('.leader-badge');
-        if (badgeSpan) nameEl.innerHTML = leaderName + ' <span class="leader-badge">Leader</span>';
-        else nameEl.textContent = leaderName;
-      }
-      var avatarEl = leaderRow.querySelector('.member-avatar');
-      if (avatarEl) avatarEl.textContent = leaderInitials;
-    }
 
     var list = document.getElementById('assignMembersList');
     var html = '';
@@ -361,7 +346,7 @@
     });
     list.innerHTML = html;
 
-    document.querySelectorAll('.member-assign-check, .member-count-input, #leaderCount').forEach(function (el) {
+    document.querySelectorAll('.member-assign-check, .member-count-input').forEach(function (el) {
       el.addEventListener('input', updateModalTotal);
       el.addEventListener('change', updateModalTotal);
     });
@@ -378,8 +363,6 @@
 
   function updateModalTotal() {
     var total = 0;
-    var leaderVal = parseInt(document.getElementById('leaderCount').value) || 0;
-    total += leaderVal;
     document.querySelectorAll('.member-count-input').forEach(function (inp) {
       var cb = inp.closest('.assign-member-row').querySelector('.member-assign-check');
       if (cb && cb.checked) {
@@ -398,7 +381,6 @@
     }
     var checkboxes = document.querySelectorAll('.member-assign-check:checked');
     var allCountInputs = document.querySelectorAll('.member-count-input');
-    var leaderInput = document.getElementById('leaderCount');
     var checkedIds = [];
     checkboxes.forEach(function (cb) { checkedIds.push(parseInt(cb.getAttribute('data-id'))); });
 
@@ -409,13 +391,10 @@
       }
     });
 
-    var totalPeople = checkedIds.length + 1;
+    var totalPeople = checkedIds.length || 1;
     var pool = totalPending;
     var base = Math.floor(pool / totalPeople);
     var extra = pool - (base * totalPeople);
-
-    leaderInput.value = base + (extra > 0 ? 1 : 0);
-    extra--;
 
     allCountInputs.forEach(function (inp) {
       var id = parseInt(inp.getAttribute('data-id'));
@@ -426,7 +405,7 @@
     });
 
     updateModalTotal();
-    showToast('Distribution Complete', 'Alumni count evenly distributed among selected members and leader.', 'success');
+    showToast('Distribution Complete', 'Alumni count evenly distributed among selected members.', 'success');
   }
 
   function initCharts() {
@@ -674,9 +653,6 @@
       saveAssignmentBtn.disabled = true;
       saveAssignmentBtn.textContent = 'Saving...';
       var allocations = [];
-      var leaderId = API.getUser().id;
-      var leaderCount = parseInt(document.getElementById('leaderCount').value) || 0;
-      if (leaderCount > 0 && leaderId) allocations.push({ userId: leaderId, count: leaderCount });
       document.querySelectorAll('.member-count-input').forEach(function (inp) {
         var cb = inp.closest('.assign-member-row').querySelector('.member-assign-check');
         if (cb && cb.checked) {
@@ -713,50 +689,6 @@
     if (refreshBtn) {
       refreshBtn.addEventListener('click', function () {
         document.getElementById('refreshDataBtn').click();
-      });
-    }
-  }
-
-  function setupExport() {
-    var btn = document.getElementById('exportReportBtn');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      if (!filteredReportData || filteredReportData.length === 0) {
-        showToast('Warning', 'No team progress data available to export.', 'warning');
-        return;
-      }
-      var csv = '\uFEFF';
-      csv += 'S.No,Alumni Name,Department,Batch,Assigned Member,Company,Designation,Status,Update Date\r\n';
-      filteredReportData.forEach(function (r, idx) {
-        var sno = idx + 1;
-        var name = '"' + (r.name || '').replace(/"/g, '""') + '"';
-        var dept = '"' + (r.department || '').replace(/"/g, '""') + '"';
-        var batch = '"' + (r.batch || '').replace(/"/g, '""') + '"';
-        var member = '"' + (r.assigned_to || r.assignedTo || r.teamMember || '').replace(/"/g, '""') + '"';
-        var company = '"' + (r.company || '').replace(/"/g, '""') + '"';
-        var designation = '"' + (r.designation || '').replace(/"/g, '""') + '"';
-        var status = '"' + (r.status || '').replace(/"/g, '""') + '"';
-        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
-        if (compDate !== '-') {
-          compDate = new Date(compDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        }
-        csv += sno + ',' + name + ',' + dept + ',' + batch + ',' + member + ',' + company + ',' + designation + ',' + status + ',"' + compDate + '"\r\n';
-      });
-      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'team_progress_report_' + new Date().toISOString().slice(0, 10) + '.csv';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-      showToast('Success', 'Report exported successfully as CSV.', 'success');
-    });
-    
-    var exp = document.getElementById('exportBtn');
-    if (exp) {
-      exp.addEventListener('click', function () {
-        btn.click();
       });
     }
   }
@@ -1787,7 +1719,8 @@
               pending: (m.assigned || 0) - (m.completed || 0),
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
               status: m.status || (m.progress >= 75 ? 'On Track' : m.progress >= 50 ? 'Behind' : 'Critical'),
-              lastActivity: m.lastActivity || '-'
+              lastActivity: m.lastActivity || '-',
+              isLeader: m.isLeader || false
             };
           });
         }
@@ -2003,7 +1936,6 @@
     setupProfileDropdown();
     setupSearchAndFilter();
     setupModals();
-    setupExport();
     setupLockFeatures();
     setupSessionTimeout();
     setupUpdateModalEvents();

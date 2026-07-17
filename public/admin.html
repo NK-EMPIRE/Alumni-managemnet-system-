@@ -703,8 +703,6 @@
             <div class="tabs" id="settingsTabs">
               <button class="tab-item active" data-tab="general"
                 onclick="switchSettingsTab('general',this)">General</button>
-              <button class="tab-item" data-tab="notifications"
-                onclick="switchSettingsTab('notifications',this)">Notifications</button>
               <button class="tab-item" data-tab="security"
                 onclick="switchSettingsTab('security',this)">Security</button>
               <button class="tab-item" data-tab="backup" onclick="switchSettingsTab('backup',this)">Backup</button>
@@ -720,25 +718,6 @@
               </div>
               <button class="btn btn-primary" onclick="saveAdminProfile()">
                 <i class="fas fa-save"></i> Save Settings
-              </button>
-            </div>
-            <div class="tab-content" id="tab-notifications">
-              <div class="form-group">
-                <label class="form-switch" style="margin-bottom:12px;">
-                  <input type="checkbox" checked>
-                  <span class="slider"></span> Email Notifications
-                </label>
-                <label class="form-switch" style="margin-bottom:12px;">
-                  <input type="checkbox" checked>
-                  <span class="slider"></span> SMS Notifications
-                </label>
-                <label class="form-switch" style="margin-bottom:12px;">
-                  <input type="checkbox">
-                  <span class="slider"></span> Weekly Digest
-                </label>
-              </div>
-              <button class="btn btn-primary" onclick="Toast.success('Settings','Notification preferences saved!')">
-                <i class="fas fa-save"></i> Save Preferences
               </button>
             </div>
             <div class="tab-content" id="tab-security">

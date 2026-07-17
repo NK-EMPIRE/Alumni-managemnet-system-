@@ -1049,3 +1049,56 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-16 11:43:26.554"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-16 11:43:26.555"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-16 11:43:26.555"}
+{"error":"Failed to connect to 103.207.1.87:1433 in 15000ms","level":"error","message":"Failed to start server:","timestamp":"2026-07-17 09:12:54.915"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 09:13:28.945"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 09:13:28.949"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 09:13:28.949"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 09:13:28.949"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-17 09:17:56.193","userId":51}
+{"error":"Failed to connect to 103.207.1.87:1433 in 15000ms","ip":"::1","level":"error","message":"GET /api/v1/alumni?page=1&limit=10","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 in 15000ms\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-07-17 09:21:44.412","userId":51}
+{"level":"error","message":"UNEXPECTED: Failed to connect to 103.207.1.87:1433 in 15000ms","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 in 15000ms\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-07-17 09:21:44.413"}
+{"error":"Failed to connect to 103.207.1.87:1433 in 15000ms","ip":"::1","level":"error","message":"GET /api/v1/audit-logs?page=1&limit=1000","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 in 15000ms\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-07-17 09:24:53.227","userId":51}
+{"level":"error","message":"UNEXPECTED: Failed to connect to 103.207.1.87:1433 in 15000ms","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 in 15000ms\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-07-17 09:24:53.228"}
+{"error":"Failed to connect to 103.207.1.87:1433 in 15000ms","ip":"::1","level":"error","message":"GET /api/v1/auth/reset-password-requests","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 in 15000ms\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-07-17 09:24:57.135","userId":51}
+{"level":"error","message":"UNEXPECTED: Failed to connect to 103.207.1.87:1433 in 15000ms","stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 in 15000ms\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-07-17 09:24:57.135"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:11:03.074"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:11:03.077"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:11:03.077"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:11:03.078"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:11:06.620"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:11:06.625"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:11:06.625"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:11:06.625"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-17 10:12:34.170","userId":29}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:23:05.682"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:23:05.686"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:23:05.687"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:23:05.687"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:23:09.287"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:23:09.291"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:23:09.292"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:23:09.292"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:23:11.394"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:23:11.398"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:23:11.398"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:23:11.398"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:23:13.759"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:23:13.762"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:23:13.763"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:23:13.763"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:23:22.697"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:23:22.700"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:23:22.701"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:23:22.701"}
+{"duplicates":0,"errors":0,"fileName":"1784264166632-a8c6c67a699da4cb.xlsx","imported":238,"level":"info","merged":0,"message":"[AUDIT] EXCEL_IMPORTED","skipped":0,"timestamp":"2026-07-17 10:26:15.733"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:27:27.626"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:27:27.630"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:27:27.630"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:27:27.631"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-17 10:27:46.691","userId":51}
+{"level":"info","message":"Email service disabled. Mocking email delivery.","subject":"AlumniMS - New Alumni Records Assigned to You","timestamp":"2026-07-17 10:28:12.150","to":"srinivas11@mountzion.ac.in"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-17 10:28:56.577","userId":29}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-17 10:37:26.065"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-17 10:37:26.070"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-17 10:37:26.070"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-17 10:37:26.071"}
