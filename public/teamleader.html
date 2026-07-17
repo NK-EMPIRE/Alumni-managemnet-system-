@@ -712,7 +712,6 @@
         <div class="card-body">
           <div class="tabs" id="settingsTabs" style="display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:10px;">
             <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">General</button>
-            <button class="tab-item" data-tab="notifications" onclick="switchSettingsTab('notifications',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Notifications</button>
             <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Security</button>
           </div>
           <div class="tab-content active" id="tab-general">
@@ -726,21 +725,6 @@
             </div>
             <button class="btn btn-primary" onclick="saveLeaderProfile()" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
               <i class="fas fa-save"></i> Save Settings
-            </button>
-          </div>
-          <div class="tab-content" id="tab-notifications" style="display:none;">
-            <div class="form-group" style="margin-bottom:16px;display:flex;flex-direction:column;gap:12px;">
-              <label class="form-switch" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;">
-                <input type="checkbox" checked style="width:16px;height:16px;">
-                Email alerts for member updates
-              </label>
-              <label class="form-switch" style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;">
-                <input type="checkbox" checked style="width:16px;height:16px;">
-                Weekly progress reports
-              </label>
-            </div>
-            <button class="btn btn-primary" onclick="showToast('Settings','Notification preferences saved!','success')" style="padding:8px 16px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;">
-              <i class="fas fa-save"></i> Save Preferences
             </button>
           </div>
           <div class="tab-content" id="tab-security" style="display:none;">
@@ -806,17 +790,7 @@
             <span style="font-weight:700;color:#2563EB;font-size:1.1rem" id="remainingToAssign">158</span>
           </div>
         </div>
-        <div style="background:#F8FAFC;border-radius:8px;padding:14px;margin-bottom:16px">
-          <div class="assign-member-row" style="padding-top:0">
-            <input type="checkbox" id="leaderCheck" checked disabled style="accent-color:#2563EB;width:16px;height:16px" />
-            <div class="member-avatar" style="background:linear-gradient(135deg,#2563EB,#7C3AED)">AR</div>
-            <div style="flex:1">
-              <div style="font-weight:600;font-size:0.85rem;color:#1E293B">Arun Rajan <span class="leader-badge">Leader</span></div>
-              <div style="font-size:0.75rem;color:#64748B">Current: 0 assigned</div>
-            </div>
-            <input type="number" class="count-input" id="leaderCount" value="0" min="0" max="158" />
-          </div>
-        </div>
+
         <p style="font-size:0.8rem;font-weight:600;color:#1E293B;margin:0 0 8px">Select Team Members &amp; Set Counts</p>
         <div id="assignMembersList" style="max-height:260px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:8px;padding:0 14px"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
