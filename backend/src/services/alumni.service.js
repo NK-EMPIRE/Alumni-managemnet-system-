@@ -141,10 +141,10 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
   return professionalInfo;
 }
 
-async function getMyAssignments(userId, role, { page, limit, onlyMe, search, department, batch, status }) {
+async function getMyAssignments(userId, role, { page, limit, onlyMe, search, department, batch, status, memberId }) {
   const p = computeOffset(page, limit);
   if (role === 'LEADER' && !onlyMe) {
-    return alumniRepository.getAssignmentsByLeader(userId, { page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status });
+    return alumniRepository.getAssignmentsByLeader(userId, { page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status, memberId });
   }
   return alumniRepository.getAssignmentsByMember(userId, { page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status });
 }

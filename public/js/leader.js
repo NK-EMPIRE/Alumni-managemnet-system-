@@ -1390,9 +1390,13 @@
           }
           val = date;
         } else if (col.key === 'linkedin_profile') {
-          var link = row.linkedin_profile || row.linkedin_url;
+          var link = row.linkedin_profile || row.linkedin_url || '';
           if (link) {
-            val = '<a href="' + (link.startsWith('http') ? link : 'https://' + link) + '" target="_blank" style="color: var(--primary);"><i class="fab fa-linkedin"></i> View</a>';
+            var href = link.startsWith('http') ? link : 'https://' + link;
+            val = '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
+              '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
+              '</div>';
           } else {
             val = '-';
           }

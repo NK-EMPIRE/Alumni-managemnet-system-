@@ -315,7 +315,7 @@ async function getAssignmentsByMember(memberId, { page, limit, offset, search, d
   return { data, totalCount, page, limit };
 }
 
-async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, department, batch, status }) {
+async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, department, batch, status, memberId }) {
   const pool = await getPool();
   const request = pool.request()
     .input('leaderId', sql.Int, leaderId)
@@ -324,7 +324,8 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
     .input('search', sql.NVarChar(200), (search && search !== 'undefined' && search !== 'null') ? `%${search}%` : null)
     .input('department', sql.NVarChar(50), (department && department !== 'undefined' && department !== 'null') ? department : null)
     .input('batch', sql.NVarChar(10), (batch && batch !== 'undefined' && batch !== 'null') ? batch : null)
-    .input('status', sql.NVarChar(30), (status && status !== 'undefined' && status !== 'null') ? status : null);
+    .input('status', sql.NVarChar(30), (status && status !== 'undefined' && status !== 'null') ? status : null)
+    .input('memberId', sql.Int, (memberId && memberId !== 'undefined' && memberId !== 'null') ? parseInt(memberId) : null);
 
   const result = await request.query(`
     WITH TeamAssignments AS (
@@ -341,6 +342,7 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
       LEFT JOIN Users u ON aa.member_id = u.user_id
       INNER JOIN Teams t ON aa.team_id = t.team_id
       WHERE t.leader_id = @leaderId
+        AND (@memberId IS NULL OR aa.member_id = @memberId)
         AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
