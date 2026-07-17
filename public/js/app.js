@@ -346,68 +346,133 @@
   } else {
     initUniversalWidgets();
   }
-  window.showCollapsedPopover = function (el, submenu) {
-    var existing = document.getElementById('sidebar-collapsed-popover');
-    if (existing) existing.remove();
+  // ─── Collapsed Sidebar Hover Popover ─────────────────────────────────────
+  (function () {
+    var activePopover = null;
+    var activeItem = null;
+    var hideTimer = null;
 
-    var popover = document.createElement('div');
-    popover.id = 'sidebar-collapsed-popover';
-    popover.className = 'collapsed-popover';
-    
-    popover.innerHTML = submenu.innerHTML;
-    document.body.appendChild(popover);
-    
-    var rect = el.getBoundingClientRect();
-    popover.style.position = 'fixed';
-    popover.style.top = rect.top + 'px';
-    popover.style.left = (rect.right + 8) + 'px';
-    popover.style.background = document.body.classList.contains('dark-mode') ? '#1E293B' : '#ffffff';
-    popover.style.border = document.body.classList.contains('dark-mode') ? '1px solid #334155' : '1px solid #E2E8F0';
-    popover.style.borderRadius = '8px';
-    popover.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-    popover.style.zIndex = '99999';
-    popover.style.minWidth = '160px';
-    popover.style.padding = '8px 0';
-    popover.style.display = 'flex';
-    popover.style.flexDirection = 'column';
-    popover.style.gap = '4px';
+    function isDark() { return document.body.classList.contains('dark-mode'); }
 
-    var items = popover.querySelectorAll('.sidebar-item');
-    items.forEach(function (item) {
-      item.style.padding = '8px 16px';
-      item.style.display = 'flex';
-      item.style.alignItems = 'center';
-      item.style.gap = '10px';
-      item.style.textDecoration = 'none';
-      item.style.color = document.body.classList.contains('dark-mode') ? '#F1F5F9' : '#1E293B';
-      item.style.fontSize = '13px';
-      item.style.cursor = 'pointer';
-      item.style.transition = 'background 0.2s';
-      
-      var oldClick = item.getAttribute('onclick');
-      if (oldClick) {
-        item.setAttribute('onclick', oldClick + '; document.getElementById("sidebar-collapsed-popover").remove();');
+    function clearHideTimer() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    }
+
+    function scheduleHide(delay) {
+      clearHideTimer();
+      hideTimer = setTimeout(removePopover, delay || 120);
+    }
+
+    function removePopover() {
+      clearHideTimer();
+      if (activePopover) { activePopover.remove(); activePopover = null; }
+      activeItem = null;
+    }
+
+    function buildPopover(el) {
+      if (!document.body.classList.contains('sidebar-collapsed')) return;
+      if (activeItem === el) return; // already showing for this item
+
+      clearHideTimer();
+      if (activePopover) { activePopover.remove(); activePopover = null; }
+      activeItem = el;
+
+      var submenu = el.nextElementSibling;
+      var hasSub = el.classList.contains('has-sub') && submenu && submenu.classList.contains('submenu');
+
+      var pop = document.createElement('div');
+      pop.id = 'sidebar-collapsed-popover';
+      pop.style.cssText = [
+        'position:fixed',
+        'background:' + (isDark() ? '#1E293B' : '#fff'),
+        'border:1px solid ' + (isDark() ? '#334155' : '#E2E8F0'),
+        'border-radius:10px',
+        'box-shadow:0 10px 25px rgba(0,0,0,0.15)',
+        'z-index:999999',
+        'min-width:160px',
+        'padding:6px 0',
+        'pointer-events:auto',
+        'transition:opacity .12s ease'
+      ].join(';');
+
+      if (hasSub) {
+        pop.innerHTML = submenu.innerHTML;
+        var items = pop.querySelectorAll('.sidebar-item');
+        items.forEach(function (si) {
+          si.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:' +
+            (isDark() ? '#F1F5F9' : '#1E293B') + ';cursor:pointer;transition:background .15s;text-decoration:none;border-radius:6px;margin:2px 6px;';
+          si.addEventListener('mouseenter', function () {
+            si.style.background = isDark() ? '#334155' : '#F1F5F9';
+          });
+          si.addEventListener('mouseleave', function () {
+            si.style.background = 'transparent';
+          });
+          // Close popover when a submenu item is clicked
+          si.addEventListener('click', function () {
+            removePopover();
+          });
+          // Make sure the icon + text are visible (they may be hidden via CSS in collapsed mode)
+          var icon = si.querySelector('i, .sidebar-item-icon');
+          if (icon) icon.style.display = 'inline-flex';
+          var txt = si.querySelector('.sidebar-item-text');
+          if (txt) txt.style.display = 'inline';
+        });
+      } else {
+        var labelEl = el.querySelector('.sidebar-item-text');
+        var label = labelEl ? labelEl.innerText.trim() : '';
+        if (!label) { activeItem = null; return; }
+        pop.innerHTML = '<div style="padding:9px 16px;font-weight:600;font-size:13px;color:' +
+          (isDark() ? '#F1F5F9' : '#1E293B') + ';white-space:nowrap;">' + label + '</div>';
       }
 
-      item.addEventListener('mouseenter', function () {
-        item.style.background = document.body.classList.contains('dark-mode') ? '#334155' : '#F1F5F9';
-      });
-      item.addEventListener('mouseleave', function () {
-        item.style.background = 'transparent';
-      });
+      document.body.appendChild(pop);
+      activePopover = pop;
+
+      // Position: right of the sidebar item, vertically centred
+      var rect = el.getBoundingClientRect();
+      var popH = pop.offsetHeight || 40;
+      var top = Math.min(rect.top, window.innerHeight - popH - 8);
+      pop.style.top = Math.max(8, top) + 'px';
+      pop.style.left = (rect.right + 6) + 'px';
+
+      pop.addEventListener('mouseenter', clearHideTimer);
+      pop.addEventListener('mouseleave', function () { scheduleHide(80); });
+    }
+
+    // Use mouseover (bubbling) so we catch all child elements too
+    document.addEventListener('mouseover', function (e) {
+      if (!document.body.classList.contains('sidebar-collapsed')) return;
+      // Stay inside popover
+      if (activePopover && activePopover.contains(e.target)) {
+        clearHideTimer(); return;
+      }
+      var sidebarEl = e.target.closest ? e.target.closest('.sidebar-item:not(.submenu .sidebar-item)') : null;
+      if (sidebarEl) {
+        buildPopover(sidebarEl);
+      }
     });
 
-    setTimeout(function () {
-      function clickOutside(e) {
-        var pop = document.getElementById('sidebar-collapsed-popover');
-        if (pop && !pop.contains(e.target) && !el.contains(e.target)) {
-          pop.remove();
-          document.removeEventListener('click', clickOutside);
-        }
+    document.addEventListener('mouseout', function (e) {
+      if (!document.body.classList.contains('sidebar-collapsed')) return;
+      // If leaving a sidebar item but entering the popover — don't hide
+      var toEl = e.relatedTarget;
+      if (toEl && activePopover && activePopover.contains(toEl)) { clearHideTimer(); return; }
+      var fromItem = e.target.closest ? e.target.closest('.sidebar-item:not(.submenu .sidebar-item)') : null;
+      var fromPop = e.target.closest ? e.target.closest('#sidebar-collapsed-popover') : null;
+      if (fromItem || fromPop) {
+        scheduleHide(120);
       }
-      document.addEventListener('click', clickOutside);
-    }, 50);
-  };
+    });
+
+    // Hide on any click outside
+    document.addEventListener('click', function (e) {
+      if (activePopover && !activePopover.contains(e.target)) {
+        removePopover();
+      }
+    }, true);
+  }());
+
+  window.showCollapsedPopover = function() {};
 
   window.toggleSecondaryField = function (containerId, btn) {
     var container = document.getElementById(containerId);

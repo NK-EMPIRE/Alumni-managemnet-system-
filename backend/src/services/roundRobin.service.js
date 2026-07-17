@@ -388,64 +388,48 @@ async function leaderDistribute(currentUser, params) {
     for (const group of preview) {
       if (group.userId === -1) continue; // skip unmatched sentinel
       for (const alumni of group.alumniList) {
-        const checkExist = await transaction.request()
+        await transaction.request()
           .input('alumniId', sql.Int, alumni.alumni_id)
+          .input('memberId', sql.Int, group.userId)
           .input('teamId', sql.Int, params.teamId)
-          .query('SELECT assignment_id FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId');
-
-        if (checkExist.recordset.length > 0) {
-          await transaction.request()
-            .input('alumniId', sql.Int, alumni.alumni_id)
-            .input('memberId', sql.Int, group.userId)
-            .input('teamId', sql.Int, params.teamId)
-            .query(`
+          .input('assignedBy', sql.Int, currentUser.userId)
+          .query(`
+            IF EXISTS (SELECT 1 FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId)
+            BEGIN
               UPDATE AlumniAssignments
               SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
-              WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER'
-            `);
-        } else {
-          await transaction.request()
-            .input('alumniId', sql.Int, alumni.alumni_id)
-            .input('memberId', sql.Int, group.userId)
-            .input('teamId', sql.Int, params.teamId)
-            .input('assignedBy', sql.Int, currentUser.userId)
-            .query(`
+              WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER';
+            END
+            ELSE
+            BEGIN
               INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
-              VALUES (@alumniId, @teamId, @memberId, 'Pending', GETUTCDATE(), @assignedBy, 'LEADER_DISTRIBUTION')
-            `);
-        }
+              VALUES (@alumniId, @teamId, @memberId, 'Pending', GETUTCDATE(), @assignedBy, 'LEADER_DISTRIBUTION');
+            END
+          `);
         totalUpdated++;
       }
     }
 
     for (const ma of manualAssignments) {
       if (!ma.alumniId || !ma.memberId) continue;
-      const checkExist = await transaction.request()
+      await transaction.request()
         .input('alumniId', sql.Int, ma.alumniId)
+        .input('memberId', sql.Int, ma.memberId)
         .input('teamId', sql.Int, params.teamId)
-        .query('SELECT assignment_id FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId');
-
-      if (checkExist.recordset.length > 0) {
-        await transaction.request()
-          .input('alumniId', sql.Int, ma.alumniId)
-          .input('memberId', sql.Int, ma.memberId)
-          .input('teamId', sql.Int, params.teamId)
-          .query(`
+        .input('assignedBy', sql.Int, currentUser.userId)
+        .query(`
+          IF EXISTS (SELECT 1 FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId)
+          BEGIN
             UPDATE AlumniAssignments
             SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
-            WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER'
-          `);
-      } else {
-        await transaction.request()
-          .input('alumniId', sql.Int, ma.alumniId)
-          .input('memberId', sql.Int, ma.memberId)
-          .input('teamId', sql.Int, params.teamId)
-          .input('assignedBy', sql.Int, currentUser.userId)
-          .query(`
+            WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER';
+          END
+          ELSE
+          BEGIN
             INSERT INTO AlumniAssignments (alumni_id, team_id, member_id, status, assigned_date, assigned_by, assignment_type)
-            VALUES (@alumniId, @teamId, @memberId, 'Pending', GETUTCDATE(), @assignedBy, 'LEADER_DISTRIBUTION')
-          `);
-      }
+            VALUES (@alumniId, @teamId, @memberId, 'Pending', GETUTCDATE(), @assignedBy, 'LEADER_DISTRIBUTION');
+          END
+        `);
       totalUpdated++;
     }
 

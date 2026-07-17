@@ -5359,3 +5359,21 @@ th {
 }
 
 /* End of stylesheet */
+
+.badge-record-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: var(--primary) !important;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .badge-record-count {
+  background: rgba(165, 180, 252, 0.15) !important;
+  color: #c7d2fe !important;
+  border-color: rgba(165, 180, 252, 0.3) !important;
+}

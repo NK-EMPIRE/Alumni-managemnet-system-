@@ -482,25 +482,29 @@
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div style="display:flex; align-items:center;">
             <h3><i class="fas fa-list" style="margin-right:8px;color:#2563EB;"></i> My Assigned Alumni</h3>
-            <span id="myAssignmentsFilteredCount" style="margin-left: 12px; font-size: 0.8rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 4px 10px; border-radius: 20px; border: 1px solid #E2E8F0;">0 Records</span>
           </div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div class="search-bar" style="max-width:220px">
-              <i class="fas fa-search search-icon"></i>
-              <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:100%;justify-content:space-between;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <div class="search-bar" style="max-width:220px">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
+              </div>
+              <select id="myAssignmentsDeptFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
+                <option value="all">All Depts</option>
+              </select>
+              <select id="myAssignmentsBatchFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
+                <option value="all">All Batches</option>
+              </select>
+              <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
+                <option value="all">All Status</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="Draft">Draft</option>
+              </select>
             </div>
-            <select id="myAssignmentsDeptFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-              <option value="all">All Depts</option>
-            </select>
-            <select id="myAssignmentsBatchFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-              <option value="all">All Batches</option>
-            </select>
-            <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-              <option value="all">All Status</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-              <option value="Draft">Draft</option>
-            </select>
+            <div>
+              <span id="myAssignmentsFilteredCount" class="badge-record-count" style="font-size: 0.9rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block;">0 Records</span>
+            </div>
           </div>
         </div>
         <div class="card-body" style="padding:0">
@@ -1088,7 +1092,7 @@
 
   <!-- Faculty-Wise / Distribution Modal -->
   <div class="modal-overlay" id="distributeModalOverlay">
-    <div class="modal" style="max-width:720px;width:95%;max-height:90vh;overflow-y:auto">
+  <div class="modal" style="max-width:1100px;width:95%;max-height:90vh;overflow-y:auto">
       <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #E2E8F0">
         <div>
           <h2 style="font-size:1.1rem;font-weight:700;color:#1E293B;margin:0"><i class="fas fa-share-alt" style="color:#7C3AED;margin-right:8px"></i>Distribute Alumni to Members</h2>

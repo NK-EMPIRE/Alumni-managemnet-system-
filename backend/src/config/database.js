@@ -25,6 +25,19 @@ function buildConfig() {
 async function getPool() {
   if (pool) return pool;
   pool = await sql.connect(buildConfig());
+  try {
+    await pool.query(`
+      IF NOT EXISTS (
+        SELECT * FROM sys.columns 
+        WHERE object_id = OBJECT_ID('dbo.ImportHistory') AND name = 'duration_sec'
+      )
+      BEGIN
+        ALTER TABLE dbo.ImportHistory ADD duration_sec DECIMAL(10, 2) NULL;
+      END
+    `);
+  } catch (e) {
+    console.error('ImportHistory migration failed:', e);
+  }
   pool.on('error', (err) => {
     console.error('SQL Pool error:', err);
     pool = null;

@@ -146,7 +146,8 @@ async function getLeaderDashboard(leaderId) {
         progress,
         status: progress >= 75 ? 'On Track' : progress >= 50 ? 'Behind' : 'Critical',
         lastActivity: '-',
-        email: m.email
+        email: m.email,
+        isLeader: m.is_leader === 1 || m.is_leader === true
       };
     });
   }

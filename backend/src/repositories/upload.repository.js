@@ -1,6 +1,6 @@
 const { sql, getPool } = require('../config/database');
 
-async function createImportLog({ fileName, originalName, totalRows, imported, merged, skipped, duplicates, errors, errorDetails, importedBy, status }) {
+async function createImportLog({ fileName, originalName, totalRows, imported, merged, skipped, duplicates, errors, errorDetails, importedBy, status, durationSec }) {
   const pool = await getPool();
   const result = await pool.request()
     .input('fileName', sql.NVarChar(255), fileName)
@@ -14,10 +14,11 @@ async function createImportLog({ fileName, originalName, totalRows, imported, me
     .input('errorDetails', sql.NVarChar(sql.MAX), errorDetails ? JSON.stringify(errorDetails) : null)
     .input('importedBy', sql.Int, importedBy)
     .input('status', sql.NVarChar(50), status)
+    .input('durationSec', sql.Decimal(10, 2), durationSec || null)
     .query(`
-      INSERT INTO ImportHistory (file_name, original_name, total_rows, imported, merged, skipped, duplicates, errors, error_details, imported_by, status)
+      INSERT INTO ImportHistory (file_name, original_name, total_rows, imported, merged, skipped, duplicates, errors, error_details, imported_by, status, duration_sec)
       OUTPUT INSERTED.*
-      VALUES (@fileName, @originalName, @totalRows, @imported, @merged, @skipped, @duplicates, @errors, @errorDetails, @importedBy, @status)
+      VALUES (@fileName, @originalName, @totalRows, @imported, @merged, @skipped, @duplicates, @errors, @errorDetails, @importedBy, @status, @durationSec)
     `);
   return result.recordset[0];
 }

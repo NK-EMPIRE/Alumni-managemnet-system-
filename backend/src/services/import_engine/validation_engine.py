@@ -6,13 +6,21 @@ class ValidationEngine:
     def validate_row(row_dict: Dict[str, Any], row_num: int, sheet_name: str) -> List[Dict[str, Any]]:
         errors = []
         
-        # 1. Validate Register Number
+        # Extract fields for previewing errors
         reg_no = row_dict.get('registerNo')
+        name = row_dict.get('name') or "-"
+        dept = row_dict.get('department') or "-"
+        batch = row_dict.get('batch') or "-"
+        
+        # 1. Validate Register Number
         if not reg_no or str(reg_no).strip() == '' or str(reg_no).strip().lower() == 'null':
             errors.append({
                 "sheet": sheet_name,
                 "row": row_num,
                 "registerNo": "-",
+                "name": name,
+                "department": dept,
+                "batch": batch,
                 "errorType": "Missing Register Number",
                 "errorDescription": f"Row {row_num} in sheet '{sheet_name}' is missing a Register Number."
             })
@@ -26,6 +34,9 @@ class ValidationEngine:
                     "sheet": sheet_name,
                     "row": row_num,
                     "registerNo": reg_no or "-",
+                    "name": name,
+                    "department": dept,
+                    "batch": batch,
                     "errorType": "Invalid Email Format",
                     "errorDescription": f"Email format '{email}' is invalid."
                 })
@@ -40,6 +51,9 @@ class ValidationEngine:
                     "sheet": sheet_name,
                     "row": row_num,
                     "registerNo": reg_no or "-",
+                    "name": name,
+                    "department": dept,
+                    "batch": batch,
                     "errorType": "Invalid Phone Format",
                     "errorDescription": f"Phone number '{phone}' must contain between 10 and 15 digits."
                 })

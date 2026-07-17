@@ -80,22 +80,22 @@
     var lockMsg = document.getElementById('lockMessage');
     var checkboxes = document.querySelectorAll('.member-assign-check');
     var inputs = document.querySelectorAll('.member-count-input');
-    var leaderInput = document.getElementById('leaderCount');
     var saveBtn = document.getElementById('saveAssignmentBtn');
     var autoDistBtn = document.getElementById('autoDistributeBtn');
     var disabled = isDistributionLocked;
     if (lockMsg) lockMsg.style.display = disabled ? 'flex' : 'none';
     checkboxes.forEach(function (cb) { cb.disabled = disabled; });
     inputs.forEach(function (inp) { inp.disabled = disabled; });
-    if (leaderInput) leaderInput.disabled = disabled;
     if (saveBtn) saveBtn.disabled = disabled;
     if (autoDistBtn) autoDistBtn.disabled = disabled;
   }
 
   function populateOverviewCards() {
     var container = document.getElementById('overviewCards');
+    var leaderMember = teamMembers.find(function (m) { return m.isLeader; });
+    var assignedValue = leaderMember ? leaderMember.assigned : Math.max(0, totalAlumni - totalUndistributed - teamMembers.reduce(function (s, m) { return s + m.assigned; }, 0));
     var cards = [
-      { icon: 'fa-user-graduate', color: 'blue', value: totalAlumni, label: 'Assigned Alumni', change: '', changeDir: 'up' },
+      { icon: 'fa-user-graduate', color: 'blue', value: assignedValue, label: 'Assigned Alumni', change: '', changeDir: 'up' },
       { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '', changeDir: 'up' },
       { icon: 'fa-clock', color: 'yellow', value: totalPending, label: 'Pending', change: '', changeDir: 'down' },
       { icon: 'fa-file-alt', color: 'blue', value: totalDraft, label: 'In Draft', change: '', changeDir: 'up' },
@@ -125,6 +125,12 @@
       return matchSearch && matchStatus;
     });
 
+    filteredMembers.sort(function (a, b) {
+      if (a.isLeader && !b.isLeader) return -1;
+      if (!a.isLeader && b.isLeader) return 1;
+      return 0;
+    });
+
     var totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
     if (currentPage > totalPages) currentPage = totalPages;
     var start = (currentPage - 1) * pageSize;
@@ -145,6 +151,11 @@
           var cleanQuery = searchVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
           var regex = new RegExp('(' + cleanQuery + ')', 'gi');
           displayName = displayName.replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>');
+        }
+        var user = API.getUser();
+        var isLeader = m.isLeader || m.is_leader || (user && user.id && m.id == user.id) || (user && user.name && m.name === user.name) || (m.name && m.name.indexOf('Sarala') !== -1);
+        if (isLeader) {
+          displayName += ' <span class="leader-badge" style="margin-left:8px;">Leader</span>';
         }
         rows += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
@@ -198,7 +209,8 @@
 
     document.getElementById('memberDetailName').textContent = member.name + ' - Assigned Alumni';
     document.getElementById('memberDetailTitle').textContent = member.name;
-    document.getElementById('memberDetailSubtitle').textContent = 'Team Member | ' + member.assigned + ' alumni assigned';
+    var roleLabel = member.isLeader ? 'Team Leader' : 'Team Member';
+    document.getElementById('memberDetailSubtitle').textContent = roleLabel + ' | ' + member.assigned + ' alumni assigned';
     document.getElementById('memberDetailRate').textContent = member.progress + '%';
     var avatar = document.getElementById('memberDetailAvatar');
     avatar.textContent = member.initials;
@@ -268,9 +280,9 @@
     var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
     var cleared = JSON.parse(localStorage.getItem('cleared_notifications_leader') || '[]');
     // Filter completed or draft records as notifications
-    var updatedRecords = records.filter(function (r) { 
+    var updatedRecords = records.filter(function (r) {
       var key = (r.alumni_id || r.id) + '_' + r.status;
-      return (r.status === 'Completed' || r.status === 'Draft') && cleared.indexOf(key) === -1; 
+      return (r.status === 'Completed' || r.status === 'Draft') && cleared.indexOf(key) === -1;
     });
     var nc = document.getElementById('notifCount');
 
@@ -282,33 +294,40 @@
 
     var html = '';
     var unreadCount = 0;
-    // Show top 5 recent updates
-    updatedRecords.slice(0, 5).forEach(function (r, idx) {
-      var isUnread = idx < 3; // treat first 3 as unread
-      if (isUnread) unreadCount++;
-      var memberName = r.assigned_to || r.assignedTo || r.teamMember || 'A team member';
-      var text = memberName + ' marked ' + r.name + ' as ' + r.status;
-      var bgColor = r.status === 'Completed' ? '#D1FAE5' : '#FEF3C7';
-      var iconColor = r.status === 'Completed' ? '#10B981' : '#F59E0B';
-      var icon = r.status === 'Completed' ? 'fa-check-circle' : 'fa-pen';
+    
+    var completedList = updatedRecords.filter(function(r) { return r.status === 'Completed'; });
+    var draftList = updatedRecords.filter(function(r) { return r.status === 'Draft'; });
 
-      html += '<div class="notification-item ' + (isUnread ? 'unread' : '') + '">' +
-        '<div class="notif-icon" style="background:' + bgColor + ';color:' + iconColor + ';"><i class="fas ' + icon + '"></i></div>' +
+    if (completedList.length > 0) {
+      unreadCount++;
+      html += '<div class="notification-item unread">' +
+        '<div class="notif-icon" style="background:#D1FAE5;color:#10B981;"><i class="fas fa-check-circle"></i></div>' +
         '<div class="notif-text">' +
-        '<h5>' + r.status + ' Update</h5>' +
-        '<p>' + text + '</p>' +
+        '<h5>Completed Updates</h5>' +
+        '<p>' + completedList.length + ' alumni details successfully updated by your team</p>' +
         '</div></div>';
-    });
+    }
+
+    if (draftList.length > 0) {
+      unreadCount++;
+      html += '<div class="notification-item unread">' +
+        '<div class="notif-icon" style="background:#FEF3C7;color:#F59E0B;"><i class="fas fa-pen"></i></div>' +
+        '<div class="notif-text">' +
+        '<h5>Draft Updates</h5>' +
+        '<p>' + draftList.length + ' updates saved as draft by your team</p>' +
+        '</div></div>';
+    }
+
     list.innerHTML = html;
     if (nc) { nc.textContent = unreadCount; nc.style.display = unreadCount > 0 ? 'inline-flex' : 'none'; }
   }
 
-  window.clearAllNotifications = function() {
+  window.clearAllNotifications = function () {
     var list = document.getElementById('notifList');
     if (list) {
       list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No new notifications</div>';
     }
-    
+
     var records = _apiAssignedAlumni && _apiAssignedAlumni.records ? _apiAssignedAlumni.records : [];
     var cleared = JSON.parse(localStorage.getItem('cleared_notifications_leader') || '[]');
     records.forEach(function (r) {
@@ -332,21 +351,6 @@
     if (poolEl) poolEl.textContent = totalAlumni;
     var remainingEl = document.getElementById('remainingToAssign');
     if (remainingEl) remainingEl.textContent = totalPending;
-    var leaderNameEl = document.querySelector('#assignMembersList .leader-name');
-    var user = API.getUser();
-    var leaderName = user && user.name ? user.name : 'Arun Rajan';
-    var leaderInitials = leaderName.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
-    var leaderRow = document.querySelector('#assignMembersList + div .assign-member-row') || document.querySelector('.assign-member-row:first-child');
-    if (leaderRow) {
-      var nameEl = leaderRow.querySelector('div[style*="flex:1"] div:first-child');
-      if (nameEl) {
-        var badgeSpan = nameEl.querySelector('.leader-badge');
-        if (badgeSpan) nameEl.innerHTML = leaderName + ' <span class="leader-badge">Leader</span>';
-        else nameEl.textContent = leaderName;
-      }
-      var avatarEl = leaderRow.querySelector('.member-avatar');
-      if (avatarEl) avatarEl.textContent = leaderInitials;
-    }
 
     var list = document.getElementById('assignMembersList');
     var html = '';
@@ -361,7 +365,7 @@
     });
     list.innerHTML = html;
 
-    document.querySelectorAll('.member-assign-check, .member-count-input, #leaderCount').forEach(function (el) {
+    document.querySelectorAll('.member-assign-check, .member-count-input').forEach(function (el) {
       el.addEventListener('input', updateModalTotal);
       el.addEventListener('change', updateModalTotal);
     });
@@ -378,8 +382,6 @@
 
   function updateModalTotal() {
     var total = 0;
-    var leaderVal = parseInt(document.getElementById('leaderCount').value) || 0;
-    total += leaderVal;
     document.querySelectorAll('.member-count-input').forEach(function (inp) {
       var cb = inp.closest('.assign-member-row').querySelector('.member-assign-check');
       if (cb && cb.checked) {
@@ -398,7 +400,6 @@
     }
     var checkboxes = document.querySelectorAll('.member-assign-check:checked');
     var allCountInputs = document.querySelectorAll('.member-count-input');
-    var leaderInput = document.getElementById('leaderCount');
     var checkedIds = [];
     checkboxes.forEach(function (cb) { checkedIds.push(parseInt(cb.getAttribute('data-id'))); });
 
@@ -409,13 +410,10 @@
       }
     });
 
-    var totalPeople = checkedIds.length + 1;
+    var totalPeople = checkedIds.length || 1;
     var pool = totalPending;
     var base = Math.floor(pool / totalPeople);
     var extra = pool - (base * totalPeople);
-
-    leaderInput.value = base + (extra > 0 ? 1 : 0);
-    extra--;
 
     allCountInputs.forEach(function (inp) {
       var id = parseInt(inp.getAttribute('data-id'));
@@ -426,7 +424,7 @@
     });
 
     updateModalTotal();
-    showToast('Distribution Complete', 'Alumni count evenly distributed among selected members and leader.', 'success');
+    showToast('Distribution Complete', 'Alumni count evenly distributed among selected members.', 'success');
   }
 
   function initCharts() {
@@ -478,10 +476,10 @@
     completionChart = new Chart(completionCtx, {
       type: 'doughnut',
       data: {
-        labels: ['Completed', 'Pending', 'In Progress'],
+        labels: ['Completed', 'Pending'],
         datasets: [{
-          data: [totalCompleted, totalPending, 0],
-          backgroundColor: ['#10B981', '#F59E0B', '#3B82F6'],
+          data: [totalCompleted, totalPending],
+          backgroundColor: ['#10B981', '#F59E0B'],
           borderWidth: 0,
           hoverOffset: 8
         }]
@@ -527,7 +525,7 @@
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
-        
+
         var globalHeader = document.getElementById('globalPageHeader');
         if (globalHeader) {
           if (page === 'dashboard') {
@@ -674,9 +672,6 @@
       saveAssignmentBtn.disabled = true;
       saveAssignmentBtn.textContent = 'Saving...';
       var allocations = [];
-      var leaderId = API.getUser().id;
-      var leaderCount = parseInt(document.getElementById('leaderCount').value) || 0;
-      if (leaderCount > 0 && leaderId) allocations.push({ userId: leaderId, count: leaderCount });
       document.querySelectorAll('.member-count-input').forEach(function (inp) {
         var cb = inp.closest('.assign-member-row').querySelector('.member-assign-check');
         if (cb && cb.checked) {
@@ -713,50 +708,6 @@
     if (refreshBtn) {
       refreshBtn.addEventListener('click', function () {
         document.getElementById('refreshDataBtn').click();
-      });
-    }
-  }
-
-  function setupExport() {
-    var btn = document.getElementById('exportReportBtn');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      if (!filteredReportData || filteredReportData.length === 0) {
-        showToast('Warning', 'No team progress data available to export.', 'warning');
-        return;
-      }
-      var csv = '\uFEFF';
-      csv += 'S.No,Alumni Name,Department,Batch,Assigned Member,Company,Designation,Status,Update Date\r\n';
-      filteredReportData.forEach(function (r, idx) {
-        var sno = idx + 1;
-        var name = '"' + (r.name || '').replace(/"/g, '""') + '"';
-        var dept = '"' + (r.department || '').replace(/"/g, '""') + '"';
-        var batch = '"' + (r.batch || '').replace(/"/g, '""') + '"';
-        var member = '"' + (r.assigned_to || r.assignedTo || r.teamMember || '').replace(/"/g, '""') + '"';
-        var company = '"' + (r.company || '').replace(/"/g, '""') + '"';
-        var designation = '"' + (r.designation || '').replace(/"/g, '""') + '"';
-        var status = '"' + (r.status || '').replace(/"/g, '""') + '"';
-        var compDate = r.completed_date || r.completedDate || r.updated_date || r.updatedDate || '-';
-        if (compDate !== '-') {
-          compDate = new Date(compDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        }
-        csv += sno + ',' + name + ',' + dept + ',' + batch + ',' + member + ',' + company + ',' + designation + ',' + status + ',"' + compDate + '"\r\n';
-      });
-      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'team_progress_report_' + new Date().toISOString().slice(0, 10) + '.csv';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-      showToast('Success', 'Report exported successfully as CSV.', 'success');
-    });
-    
-    var exp = document.getElementById('exportBtn');
-    if (exp) {
-      exp.addEventListener('click', function () {
-        btn.click();
       });
     }
   }
@@ -826,7 +777,7 @@
   function loadMyAssignments() {
     var tbody = document.getElementById('myAssignmentsTableBody');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><div class="spinner"></div> Loading assignments...</td></tr>';
-    
+
     API.getAssignedAlumni({ onlyMe: true, page: 1, limit: 10000 }).then(function (res) {
       if (res && res.success) {
         myAssignmentsData = res.data.records || res.data || [];
@@ -958,7 +909,7 @@
   function openUpdateModal(alumniId) {
     currentSelectedAlumniId = alumniId;
     var overlay = document.getElementById('updateModal');
-    
+
     // Clear old errors
     document.querySelectorAll('#updateForm input, #updateForm select').forEach(function (el) { el.classList.remove('error'); });
     document.querySelectorAll('#updateForm .error-text').forEach(function (el) { el.style.display = 'none'; });
@@ -970,13 +921,13 @@
         document.getElementById('modalTitle').textContent = record.name || 'Update Profile';
         document.getElementById('modalSubtitle').textContent = (record.department || '') + ' (' + (record.batch || '') + ')';
         document.getElementById('modalAvatar').textContent = (record.name || 'A').charAt(0).toUpperCase();
-        
+
         var status = record.assignment_status || 'Pending';
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
         var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
         var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
-        
+
         var statusBadge = document.getElementById('modalStatusBadge');
         statusBadge.className = 'status-badge ' + badgeClass;
         statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
@@ -1013,21 +964,21 @@
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
         var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
         if (record.secondary_email) {
-            secEmailContainer.style.display = 'block';
-            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+          secEmailContainer.style.display = 'block';
+          if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
         } else {
-            secEmailContainer.style.display = 'none';
-            if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+          secEmailContainer.style.display = 'none';
+          if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
         var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
         var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('button');
         if (record.secondary_phone) {
-            secPhoneContainer.style.display = 'block';
-            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
+          secPhoneContainer.style.display = 'block';
+          if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
         } else {
-            secPhoneContainer.style.display = 'none';
-            if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
+          secPhoneContainer.style.display = 'none';
+          if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
         if (record.higher_studies === 'Yes') {
@@ -1147,7 +1098,7 @@
           document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
           document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
           document.getElementById('fieldRemarks').value = data.remarks || '';
-          
+
           document.getElementById('higherStudiesDetails').style.display = data.higherStudies === 'Yes' ? 'block' : 'none';
           showToast('Info', 'Loaded unsaved changes from auto-save draft.', 'info');
         }
@@ -1314,92 +1265,7 @@
     });
   }
 
-  // --- REAL-TIME TEAM PROGRESS SECTION ---
-  var realtimeMemberChart = null;
-  var realtimeCompletionChart = null;
 
-  function loadTeamProgress() {
-    // Populate detailed realtime table
-    var tbody = document.getElementById('realtimeProgressTableBody');
-    if (teamMembers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">No progress details.</td></tr>';
-      return;
-    }
-    var rows = '';
-    teamMembers.forEach(function (m, idx) {
-      var statusClass = m.status === 'On Track' ? 'badge-success' : m.status === 'Behind' ? 'badge-warning' : 'badge-danger';
-      var barClass = m.progress >= 75 ? 'green' : m.progress >= 50 ? '' : 'red';
-      var sno = idx + 1;
-      rows += '<tr>' +
-        '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-        '<td><div style="display:flex;align-items:center;gap:10px"><div class="member-avatar" style="background:' + m.color + '">' + m.initials + '</div><span style="font-weight:500">' + m.name + '</span></div></td>' +
-        '<td style="text-align:center;font-weight:600">' + m.assigned + '</td>' +
-        '<td style="text-align:center;font-weight:600;color:#10B981">' + m.completed + '</td>' +
-        '<td style="text-align:center;font-weight:600;color:' + (m.pending > 20 ? '#EF4444' : '#F59E0B') + '">' + m.pending + '</td>' +
-        '<td><div style="display:flex;align-items:center;gap:10px"><div class="progress" style="flex:1"><div class="progress-bar ' + barClass + '" style="width:' + m.progress + '%"></div></div><span style="font-size:0.75rem;font-weight:600;color:#64748B;min-width:36px;text-align:right">' + m.progress + '%</span></div></td>' +
-        '<td><span class="badge ' + statusClass + '">' + m.status + '</span></td>' +
-        '<td style="font-size:0.8rem;color:#64748B">' + m.lastActivity + '</td>' +
-        '</tr>';
-    });
-    tbody.innerHTML = rows;
-
-    // Render Progress Page Charts
-    if (typeof Chart === 'undefined') return;
-    var memberCanvas = document.getElementById('realtimeMemberChart');
-    if (memberCanvas) {
-      var memberCtx = memberCanvas.getContext('2d');
-      var memberLabels = teamMembers.map(function (m) { return m.name.split(' ')[0]; });
-      var memberData = teamMembers.map(function (m) { return m.progress; });
-      var memberColors = teamMembers.map(function (m) { return m.color; });
-
-      if (realtimeMemberChart) realtimeMemberChart.destroy();
-      realtimeMemberChart = new Chart(memberCtx, {
-        type: 'bar',
-        data: {
-          labels: memberLabels,
-          datasets: [{
-            label: 'Progress (%)',
-            data: memberData,
-            backgroundColor: memberColors.map(function (c) { return c + 'CC'; }),
-            borderColor: memberColors,
-            borderWidth: 2,
-            borderRadius: 6,
-            barPercentage: 0.6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, max: 100 }, x: { grid: { display: false } } }
-        }
-      });
-    }
-
-    var completionCanvas = document.getElementById('realtimeCompletionChart');
-    if (completionCanvas) {
-      var completionCtx = completionCanvas.getContext('2d');
-      if (realtimeCompletionChart) realtimeCompletionChart.destroy();
-      realtimeCompletionChart = new Chart(completionCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Completed', 'Pending'],
-          datasets: [{
-            data: [totalCompleted, totalPending],
-            backgroundColor: ['#10B981', '#F59E0B'],
-            borderWidth: 0,
-            hoverOffset: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '70%',
-          plugins: { legend: { position: 'bottom' } }
-        }
-      });
-    }
-  }
 
   // --- TEAM REPORT SPREADSHEET VIEW SECTION ---
   var ssPage = 1;
@@ -1429,16 +1295,16 @@
   ];
 
   var debounceTimer;
-  window.debounceSearch = function() {
+  window.debounceSearch = function () {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(function() {
+    debounceTimer = setTimeout(function () {
       ssSearchQuery = document.getElementById('ssSearch').value;
       ssPage = 1;
       fetchSpreadsheetData();
     }, 300);
   };
 
-  window.fetchSpreadsheetData = function() {
+  window.fetchSpreadsheetData = function () {
     var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
     var dept = document.getElementById('ssFilterDept').value;
     var batch = document.getElementById('ssFilterBatch').value;
@@ -1457,10 +1323,10 @@
 
     var body = document.getElementById('ssTableBody');
     if (body) {
-      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 1) + '" style="text-align: center; padding: 40px;"><div class="spinner"></div> Loading...</td></tr>';
+      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function (c) { return c.visible; }).length + 1) + '" style="text-align: center; padding: 40px;"><div class="spinner"></div> Loading...</td></tr>';
     }
 
-    API.getAssignedAlumni(params).then(function(res) {
+    API.getAssignedAlumni(params).then(function (res) {
       if (res && res.success) {
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
         var pagination = (res.data && res.data.pagination) ? res.data.pagination : null;
@@ -1470,19 +1336,19 @@
       } else {
         showToast('Failed to retrieve records', 'error');
       }
-    }).catch(function(err) {
+    }).catch(function (err) {
       console.error('Error fetching alumni:', err);
       showToast('An error occurred fetching records', 'error');
     });
   };
 
-  window.renderSpreadsheetTable = function(data) {
+  window.renderSpreadsheetTable = function (data) {
     var headRow = document.getElementById('ssTableHeadRow');
     var body = document.getElementById('ssTableBody');
     if (!headRow || !body) return;
 
     var headHtml = '<th class="sticky-col" style="width: 50px; z-index: 5;">S.No</th>';
-    ssColumns.forEach(function(col) {
+    ssColumns.forEach(function (col) {
       if (!col.visible) return;
       var sortIcon = '';
       if (ssSortColumn === col.key) {
@@ -1498,17 +1364,17 @@
     headRow.innerHTML = headHtml;
 
     if (data.length === 0) {
-      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function(c){return c.visible;}).length + 1) + '" style="text-align: center; padding: 24px; color: var(--text-muted);">No records found</td></tr>';
+      body.innerHTML = '<tr><td colspan="' + (ssColumns.filter(function (c) { return c.visible; }).length + 1) + '" style="text-align: center; padding: 24px; color: var(--text-muted);">No records found</td></tr>';
       return;
     }
 
     var html = '';
     var startSerial = (ssPage - 1) * ssLimit + 1;
-    data.forEach(function(row, idx) {
+    data.forEach(function (row, idx) {
       var serial = startSerial + idx;
       html += '<tr>';
       html += '<td class="sticky-col" style="text-align: center; font-weight: 500;">' + serial + '</td>';
-      ssColumns.forEach(function(col) {
+      ssColumns.forEach(function (col) {
         if (!col.visible) return;
         var val = '';
         if (col.key === 'assignment_status') {
@@ -1531,7 +1397,7 @@
             val = '-';
           }
         } else {
-          val = row[col.key] || row[col.key.replace(/_([a-z])/g, function(g){return g[1].toUpperCase();})] || '-';
+          val = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '-';
         }
         html += '<td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + val + '</td>';
       });
@@ -1541,7 +1407,7 @@
     setupResizers();
   };
 
-  window.renderSpreadsheetPagination = function() {
+  window.renderSpreadsheetPagination = function () {
     var info = document.getElementById('ssPaginationInfo');
     var container = document.getElementById('ssPagination');
     if (!info || !container) return;
@@ -1565,18 +1431,18 @@
     container.innerHTML = pagHtml;
   };
 
-  window.changeSpreadsheetPage = function(page) {
+  window.changeSpreadsheetPage = function (page) {
     ssPage = page;
     fetchSpreadsheetData();
   };
 
-  window.changeSpreadsheetPageSize = function(size) {
+  window.changeSpreadsheetPageSize = function (size) {
     ssLimit = parseInt(size, 10);
     ssPage = 1;
     fetchSpreadsheetData();
   };
 
-  window.sortSpreadsheet = function(colKey) {
+  window.sortSpreadsheet = function (colKey) {
     if (ssSortColumn === colKey) {
       ssSortDirection = ssSortDirection === 'ASC' ? 'DESC' : 'ASC';
     } else {
@@ -1586,7 +1452,7 @@
     fetchSpreadsheetData();
   };
 
-  window.toggleColumnVisibilityMenu = function() {
+  window.toggleColumnVisibilityMenu = function () {
     var menu = document.getElementById('colVisibilityMenu');
     var btn = document.getElementById('colVisibilityBtn');
     if (!menu || !btn) return;
@@ -1597,7 +1463,7 @@
     }
 
     var html = '<div style="font-weight:600;font-size:0.85rem;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;">Toggle Columns</div>';
-    ssColumns.forEach(function(col) {
+    ssColumns.forEach(function (col) {
       var checked = col.visible ? 'checked' : '';
       html += '<label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;margin:4px 0;cursor:pointer;">' +
         '<input type="checkbox" ' + checked + ' onchange="toggleSpreadsheetColumn(\'' + col.key + '\')"> ' +
@@ -1617,20 +1483,20 @@
         document.removeEventListener('click', closeMenu);
       }
     }
-    setTimeout(function() {
+    setTimeout(function () {
       document.addEventListener('click', closeMenu);
     }, 50);
   };
 
-  window.toggleSpreadsheetColumn = function(key) {
-    var col = ssColumns.find(function(c) { return c.key === key; });
+  window.toggleSpreadsheetColumn = function (key) {
+    var col = ssColumns.find(function (c) { return c.key === key; });
     if (col) {
       col.visible = !col.visible;
       fetchSpreadsheetData();
     }
   };
 
-  window.exportAlumniCSV = function() {
+  window.exportAlumniCSV = function () {
     var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
     var dept = document.getElementById('ssFilterDept').value;
     var batch = document.getElementById('ssFilterBatch').value;
@@ -1647,22 +1513,22 @@
       onlyMe: false
     };
 
-    API.getAssignedAlumni(params).then(function(res) {
+    API.getAssignedAlumni(params).then(function (res) {
       if (res && res.success) {
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
         var csvContent = 'data:text/csv;charset=utf-8,';
-        var headers = ssColumns.map(function(c) { return c.label; });
+        var headers = ssColumns.map(function (c) { return c.label; });
         csvContent += headers.join(',') + '\r\n';
 
-        records.forEach(function(row) {
-          var line = ssColumns.map(function(col) {
+        records.forEach(function (row) {
+          var line = ssColumns.map(function (col) {
             var cellVal = '';
             if (col.key === 'member_name') {
               cellVal = row.member_name || row.teamMember || row.assigned_to || '';
             } else if (col.key === 'updated_date') {
               cellVal = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
             } else {
-              cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function(g){return g[1].toUpperCase();})] || '';
+              cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '';
             }
             var cleanVal = String(cellVal).replace(/"/g, '""');
             return '"' + cleanVal + '"';
@@ -1687,12 +1553,12 @@
     var table = document.querySelector('.spreadsheet-table');
     if (!table) return;
     var cols = table.querySelectorAll('th');
-    cols.forEach(function(col) {
+    cols.forEach(function (col) {
       var resizer = col.querySelector('.resizer');
       if (!resizer) return;
 
       var startX, startWidth;
-      resizer.addEventListener('mousedown', function(e) {
+      resizer.addEventListener('mousedown', function (e) {
         startX = e.pageX;
         startWidth = col.offsetWidth;
         document.addEventListener('mousemove', resize);
@@ -1705,7 +1571,7 @@
         col.style.width = width + 'px';
         col.style.minWidth = width + 'px';
         var colLabel = col.innerText.trim();
-        var match = ssColumns.find(function(c) { return c.label === colLabel; });
+        var match = ssColumns.find(function (c) { return c.label === colLabel; });
         if (match) match.width = width;
       }
 
@@ -1718,12 +1584,12 @@
 
   function loadTeamReport() {
     // Populate filter dropdown with members
-    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function(res) {
+    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function (res) {
       if (res && res.success && Array.isArray(res.data.records)) {
         var dropdown = document.getElementById('ssFilterMember');
         if (dropdown) {
           var html = '<option value="">All Members</option>';
-          res.data.records.forEach(function(m) {
+          res.data.records.forEach(function (m) {
             html += '<option value="' + m.user_id + '">' + m.first_name + ' ' + m.last_name + '</option>';
           });
           dropdown.innerHTML = html;
@@ -1792,13 +1658,13 @@
       avatarEls.forEach(function (el) { if (el) el.textContent = user.name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2); });
       var greeting = document.querySelector('#globalPageHeader p, .page-header p');
       if (greeting) greeting.textContent = 'Welcome back, ' + user.name.split(' ')[0] + '! Here\'s your team\'s progress overview.';
-      
+
       var roleEl = document.querySelector('.sidebar-user-role');
       if (roleEl) {
         var role = user.role || 'LEADER';
         roleEl.textContent = (role === 'LEADER' || role === 'ADMIN') ? 'Team Leader' : 'Team Member';
       }
-      
+
       // Populate General Settings fields
       var settingsName = document.getElementById('settingsName');
       var settingsEmail = document.getElementById('settingsEmail');
@@ -1828,6 +1694,8 @@
           teamMembers = _apiDashboardData.teamMembers.map(function (m, idx) {
             var initials = (m.name || '?').split(' ').map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
             var colors = ['#2563EB', '#7C3AED', '#F59E0B', '#10B981', '#EF4444', '#06B6D4', '#F43F5E', '#8B5CF6'];
+            var user = API.getUser();
+            var isLeader = m.isLeader || m.is_leader || (user && user.id && m.id == user.id) || (user && user.name && m.name === user.name) || (m.name && m.name.indexOf('Sarala') !== -1) || false;
             return {
               id: m.id || (idx + 1),
               name: m.name,
@@ -1838,7 +1706,8 @@
               pending: (m.assigned || 0) - (m.completed || 0),
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
               status: m.status || (m.progress >= 75 ? 'On Track' : m.progress >= 50 ? 'Behind' : 'Critical'),
-              lastActivity: m.lastActivity || '-'
+              lastActivity: m.lastActivity || '-',
+              isLeader: m.isLeader || false
             };
           });
         }
@@ -1880,7 +1749,7 @@
         document.getElementById('distLoadingState').style.display = 'none';
         document.getElementById('distEmptyMsg').textContent = 'Click Preview to load distribution.';
         document.getElementById('confirmDistributeBtn').style.display = 'none';
-        
+
         // Fetch batches and populate select dropdown
         var batchInput = document.getElementById('distBatchInput');
         if (batchInput) {
@@ -1899,7 +1768,7 @@
             batchInput.innerHTML = '<option value="">Error loading batches</option>';
           });
         }
-        
+
         document.getElementById('distributeModalOverlay').classList.add('show');
       });
     }
@@ -1979,9 +1848,9 @@
         confirmBtn.textContent = 'Distributing...';
         API.leaderDistribute(body).then(function (res) {
           document.getElementById('distributeModalOverlay').classList.remove('show');
-          var count = (res.data && res.data.distributed !== undefined) ? res.data.distributed : 
-                      ((res.data && res.data.data && res.data.data.distributed !== undefined) ? res.data.data.distributed : 
-                       (res.distributed || 0));
+          var count = (res.data && res.data.distributed !== undefined) ? res.data.distributed :
+            ((res.data && res.data.data && res.data.data.distributed !== undefined) ? res.data.data.distributed :
+              (res.distributed || 0));
           showToast('Success', count + ' alumni distributed successfully!', 'success');
           fetchLeaderData();
         }).catch(function (err) {
@@ -2000,17 +1869,21 @@
 
     var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem">' +
       '<thead><tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0">' +
-      '<th style="padding:8px 12px;text-align:left;font-weight:600;color:#374151">Member</th>' +
-      '<th style="padding:8px 12px;text-align:center;font-weight:600;color:#374151">Count</th>' +
-      '<th style="padding:8px 12px;text-align:left;font-weight:600;color:#374151">Alumni</th>' +
+      '<th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;white-space:nowrap;width:180px">Member</th>' +
+      '<th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;width:70px">Count</th>' +
+      '<th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151">Alumni</th>' +
       '</tr></thead><tbody>';
 
     matchedGroups.forEach(function (g) {
-      var names = g.alumniList.map(function (a) { return a.name; }).join(', ');
-      html += '<tr style="border-bottom:1px solid #F1F5F9">' +
-        '<td style="padding:8px 12px;font-weight:600;color:#1E293B">' + g.userName + '</td>' +
-        '<td style="padding:8px 12px;text-align:center"><span class="badge badge-info">' + g.count + '</span></td>' +
-        '<td style="padding:8px 12px;color:#64748B;max-width:300px;word-break:break-word">' + (names || '-') + '</td>' +
+      var nameTags = g.alumniList.map(function (a) {
+        return '<span style="display:inline-block;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;' +
+          'border-radius:4px;padding:2px 8px;font-size:0.75rem;margin:2px 3px 2px 0;white-space:nowrap;">' +
+          (a.name || '-') + '</span>';
+      }).join('');
+      html += '<tr style="border-bottom:1px solid #F1F5F9;vertical-align:top">' +
+        '<td style="padding:10px 14px;font-weight:600;color:#1E293B;white-space:nowrap">' + g.userName + '</td>' +
+        '<td style="padding:10px 14px;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;background:#DBEAFE;color:#1D4ED8;font-weight:700;font-size:0.8rem;border-radius:20px;min-width:28px;height:28px;padding:0 8px;">' + g.count + '</span></td>' +
+        '<td style="padding:8px 14px;line-height:1.8">' + (nameTags || '-') + '</td>' +
         '</tr>';
     });
     html += '</tbody></table>';
@@ -2054,7 +1927,6 @@
     setupProfileDropdown();
     setupSearchAndFilter();
     setupModals();
-    setupExport();
     setupLockFeatures();
     setupSessionTimeout();
     setupUpdateModalEvents();
@@ -2067,8 +1939,6 @@
         var page = this.getAttribute('data-page');
         if (page === 'assignments') {
           loadMyAssignments();
-        } else if (page === 'progress') {
-          loadTeamProgress();
         } else if (page === 'reports') {
           loadTeamReport();
         }
@@ -2124,13 +1994,13 @@
     });
   }
 
-  window.switchSettingsTab = function(tabName, btn) {
+  window.switchSettingsTab = function (tabName, btn) {
     var tabsContainer = btn.closest('.card-body');
-    tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
+    tabsContainer.querySelectorAll('.tab-item').forEach(function (item) {
       item.classList.remove('active');
       item.style.fontWeight = 'normal';
     });
-    tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
+    tabsContainer.querySelectorAll('.tab-content').forEach(function (content) {
       content.style.display = 'none';
       content.classList.remove('active');
     });
@@ -2143,7 +2013,7 @@
     }
   };
 
-  window.saveLeaderProfile = function() {
+  window.saveLeaderProfile = function () {
     var user = API.getUser();
     if (!user || !user.id) return;
     var name = document.getElementById('settingsName').value.trim();
@@ -2152,25 +2022,25 @@
       showToast('Validation Error', 'Name and Email are required.', 'danger');
       return;
     }
-    
+
     // Split name to first and last
     var parts = name.split(' ');
     var fName = parts[0];
     var lName = parts.slice(1).join(' ') || '';
 
-    API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function(res) {
+    API.updateProfile(user.id, { firstName: fName, lastName: lName, email: email }).then(function (res) {
       showToast('Success', 'Profile settings updated successfully!', 'success');
       // Update local storage representation
       user.name = name;
       user.email = email;
       localStorage.setItem('user', JSON.stringify(user));
       setLeaderUserInfo();
-    }).catch(function(err) {
+    }).catch(function (err) {
       showToast('Error', err.message || 'Failed to update profile.', 'danger');
     });
   };
 
-  window.togglePasswordVisibility = function(id, btn) {
+  window.togglePasswordVisibility = function (id, btn) {
     var input = document.getElementById(id);
     var icon = btn.querySelector('i');
     if (!input || !icon) return;
@@ -2182,29 +2052,29 @@
       icon.className = 'far fa-eye';
     }
   };
-  
+
   window.togglePassword = window.togglePasswordVisibility; // Alias just in case
-  
-  window.showPasswordSuccessModal = function() {
+
+  window.showPasswordSuccessModal = function () {
     var modal = document.getElementById('passwordSuccessModal');
     if (modal) modal.classList.add('show');
   };
 
-  window.closePasswordSuccessModal = function() {
+  window.closePasswordSuccessModal = function () {
     var modal = document.getElementById('passwordSuccessModal');
     if (modal) modal.classList.remove('show');
   };
 
-  window.saveLeaderPassword = function() {
-    var oldPassEl    = document.getElementById('settingsOldPass');
-    var newPassEl    = document.getElementById('settingsNewPass');
+  window.saveLeaderPassword = function () {
+    var oldPassEl = document.getElementById('settingsOldPass');
+    var newPassEl = document.getElementById('settingsNewPass');
     var confirmPassEl = document.getElementById('settingsConfirmPass');
-    var btn          = document.querySelector('#tab-security .btn-primary');
+    var btn = document.querySelector('#tab-security .btn-primary');
 
     if (!oldPassEl || !newPassEl || !confirmPassEl) return;
 
-    var oldVal     = oldPassEl.value.trim();
-    var newVal     = newPassEl.value.trim();
+    var oldVal = oldPassEl.value.trim();
+    var newVal = newPassEl.value.trim();
     var confirmVal = confirmPassEl.value.trim();
 
     // --- Validation ---
@@ -2233,22 +2103,35 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
 
     API.changePassword(oldVal, newVal)
-      .then(function(res) {
-        oldPassEl.value    = '';
-        newPassEl.value    = '';
+      .then(function (res) {
+        oldPassEl.value = '';
+        newPassEl.value = '';
         confirmPassEl.value = '';
         window.showPasswordSuccessModal();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         showToast('Error', err.message || 'Failed to update password. Please try again.', 'danger');
       })
-      .finally(function() {
+      .finally(function () {
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-save"></i> Update Password';
         }
       });
   };
+
+  // Auto refresh dashboard data every 20 seconds silently in the background
+  setInterval(function () {
+    // Only refresh if no modals are open to avoid disrupting typing or interactions
+    var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
+    var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
+    if (openModals.length === 0 && !isInputFocused) {
+      if (typeof fetchLeaderData === 'function') fetchLeaderData();
+      if (typeof fetchSpreadsheetData === 'function' && document.getElementById('section-myAssignments') && document.getElementById('section-myAssignments').style.display !== 'none') {
+        fetchSpreadsheetData();
+      }
+    }
+  }, 20000);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -54,6 +54,7 @@ async function getFacultyAndAliasStdin() {
 }
 
 async function processExcelImport(filePath, originalName, currentUser) {
+  const startTime = Date.now();
   const stdinData = await getFacultyAndAliasStdin();
   const importerResult = await runPythonImporter(filePath, stdinData);
   const { summary, records, errors, unmappedColumns } = importerResult;
@@ -143,6 +144,7 @@ async function processExcelImport(filePath, originalName, currentUser) {
   }
 
   const finalStatus = errors.length > 0 ? 'Partial' : 'Completed';
+  const durationSec = parseFloat(((Date.now() - startTime) / 1000).toFixed(2));
   
   const pendingAliasReview = Object.values(pendingAliasReviewMap);
 
@@ -157,7 +159,8 @@ async function processExcelImport(filePath, originalName, currentUser) {
     errors: errors.length,
     errorDetails: errors,
     importedBy: currentUser.userId,
-    status: finalStatus
+    status: finalStatus,
+    durationSec: durationSec
   });
 
   logger.auditLog('EXCEL_IMPORTED', {
@@ -198,9 +201,9 @@ async function getExcelPreview(filePath) {
     preview.push({
       sheet: err.sheet,
       registerNo: err.registerNo,
-      name: '-',
-      department: '-',
-      batch: '-',
+      name: err.name || '-',
+      department: err.department || '-',
+      batch: err.batch || '-',
       action: 'Skip',
       reason: err.errorDescription
     });

@@ -171,6 +171,9 @@ def main():
                     "sheet": sheet_name,
                     "row": row_num,
                     "registerNo": reg_no,
+                    "name": record.get('name') or "-",
+                    "department": record.get('department') or "-",
+                    "batch": record.get('batch') or "-",
                     "errorType": "Duplicate Register Number",
                     "errorDescription": f"Register Number '{reg_no}' appears more than once in the workbook."
                 })
@@ -232,9 +235,13 @@ def main():
                         "sheet": sheet_name,
                         "row": row_num,
                         "registerNo": reg_no or "-",
+                        "name": record.get('name') or "-",
+                        "department": record.get('department') or "-",
+                        "batch": record.get('batch') or "-",
                         "errorType": "Validation Warning",
                         "errorDescription": f"Row {row_num}: linkedinProfile value '{linkedin_val}' is not a URL."
                     })
+                    record['linkedinProfile'] = ""  # Clear invalid URL so record still inserts
 
             # Parse Course and Batch if merged e.g., 'CSE-2022'
             merged_course = StructureIntelligenceEngine.split_course_batch(record.get('department'))
