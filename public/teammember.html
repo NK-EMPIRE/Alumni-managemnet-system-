@@ -59,6 +59,8 @@
             z-index: 1000;
             transition: var(--transition);
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         .sidebar-brand {
             padding: 24px 20px;
@@ -1094,6 +1096,15 @@
     <a class="nav-item" data-page="logout">
         <i class="fas fa-sign-out-alt"></i> <span class="nav-item-text">Logout</span>
     </a>
+    <div class="sidebar-footer" style="margin-top: auto;">
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-user-avatar" id="sidebarUserAvatar">TM</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarUserName">Team Member</div>
+                <div class="sidebar-user-role">Team Member</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="main-content">

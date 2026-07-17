@@ -958,63 +958,6 @@
             loadPreviewSpreadsheet();
         };
 
-        window.switchSettingsTab = function(tabName, btn) {
-            var tabsContainer = btn.closest('.card') || btn.closest('.card-body');
-            tabsContainer.querySelectorAll('.tab-item').forEach(function(item) {
-                item.classList.remove('active');
-                item.style.fontWeight = 'normal';
-            });
-            tabsContainer.querySelectorAll('.tab-content').forEach(function(content) {
-                content.style.display = 'none';
-                content.classList.remove('active');
-            });
-            btn.classList.add('active');
-            btn.style.fontWeight = 'bold';
-            var target = document.getElementById('tab-' + tabName);
-            if (target) {
-                target.style.display = 'block';
-                target.classList.add('active');
-            }
-        };
-
-        window.togglePasswordVisibility = function(id, btn) {
-            var input = document.getElementById(id);
-            var icon = btn.querySelector('i');
-            if (!input || !icon) return;
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'far fa-eye';
-            }
-        };
-
-        window.togglePassword = window.togglePasswordVisibility; // Alias just in case
-
-        window.saveMemberPassword = function() {
-            var oldPass = document.getElementById('settingsOldPass').value;
-            var newPass = document.getElementById('settingsNewPass').value;
-            var confirmPass = document.getElementById('settingsConfirmPass').value;
-
-            if (!oldPass || !newPass || !confirmPass) {
-                showToast('All password fields are required.', 'error');
-                return;
-            }
-            if (newPass !== confirmPass) {
-                showToast('Passwords do not match.', 'error');
-                return;
-            }
-
-            API.changePassword(oldPass, newPass).then(function(res) {
-                showToast('Password changed successfully!', 'success');
-                document.getElementById('settingsOldPass').value = '';
-                document.getElementById('settingsNewPass').value = '';
-                document.getElementById('settingsConfirmPass').value = '';
-            }).catch(function(err) {
-                showToast(err.message || 'Failed to update password.', 'error');
-            });
-        };
     }
 
     function initSessionTimeout() {
@@ -1040,6 +983,18 @@
         if (user && user.name) {
             document.getElementById('memberName').textContent = user.name.split(' ')[0] || user.name;
 
+            // Populate sidebar user details
+            var sidebarName = document.getElementById('sidebarUserName');
+            var sidebarAvatar = document.getElementById('sidebarUserAvatar');
+            if (sidebarName) sidebarName.textContent = user.name;
+            if (sidebarAvatar) {
+                var names = user.name.split(' ');
+                var initials = names[0].charAt(0).toUpperCase();
+                if (names.length > 1) {
+                    initials += names[names.length - 1].charAt(0).toUpperCase();
+                }
+                sidebarAvatar.textContent = initials;
+            }
             
             // Populate General Settings with real user data
             var settingsName = document.getElementById('settingsName');
