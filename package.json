@@ -5,6 +5,7 @@
   "scripts": {
     "test": "mocha tests/**/*.test.js",
     "start": "node server.js",
+    "build": "echo \"Serving static & dynamic files from public/ directly...\"",
     "dev": "nodemon server.js"
   },
   "keywords": [],
