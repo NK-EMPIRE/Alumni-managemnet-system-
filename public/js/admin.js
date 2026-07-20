@@ -3262,9 +3262,6 @@ window.renderSpreadsheetTable = function(data) {
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
     var _safeName = String(row.name || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
-    if (isCompleted) {
-      actionButtons += '<button class="btn btn-danger btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="reopenRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-unlock"></i></button>';
-    }
     actionButtons += '</div>';
 
     bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center;">' + actionButtons + '</td>';
@@ -3520,29 +3517,6 @@ window.closeDrawer = function() {
   }
 };
 
-window.reopenRecord = function(alumniId) {
-  if (confirm('Are you sure you want to reopen this completed alumni record? This will clear the completion status and allow members to re-update details.')) {
-    var token = localStorage.getItem('token');
-    fetch('/api/v1/assignments/reopen/' + alumniId, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({ reason: 'Reopened by Admin' })
-    }).then(function(r) { return r.json(); }).then(function(res) {
-      if (res && res.success) {
-        Toast.success('Reopen Record', 'Record reopened successfully');
-        fetchSpreadsheetData();
-      } else {
-        Toast.error('Reopen Record', res.message || 'Failed to reopen record');
-      }
-    }).catch(function(err) {
-      console.error('Reopen error:', err);
-      Toast.error('Reopen Record', 'An error occurred reopening the record');
-    });
-  }
-};
 
 window.editAlumniRecord = function(id) {
   API.getAlumniById(id).then(function(res) {

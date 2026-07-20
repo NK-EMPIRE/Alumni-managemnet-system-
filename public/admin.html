@@ -436,7 +436,7 @@
           </div>
         </div>
 
-        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+        <div class="card spreadsheet-card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
           <!-- Spreadsheet Toolbar -->
           <div
             style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
@@ -485,7 +485,7 @@
             <div style="display:flex;gap:8px;align-items:center;">
               <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
                 style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
-              <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet()" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
               <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i
                   class="fas fa-file-csv"></i> Export CSV</button>
               <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i

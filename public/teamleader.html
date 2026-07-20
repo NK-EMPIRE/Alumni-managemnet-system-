@@ -560,7 +560,7 @@
           <p>Spreadsheet-style overview of all updates submitted by the team.</p>
         </div>
       </div>
-      <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+      <div class="card spreadsheet-card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
         <!-- Spreadsheet Toolbar -->
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -604,7 +604,7 @@
           <div style="display:flex;gap:8px;align-items:center;">
             <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
               style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet()" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
 
             <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i class="fas fa-file-csv"></i> Export CSV</button>
             <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i
@@ -987,15 +987,15 @@
           <input type="hidden" id="fieldIndex" value="">
           <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px">
             <button type="button" class="btn btn-outline" id="saveDraftBtn">
-              <span class="spinner"></span>
+              <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text">Save Draft</span>
             </button>
             <button type="button" class="btn btn-primary" id="submitRecordBtn">
-              <span class="spinner"></span>
+              <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text">Submit Record</span>
             </button>
             <button type="button" class="btn btn-success" id="submitNextBtn" style="background-color: var(--success); border-color: var(--success); color: #fff;">
-              <span class="spinner"></span>
+              <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text"><i class="fas fa-arrow-right"></i> Submit & Next</span>
             </button>
             <button type="button" class="btn btn-secondary" id="cancelModalBtn" data-close="updateModal">Cancel</button>
