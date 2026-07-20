@@ -14,3 +14,4 @@ tmp/
 .tempmediaStorage/
 backend/logs/
 
+.env
