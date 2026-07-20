@@ -5379,3 +5379,28 @@ body.dark-mode .badge-record-count {
   color: #c7d2fe !important;
   border-color: rgba(165, 180, 252, 0.3) !important;
 }
+
+/* Full Screen Spreadsheet styling */
+.spreadsheet-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #ffffff !important;
+  padding: 15px !important;
+}
+
+body.dark-mode .spreadsheet-fullscreen {
+  background: #0f172a !important;
+}
+
+.spreadsheet-fullscreen div[style*="overflow:auto"],
+.spreadsheet-fullscreen .table-container {
+  max-height: none !important;
+  height: calc(100vh - 140px) !important;
+}

@@ -483,10 +483,10 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   await transaction.begin();
 
   try {
-    // Delete the assignment record (making it Available again)
+    // Update the assignment record status to Pending (keeping it assigned to the member)
     await transaction.request()
       .input('alumniId', sql.Int, alumniId)
-      .query('DELETE FROM AlumniAssignments WHERE alumni_id = @alumniId');
+      .query("UPDATE AlumniAssignments SET status = 'Pending', completed_date = NULL WHERE alumni_id = @alumniId");
 
     await transaction.commit();
   } catch (err) {
@@ -506,7 +506,7 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
 
   return {
     success: true,
-    message: `Alumni record ${assignment.name} reopened successfully and is now Available.`
+    message: `Alumni record ${assignment.name} reopened successfully and is now Pending.`
   };
 }
 
