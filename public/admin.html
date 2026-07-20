@@ -281,33 +281,7 @@
           </div>
         </div>
 
-        <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div class="card fade-in-up">
-            <div class="card-header">
-              <h3><i class="fas fa-chart-pie" style="color:var(--primary);margin-right:8px;"></i>Completion Overview</h3>
-            </div>
-            <div class="card-body" style="display:flex;justify-content:center;padding:16px;">
-              <canvas id="completionChart" height="220" style="max-width:260px;"></canvas>
-            </div>
-          </div>
-          <div class="card fade-in-up">
-            <div class="card-header">
-              <h3><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Department Progress</h3>
-            </div>
-            <div class="card-body" style="padding:16px;">
-              <canvas id="departmentChart" height="220"></canvas>
-            </div>
-          </div>
-          <div class="card fade-in-up">
-            <div class="card-header">
-              <h3><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>Weekly Trend</h3>
-            </div>
-            <div class="card-body" style="padding:16px;">
-              <canvas id="weeklyChart" height="220"></canvas>
-            </div>
-          </div>
-        </div>
+        <!-- Removed Dashboards Charts Row as requested -->
 
         <!-- Recent Assignments Table -->
         <div class="card fade-in-up">
@@ -511,6 +485,7 @@
             <div style="display:flex;gap:8px;align-items:center;">
               <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
                 style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet()" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
               <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i
                   class="fas fa-file-csv"></i> Export CSV</button>
               <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i

@@ -539,5 +539,31 @@
     setTimeout(function () { document.addEventListener('click', dismiss, true); }, 10);
   };
 
+  window.toggleFullScreenSpreadsheet = function () {
+    var wrapper = document.querySelector('.card:has(#ssTableBody)');
+    if (!wrapper) {
+      // Fallback if card isn't matched exactly: look for parent card of table container
+      var tableContainer = document.querySelector('div:has(> table.spreadsheet-table)');
+      if (tableContainer) {
+        wrapper = tableContainer.closest('.card') || tableContainer;
+      }
+    }
+    if (!wrapper) return;
+
+    if (wrapper.classList.contains('spreadsheet-fullscreen')) {
+      wrapper.classList.remove('spreadsheet-fullscreen');
+      var icon = document.querySelector('button[title="View in Full Screen"] i');
+      if (icon) {
+        icon.className = 'fas fa-expand';
+      }
+    } else {
+      wrapper.classList.add('spreadsheet-fullscreen');
+      var icon = document.querySelector('button[title="View in Full Screen"] i');
+      if (icon) {
+        icon.className = 'fas fa-compress';
+      }
+    }
+  };
+
 })();
 

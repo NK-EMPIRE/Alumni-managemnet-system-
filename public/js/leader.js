@@ -1284,12 +1284,11 @@
     { key: 'phone', label: 'Phone', visible: true, width: 120 },
     { key: 'company', label: 'Company', visible: true, width: 150 },
     { key: 'designation', label: 'Designation', visible: true, width: 150 },
-    { key: 'experience', label: 'Experience', visible: true, width: 100 },
-    { key: 'salary', label: 'Salary', visible: true, width: 100 },
     { key: 'city', label: 'City', visible: true, width: 120 },
     { key: 'country', label: 'Country', visible: true, width: 120 },
     { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
     { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
+    { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
     { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
     { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
   ];
@@ -1383,6 +1382,8 @@
           val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
         } else if (col.key === 'member_name') {
           val = row.member_name || row.teamMember || row.assigned_to || '-';
+        } else if (col.key === 'leader_name') {
+          val = row.leader_name || row.leader || '-';
         } else if (col.key === 'updated_date') {
           var date = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '-';
           if (date !== '-') {
