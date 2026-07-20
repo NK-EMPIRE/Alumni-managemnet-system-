@@ -1183,7 +1183,7 @@
     }
 
     function fetchMemberData() {
-        Promise.all([
+        return Promise.all([
             API.getMemberDashboard().catch(function () { return null; }),
             API.getAssignedAlumni({ page: 1, limit: 500 }).catch(function () { return null; })
         ]).then(function (results) {
