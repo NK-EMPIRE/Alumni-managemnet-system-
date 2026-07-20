@@ -132,11 +132,19 @@
     var btn = event && event.target;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Testing...';
-    setTimeout(function () {
+    API.get('/health/db').then(function (res) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-plug"></i> Test Connection';
-      Toast.success('Connection Successful', 'Database connection test passed successfully.');
-    }, 1500);
+      if (res && res.success) {
+        Toast.success('Connection Successful', 'Database connection test passed successfully.');
+      } else {
+        Toast.error('Connection Failed', res.message || 'Could not connect to database.');
+      }
+    }).catch(function () {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-plug"></i> Test Connection';
+      Toast.error('Connection Failed', 'Could not reach the server.');
+    });
   };
 
   window.backupDatabase = function (event) {
@@ -144,11 +152,19 @@
     var btn = event && event.target;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Backing up...';
-    setTimeout(function () {
+    API.post('/backup').then(function (res) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-database"></i> Backup Database';
-      Toast.success('Backup Complete', 'Database backup has been created successfully.');
-    }, 2500);
+      if (res && res.success) {
+        Toast.success('Backup Complete', 'Database backup created successfully.');
+      } else {
+        Toast.error('Backup Failed', res.message || 'Backup could not be completed.');
+      }
+    }).catch(function () {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-database"></i> Backup Database';
+      Toast.error('Backup Failed', 'Could not reach the server.');
+    });
   };
 
   window.handleGlobalSearch = function (val) {

@@ -861,15 +861,17 @@
             });
         });
 
+        var _previewDebounce = null;
         window.onPreviewFilterChange = function () {
             previewPage = 1;
-            loadPreviewSpreadsheet();
+            clearTimeout(_previewDebounce);
+            _previewDebounce = setTimeout(loadPreviewSpreadsheet, 300);
         };
 
         window.loadPreviewSpreadsheet = function () {
             var body = document.getElementById('previewSpreadsheetBody');
             if (!body) return;
-            body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
+            body.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
 
             var search = document.getElementById('previewSearch').value || '';
             var dept = document.getElementById('previewFilterDept').value || '';
@@ -1286,7 +1288,15 @@
             console.error('Failed to load dynamic filters in member:', err);
         });
 
-        fetchMemberData();
+        var hideLoading = function () {
+            var ls = document.getElementById('loadingScreen');
+            if (ls) ls.classList.add('hide');
+        };
+
+        fetchMemberData().then(hideLoading).catch(hideLoading);
+
+        // Fallback: hide loading after 8s regardless
+        setTimeout(hideLoading, 8000);
 
         tableSearch.addEventListener('input', function () {
             currentPage = 1;
@@ -1307,8 +1317,6 @@
             currentPage = 1;
             renderTable();
         });
-
-
 
         recordsBody.addEventListener('click', handleUpdateClick);
 
@@ -1348,12 +1356,6 @@
         initNotifications();
         initSidebar();
         initSessionTimeout();
-
-        // Hide loading screen
-        var loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            setTimeout(function () { loadingScreen.classList.add('hide'); }, 300);
-        }
     }
 
     if (document.readyState === 'loading') {

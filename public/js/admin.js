@@ -158,7 +158,6 @@ function escapeHtml(str) {
 }
 document.addEventListener('DOMContentLoaded', function () {
   try {
-    setCurrentDate();
     setUserInfo();
     initSessionTimeout();
     setupClickOutside();
@@ -168,12 +167,11 @@ document.addEventListener('DOMContentLoaded', function () {
     initSpreadsheetHandlers();
     initProgressWatch();
     fetchAllData();
-    initRealtimeClock();
     // Real-time polling every 30 seconds for notifications + reset requests
     setInterval(function() {
       API.getAuditLogs({ page: 1, limit: 1000 }).then(function(res) {
         if (res && res.success) {
-          _apiAuditLogs = res.data;
+          _apiAuditLogs = res.data && res.data.records ? res.data : { records: Array.isArray(res.data) ? res.data : [] };
           populateNotifications();
         }
       }).catch(function() {});
@@ -192,6 +190,7 @@ var _apiAlumni = null;
 var _apiImportHistory = null;
 var _apiTeams = null;
 var _apiAuditLogs = null;
+var _alumniMapped = null;
 var _apiStats = null;
 
 function parseUTCDateTime(dateStr) {
@@ -255,7 +254,6 @@ function fetchAllData() {
     populateDynamicFilters(_apiAlumniFilters);
 
     populateDashboardStats();
-    populateActivityFeed();
     populateTable();
     populateTeamLeadersTable();
     populateTeamMembersTable();
@@ -276,7 +274,6 @@ function fetchAllData() {
   }).catch(function () {
     _apiDataLoaded = false;
     populateDashboardStats();
-    populateActivityFeed();
     populateTable();
     populateTeamLeadersTable();
     populateTeamMembersTable();
@@ -386,7 +383,7 @@ function populateActivityFeed() {
    ──────────────────────────────────────────────────────────── */
 function populateTable() {
   if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
-    state.filteredData = _apiAlumni.records.map(function (a) {
+    _alumniMapped = _apiAlumni.records.map(function (a) {
       return {
         id: a.alumni_id || a.id,
         name: a.name || a.fullName || 'Unknown',
@@ -394,10 +391,10 @@ function populateTable() {
         batch: a.batch || '',
         company: a.company || '',
         leader: a.assignedTo || a.leader || '',
-        status: a.status || 'Pending',
+        status: a.assignment_status || 'Pending',
         progress: (function(rec) {
-          if (rec.status === 'Completed') return 100;
-          if (rec.status === 'Pending') return 0;
+          if (rec.assignment_status === 'Completed') return 100;
+          if (rec.assignment_status === 'Pending') return 0;
           var fields = ['company', 'designation', 'email', 'phone', 'working_details', 'linkedin_profile'];
           var filled = 0;
           fields.forEach(function(f) { if (rec[f] && String(rec[f]).trim() !== '') filled++; });
@@ -405,7 +402,9 @@ function populateTable() {
         })(a)
       };
     });
+    state.filteredData = _alumniMapped.slice();
   } else {
+    _alumniMapped = null;
     state.filteredData = [];
   }
 
@@ -450,11 +449,12 @@ function renderTable() {
     if (q) {
       var cleanQuery = q.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       var regex = new RegExp('(' + cleanQuery + ')', 'gi');
-      var highlightMark = '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>';
-      nameVal = String(nameVal).replace(regex, highlightMark);
-      deptVal = String(deptVal).replace(regex, highlightMark);
-      batchVal = String(batchVal).replace(regex, highlightMark);
-      leaderVal = String(leaderVal).replace(regex, highlightMark);
+      var escapeHtml = function(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+      var highlighter = function(match) { return '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">' + escapeHtml(match) + '</mark>'; };
+      nameVal = String(nameVal).replace(regex, highlighter);
+      deptVal = String(deptVal).replace(regex, highlighter);
+      batchVal = String(batchVal).replace(regex, highlighter);
+      leaderVal = String(leaderVal).replace(regex, highlighter);
     }
 
     html += '<tr>';
@@ -534,31 +534,18 @@ function goToPage(page) {
 /* ────────────────────────────────────────────────────────────
    8. TABLE SEARCH & FILTER
    ──────────────────────────────────────────────────────────── */
+var _filterDebounce = null;
 function filterTable() {
+  clearTimeout(_filterDebounce);
+  _filterDebounce = setTimeout(_doFilter, 250);
+}
+function _doFilter() {
   var q = getVal('tableSearch').toLowerCase();
   var dept = getVal('filterDepartment');
   var status = getVal('filterStatus');
   var batch = getVal('filterBatch');
 
-  var source = (_apiDataLoaded && _apiAlumni && _apiAlumni.records) ? _apiAlumni.records.map(function (a) {
-    return {
-      id: a.alumni_id || a.id,
-      name: a.name || a.fullName || 'Unknown',
-      dept: a.department || a.dept || '',
-      batch: a.batch || '',
-      company: a.company || '',
-      leader: a.assignedTo || a.leader || '',
-      status: a.status || 'Pending',
-      progress: (function(rec) {
-        if (rec.status === 'Completed') return 100;
-        if (rec.status === 'Pending') return 0;
-        var fields = ['company', 'designation', 'email', 'phone', 'working_details', 'linkedin_profile'];
-        var filled = 0;
-        fields.forEach(function(f) { if (rec[f] && String(rec[f]).trim() !== '') filled++; });
-        return Math.round((filled / fields.length) * 100);
-      })(a)
-    };
-  }) : [];
+  var source = _alumniMapped || [];
 
   if (!source || source.length === 0) {
     state.filteredData = [];
@@ -700,7 +687,7 @@ function populateTeamLeadersTable() {
       html += '<td>' + tl.dept + '</td>';
       html += '<td>' + tl.members + '</td>';
       html += '<td>' + tl.assigned + '</td>';
-      html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamLeaderDetails(\'' + tl.name + '\')"><i class="fas fa-eye"></i></button></td>';
+      html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamLeaderDetails(\'' + String(tl.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')"><i class="fas fa-eye"></i></button></td>';
       html += '</tr>';
     });
   }
@@ -733,7 +720,7 @@ function populateTeamMembersTable() {
       html += '<td>' + tm.dept + '</td>';
       html += '<td>' + tm.leader + '</td>';
       html += '<td>' + tm.assigned + '</td>';
-      html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamMemberDetails(\'' + tm.name + '\')"><i class="fas fa-eye"></i></button></td>';
+      html += '<td><button class="btn btn-sm btn-outline" onclick="viewTeamMemberDetails(\'' + String(tm.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')"><i class="fas fa-eye"></i></button></td>';
       html += '</tr>';
     });
   }
@@ -2152,20 +2139,22 @@ var sessionOverlay = null;
 
 function initSessionTimeout() {
   sessionOverlay = document.getElementById('sessionTimeout');
-  /* Simulate session timeout after 5 minutes of inactivity */
-  var idleTime = 0;
-  var resetIdle = function () { idleTime = 0; if (sessionOverlay && sessionOverlay.classList.contains('show')) { extendSession(); } };
+  var lastActivity = Date.now();
+  var IDLE_TIMEOUT = 5 * 60 * 1000; /* 5 minutes */
+  var resetIdle = function () {
+    lastActivity = Date.now();
+    if (sessionOverlay && sessionOverlay.classList.contains('show')) { extendSession(); }
+  };
   document.addEventListener('mousemove', resetIdle);
   document.addEventListener('keydown', resetIdle);
   document.addEventListener('click', resetIdle);
   document.addEventListener('scroll', resetIdle);
 
   setInterval(function () {
-    idleTime++;
-    if (idleTime >= 5) { /* 5 minutes = 300 seconds, using 5 for demo */
+    if (Date.now() - lastActivity >= IDLE_TIMEOUT) {
       showSessionTimeout();
     }
-  }, 60000); /* Check every minute, but for demo purposes we make it faster */
+  }, 10000); /* Check every 10 seconds */
 }
 
 function showSessionTimeout() {
@@ -2913,7 +2902,7 @@ function viewReportData(type, title) {
     columns = ['Name', 'Department', 'Batch', 'Company', 'Designation', 'Status'];
     if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
       rows = _apiAlumni.records.map(function (a) {
-        return [a.name || (a.first_name + ' ' + (a.last_name || '')).trim(), a.department || a.dept || '-', a.batch || '-', a.company || a.working_details || '-', a.designation || '-', a.status || 'Pending'];
+        return [a.name || (a.first_name + ' ' + (a.last_name || '')).trim(), a.department || a.dept || '-', a.batch || '-', a.company || a.working_details || '-', a.designation || '-', a.assignment_status || 'Pending'];
       });
     } else {
       rows = [];
@@ -3259,7 +3248,8 @@ window.renderSpreadsheetTable = function(data) {
       if (!isDate && col.key !== 'assignment_status' && col.key !== 'linkedin_profile' && val !== '-' && ssSearchQuery) {
         var cleanQuery = ssSearchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         var regex = new RegExp('(' + cleanQuery + ')', 'gi');
-        val = String(val).replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">$1</mark>');
+        var escapeHtml = function(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+        val = String(val).replace(regex, function(match) { return '<mark style="background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-weight:600;">' + escapeHtml(match) + '</mark>'; });
       }
 
       bodyHtml += '<td>' + val + '</td>';
@@ -3270,7 +3260,8 @@ window.renderSpreadsheetTable = function(data) {
     var actionButtons = '<div style="display:flex; gap:6px; justify-content:center;">';
     actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
-    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + row.name.replace(/'/g, "\\'") + '\')" title="History"><i class="fas fa-history"></i></button>';
+    var _safeName = String(row.name || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
     if (isCompleted) {
       actionButtons += '<button class="btn btn-danger btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="reopenRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-unlock"></i></button>';
     }
@@ -3428,7 +3419,7 @@ window.toggleColumnVisibility = function(key) {
   var col = ssColumns.find(function(c) { return c.key === key; });
   if (col) {
     col.visible = !col.visible;
-    fetchSpreadsheetData();
+    renderSpreadsheetTable();
   }
 };
 

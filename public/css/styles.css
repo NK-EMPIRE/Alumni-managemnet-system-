@@ -3484,7 +3484,8 @@ textarea.form-control {
   }
 }
 
-/* Disable all animations and transitions globally for instant UI response */
+/* Disable all animations and transitions globally for instant UI response (disabled for dev) */
+/* 
 *,
 *::before,
 *::after {
@@ -3494,7 +3495,8 @@ textarea.form-control {
 
 .stagger-children>* {
   opacity: 1 !important;
-}
+} 
+*/
 
 /* ────────────────────────────────────────────────────────────
    DARK MODE COMPONENT OVERRIDES

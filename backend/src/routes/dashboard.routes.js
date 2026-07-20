@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const { param } = require('express-validator');
 const dashboardController = require('../controllers/dashboard.controller');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
@@ -65,6 +66,8 @@ router.get(
 
 router.get(
   '/leader/:leaderId/stats',
+  param('leaderId').isInt().toInt(),
+  validate,
   authorize(ROLES.ADMIN),
   dashboardController.getLeaderStats
 );

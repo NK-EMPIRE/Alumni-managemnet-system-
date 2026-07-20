@@ -1,4 +1,6 @@
 const { Router } = require('express');
+const { getPool } = require('../config/database');
+const authenticate = require('../middleware/authenticate');
 
 const authRoutes = require('./auth.routes');
 const userRoutes = require('./user.routes');
@@ -12,6 +14,20 @@ const auditRoutes = require('./audit.routes');
 const settingsRoutes = require('./settings.routes');
 
 const router = Router();
+
+router.get('/health/db', async function (req, res) {
+  try {
+    const pool = await getPool();
+    await pool.request().query('SELECT 1 AS ok');
+    res.json({ success: true, message: 'Database connection is healthy' });
+  } catch (err) {
+    res.status(503).json({ success: false, message: 'Database connection failed' });
+  }
+});
+
+router.post('/backup', authenticate, async function (req, res) {
+  res.status(501).json({ success: false, message: 'Backup feature is not yet implemented' });
+});
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
