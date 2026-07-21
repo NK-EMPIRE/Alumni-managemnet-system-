@@ -96,8 +96,10 @@
     success: function (title, msg) { window.showToast(title, msg, 'success'); },
     warning: function (title, msg) { window.showToast(title, msg, 'warning'); },
     info: function (title, msg) { window.showToast(title, msg, 'info'); },
-    danger: function (title, msg) { window.showToast(title, msg, 'danger'); }
+    danger: function (title, msg) { window.showToast(title, msg, 'danger'); },
+    error: function (title, msg) { window.showToast(title, msg, 'danger'); }
   };
+  try { window.eval('var Toast = window.Toast;'); } catch (e) { }
 
   window.openModal = function (modalId) {
     var modal = document.getElementById(modalId);

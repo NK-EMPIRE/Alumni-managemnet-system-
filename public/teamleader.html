@@ -1295,6 +1295,14 @@
   <script src="js/charts.js"></script>
   <script src="js/services/api.js"></script>
   <script>
+    window.Toast = window.Toast || {
+      success: function(t, m) { window.showToast(t, m, 'success'); },
+      warning: function(t, m) { window.showToast(t, m, 'warning'); },
+      info: function(t, m) { window.showToast(t, m, 'info'); },
+      danger: function(t, m) { window.showToast(t, m, 'danger'); },
+      error: function(t, m) { window.showToast(t, m, 'danger'); }
+    };
+    var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
   <script src="js/leader.js"></script>
