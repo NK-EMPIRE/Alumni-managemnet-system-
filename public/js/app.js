@@ -652,10 +652,31 @@
       if (modal) {
         e.preventDefault();
         if (modal.style.display === 'flex' || modal.classList.contains('active')) {
-          if (window.closeModal) window.closeModal('ssFilterModal');
-        } else {
-          if (window.openModal) window.openModal('ssFilterModal');
+    // Escape -> Close any open modal
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay, .modal-backdrop').forEach(function (m) {
+        if (m.style.display === 'flex' || m.classList.contains('active') || m.classList.contains('show')) {
+          m.style.display = 'none';
+          m.classList.remove('active', 'show');
         }
+      });
+    }
+    // Ctrl + S -> Save / Submit active record form
+    if (e.ctrlKey && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      var submitBtn = document.getElementById('submitRecordBtn') || document.getElementById('saveAlumniBtn') || document.querySelector('.modal.show .btn-primary');
+      if (submitBtn) {
+        submitBtn.click();
+        if (window.Toast) window.Toast.success('Saved', 'Record submission triggered via Ctrl + S');
+      }
+    }
+    // Alt + E -> Export CSV
+    if (e.altKey && e.key.toLowerCase() === 'e') {
+      e.preventDefault();
+      if (window.handleExport && typeof window.handleExport === 'function') {
+        window.handleExport();
+      } else if (window.exportAlumniCSV && typeof window.exportAlumniCSV === 'function') {
+        window.exportAlumniCSV();
       }
     }
     // Alt + R -> Refresh Data
