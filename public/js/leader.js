@@ -1993,17 +1993,22 @@
     });
 
     // Bind my assignments sub-filters
-    document.getElementById('myAssignmentsSearch').addEventListener('input', renderMyAssignmentsTable);
-    document.getElementById('myAssignmentsStatusFilter').addEventListener('change', renderMyAssignmentsTable);
+    var mySearch = document.getElementById('myAssignmentsSearch');
+    if (mySearch) mySearch.addEventListener('input', renderMyAssignmentsTable);
+    var myStatusF = document.getElementById('myAssignmentsStatusFilter');
+    if (myStatusF) myStatusF.addEventListener('change', renderMyAssignmentsTable);
     var myDeptF = document.getElementById('myAssignmentsDeptFilter');
     if (myDeptF) myDeptF.addEventListener('change', renderMyAssignmentsTable);
     var myBatchF = document.getElementById('myAssignmentsBatchFilter');
     if (myBatchF) myBatchF.addEventListener('change', renderMyAssignmentsTable);
 
     // Bind report sub-filters
-    document.getElementById('reportSearch').addEventListener('input', renderTeamReportTable);
-    document.getElementById('reportUserFilter').addEventListener('change', renderTeamReportTable);
-    document.getElementById('reportStatusFilter').addEventListener('change', renderTeamReportTable);
+    var repSearch = document.getElementById('reportSearch');
+    if (repSearch) repSearch.addEventListener('input', renderTeamReportTable);
+    var repUserF = document.getElementById('reportUserFilter');
+    if (repUserF) repUserF.addEventListener('change', renderTeamReportTable);
+    var repStatusF = document.getElementById('reportStatusFilter');
+    if (repStatusF) repStatusF.addEventListener('change', renderTeamReportTable);
 
     // Bind rows per page dropdown listeners
     var rppSelect = document.getElementById('rowsPerPageSelect');

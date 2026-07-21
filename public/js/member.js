@@ -1308,25 +1308,33 @@
         // Fallback: hide loading after 8s regardless
         setTimeout(hideLoading, 8000);
 
-        tableSearch.addEventListener('input', function () {
-            currentPage = 1;
-            renderTable();
-        });
+        if (tableSearch) {
+            tableSearch.addEventListener('input', function () {
+                currentPage = 1;
+                renderTable();
+            });
+        }
 
-        filterDept.addEventListener('change', function () {
-            currentPage = 1;
-            renderTable();
-        });
+        if (filterDept) {
+            filterDept.addEventListener('change', function () {
+                currentPage = 1;
+                renderTable();
+            });
+        }
 
-        filterBatch.addEventListener('change', function () {
-            currentPage = 1;
-            renderTable();
-        });
+        if (filterBatch) {
+            filterBatch.addEventListener('change', function () {
+                currentPage = 1;
+                renderTable();
+            });
+        }
 
-        filterStatus.addEventListener('change', function () {
-            currentPage = 1;
-            renderTable();
-        });
+        if (filterStatus) {
+            filterStatus.addEventListener('change', function () {
+                currentPage = 1;
+                renderTable();
+            });
+        }
 
         recordsBody.addEventListener('click', handleUpdateClick);
 

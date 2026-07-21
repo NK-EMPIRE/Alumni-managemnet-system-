@@ -624,6 +624,12 @@
       if (modal) {
         e.preventDefault();
         if (modal.style.display === 'flex' || modal.classList.contains('active')) {
+          if (window.closeModal) window.closeModal('ssFilterModal');
+        } else {
+          if (window.openModal) window.openModal('ssFilterModal');
+        }
+      }
+    }
     // Escape -> Close any open modal
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay, .modal-backdrop').forEach(function (m) {
