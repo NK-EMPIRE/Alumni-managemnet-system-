@@ -115,6 +115,8 @@
         const deptFilter = filterDept.value;
         const batchFilter = filterBatch.value;
         const statusFilter = filterStatus.value;
+        const dateFrom = document.getElementById('filterDateFrom') ? document.getElementById('filterDateFrom').value : null;
+        const dateTo = document.getElementById('filterDateTo') ? document.getElementById('filterDateTo').value : null;
 
         filteredData = alumniData.filter(function (r) {
             const matchesSearch = !searchTerm ||
@@ -126,7 +128,15 @@
             const matchesDept = !deptFilter || r.department === deptFilter;
             const matchesBatch = !batchFilter || r.batch === batchFilter;
             const matchesStatus = !statusFilter || r.status === statusFilter;
-            return matchesSearch && matchesDept && matchesBatch && matchesStatus;
+
+            let matchesDate = true;
+            if (r.created_at || r.createdAt || r.assigned_date) {
+                const itemDate = (r.created_at || r.createdAt || r.assigned_date).substring(0, 10);
+                if (dateFrom && itemDate < dateFrom) matchesDate = false;
+                if (dateTo && itemDate > dateTo) matchesDate = false;
+            }
+
+            return matchesSearch && matchesDept && matchesBatch && matchesStatus && matchesDate;
         });
 
         const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));

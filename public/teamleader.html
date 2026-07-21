@@ -601,9 +601,13 @@
               <option value="Completed">Completed</option>
             </select>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
-              style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">Date Range:</label>
+              <input type="date" id="ssDateFrom" class="form-control" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+              <span style="color:var(--text-secondary);">-</span>
+              <input type="date" id="ssDateTo" class="form-control" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+              <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
+                style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
             <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
 
             <button class="btn btn-warning btn-sm" onclick="openCirculateModal()" style="height:36px;color:#fff;" title="Redistribute pending records within team">

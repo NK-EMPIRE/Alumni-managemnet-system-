@@ -30,7 +30,7 @@ const FIELD_TYPES = {
   secondary_email: sql.NVarChar(150)
 };
 
-async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId }) {
+async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField }) {
   const pool = await getPool();
   const request = pool.request()
     .input('offset', sql.Int, offset)
@@ -40,7 +40,11 @@ async function findAll({ page, limit, offset, search, department, batch, status,
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
     .input('leaderId', sql.Int, leaderId || null)
-    .input('memberId', sql.Int, memberId || null);
+    .input('memberId', sql.Int, memberId || null)
+    .input('dateFrom', sql.NVarChar(30), dateFrom || null)
+    .input('dateTo', sql.NVarChar(30), dateTo || null);
+
+  const dateCol = dateField === 'assigned_date' ? 'aa.assigned_date' : 'a.created_at';
 
   const result = await request.query(`
     WITH AlumniCTE AS (
@@ -79,6 +83,8 @@ async function findAll({ page, limit, offset, search, department, batch, status,
           OR (@status = 'Available' AND aa.status IS NULL)
           OR (aa.status = @status)
         )
+        AND (@dateFrom IS NULL OR ${dateCol} >= CAST(@dateFrom AS DATETIME2))
+        AND (@dateTo IS NULL OR ${dateCol} <= CAST(@dateTo + ' 23:59:59' AS DATETIME2))
     )
     SELECT *, (SELECT COUNT(*) FROM AlumniCTE) AS total_count
     FROM AlumniCTE

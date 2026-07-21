@@ -9,9 +9,9 @@ function computeOffset(page, limit) {
   return { page, limit, offset: (page - 1) * limit };
 }
 
-async function getAlumni({ page, limit, search, department, batch, status, leaderId, memberId }) {
+async function getAlumni({ page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField }) {
   const p = computeOffset(page, limit);
-  return alumniRepository.findAll({ page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status, leaderId, memberId });
+  return alumniRepository.findAll({ page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField });
 }
 
 async function getAlumniById(alumniId) {

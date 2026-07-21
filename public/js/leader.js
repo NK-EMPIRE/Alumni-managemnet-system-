@@ -1309,6 +1309,9 @@
     var batch = document.getElementById('ssFilterBatch').value;
     var status = document.getElementById('ssFilterStatus').value;
 
+    var dateFrom = document.getElementById('ssDateFrom') ? document.getElementById('ssDateFrom').value : null;
+    var dateTo = document.getElementById('ssDateTo') ? document.getElementById('ssDateTo').value : null;
+
     var params = {
       page: ssPage,
       limit: ssLimit,
@@ -1317,6 +1320,8 @@
       batch: batch || undefined,
       status: status || undefined,
       memberId: memberId || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
       onlyMe: false
     };
 

@@ -296,6 +296,9 @@
               <button class="btn btn-sm btn-warning" onclick="openReassignModal()" style="color:#fff;">
                 <i class="fas fa-exchange-alt"></i> Reassign
               </button>
+              <button class="btn btn-sm btn-info" onclick="openDbHealthModal()" style="color:#fff;background:#0EA5E9;">
+                <i class="fas fa-heartbeat"></i> DB Health
+              </button>
               <button class="btn btn-sm btn-secondary" onclick="handleExport()">
                 <i class="fas fa-download"></i> Export
               </button>
@@ -486,6 +489,14 @@
               </select>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
+              <label style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">Date Range:</label>
+              <input type="date" id="ssDateFrom" class="form-control" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+              <span style="color:var(--text-secondary);">-</span>
+              <input type="date" id="ssDateTo" class="form-control" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+              <select id="ssDateField" class="form-control form-select" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+                <option value="created_at">Import Date</option>
+                <option value="assigned_date">Distributed Date</option>
+              </select>
               <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
                 style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
               <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
@@ -1677,6 +1688,33 @@
     </div>
   </div>
 
+
+  <!-- ============================================================
+       DB HEALTH CHECK MODAL (Admin)
+       ============================================================ -->
+  <div class="modal-overlay" id="dbHealthModal">
+    <div class="modal" style="max-width:850px;width:95vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-heartbeat" style="color:#0EA5E9;margin-right:8px;"></i>Database Health Check & Diagnostics</h3>
+        <button class="modal-close" onclick="closeModal('dbHealthModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div id="dbHealthSummaryPanel" style="margin-bottom:20px;">
+          <p style="color:var(--text-secondary);">Loading database diagnostics...</p>
+        </div>
+
+        <!-- Detail Table Drawer inside Modal -->
+        <div id="dbHealthDetailContainer" style="display:none;border-top:1px solid #E2E8F0;padding-top:16px;margin-top:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <strong id="dbHealthDetailTitle" style="font-size:1rem;color:var(--text-primary);"></strong>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('dbHealthDetailContainer').style.display='none';">Close Detail View</button>
+          </div>
+          <div id="dbHealthDetailTable" style="max-height:300px;overflow-y:auto;margin-bottom:12px;"></div>
+          <div id="dbHealthDetailPagination" style="display:flex;justify-content:space-between;align-items:center;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================================================
        SCRIPTS

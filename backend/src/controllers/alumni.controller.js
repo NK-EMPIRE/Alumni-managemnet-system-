@@ -3,8 +3,8 @@ const { asyncHandler } = require('../middleware/errorHandler');
 const { success, paginated } = require('../utils/response');
 
 const getAlumni = asyncHandler(async (req, res) => {
-  const { page, limit, search, department, batch, status, leaderId, memberId } = req.query;
-  const result = await alumniService.getAlumni({ page, limit, search, department, batch, status, leaderId, memberId });
+  const { page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField } = req.query;
+  const result = await alumniService.getAlumni({ page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField });
   paginated(res, result.data, result.totalCount, result.page, result.limit, 'Alumni retrieved successfully');
 });
 

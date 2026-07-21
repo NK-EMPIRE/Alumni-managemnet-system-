@@ -3136,6 +3136,10 @@ window.fetchSpreadsheetData = function() {
     console.error('Failed to load stats:', err);
   });
 
+  var dateFrom = document.getElementById('ssDateFrom') ? document.getElementById('ssDateFrom').value : null;
+  var dateTo = document.getElementById('ssDateTo') ? document.getElementById('ssDateTo').value : null;
+  var dateField = document.getElementById('ssDateField') ? document.getElementById('ssDateField').value : null;
+
   // Load alumni records
   var params = {
     page: ssPage,
@@ -3145,7 +3149,10 @@ window.fetchSpreadsheetData = function() {
     batch: batch || undefined,
     status: status || undefined,
     leaderId: leaderId || undefined,
-    memberId: memberId || undefined
+    memberId: memberId || undefined,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
+    dateField: dateField || undefined
   };
 
   API.getAlumni(params).then(function(res) {
@@ -3853,3 +3860,125 @@ if (typeof io !== 'undefined') {
     console.warn('Socket.io connection failed:', e);
   }
 }
+
+// ============================================================
+// FEATURE 2 — DATABASE HEALTH CHECK (Admin)
+// ============================================================
+
+var _healthCurrentType = null;
+var _healthCurrentPage = 1;
+
+window.openDbHealthModal = function() {
+  document.getElementById('dbHealthDetailContainer').style.display = 'none';
+  document.getElementById('dbHealthSummaryPanel').innerHTML = '<p style="color:var(--text-secondary);">Scanning database records...</p>';
+  openModal('dbHealthModal');
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/health/db-summary', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (!res || !res.success) {
+      document.getElementById('dbHealthSummaryPanel').innerHTML = '<p style="color:var(--danger);">Failed to load DB health summary.</p>';
+      return;
+    }
+    var d = res.data;
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-bottom:20px;">' +
+      '<div style="background:#F8FAFC;padding:12px;border-radius:10px;border:1px solid #E2E8F0;text-align:center;"><div style="font-size:0.75rem;color:#64748B;">Total Alumni</div><div style="font-size:1.4rem;font-weight:700;color:#0F172A;">' + d.totalAlumni + '</div></div>' +
+      '<div style="background:#FEF2F2;padding:12px;border-radius:10px;border:1px solid #FCA5A5;text-align:center;"><div style="font-size:0.75rem;color:#991B1B;">Duplicates</div><div style="font-size:1.4rem;font-weight:700;color:#991B1B;">' + d.duplicates + '</div><button class="btn btn-sm btn-danger" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'duplicates\')">View (' + d.duplicates + ')</button></div>' +
+      '<div style="background:#FFFBEB;padding:12px;border-radius:10px;border:1px solid #FCD34D;text-align:center;"><div style="font-size:0.75rem;color:#92400E;">Pending</div><div style="font-size:1.4rem;font-weight:700;color:#92400E;">' + d.assignments.pending + '</div><button class="btn btn-sm btn-warning" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;color:#fff;" onclick="loadDbHealthDetail(\'pending\')">View (' + d.assignments.pending + ')</button></div>' +
+      '<div style="background:#F0FDF4;padding:12px;border-radius:10px;border:1px solid #86EFAC;text-align:center;"><div style="font-size:0.75rem;color:#166534;">Completed</div><div style="font-size:1.4rem;font-weight:700;color:#166534;">' + d.assignments.completed + '</div><button class="btn btn-sm btn-success" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'completed\')">View (' + d.assignments.completed + ')</button></div>' +
+      '<div style="background:#F1F5F9;padding:12px;border-radius:10px;border:1px solid #CBD5E1;text-align:center;"><div style="font-size:0.75rem;color:#475569;">Unassigned</div><div style="font-size:1.4rem;font-weight:700;color:#475569;">' + d.assignments.unassigned + '</div><button class="btn btn-sm btn-secondary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'unassigned\')">View (' + d.assignments.unassigned + ')</button></div>' +
+      '</div>';
+
+    html += '<h4 style="font-size:0.9rem;margin-bottom:10px;color:var(--text-primary);">Missing Fields Breakdown</h4>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;"><th style="padding:6px;text-align:left;">Field</th><th style="padding:6px;text-align:center;">Missing Count</th><th style="padding:6px;text-align:center;">Action</th></tr></thead><tbody>';
+
+    Object.keys(d.missingFields).forEach(function(f) {
+      var cnt = d.missingFields[f];
+      html += '<tr><td style="padding:6px;border-bottom:1px solid #E2E8F0;text-transform:capitalize;">' + f.replace('_', ' ') + '</td>' +
+        '<td style="padding:6px;border-bottom:1px solid #E2E8F0;text-align:center;font-weight:600;' + (cnt > 0 ? 'color:var(--danger);' : 'color:var(--text-secondary);') + '">' + cnt + '</td>' +
+        '<td style="padding:6px;border-bottom:1px solid #E2E8F0;text-align:center;">' +
+        '<button class="btn btn-secondary btn-sm" style="font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'missing_' + f + '\')">View Records</button>' +
+        '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    document.getElementById('dbHealthSummaryPanel').innerHTML = html;
+  }).catch(function(err) {
+    document.getElementById('dbHealthSummaryPanel').innerHTML = '<p style="color:var(--danger);">Network error scanning health.</p>';
+  });
+};
+
+window.loadDbHealthDetail = function(type, page) {
+  _healthCurrentType = type || _healthCurrentType;
+  _healthCurrentPage = page || 1;
+
+  document.getElementById('dbHealthDetailTitle').textContent = 'Records Detail: ' + _healthCurrentType.replace('_', ' ').toUpperCase();
+  document.getElementById('dbHealthDetailTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;">Loading records...</p>';
+  document.getElementById('dbHealthDetailContainer').style.display = 'block';
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/health/db-detail?type=' + _healthCurrentType + '&page=' + _healthCurrentPage + '&limit=10', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (!res || !res.success) {
+      document.getElementById('dbHealthDetailTable').innerHTML = '<p style="color:var(--danger);">Failed to load detail records.</p>';
+      return;
+    }
+    var rows = res.data.records;
+    var total = res.data.pagination.total;
+
+    var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.8rem;"><thead><tr style="background:#F1F5F9;">' +
+      '<th style="padding:6px;text-align:left;">Name</th><th style="padding:6px;text-align:left;">Reg No</th><th style="padding:6px;text-align:left;">Dept/Batch</th><th style="padding:6px;text-align:left;">Assigned To</th><th style="padding:6px;text-align:center;">Action</th></tr></thead><tbody>';
+
+    if (rows.length === 0) {
+      tbl += '<tr><td colspan="5" style="text-align:center;padding:12px;color:var(--text-secondary);">No records found matching criteria.</td></tr>';
+    } else {
+      rows.forEach(function(r) {
+        tbl += '<tr>' +
+          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;">' + r.name + '</td>' +
+          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;color:#64748B;">' + r.register_no + '</td>' +
+          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;">' + r.department + ' (' + r.batch + ')</td>' +
+          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;">' + (r.assigned_person_name || '<em style="color:#94A3B8;">Unassigned</em>') + '</td>' +
+          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;text-align:center;">' +
+          '<button class="btn btn-warning btn-sm" style="font-size:0.7rem;padding:2px 6px;color:#fff;" onclick="notifySingleAlumni(' + r.alumni_id + ')">Notify</button>' +
+          '</td>' +
+          '</tr>';
+      });
+    }
+    tbl += '</tbody></table>';
+    document.getElementById('dbHealthDetailTable').innerHTML = tbl;
+
+    // Pagination controls
+    var totalPages = res.data.pagination.totalPages || 1;
+    var pagHtml = '<small style="color:var(--text-secondary);">Page ' + _healthCurrentPage + ' of ' + totalPages + ' (' + total + ' total)</small><div>';
+    if (_healthCurrentPage > 1) {
+      pagHtml += '<button class="btn btn-secondary btn-sm" style="padding:2px 8px;margin-right:6px;" onclick="loadDbHealthDetail(null, ' + (_healthCurrentPage - 1) + ')">Prev</button>';
+    }
+    if (_healthCurrentPage < totalPages) {
+      pagHtml += '<button class="btn btn-secondary btn-sm" style="padding:2px 8px;" onclick="loadDbHealthDetail(null, ' + (_healthCurrentPage + 1) + ')">Next</button>';
+    }
+    pagHtml += '</div>';
+    document.getElementById('dbHealthDetailPagination').innerHTML = pagHtml;
+  }).catch(function(err) {
+    document.getElementById('dbHealthDetailTable').innerHTML = '<p style="color:var(--danger);">Network error fetching details.</p>';
+  });
+};
+
+window.notifySingleAlumni = function(alumniId) {
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/health/notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ alumniIds: [alumniId], message: 'Please update missing professional details for this alumni.' })
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.success) {
+      Toast.success('Notify', res.message || 'Notification sent.');
+    } else {
+      Toast.error('Notify', res && res.message || 'Failed to send notification.');
+    }
+  }).catch(function() {
+    Toast.error('Notify', 'Network error sending notification.');
+  });
+};
+
