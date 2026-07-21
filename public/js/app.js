@@ -562,5 +562,110 @@
     }
   };
 
+  /* ────────────────────────────────────────────────────────────
+     GLOBAL TOPBAR DATE FILTER & SHORTCUTS HELPERS
+     ──────────────────────────────────────────────────────────── */
+  window.toggleTopbarDateMenu = function (e) {
+    if (e) e.stopPropagation();
+    var menu = document.getElementById('topbarDateMenu');
+    if (menu) {
+      var isVisible = menu.style.display === 'block';
+      menu.style.display = isVisible ? 'none' : 'block';
+    }
+  };
+
+  window.applyGlobalDateFilter = function () {
+    var from = document.getElementById('globalDateFrom') ? document.getElementById('globalDateFrom').value : '';
+    var to = document.getElementById('globalDateTo') ? document.getElementById('globalDateTo').value : '';
+    var field = document.getElementById('globalDateField') ? document.getElementById('globalDateField').value : 'created_at';
+    var label = document.getElementById('topbarDateLabel');
+
+    if (from || to) {
+      if (label) label.textContent = (from || 'Start') + ' to ' + (to || 'End');
+    } else {
+      if (label) label.textContent = 'All Time';
+    }
+
+    // Sync to spreadsheet hidden date inputs if present
+    var ssFrom = document.getElementById('ssDateFrom');
+    var ssTo = document.getElementById('ssDateTo');
+    var ssField = document.getElementById('ssDateField');
+
+    if (ssFrom) ssFrom.value = from;
+    if (ssTo) ssTo.value = to;
+    if (ssField) ssField.value = field;
+
+    if (window.fetchSpreadsheetData && typeof window.fetchSpreadsheetData === 'function') {
+      window.fetchSpreadsheetData();
+    } else if (window.renderTable && typeof window.renderTable === 'function') {
+      window.renderTable();
+    }
+
+    var menu = document.getElementById('topbarDateMenu');
+    if (menu) menu.style.display = 'none';
+
+    if (window.Toast) window.Toast.info('Date Filter Applied', (from || to) ? `Working dataset filtered from ${from || 'Start'} to ${to || 'End'}` : 'Showing all-time records');
+  };
+
+  window.clearGlobalDateFilter = function () {
+    var from = document.getElementById('globalDateFrom');
+    var to = document.getElementById('globalDateTo');
+    var label = document.getElementById('topbarDateLabel');
+
+    if (from) from.value = '';
+    if (to) to.value = '';
+    if (label) label.textContent = 'All Time';
+
+    window.applyGlobalDateFilter();
+  };
+
+  window.resetSpreadsheetFilters = function () {
+    ['ssFilterLeader', 'ssFilterMember', 'ssFilterDept', 'ssFilterBatch', 'ssFilterStatus'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    window.clearGlobalDateFilter();
+    var badge = document.getElementById('activeFilterBadge');
+    if (badge) badge.style.display = 'none';
+  };
+
+  window.startWelcomeTour = function () {
+    if (window.openModal && typeof window.openModal === 'function') {
+      window.openModal('welcomeTourModal');
+    } else {
+      var modal = document.getElementById('welcomeTourModal');
+      if (modal) modal.style.display = 'flex';
+    }
+  };
+
+  // Keyboard Shortcuts Listener
+  document.addEventListener('keydown', function (e) {
+    // Ctrl + K -> Focus global search
+    if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      var searchInput = document.getElementById('ssSearch') || document.getElementById('globalSearchInput') || document.getElementById('tableSearch');
+      if (searchInput) searchInput.focus();
+    }
+    // Ctrl + F -> Toggle Filter Modal
+    if (e.ctrlKey && e.key.toLowerCase() === 'f') {
+      var modal = document.getElementById('ssFilterModal');
+      if (modal) {
+        e.preventDefault();
+        if (modal.style.display === 'flex' || modal.classList.contains('active')) {
+          if (window.closeModal) window.closeModal('ssFilterModal');
+        } else {
+          if (window.openModal) window.openModal('ssFilterModal');
+        }
+      }
+    }
+    // Alt + R -> Refresh Data
+    if (e.altKey && e.key.toLowerCase() === 'r') {
+      e.preventDefault();
+      if (window.fetchSpreadsheetData && typeof window.fetchSpreadsheetData === 'function') {
+        window.fetchSpreadsheetData();
+      }
+    }
+  });
+
 })();
 

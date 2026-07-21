@@ -377,6 +377,10 @@ ul {
 .sidebar-collapsed .submenu {
   padding-left: 0 !important;
 }
+.sidebar-collapsed .submenu {
+  display: none !important;
+}
+
 .sidebar-collapsed .submenu .sidebar-item {
   padding: 10px 0;
   justify-content: center;
