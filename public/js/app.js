@@ -230,48 +230,20 @@
   }
 
   function setupUniversalClock() {
-    var rightContainer = document.querySelector('.navbar-right') || document.querySelector('.topbar-right');
-    if (!rightContainer) return;
-
-    // Remove any existing clock inserted previously
-    var existing = document.getElementById('universalLiveClock');
-    if (existing) existing.remove();
-
-    var clockDiv = document.createElement('div');
-    clockDiv.id = 'universalLiveClock';
-    clockDiv.style.cssText = [
-      'display:flex', 'flex-direction:column', 'align-items:flex-end',
-      'justify-content:center', 'padding:0 4px 0 12px',
-      'border-left:1px solid rgba(0,0,0,0.07)', 'min-width:140px'
-    ].join(';');
-    clockDiv.innerHTML = [
-      '<div id="uClockDate" style="font-size:0.78rem;font-weight:600;color:#1E293B;display:flex;align-items:center;gap:5px;white-space:nowrap;">',
-        '<i class="far fa-calendar-alt" style="color:#3B82F6;font-size:0.75rem;"></i>',
-        '<span>-</span>',
-      '</div>',
-      '<div id="uClockTime" style="font-size:0.72rem;color:#64748B;font-weight:500;margin-top:2px;display:flex;align-items:center;gap:4px;white-space:nowrap;">',
-        '<i class="far fa-clock" style="color:#64748B;font-size:0.68rem;"></i>',
-        '<span>-</span>',
-      '</div>'
-    ].join('');
-
-    // Append AFTER all existing buttons (end of container)
-    rightContainer.appendChild(clockDiv);
-
     function updateClock() {
       var now = new Date();
-      var dateSpan = clockDiv.querySelector('#uClockDate span');
-      var timeSpan = clockDiv.querySelector('#uClockTime span');
-      if (dateSpan) {
-        dateSpan.textContent = now.toLocaleDateString('en-IN', {
-          timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
-        });
-      }
-      if (timeSpan) {
-        timeSpan.textContent = now.toLocaleTimeString('en-IN', {
-          timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-        }).toLowerCase();
-      }
+      var dateStr = now.toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+      });
+      var timeStr = now.toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      });
+
+      var dateEls = document.querySelectorAll('#hdrClockDate');
+      var timeEls = document.querySelectorAll('#hdrClockTime');
+
+      dateEls.forEach(function(el) { el.textContent = dateStr; });
+      timeEls.forEach(function(el) { el.textContent = timeStr; });
     }
     updateClock();
     setInterval(updateClock, 1000);

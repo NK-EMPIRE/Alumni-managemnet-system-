@@ -1154,3 +1154,11 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-21 13:00:05.854"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-21 13:00:05.855"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-21 13:00:05.855"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-21 13:01:14.623"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-21 13:01:14.632"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-21 13:01:14.633"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-21 13:01:14.633"}
+{"ip":"::1","level":"info","loginId":"alumni@mountzion.a.cin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-07-21 13:03:00.922"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-07-21 13:03:08.330","userId":51}
+{"duplicates":0,"errors":0,"fileName":"1784619238552-d573fd2be81b15f2.xlsx","imported":419,"level":"info","merged":1,"message":"[AUDIT] EXCEL_IMPORTED","skipped":0,"timestamp":"2026-07-21 13:04:04.773"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-07-21 13:07:31.807","userId":29}

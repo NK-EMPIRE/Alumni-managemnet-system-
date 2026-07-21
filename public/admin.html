@@ -158,9 +158,9 @@
       <div class="navbar-right" style="display:flex;align-items:center;gap:12px;">
         <!-- Global Date Filter Dropdown in Top Bar -->
         <div class="dropdown" id="topbarDateDropdown" style="position:relative;">
-          <button class="navbar-btn" onclick="toggleTopbarDateMenu(event)" title="Global Date Filter" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg-light);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--text-dark);cursor:pointer;">
+          <button class="navbar-btn" onclick="toggleTopbarDateMenu(event)" title="Global Date Filter" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;height:38px;background:var(--bg-light);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--text-dark);cursor:pointer;white-space:nowrap;">
             <i class="fas fa-calendar-alt" style="color:var(--primary);"></i>
-            <span id="topbarDateLabel" style="font-weight:500;">All Time</span>
+            <span id="topbarDateLabel" style="font-weight:500;white-space:nowrap;">All Time</span>
             <i class="fas fa-chevron-down" style="font-size:0.65rem;color:var(--text-secondary);"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-right" id="topbarDateMenu" style="width:280px;padding:14px;right:0;left:auto;">
@@ -248,12 +248,20 @@
       <section id="section-dashboard" class="content-section active">
 
         <!-- Page Header -->
-        <div class="page-header fade-in">
+        <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
           <div class="page-header-left">
             <h1>Dashboard</h1>
             <p>Welcome back! Here is what is happening with your alumni data today.</p>
           </div>
-
+          <div class="page-header-right" id="dashboardLiveClockContainer">
+            <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 16px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px;">
+              <i class="far fa-clock" style="font-size:1.4rem;color:var(--primary);"></i>
+              <div>
+                <div id="hdrClockDate" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);">-</div>
+                <div id="hdrClockTime" style="font-size:0.75rem;color:var(--text-secondary);font-weight:500;">-</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Overview Cards -->
