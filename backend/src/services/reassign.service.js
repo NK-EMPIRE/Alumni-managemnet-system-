@@ -1,5 +1,6 @@
 const { sql, getPool } = require('../config/database');
 const { createAuditLog } = require('../helpers/audit');
+const { notifyAssignmentsUpdated } = require('../helpers/realtime');
 const { AppError, NotFoundError } = require('../middleware/errorHandler');
 
 /**
@@ -263,6 +264,11 @@ async function commitReassign(currentUser, { leaderId, sourceMemberId, allocatio
       description: `Moved ${assignIds.length} Pending alumni (IDs: ${assignIds.join(',')}) from member_id=${sourceMemberId} to member_id=${targetId}`
     });
   }
+
+  // Trigger real-time sync across connected clients
+  try {
+    notifyAssignmentsUpdated(team.team_id, 'reassign');
+  } catch (e) {}
 
   return { moved: totalMoved, teamId: team.team_id };
 }

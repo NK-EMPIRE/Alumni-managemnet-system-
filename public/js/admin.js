@@ -3839,3 +3839,17 @@ window.reassignCommit = function() {
     Toast.error('Reassign', 'Network error: ' + err.message);
   });
 };
+
+// Real-time sync listener (Feature 5)
+if (typeof io !== 'undefined') {
+  try {
+    var socket = io();
+    socket.emit('join', { role: 'ADMIN' });
+    socket.on('assignmentsUpdated', function() {
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchAllData === 'function') fetchAllData();
+    });
+  } catch (e) {
+    console.warn('Socket.io connection failed:', e);
+  }
+}

@@ -2262,3 +2262,18 @@ window.circulateCommit = function() {
     if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
   }).catch(function(err) { Toast.error('Circulate', 'Network error.'); });
 };
+
+// Real-time sync listener (Feature 5)
+if (typeof io !== 'undefined') {
+  try {
+    var socket = io();
+    var user = API.getCurrentUser ? API.getCurrentUser() : null;
+    socket.emit('join', { role: 'LEADER', teamId: user ? user.team_id : null });
+    socket.on('assignmentsUpdated', function() {
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchDashboardStats === 'function') fetchDashboardStats();
+    });
+  } catch (e) {
+    console.warn('Socket.io connection failed:', e);
+  }
+}

@@ -63,7 +63,31 @@ app.use((err, req, res, next) => {
 
 app.use(errorHandler);
 
+const http = require('http');
+const { Server } = require('socket.io');
+const { setIO } = require('./backend/src/helpers/realtime');
+
 const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+setIO(io);
+
+io.on('connection', (socket) => {
+  socket.on('join', ({ role, teamId }) => {
+    if (role === 'ADMIN') {
+      socket.join('admin');
+    }
+    if (teamId) {
+      socket.join(`team:${teamId}`);
+    }
+  });
+});
 
 async function startServer() {
   try {
@@ -75,7 +99,7 @@ async function startServer() {
     } catch (migErr) {
       logger.warn('Migration run failed: ' + migErr.message);
     }
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       logger.info(`Server running on http://localhost:${PORT}`);
       logger.info(`Frontend: http://localhost:${PORT}`);
       logger.info(`API: http://localhost:${PORT}/api/v1`);
