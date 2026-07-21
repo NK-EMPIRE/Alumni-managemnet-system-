@@ -1944,6 +1944,34 @@
     setupSidebar();
     setupNotifications();
     setupProfileDropdown();
+
+    // Populate Department and Batch filter dropdowns dynamically from database
+    if (window.API && typeof API.getAlumniFilters === 'function') {
+      API.getAlumniFilters().then(function(res) {
+        if (res && res.success && res.data) {
+          var depts = res.data.departments || [];
+          var batches = res.data.batches || [];
+
+          var ssDept = document.getElementById('ssFilterDept');
+          var ssBatch = document.getElementById('ssFilterBatch');
+
+          if (ssDept) {
+            ssDept.innerHTML = '<option value="">All Depts</option>';
+            depts.forEach(function(d) {
+              ssDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
+            });
+          }
+          if (ssBatch) {
+            ssBatch.innerHTML = '<option value="">All Batches</option>';
+            batches.forEach(function(b) {
+              ssBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
+            });
+          }
+        }
+      }).catch(function(e) {
+        console.warn('Failed to load dynamic alumni filters:', e);
+      });
+    }
     setupSearchAndFilter();
     setupModals();
     setupLockFeatures();

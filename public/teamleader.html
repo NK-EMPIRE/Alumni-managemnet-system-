@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Team Leader Dashboard - Alumni Professional Details Update Management System" />
   <title>Team Leader Dashboard - APIUMS | Alumni Professional Information Update Management System</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563EB'/><path d='M50 20 L80 40 L50 60 L20 40 Z' fill='%23FFFFFF'/><path d='M35 53 L35 70 Q50 82 65 70 L65 53' stroke='%23FFFFFF' stroke-width='6' fill='none'/></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" />
@@ -561,61 +562,42 @@
         </div>
       </div>
       <div class="card spreadsheet-card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
-        <!-- Spreadsheet Toolbar -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div class="search-bar" style="width:280px;margin-bottom:0;">
-              <i class="fas fa-search search-icon"></i>
-              <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
+          <!-- Spreadsheet Toolbar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex:1 1 auto;">
+              <div class="search-bar" style="width:180px;margin-bottom:0;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search..." id="ssSearch" oninput="debounceSearch()">
+              </div>
+              <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()" style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Members</option>
+              </select>
+              <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()" style="width:100px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Depts</option>
+              </select>
+              <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()" style="width:110px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Batches</option>
+              </select>
+              <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()" style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
+                <option value="">All Statuses</option>
+                <option value="Available">Awaiting Distribution</option>
+                <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
+                <option value="Pending">Pending Member</option>
+                <option value="Draft">Draft</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
-            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()"
-              style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">All Members</option>
-            </select>
-            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()"
-              style="width:90px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">Depts</option>
-              <option value="CSE">CSE</option>
-              <option value="ECE">ECE</option>
-              <option value="EEE">EEE</option>
-              <option value="ME">ME</option>
-              <option value="CE">CE</option>
-              <option value="IT">IT</option>
-            </select>
-            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()"
-              style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">All Batches</option>
-              <option value="2020">2020</option>
-              <option value="2021">2021</option>
-              <option value="2022">2022</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-            </select>
-            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()"
-              style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">All Statuses</option>
-              <option value="Available">Awaiting Distribution</option>
-              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
-              <option value="Pending">Pending Member</option>
-              <option value="Draft">Draft</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <label style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">Date Range:</label>
-              <input type="date" id="ssDateFrom" class="form-control" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;white-space:nowrap;">Date:</span>
+              <input type="date" id="ssDateFrom" class="form-control" style="width:130px;height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
               <span style="color:var(--text-secondary);">-</span>
-              <input type="date" id="ssDateTo" class="form-control" style="height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
-              <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
-                style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
-
-            <button class="btn btn-warning btn-sm" onclick="openCirculateModal()" style="height:36px;color:#fff;" title="Redistribute pending records within team">
-              <i class="fas fa-exchange-alt"></i> Circulate
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i class="fas fa-file-csv"></i> Export CSV</button>
-            <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i
-                class="fas fa-rotate"></i> Refresh</button>
+              <input type="date" id="ssDateTo" class="form-control" style="width:130px;height:36px;padding:4px 8px;font-size:0.8rem;" onchange="fetchSpreadsheetData()">
+              <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn" style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;white-space:nowrap;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
+              <button class="btn btn-warning btn-sm" onclick="openCirculateModal()" style="height:36px;color:#fff;white-space:nowrap;" title="Redistribute pending records within team"><i class="fas fa-exchange-alt"></i> Circulate</button>
+              <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;white-space:nowrap;"><i class="fas fa-file-csv"></i> Export CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;white-space:nowrap;"><i class="fas fa-rotate"></i> Refresh</button>
+            </div>
           </div>
         </div>
 

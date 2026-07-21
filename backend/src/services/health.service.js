@@ -74,9 +74,8 @@ async function getDbSummary() {
 /**
  * Get paginated list of records matching a specific DB health issue filter.
  */
-async function getDbDetail({ type, page = 1, limit = 20 }) {
+async function getDbDetail({ type }) {
   const pool = await getPool();
-  const offset = (page - 1) * limit;
 
   let whereClause = '1=1';
   if (type === 'duplicates') {
@@ -101,20 +100,7 @@ async function getDbDetail({ type, page = 1, limit = 20 }) {
     whereClause = `aa.assignment_id IS NULL`;
   }
 
-  const countReq = pool.request();
-  const countRes = await countReq.query(`
-    SELECT COUNT(DISTINCT a.alumni_id) AS total
-    FROM Alumni a
-    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
-    WHERE ${whereClause}
-  `);
-  const total = countRes.recordset[0].total;
-
-  const dataReq = pool.request()
-    .input('offset', sql.Int, offset)
-    .input('limit', sql.Int, limit);
-
-  const dataRes = await dataReq.query(`
+  const dataRes = await pool.request().query(`
     SELECT DISTINCT
       a.alumni_id, a.register_no, a.name, a.department, a.batch,
       a.email, a.phone, a.company, a.designation,
@@ -125,11 +111,10 @@ async function getDbDetail({ type, page = 1, limit = 20 }) {
     LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
     LEFT JOIN Users u ON aa.member_id = u.user_id
     WHERE ${whereClause}
-    ORDER BY a.alumni_id ASC
-    OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+    ORDER BY a.name ASC
   `);
 
-  return { rows: dataRes.recordset, total };
+  return { rows: dataRes.recordset, total: dataRes.recordset.length };
 }
 
 /**

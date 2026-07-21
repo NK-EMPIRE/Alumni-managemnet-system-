@@ -9,11 +9,8 @@ const getDbSummary = asyncHandler(async (req, res) => {
 
 const getDbDetail = asyncHandler(async (req, res) => {
   const type = req.query.type || 'duplicates';
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 20;
-
-  const result = await healthService.getDbDetail({ type, page, limit });
-  paginated(res, result.rows, result.total, page, limit, 'Health detail records retrieved successfully');
+  const result = await healthService.getDbDetail({ type });
+  success(res, result, 'Health detail records retrieved successfully');
 });
 
 const notifyAssignee = asyncHandler(async (req, res) => {

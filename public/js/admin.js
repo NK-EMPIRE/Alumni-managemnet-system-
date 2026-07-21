@@ -3909,57 +3909,49 @@ window.openDbHealthModal = function() {
   });
 };
 
-window.loadDbHealthDetail = function(type, page) {
+window.loadDbHealthDetail = function(type) {
   _healthCurrentType = type || _healthCurrentType;
-  _healthCurrentPage = page || 1;
 
   document.getElementById('dbHealthDetailTitle').textContent = 'Records Detail: ' + _healthCurrentType.replace('_', ' ').toUpperCase();
   document.getElementById('dbHealthDetailTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;">Loading records...</p>';
   document.getElementById('dbHealthDetailContainer').style.display = 'block';
 
   var token = localStorage.getItem('token');
-  fetch('/api/v1/health/db-detail?type=' + _healthCurrentType + '&page=' + _healthCurrentPage + '&limit=10', {
+  fetch('/api/v1/health/db-detail?type=' + _healthCurrentType, {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function(r) { return r.json(); }).then(function(res) {
     if (!res || !res.success) {
       document.getElementById('dbHealthDetailTable').innerHTML = '<p style="color:var(--danger);">Failed to load detail records.</p>';
       return;
     }
-    var rows = res.data.records;
-    var total = res.data.pagination.total;
+    var rows = res.data.rows || [];
+    var total = res.data.total || rows.length;
 
-    var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.8rem;"><thead><tr style="background:#F1F5F9;">' +
-      '<th style="padding:6px;text-align:left;">Name</th><th style="padding:6px;text-align:left;">Reg No</th><th style="padding:6px;text-align:left;">Dept/Batch</th><th style="padding:6px;text-align:left;">Assigned To</th><th style="padding:6px;text-align:center;">Action</th></tr></thead><tbody>';
+    var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><thead><tr style="background:#F1F5F9;">' +
+      '<th style="padding:8px 10px;text-align:left;border-bottom:2px solid #E2E8F0;">Name</th>' +
+      '<th style="padding:8px 10px;text-align:left;border-bottom:2px solid #E2E8F0;">Reg No</th>' +
+      '<th style="padding:8px 10px;text-align:left;border-bottom:2px solid #E2E8F0;">Dept / Batch</th>' +
+      '<th style="padding:8px 10px;text-align:left;border-bottom:2px solid #E2E8F0;">Assigned To</th>' +
+      '<th style="padding:8px 10px;text-align:center;border-bottom:2px solid #E2E8F0;">Action</th></tr></thead><tbody>';
 
     if (rows.length === 0) {
-      tbl += '<tr><td colspan="5" style="text-align:center;padding:12px;color:var(--text-secondary);">No records found matching criteria.</td></tr>';
+      tbl += '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-secondary);">No records found matching criteria.</td></tr>';
     } else {
       rows.forEach(function(r) {
         tbl += '<tr>' +
-          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;">' + r.name + '</td>' +
-          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;color:#64748B;">' + r.register_no + '</td>' +
-          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;">' + r.department + ' (' + r.batch + ')</td>' +
-          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;">' + (r.assigned_person_name || '<em style="color:#94A3B8;">Unassigned</em>') + '</td>' +
-          '<td style="padding:6px;border-bottom:1px solid #E2E8F0;text-align:center;">' +
-          '<button class="btn btn-warning btn-sm" style="font-size:0.7rem;padding:2px 6px;color:#fff;" onclick="notifySingleAlumni(' + r.alumni_id + ')">Notify</button>' +
+          '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:500;">' + r.name + '</td>' +
+          '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;color:#64748B;">' + r.register_no + '</td>' +
+          '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;">' + r.department + ' (' + r.batch + ')</td>' +
+          '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;">' + (r.assigned_person_name || '<em style="color:#94A3B8;">Unassigned</em>') + '</td>' +
+          '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;text-align:center;">' +
+          '<button class="btn btn-warning btn-sm" style="font-size:0.75rem;padding:3px 10px;color:#fff;border-radius:6px;" onclick="notifySingleAlumni(' + r.alumni_id + ')"><i class="fas fa-bell"></i> Notify</button>' +
           '</td>' +
           '</tr>';
       });
     }
     tbl += '</tbody></table>';
     document.getElementById('dbHealthDetailTable').innerHTML = tbl;
-
-    // Pagination controls
-    var totalPages = res.data.pagination.totalPages || 1;
-    var pagHtml = '<small style="color:var(--text-secondary);">Page ' + _healthCurrentPage + ' of ' + totalPages + ' (' + total + ' total)</small><div>';
-    if (_healthCurrentPage > 1) {
-      pagHtml += '<button class="btn btn-secondary btn-sm" style="padding:2px 8px;margin-right:6px;" onclick="loadDbHealthDetail(null, ' + (_healthCurrentPage - 1) + ')">Prev</button>';
-    }
-    if (_healthCurrentPage < totalPages) {
-      pagHtml += '<button class="btn btn-secondary btn-sm" style="padding:2px 8px;" onclick="loadDbHealthDetail(null, ' + (_healthCurrentPage + 1) + ')">Next</button>';
-    }
-    pagHtml += '</div>';
-    document.getElementById('dbHealthDetailPagination').innerHTML = pagHtml;
+    document.getElementById('dbHealthDetailPagination').innerHTML = '<small style="color:var(--text-secondary);font-weight:600;">Total Records Found: ' + total + '</small>';
   }).catch(function(err) {
     document.getElementById('dbHealthDetailTable').innerHTML = '<p style="color:var(--danger);">Network error fetching details.</p>';
   });
