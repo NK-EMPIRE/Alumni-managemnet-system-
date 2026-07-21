@@ -293,6 +293,9 @@
               <button class="btn btn-sm btn-primary" onclick="openModal('assignAlumniModal')">
                 <i class="fas fa-plus"></i> Assign New
               </button>
+              <button class="btn btn-sm btn-warning" onclick="openReassignModal()" style="color:#fff;">
+                <i class="fas fa-exchange-alt"></i> Reassign
+              </button>
               <button class="btn btn-sm btn-secondary" onclick="handleExport()">
                 <i class="fas fa-download"></i> Export
               </button>
@@ -1603,6 +1606,77 @@
         style="width:100%; padding:12px; font-weight:600; border-radius:12px; cursor:pointer;">Close</button>
     </div>
   </div>
+
+  <!-- ============================================================
+       REASSIGN MODAL (Admin)
+       ============================================================ -->
+  <div class="modal-overlay" id="reassignModal">
+    <div class="modal" style="max-width:720px;width:95vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-exchange-alt" style="color:var(--primary);margin-right:8px;"></i>Reassign / Redistribute Alumni</h3>
+        <button class="modal-close" onclick="closeModal('reassignModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:0;">
+
+        <!-- Step 1: Leader select -->
+        <div id="reassignStep1" style="padding:24px;">
+          <p style="color:var(--text-secondary);margin-bottom:16px;">Select a Team Leader to load their team workload.</p>
+          <div class="form-group" style="margin-bottom:16px;">
+            <select class="form-control form-select" id="reassignLeaderSelect">
+              <option value="">-- Select Leader --</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="reassignLoadTeam()" style="width:100%;">Load Team Workload <i class="fas fa-arrow-right" style="margin-left:6px;"></i></button>
+        </div>
+
+        <!-- Step 2: Workload table + source/target select -->
+        <div id="reassignStep2" style="display:none;padding:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <strong id="reassignTeamName" style="font-size:1rem;color:var(--text-primary);"></strong>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('reassignStep2').style.display='none';document.getElementById('reassignStep1').style.display='block';">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div id="reassignWorkloadTable" style="overflow-x:auto;margin-bottom:18px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div class="form-group">
+              <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;">SOURCE (has backlog)</label>
+              <select class="form-control form-select" id="reassignSourceSelect">
+                <option value="">-- Select Source --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;">TARGETS (will receive)</label>
+              <select class="form-control form-select" id="reassignTargetSelect" multiple style="height:90px;">
+              </select>
+              <small style="color:var(--text-secondary);font-size:0.75rem;">Hold Ctrl/Cmd to select multiple</small>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;">Number of records to move (leave blank for all Pending)</label>
+            <input class="form-control" type="number" id="reassignCount" min="1" placeholder="e.g. 10" style="max-width:200px;">
+          </div>
+          <button class="btn btn-primary" onclick="reassignPreview()" style="width:100%;">Preview Distribution <i class="fas fa-eye" style="margin-left:6px;"></i></button>
+        </div>
+
+        <!-- Step 3: Preview -->
+        <div id="reassignStep3" style="display:none;padding:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <strong style="font-size:1rem;color:var(--text-primary);">Preview — Records to be Moved</strong>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('reassignStep3').style.display='none';document.getElementById('reassignStep2').style.display='block';">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+          <div id="reassignPreviewContent" style="max-height:380px;overflow-y:auto;margin-bottom:18px;"></div>
+          <button class="btn btn-success" onclick="reassignCommit()" style="width:100%;font-weight:600;">
+            <i class="fas fa-check-circle" style="margin-right:8px;"></i>Confirm Reassignment
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 
   <!-- ============================================================
        SCRIPTS

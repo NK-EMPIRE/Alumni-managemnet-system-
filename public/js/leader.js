@@ -2153,3 +2153,112 @@
     init();
   }
 })();
+
+// ============================================================
+// FEATURE 1 — CIRCULATE / REDISTRIBUTE (Leader)
+// ============================================================
+
+var _circulatePreviewData = null;
+
+window.openCirculateModal = function() {
+  _circulatePreviewData = null;
+  document.getElementById('circulateStep1').style.display = 'block';
+  document.getElementById('circulateStep2').style.display = 'none';
+  document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;">Loading...</p>';
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reassign/team-load', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (!res || !res.success) {
+      document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Failed to load team data.</p>';
+      return;
+    }
+    var data = res.data;
+
+    var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
+      '<thead><tr style="background:#F1F5F9;">' +
+      '<th style="padding:8px;text-align:left;border-bottom:2px solid #E2E8F0;">Member</th>' +
+      '<th style="padding:8px;text-align:center;border-bottom:2px solid #E2E8F0;">Pending</th>' +
+      '<th style="padding:8px;text-align:center;border-bottom:2px solid #E2E8F0;">Completed</th>' +
+      '</tr></thead><tbody>';
+    data.members.forEach(function(m) {
+      tbl += '<tr><td style="padding:8px;border-bottom:1px solid #E2E8F0;">' + m.name + ' <small style="color:#94A3B8;">(' + m.role + ')</small></td>' +
+        '<td style="padding:8px;text-align:center;border-bottom:1px solid #E2E8F0;color:var(--warning);font-weight:600;">' + m.pending_count + '</td>' +
+        '<td style="padding:8px;text-align:center;border-bottom:1px solid #E2E8F0;color:var(--success);">' + m.completed_count + '</td></tr>';
+    });
+    tbl += '</tbody></table>';
+    document.getElementById('circulateWorkloadTable').innerHTML = tbl;
+
+    var sourceSel = document.getElementById('circulateSourceSelect');
+    var targetSel = document.getElementById('circulateTargetSelect');
+    sourceSel.innerHTML = '<option value="">-- Select Source --</option>';
+    targetSel.innerHTML = '';
+    data.members.forEach(function(m) {
+      var o1 = document.createElement('option'); o1.value = m.user_id; o1.text = m.name + ' (' + m.pending_count + ' pending)';
+      sourceSel.appendChild(o1);
+      var o2 = document.createElement('option'); o2.value = m.user_id; o2.text = m.name + ' (' + m.pending_count + ' pending)';
+      targetSel.appendChild(o2);
+    });
+  }).catch(function(err) {
+    document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Network error.</p>';
+  });
+
+  openModal('circulateModal');
+};
+
+window.circulatePreview = function() {
+  var sourceMemberId = parseInt(document.getElementById('circulateSourceSelect').value, 10);
+  if (!sourceMemberId) { Toast.warning('Circulate', 'Please select a source member.'); return; }
+  var targetSel = document.getElementById('circulateTargetSelect');
+  var targetMemberIds = Array.from(targetSel.selectedOptions).map(function(o) { return parseInt(o.value, 10); });
+  if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
+  if (targetMemberIds.includes(sourceMemberId)) { Toast.warning('Circulate', 'Source cannot be a target.'); return; }
+  var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reassign/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Preview failed.'); return; }
+    _circulatePreviewData = res.data;
+
+    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records from <strong>' + res.data.sourceName + '</strong>:</p>';
+    res.data.preview.forEach(function(group) {
+      html += '<div style="margin-bottom:14px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;padding:8px 12px;border-radius:8px;margin-bottom:6px;">' +
+        '<strong style="color:#1E40AF;">' + group.targetName + '</strong>' +
+        '<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.75rem;">' + group.count + ' records</span></div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;">' +
+        '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th></tr></thead><tbody>';
+      group.alumni.forEach(function(a) {
+        html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td></tr>';
+      });
+      html += '</tbody></table></div>';
+    });
+    document.getElementById('circulatePreviewContent').innerHTML = html;
+    document.getElementById('circulateStep1').style.display = 'none';
+    document.getElementById('circulateStep2').style.display = 'block';
+  }).catch(function(err) { Toast.error('Circulate', 'Network error.'); });
+};
+
+window.circulateCommit = function() {
+  if (!_circulatePreviewData) { Toast.error('Circulate', 'No preview data.'); return; }
+  var allocations = {};
+  _circulatePreviewData.preview.forEach(function(group) {
+    allocations[group.targetMemberId] = group.alumni.map(function(a) { return a.assignment_id; });
+  });
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reassign/commit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ sourceMemberId: _circulatePreviewData.sourceMemberId, allocations: allocations })
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Commit failed.'); return; }
+    Toast.success('Circulate', res.message || (res.data.moved + ' alumni redistributed!'));
+    closeModal('circulateModal');
+    if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+  }).catch(function(err) { Toast.error('Circulate', 'Network error.'); });
+};

@@ -12,6 +12,8 @@ const uploadRoutes = require('./upload.routes');
 const assignmentRoutes = require('./assignment.routes');
 const auditRoutes = require('./audit.routes');
 const settingsRoutes = require('./settings.routes');
+const reassignRoutes = require('./reassign.routes');
+const healthRoutes = require('./health.routes');
 
 const router = Router();
 
@@ -37,7 +39,9 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/assignments', assignmentRoutes);
+router.use('/assignments/reassign', reassignRoutes);
 router.use('/audit-logs', auditRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/health', healthRoutes);
 
 module.exports = router;
