@@ -6,38 +6,57 @@ const { AppError } = require('../middleware/errorHandler');
 
 function runPythonImporter(filePath, stdinData = "") {
   return new Promise((resolve, reject) => {
-    const pythonPath = 'python';
+    // Try environment python, process.env.PYTHON_PATH, or fallback list
+    const pythonPath = process.env.PYTHON_PATH || (process.platform === 'win32' ? 'python' : 'python3');
     const scriptPath = path.join(__dirname, 'import_engine', 'main.py');
-    const child = spawn(pythonPath, [scriptPath, filePath]);
+    
+    let child;
+    try {
+      child = spawn(pythonPath, [scriptPath, filePath]);
+    } catch (err) {
+      return reject(new AppError(`Failed to start Python process: ${err.message}. Ensure Python is installed and added to PATH.`, 500));
+    }
 
     let stdoutData = '';
     let stderrData = '';
 
-    if (stdinData) {
-      child.stdin.write(stdinData);
+    // Handle spawn error explicitly so Node doesn't throw an unhandled 'error' event crash
+    child.on('error', (err) => {
+      logger.error('Python spawn error:', { error: err.message, path: pythonPath });
+      reject(new AppError(`Python executable not found ('${pythonPath}'): ${err.message}. Please install Python 3.x on the server environment.`, 500));
+    });
+
+    if (child.stdin) {
+      if (stdinData) {
+        child.stdin.write(stdinData);
+      }
+      child.stdin.end();
     }
-    child.stdin.end();
 
-    child.stdout.on('data', (data) => {
-      stdoutData += data.toString();
-    });
+    if (child.stdout) {
+      child.stdout.on('data', (data) => {
+        stdoutData += data.toString();
+      });
+    }
 
-    child.stderr.on('data', (data) => {
-      stderrData += data.toString();
-    });
+    if (child.stderr) {
+      child.stderr.on('data', (data) => {
+        stderrData += data.toString();
+      });
+    }
 
     child.on('close', (code) => {
       if (code !== 0) {
-        return reject(new Error(`Python importer failed with code ${code}. Error: ${stderrData}`));
+        return reject(new AppError(`Python importer failed with code ${code}. Error: ${stderrData}`, 400));
       }
       try {
         const parsed = JSON.parse(stdoutData);
         if (!parsed.success) {
-          return reject(new Error(parsed.error || 'Unknown importer error'));
+          return reject(new AppError(parsed.error || 'Unknown importer error', 400));
         }
         resolve(parsed);
       } catch (err) {
-        reject(new Error(`Failed to parse Python importer output: ${err.message}. Output was: ${stdoutData}`));
+        reject(new AppError(`Failed to parse Python importer output: ${err.message}`, 400));
       }
     });
   });
