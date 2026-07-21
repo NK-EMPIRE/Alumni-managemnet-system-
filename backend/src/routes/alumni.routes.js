@@ -6,9 +6,17 @@ const authorize = require('../middleware/authorize');
 const validate = require('../middleware/validate');
 const { ROLES } = require('../constants');
 
+const searchController = require('../controllers/search.controller');
+
 const router = Router();
 
 router.use(authenticate);
+
+router.get(
+  '/search',
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
+  searchController.searchAlumni
+);
 
 router.get(
   '/',
