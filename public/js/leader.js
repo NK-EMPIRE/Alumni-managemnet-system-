@@ -1733,7 +1733,7 @@
               completed: m.completed || 0,
               pending: (m.assigned || 0) - (m.completed || 0),
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
-              status: m.status || (m.progress >= 75 ? 'On Track' : m.progress >= 50 ? 'Behind' : 'Critical'),
+              status: m.status || (m.progress >= 75 ? 'On Track' : 'Behind'),
               lastActivity: m.lastActivity || '-',
               isLeader: m.isLeader || false
             };

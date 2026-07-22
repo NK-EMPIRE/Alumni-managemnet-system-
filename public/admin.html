@@ -25,6 +25,39 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Guidelines Alert Box - Dark Mode Fix */
+    .guidelines-box {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #FFFBEB;
+      border-radius: 8px;
+      border: 1px solid #FDE68A;
+      color: #92400E;
+    }
+    .guidelines-box h5 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #92400E;
+      margin-bottom: 8px;
+    }
+    .guidelines-box ul {
+      font-size: 0.8rem;
+      color: #92400E;
+      list-style: disc;
+      padding-left: 20px;
+      line-height: 1.8;
+    }
+    body.dark-mode .guidelines-box {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    body.dark-mode .guidelines-box h5,
+    body.dark-mode .guidelines-box ul,
+    body.dark-mode .guidelines-box li {
+      color: #FFFFFF !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -219,7 +252,7 @@
             <p>Welcome back! Here is what is happening with your alumni data today.</p>
           </div>
           <div class="page-header-right" id="dashboardLiveClockContainer">
-            <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 16px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px;">
+            <div style="background:var(--bg-white, #fff);border:1px solid var(--border);border-radius:10px;padding:8px 16px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px;">
               <i class="far fa-clock" style="font-size:1.4rem;color:var(--primary);"></i>
               <div>
                 <div id="hdrClockDate" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);">-</div>
@@ -835,11 +868,11 @@
           </div>
 
           <!-- Import Rules -->
-          <div style="margin-top:24px;padding:16px;background:#FFFBEB;border-radius:8px;border:1px solid #FDE68A;">
-            <h5 style="font-size:0.85rem;font-weight:600;color:#92400E;margin-bottom:8px;">
+          <div class="guidelines-box">
+            <h5>
               <i class="fas fa-info-circle"></i> Import Guidelines
             </h5>
-            <ul style="font-size:0.8rem;color:#92400E;list-style:disc;padding-left:20px;line-height:1.8;">
+            <ul>
               <li>File must be in .xlsx, .xls, or .csv format</li>
               <li>Maximum file size: 50 MB</li>
               <li>Required columns: FullName, Department, Batch, Email</li>

@@ -896,7 +896,7 @@ function loadTeamProgressData(leaderId) {
         
         var nameHtml = escapeHtml(m.name);
         if (m.isLeader) {
-          nameHtml += ' <span class="badge" style="background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;font-size:0.7rem;padding:1.5px 6px;border-radius:4px;margin-left:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-crown"></i> Team Leader</span>';
+          nameHtml += ' <span class="badge leader-badge" style="margin-left:6px;"><i class="fas fa-crown"></i> Team Leader</span>';
         }
         
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border);">';

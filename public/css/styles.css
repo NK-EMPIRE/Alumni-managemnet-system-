@@ -1398,6 +1398,16 @@ textarea.form-control {
   white-space: nowrap;
 }
 
+
+.leader-badge {
+  background: #EEF2FF;
+  color: #4F46E5 !important;
+  border: 1px solid #C7D2FE;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+  gap: 3px !important;
+}
+
 .badge-primary {
   background: var(--primary-light);
   color: var(--primary);
@@ -3663,6 +3673,12 @@ body.dark-mode .badge {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
+body.dark-mode .leader-badge {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(96, 165, 250, 0.3) !important;
+}
+
 /* ── Pagination ── */
 body.dark-mode .pagination-item {
   background: #1E293B !important;
@@ -3871,6 +3887,16 @@ body.dark-mode [style*="background: #FFFBEB"] {
   background-color: rgba(245, 158, 11, 0.1) !important;
   background: rgba(245, 158, 11, 0.1) !important;
   color: #FBBF24 !important;
+}
+body.dark-mode [style*="color:#92400E"],
+body.dark-mode [style*="color: #92400E"] {
+  color: #FBBF24 !important;
+}
+body.dark-mode [style*="border:1px solid #FDE68A"],
+body.dark-mode [style*="border: 1px solid #FDE68A"],
+body.dark-mode [style*="border:1px solid #FCD34D"],
+body.dark-mode [style*="border: 1px solid #FCD34D"] {
+  border-color: rgba(245, 158, 11, 0.3) !important;
 }
 body.dark-mode [style*="background:#F0FDF4"],
 body.dark-mode [style*="background: #F0FDF4"] {
@@ -5409,4 +5435,42 @@ body.dark-mode .spreadsheet-fullscreen {
   max-height: none !important;
   height: calc(100vh - 140px) !important;
   overflow: auto !important;
+}
+
+/* Guidelines alert box styling */
+.guidelines-box {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #FFFBEB;
+  border-radius: 8px;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+}
+
+.guidelines-box h5 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #92400E;
+  margin-bottom: 8px;
+}
+
+.guidelines-box ul {
+  font-size: 0.8rem;
+  color: #92400E;
+  list-style: disc;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
+/* Dark mode overrides for guidelines alert box */
+body.dark-mode .guidelines-box {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+body.dark-mode .guidelines-box h5,
+body.dark-mode .guidelines-box ul,
+body.dark-mode .guidelines-box li {
+  color: #FFFFFF !important;
 }
