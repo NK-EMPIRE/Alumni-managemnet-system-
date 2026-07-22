@@ -594,7 +594,7 @@
   };
 
   window.resetSpreadsheetFilters = function () {
-    ['ssFilterLeader', 'ssFilterMember', 'ssFilterDept', 'ssFilterBatch', 'ssFilterStatus'].forEach(function (id) {
+    ['ssFilterLeader', 'ssFilterMember', 'ssFilterDept', 'ssFilterBatch', 'ssFilterStatus', 'ssDateFrom', 'ssDateTo'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.value = '';
     });

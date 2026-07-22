@@ -164,7 +164,6 @@
           '<td style="text-align:center;font-weight:600;color:#10B981">' + m.completed + '</td>' +
           '<td style="text-align:center;font-weight:600;color:' + (m.pending > 20 ? '#EF4444' : '#F59E0B') + '">' + m.pending + '</td>' +
           '<td><div style="display:flex;align-items:center;gap:10px"><div class="progress" style="flex:1"><div class="progress-bar ' + barClass + '" style="width:' + m.progress + '%"></div></div><span style="font-size:0.75rem;font-weight:600;color:#64748B;min-width:36px;text-align:right">' + m.progress + '%</span></div></td>' +
-          '<td><span class="badge ' + statusClass + '">' + m.status + '</span></td>' +
           '<td style="font-size:0.8rem;color:#64748B">' + m.lastActivity + '</td>' +
           '<td style="text-align:center"><button class="btn btn-sm btn-outline view-detail-btn" data-id="' + m.id + '"><i class="fas fa-eye"></i> View</button></td>' +
           '</tr>';
@@ -604,10 +603,13 @@
       currentPage = 1;
       populateTeamTable();
     });
-    document.getElementById('statusFilter').addEventListener('change', function () {
-      currentPage = 1;
-      populateTeamTable();
-    });
+    var statusF = document.getElementById('statusFilter');
+    if (statusF) {
+      statusF.addEventListener('change', function () {
+        currentPage = 1;
+        populateTeamTable();
+      });
+    }
     var globalSearch = document.getElementById('globalSearch');
     if (globalSearch) {
       globalSearch.addEventListener('input', function () {
@@ -796,6 +798,8 @@
     var statusVal = document.getElementById('myAssignmentsStatusFilter').value;
     var deptValFilter = document.getElementById('myAssignmentsDeptFilter') ? document.getElementById('myAssignmentsDeptFilter').value : 'all';
     var batchValFilter = document.getElementById('myAssignmentsBatchFilter') ? document.getElementById('myAssignmentsBatchFilter').value : 'all';
+    var dateFromVal = document.getElementById('myAssignmentsDateFrom') ? document.getElementById('myAssignmentsDateFrom').value : '';
+    var dateToVal = document.getElementById('myAssignmentsDateTo') ? document.getElementById('myAssignmentsDateTo').value : '';
 
     myFilteredAssignments = myAssignmentsData.filter(function (r) {
       var matchSearch = !searchVal ||
@@ -807,7 +811,17 @@
       var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
       var matchDept = deptValFilter === 'all' || String(r.department) === deptValFilter;
       var matchBatch = batchValFilter === 'all' || String(r.batch) === batchValFilter;
-      return matchSearch && matchStatus && matchDept && matchBatch;
+
+      var matchDateFrom = true;
+      var matchDateTo = true;
+      var recordDate = r.assigned_date || r.created_at || r.updatedAt || r.updated_date;
+      if (recordDate) {
+        var rTime = new Date(recordDate).getTime();
+        if (dateFromVal) matchDateFrom = rTime >= new Date(dateFromVal + 'T00:00:00').getTime();
+        if (dateToVal) matchDateTo = rTime <= new Date(dateToVal + 'T23:59:59').getTime();
+      }
+
+      return matchSearch && matchStatus && matchDept && matchBatch && matchDateFrom && matchDateTo;
     });
 
     var countEl = document.getElementById('myAssignmentsFilteredCount');
@@ -2045,6 +2059,41 @@
       card.style.animationDelay = (idx * 0.08) + 's';
     });
   }
+
+  window.openSettingsPage = function () {
+    var item = document.querySelector('.sidebar-item[data-page="settings"]');
+    if (item) item.click();
+  };
+
+  window.updateMyAssignmentsFilterBadge = function () {
+    var deptVal = document.getElementById('myAssignmentsDeptFilter') ? document.getElementById('myAssignmentsDeptFilter').value : 'all';
+    var batchVal = document.getElementById('myAssignmentsBatchFilter') ? document.getElementById('myAssignmentsBatchFilter').value : 'all';
+    var statusVal = document.getElementById('myAssignmentsStatusFilter') ? document.getElementById('myAssignmentsStatusFilter').value : 'all';
+    var dateFromVal = document.getElementById('myAssignmentsDateFrom') ? document.getElementById('myAssignmentsDateFrom').value : '';
+    var dateToVal = document.getElementById('myAssignmentsDateTo') ? document.getElementById('myAssignmentsDateTo').value : '';
+    var activeCount = 0;
+    if (deptVal !== 'all') activeCount++;
+    if (batchVal !== 'all') activeCount++;
+    if (statusVal !== 'all') activeCount++;
+    if (dateFromVal) activeCount++;
+    if (dateToVal) activeCount++;
+    var badge = document.getElementById('myAssignmentsActiveFilterBadge');
+    if (badge) {
+      badge.textContent = activeCount;
+      badge.style.display = activeCount > 0 ? 'inline-block' : 'none';
+    }
+  };
+
+  window.clearMyAssignmentsFilters = function () {
+    if (document.getElementById('myAssignmentsDeptFilter')) document.getElementById('myAssignmentsDeptFilter').value = 'all';
+    if (document.getElementById('myAssignmentsBatchFilter')) document.getElementById('myAssignmentsBatchFilter').value = 'all';
+    if (document.getElementById('myAssignmentsStatusFilter')) document.getElementById('myAssignmentsStatusFilter').value = 'all';
+    if (document.getElementById('myAssignmentsDateFrom')) document.getElementById('myAssignmentsDateFrom').value = '';
+    if (document.getElementById('myAssignmentsDateTo')) document.getElementById('myAssignmentsDateTo').value = '';
+    window.updateMyAssignmentsFilterBadge();
+    if (typeof renderMyAssignmentsTable === 'function') renderMyAssignmentsTable();
+    if (typeof closeModal === 'function') closeModal('myAssignmentsFilterModal');
+  };
 
   window.switchSettingsTab = function (tabName, btn) {
     var tabsContainer = btn.closest('.card-body');
