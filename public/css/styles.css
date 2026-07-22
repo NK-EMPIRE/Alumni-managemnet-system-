@@ -5404,7 +5404,9 @@ body.dark-mode .spreadsheet-fullscreen {
 }
 
 .spreadsheet-fullscreen div[style*="overflow:auto"],
+.spreadsheet-fullscreen div[style*="overflow-x:auto"],
 .spreadsheet-fullscreen .table-container {
   max-height: none !important;
   height: calc(100vh - 140px) !important;
+  overflow: auto !important;
 }

@@ -26,6 +26,7 @@
     "mssql": "^12.7.0",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.3",
+    "socket": "^1.1.143",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "winston": "^3.19.0",

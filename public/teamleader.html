@@ -292,7 +292,7 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-brand">
+      <div class="sidebar-brand" style="cursor:pointer;" onclick="document.querySelector('.sidebar-item[data-page=dashboard]').click()">
         <div class="sidebar-brand-icon">
           <i class="fas fa-graduation-cap"></i>
         </div>
@@ -352,41 +352,6 @@
       </div>
 
       <div class="navbar-right" style="display:flex;align-items:center;gap:12px;">
-        <!-- Global Date Filter Dropdown in Top Bar -->
-        <div class="dropdown" id="topbarDateDropdown" style="position:relative;">
-          <button class="navbar-btn" onclick="toggleTopbarDateMenu(event)" title="Global Date Filter" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;height:38px;width:auto;background:var(--bg-light);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--text-dark);cursor:pointer;white-space:nowrap;">
-            <i class="fas fa-calendar-alt" style="color:var(--primary);"></i>
-            <span id="topbarDateLabel" style="font-weight:500;white-space:nowrap;">All Time</span>
-            <i class="fas fa-chevron-down" style="font-size:0.65rem;color:var(--text-secondary);"></i>
-          </button>
-          <div class="dropdown-menu dropdown-menu-right" id="topbarDateMenu" style="width:280px;padding:14px;right:0;left:auto;">
-            <div style="font-weight:600;font-size:0.85rem;margin-bottom:10px;color:var(--text-dark);display:flex;align-items:center;justify-content:space-between;">
-              <span><i class="fas fa-calendar-day" style="margin-right:6px;color:var(--primary);"></i>Filter Dashboard by Date</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <div>
-                <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:2px;">From Date</label>
-                <input type="date" id="globalDateFrom" class="form-control" style="height:34px;font-size:0.8rem;" onchange="applyGlobalDateFilter()">
-              </div>
-              <div>
-                <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:2px;">To Date</label>
-                <input type="date" id="globalDateTo" class="form-control" style="height:34px;font-size:0.8rem;" onchange="applyGlobalDateFilter()">
-              </div>
-              <div>
-                <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:2px;">Date Field</label>
-                <select id="globalDateField" class="form-control form-select" style="height:34px;font-size:0.8rem;" onchange="applyGlobalDateFilter()">
-                  <option value="created_at">Import Date</option>
-                  <option value="assigned_date">Distributed Date</option>
-                </select>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:4px;">
-                <button class="btn btn-primary btn-sm" style="flex:1;height:32px;font-size:0.75rem;" onclick="applyGlobalDateFilter()">Apply</button>
-                <button class="btn btn-secondary btn-sm" style="height:32px;font-size:0.75rem;" onclick="clearGlobalDateFilter()">Reset</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Quick Tour / Welcome Tutorial Button -->
         <button class="navbar-btn" onclick="startWelcomeTour()" title="Quick System Tour & Shortcuts" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.1rem;">
           <i class="fas fa-question-circle"></i>
@@ -638,7 +603,7 @@
         </div>
 
         <!-- Spreadsheet Table Container -->
-        <div style="flex:1;overflow:auto;max-height:60vh;border-bottom:1px solid var(--border);">
+        <div style="overflow-x:auto;">
           <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;">
             <thead>
               <tr id="ssTableHeadRow">
@@ -892,18 +857,21 @@
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company</label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldCompany" placeholder="Current company" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation</label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldDesignation" placeholder="Current designation" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorDesignation" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Designation is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Current City</label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Current City <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldCity" placeholder="Current city" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
@@ -929,10 +897,11 @@
           <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email</label>
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email <span class="required" style="color:#EF4444">*</span></label>
                 <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
               </div>
               <input type="email" id="fieldEmail" placeholder="email@example.com" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorEmail" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Email is required</div>
             </div>
             <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; margin-top: 5px;">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Secondary Email</label>
@@ -942,10 +911,11 @@
           <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone</label>
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone <span class="required" style="color:#EF4444">*</span></label>
                 <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
               </div>
               <input type="text" id="fieldPhone" placeholder="Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorPhone" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Phone is required</div>
             </div>
             <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; margin-top: 5px;">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Secondary Phone</label>

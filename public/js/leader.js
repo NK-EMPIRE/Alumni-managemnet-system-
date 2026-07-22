@@ -1024,14 +1024,17 @@
 
   function validateForm() {
     var isValid = true;
-    var required = ['fieldName', 'fieldDept', 'fieldBatch'];
+    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldEmail', 'fieldPhone'];
     required.forEach(function (id) {
       var el = document.getElementById(id);
-      if (!el.value || el.value.trim() === '') {
-        el.classList.add('error');
+      var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
+      if (!el || !el.value || el.value.trim() === '') {
+        if (el) el.classList.add('error');
+        if (err) err.style.display = 'block';
         isValid = false;
       } else {
-        el.classList.remove('error');
+        if (el) el.classList.remove('error');
+        if (err) err.style.display = 'none';
       }
     });
     return isValid;
@@ -1249,6 +1252,7 @@
 
       if (e.key === 'Escape') {
         modal.classList.remove('show');
+        document.body.style.overflow = '';
       }
 
       // Ctrl + S: Save Draft

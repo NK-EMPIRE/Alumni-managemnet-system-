@@ -115,8 +115,10 @@
         const deptFilter = filterDept.value;
         const batchFilter = filterBatch.value;
         const statusFilter = filterStatus.value;
-        const dateFrom = document.getElementById('filterDateFrom') ? document.getElementById('filterDateFrom').value : null;
-        const dateTo = document.getElementById('filterDateTo') ? document.getElementById('filterDateTo').value : null;
+        var dateFromEl = document.getElementById('filterDateFrom');
+        var dateToEl = document.getElementById('filterDateTo');
+        var dateFrom = dateFromEl && dateFromEl.value ? new Date(dateFromEl.value + 'T00:00:00') : null;
+        var dateTo = dateToEl && dateToEl.value ? new Date(dateToEl.value + 'T23:59:59') : null;
 
         filteredData = alumniData.filter(function (r) {
             const matchesSearch = !searchTerm ||
@@ -129,11 +131,16 @@
             const matchesBatch = !batchFilter || r.batch === batchFilter;
             const matchesStatus = !statusFilter || r.status === statusFilter;
 
-            let matchesDate = true;
-            if (r.created_at || r.createdAt || r.assigned_date) {
-                const itemDate = (r.created_at || r.createdAt || r.assigned_date).substring(0, 10);
-                if (dateFrom && itemDate < dateFrom) matchesDate = false;
-                if (dateTo && itemDate > dateTo) matchesDate = false;
+            var matchesDate = true;
+            if (dateFrom || dateTo) {
+                var rawDate = r.created_at || r.createdAt || r.assigned_date;
+                if (rawDate) {
+                    var itemDate = new Date(rawDate.substring(0, 10) + 'T00:00:00');
+                    if (dateFrom && itemDate < dateFrom) matchesDate = false;
+                    if (dateTo && itemDate > dateTo) matchesDate = false;
+                } else {
+                    matchesDate = false;
+                }
             }
 
             return matchesSearch && matchesDept && matchesBatch && matchesStatus && matchesDate;
@@ -177,6 +184,7 @@
         renderPagination(totalPages);
 
         updateCardCounts();
+        updateFilterBadge();
     }
 
     function renderPagination(totalPages) {
@@ -225,6 +233,53 @@
             }
         }, 80);
     }
+
+    function updateFilterBadge() {
+        var count = 0;
+        if (filterDept && filterDept.value) count++;
+        if (filterBatch && filterBatch.value) count++;
+        if (filterStatus && filterStatus.value) count++;
+        if (document.getElementById('filterDateFrom') && document.getElementById('filterDateFrom').value) count++;
+        if (document.getElementById('filterDateTo') && document.getElementById('filterDateTo').value) count++;
+        var badge = document.getElementById('activeFilterBadge');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    window.openFilterModal = function () {
+        var modal = document.getElementById('ssFilterModal');
+        if (modal) modal.classList.add('show');
+    };
+
+    window.closeFilterModal = function () {
+        var modal = document.getElementById('ssFilterModal');
+        if (modal) modal.classList.remove('show');
+    };
+
+    window.applyModalFilters = function () {
+        currentPage = 1;
+        renderTable();
+        var preview = document.getElementById('section-preview');
+        if (preview && preview.style.display !== 'none') {
+            previewPage = 1;
+            loadPreviewSpreadsheet();
+        }
+    };
+
+    window.clearModalFilters = function () {
+        if (filterDept) filterDept.value = '';
+        if (filterBatch) filterBatch.value = '';
+        if (filterStatus) filterStatus.value = '';
+        if (document.getElementById('filterDateFrom')) document.getElementById('filterDateFrom').value = '';
+        if (document.getElementById('filterDateTo')) document.getElementById('filterDateTo').value = '';
+        applyModalFilters();
+    };
 
     function incrementTodayCount() {
         todayUpdateCount++;
@@ -509,15 +564,20 @@
         const fields = [
             { id: 'fieldName', errorId: 'errorName', label: 'Name' },
             { id: 'fieldDept', errorId: 'errorDept', label: 'Department' },
-            { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' }
+            { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' },
+            { id: 'fieldCompany', errorId: 'errorCompany', label: 'Company' },
+            { id: 'fieldDesignation', errorId: 'errorDesignation', label: 'Designation' },
+            { id: 'fieldCity', errorId: 'errorCity', label: 'City' },
+            { id: 'fieldEmail', errorId: 'errorEmail', label: 'Email' },
+            { id: 'fieldPhone', errorId: 'errorPhone', label: 'Phone' }
         ];
 
         fields.forEach(function (f) {
             const el = document.getElementById(f.id);
             const err = document.getElementById(f.errorId);
-            if (!el.value || el.value.trim() === '') {
-                el.classList.add('error');
-                err.classList.add('show');
+            if (!el || !el.value || el.value.trim() === '') {
+                if (el) el.classList.add('error');
+                if (err) err.classList.add('show');
                 isValid = false;
             }
         });
@@ -884,9 +944,9 @@
             body.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
 
             var search = document.getElementById('previewSearch').value || '';
-            var dept = document.getElementById('previewFilterDept').value || '';
-            var batch = document.getElementById('previewFilterBatch').value || '';
-            var status = document.getElementById('previewFilterStatus').value || '';
+            var dept = filterDept ? filterDept.value : '';
+            var batch = filterBatch ? filterBatch.value : '';
+            var status = filterStatus ? filterStatus.value : '';
             var limitVal = parseInt(document.getElementById('previewLimit').value, 10) || 10;
             previewLimit = limitVal;
 
@@ -936,7 +996,18 @@
                     else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
                     else if (status === 'Draft') badgeClass = 'badge-info';
 
-                    var linkedin = row.linkedin_profile ? '<a href="' + (row.linkedin_profile.startsWith('http') ? row.linkedin_profile : 'https://' + row.linkedin_profile) + '" target="_blank" style="color:var(--primary);"><i class="fab fa-linkedin"></i> View</a>' : '-';
+                    var link = row.linkedin_profile || '';
+                    var linkedin;
+                    if (link) {
+                      var href = link.startsWith('http') ? link : 'https://' + link;
+                      var safeHref = href.replace(/'/g, "\\'");
+                      linkedin = '<div style="display:flex;align-items:center;gap:10px;">' +
+                        '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
+                        '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + safeHref + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
+                        '</div>';
+                    } else {
+                      linkedin = '-';
+                    }
                     var updatedDateStr = row.updated_date ? new Date(row.updated_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
                     html += '<tr>' +
@@ -1278,20 +1349,7 @@
                         filterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
                     });
                 }
-                var pDept = document.getElementById('previewFilterDept');
-                var pBatch = document.getElementById('previewFilterBatch');
-                if (pDept) {
-                    pDept.innerHTML = '<option value="">All Departments</option>';
-                    depts.forEach(d => {
-                        pDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
-                    });
-                }
-                if (pBatch) {
-                    pBatch.innerHTML = '<option value="">All Batches</option>';
-                    batches.forEach(b => {
-                        pBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
-                    });
-                }
+
             }
         }
         ).catch(err => {
@@ -1310,27 +1368,6 @@
 
         if (tableSearch) {
             tableSearch.addEventListener('input', function () {
-                currentPage = 1;
-                renderTable();
-            });
-        }
-
-        if (filterDept) {
-            filterDept.addEventListener('change', function () {
-                currentPage = 1;
-                renderTable();
-            });
-        }
-
-        if (filterBatch) {
-            filterBatch.addEventListener('change', function () {
-                currentPage = 1;
-                renderTable();
-            });
-        }
-
-        if (filterStatus) {
-            filterStatus.addEventListener('change', function () {
                 currentPage = 1;
                 renderTable();
             });

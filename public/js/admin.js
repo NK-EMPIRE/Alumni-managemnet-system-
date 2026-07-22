@@ -167,16 +167,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initSpreadsheetHandlers();
     initProgressWatch();
     fetchAllData();
-    // Real-time polling every 30 seconds for notifications + reset requests
-    setInterval(function() {
-      API.getAuditLogs({ page: 1, limit: 1000 }).then(function(res) {
-        if (res && res.success) {
-          _apiAuditLogs = res.data && res.data.records ? res.data : { records: Array.isArray(res.data) ? res.data : [] };
-          populateNotifications();
-        }
-      }).catch(function() {});
-      if (window.fetchResetRequests) window.fetchResetRequests();
-    }, 30000);
   } catch (err) {
     console.error('Admin init error:', err);
   }

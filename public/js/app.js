@@ -634,6 +634,8 @@
     }
     // Escape -> Close any open modal
     if (e.key === 'Escape') {
+      var updateModal = document.getElementById('updateModal');
+      if (updateModal && updateModal.classList.contains('show')) return;
       document.querySelectorAll('.modal-overlay, .modal-backdrop').forEach(function (m) {
         if (m.style.display === 'flex' || m.classList.contains('active') || m.classList.contains('show')) {
           m.style.display = 'none';
