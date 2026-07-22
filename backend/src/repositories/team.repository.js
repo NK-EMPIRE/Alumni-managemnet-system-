@@ -72,13 +72,21 @@ async function update(teamId, fields) {
   const request = pool.request().input('teamId', sql.Int, teamId);
 
   const setClauses = [];
-  if (fields.team_name !== undefined) {
-    setClauses.push('team_name = @team_name');
-    request.input('team_name', sql.NVarChar(100), fields.team_name);
-  }
-  if (fields.leader_id !== undefined) {
-    setClauses.push('leader_id = @leader_id');
-    request.input('leader_id', sql.Int, fields.leader_id);
+  const fieldMap = {
+    teamName: 'team_name',
+    team_name: 'team_name',
+    leaderId: 'leader_id',
+    leader_id: 'leader_id'
+  };
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (fieldMap[key] && value !== undefined) {
+      let sqlType = sql.NVarChar(100);
+      if (key === 'leaderId' || key === 'leader_id') sqlType = sql.Int;
+
+      request.input(key, sqlType, value);
+      setClauses.push(`${fieldMap[key]} = @${key}`);
+    }
   }
 
   if (setClauses.length === 0) return null;
