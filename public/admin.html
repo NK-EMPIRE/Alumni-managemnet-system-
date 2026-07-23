@@ -359,9 +359,12 @@
                   <i class="fas fa-search search-icon"></i>
                   <input type="text" placeholder="Search alumni..." id="tableSearch" oninput="filterTable()">
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="openModal('dashboardFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
-                  <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="dashboardActiveFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
-                </button>
+                <div class="filter-btn-wrap" id="dashFilterBtnWrap">
+                  <button class="btn btn-secondary btn-sm" onclick="openModal('filterModal')" style="height:36px;font-size:0.8rem;">
+                    <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="filterBadge" class="badge badge-primary" style="display:none;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+                  </button>
+                  <span class="filter-active-dot" title="Filters active"></span>
+                </div>
               </div>
               <div style="margin-left:12px;">
                 <span id="dashboardFilteredCount" class="badge-record-count" style="font-size: 0.9rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block;">0 Records</span>
@@ -476,9 +479,12 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
               </div>
-              <button class="btn btn-secondary btn-sm" onclick="openModal('ssFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
-                <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
-              </button>
+              <div class="filter-btn-wrap" id="ssFilterBtnWrap">
+                <button class="btn btn-secondary btn-sm" onclick="openModal('ssFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                  <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+                </button>
+                <span class="filter-active-dot" title="Filters active"></span>
+              </div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn" style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>

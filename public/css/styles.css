@@ -5554,3 +5554,35 @@ body.dark-mode .shortcut-card .shortcut-desc {
   color: #94A3B8 !important;
 }
 
+/* ──────────────────────────────────────────────────
+   FILTER ACTIVE DOT INDICATOR (Global)
+   Shows a pulsing dot on filter buttons when active
+   ────────────────────────────────────────────────── */
+.filter-btn-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.filter-btn-wrap .filter-active-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background: #F59E0B;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: none;
+  z-index: 10;
+  animation: filterDotPulse 1.8s ease-in-out infinite;
+}
+
+.filter-btn-wrap.has-active-filter .filter-active-dot {
+  display: block;
+}
+
+@keyframes filterDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 0 5px rgba(245,158,11,0); transform: scale(1.15); }
+}

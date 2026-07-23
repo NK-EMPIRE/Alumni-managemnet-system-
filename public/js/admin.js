@@ -574,7 +574,36 @@ function updateDashboardFilterBadge() {
       badge.style.display = 'none';
     }
   }
+  // Update filter dot indicator
+  var wrap = document.getElementById('dashFilterBtnWrap');
+  if (wrap) {
+    if (count > 0) wrap.classList.add('has-active-filter');
+    else wrap.classList.remove('has-active-filter');
+  }
 }
+
+function updateSsFilterDot() {
+  var leader = getVal('ssFilterLeader');
+  var member = getVal('ssFilterMember');
+  var dept = getVal('ssFilterDept');
+  var batch = getVal('ssFilterBatch');
+  var status = getVal('ssFilterStatus');
+  var search = (document.getElementById('ssSearch') ? document.getElementById('ssSearch').value : '').trim();
+  var hasFilter = !!(leader || member || dept || batch || status || search);
+  var wrap = document.getElementById('ssFilterBtnWrap');
+  if (wrap) {
+    if (hasFilter) wrap.classList.add('has-active-filter');
+    else wrap.classList.remove('has-active-filter');
+  }
+  // Also update badge count
+  var count = [leader, member, dept, batch, status].filter(Boolean).length;
+  var badge = document.getElementById('activeFilterBadge');
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+}
+
 
 function getVal(id) {
   var el = document.getElementById(id);
@@ -2089,13 +2118,7 @@ window.saveAdminPassword = function () {
    30. EXPORT BUTTON
    ──────────────────────────────────────────────────────────── */
 window.handleExport = function () {
-  if (typeof window.openExportCustomizationModal === 'function') {
-    window.openExportCustomizationModal();
-  } else {
-    console.error('openExportCustomizationModal not loaded yet');
-    var modal = document.getElementById('exportCustomizationModal');
-    if (modal) modal.classList.add('show');
-  }
+  window.openExportCustomizationModal();
 };
 
 /* ────────────────────────────────────────────────────────────
@@ -3104,6 +3127,9 @@ window.fetchSpreadsheetData = function () {
   var leaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
   var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
 
+  // Update filter dot indicator
+  if (typeof updateSsFilterDot === 'function') updateSsFilterDot();
+
   // Load stats
   API.getAlumniStats().then(function (res) {
     if (res && res.success && res.data) {
@@ -3424,12 +3450,8 @@ window.toggleColumnVisibility = function (key) {
    ──────────────────────────────────────────────────────────── */
 var _exportSelectedCols = {};
 
-window.handleExport = function () {
-  openExportCustomizationModal();
-};
-
 window.exportAlumniCSV = function () {
-  openExportCustomizationModal();
+  window.openExportCustomizationModal();
 };
 
 window.openExportCustomizationModal = function () {

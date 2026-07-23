@@ -829,6 +829,22 @@
     var dateFromVal = document.getElementById('myAssignmentsDateFrom') ? document.getElementById('myAssignmentsDateFrom').value : '';
     var dateToVal = document.getElementById('myAssignmentsDateTo') ? document.getElementById('myAssignmentsDateTo').value : '';
 
+    // Update filter dot indicator
+    var hasFilter = !!(searchVal || (statusVal && statusVal !== 'all') || (deptValFilter && deptValFilter !== 'all') || (batchValFilter && batchValFilter !== 'all') || dateFromVal || dateToVal);
+    var myFilterWrap = document.getElementById('myAssignmentsFilterBtnWrap');
+    if (myFilterWrap) {
+      if (hasFilter) myFilterWrap.classList.add('has-active-filter');
+      else myFilterWrap.classList.remove('has-active-filter');
+    }
+    // Update badge count
+    var myFilterCount = [statusVal !== 'all' ? statusVal : '', deptValFilter !== 'all' ? deptValFilter : '', batchValFilter !== 'all' ? batchValFilter : '', dateFromVal, dateToVal].filter(Boolean).length;
+    var myBadge = document.getElementById('myAssignmentsActiveFilterBadge');
+    if (myBadge) {
+      myBadge.textContent = myFilterCount;
+      myBadge.style.display = myFilterCount > 0 ? 'inline-block' : 'none';
+    }
+
+
     myFilteredAssignments = myAssignmentsData.filter(function (r) {
       var matchSearch = !searchVal ||
         (r.name || '').toLowerCase().indexOf(searchVal) !== -1 ||
@@ -893,9 +909,6 @@
         }
 
         var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
-        if (isCompleted) {
-          actionBtns += ' <button class="btn btn-sm btn-warning reopen-alumni-btn" data-id="' + r.alumni_id + '" style="color:#fff;margin-left:4px;" title="Reopen Record"><i class="fas fa-undo"></i> Reopen</button>';
-        }
 
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
