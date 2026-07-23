@@ -802,7 +802,14 @@
             <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
           </div>
         </div>
-        <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="modal-nav-group" style="display:flex;align-items:center;gap:6px;background:#F1F5F9;padding:4px 8px;border-radius:8px;border:1px solid #CBD5E1;">
+            <button type="button" class="btn btn-sm btn-secondary" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record (Left Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-left"></i></button>
+            <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;">1 / 1</span>
+            <button type="button" class="btn btn-sm btn-secondary" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record (Right Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-right"></i></button>
+          </div>
+          <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>
+        </div>
       </div>
       <div class="modal-body">
         <form id="updateForm" novalidate>
@@ -970,7 +977,10 @@
             </div>
           </div>
           <input type="hidden" id="fieldIndex" value="">
-          <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px">
+          <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-warning" id="undoSubmitBtn" style="color:#fff;display:none;" onclick="undoAlumniSubmission()">
+              <i class="fas fa-undo"></i> Undo Submit
+            </button>
             <button type="button" class="btn btn-outline" id="saveDraftBtn">
               <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text">Save Draft</span>
@@ -1089,7 +1099,7 @@
        CIRCULATE / REASSIGN MODAL (Leader)
        ============================================================ -->
   <div class="modal-overlay" id="circulateModal">
-    <div class="modal" style="max-width:680px;width:95vw;">
+    <div class="modal" style="max-width:920px;width:95vw;">
       <div class="modal-header">
         <h3><i class="fas fa-exchange-alt" style="color:var(--primary);margin-right:8px;"></i>Circulate / Redistribute Within Team</h3>
         <button class="modal-close" onclick="closeModal('circulateModal')">&times;</button>
@@ -1101,17 +1111,18 @@
           <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:18px;">
             <p style="color:var(--text-secondary);font-size:0.85rem;">Loading team workload...</p>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;">
             <div class="form-group">
-              <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;">SOURCE (has backlog)</label>
-              <select class="form-control form-select" id="circulateSourceSelect">
+              <label style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:8px;display:block;"><i class="fas fa-user-minus" style="color:#EF4444;margin-right:6px;"></i>SOURCE MEMBER (Has Backlog)</label>
+              <select class="form-control form-select" id="circulateSourceSelect" style="padding:10px;">
                 <option value="">-- Select Source --</option>
               </select>
             </div>
             <div class="form-group">
-              <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;">TARGETS (will receive)</label>
-              <select class="form-control form-select" id="circulateTargetSelect" multiple style="height:90px;"></select>
-              <small style="color:var(--text-secondary);font-size:0.75rem;">Hold Ctrl/Cmd to select multiple</small>
+              <label style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:8px;display:block;"><i class="fas fa-user-plus" style="color:#10B981;margin-right:6px;"></i>TARGET MEMBERS (Will Receive)</label>
+              <div id="circulateTargetCheckboxes" style="max-height:140px;overflow-y:auto;border:1px solid #CBD5E1;border-radius:8px;padding:10px;background:#F8FAFC;display:flex;flex-direction:column;gap:8px;">
+                <span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>
+              </div>
             </div>
           </div>
           <div class="form-group" style="margin-bottom:16px;">

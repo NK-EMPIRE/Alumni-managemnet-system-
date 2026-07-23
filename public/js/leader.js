@@ -892,6 +892,11 @@
           if (desgVal !== '-') desgVal = desgVal.replace(regex, highlightMark);
         }
 
+        var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
+        if (isCompleted) {
+          actionBtns += ' <button class="btn btn-sm btn-warning reopen-alumni-btn" data-id="' + r.alumni_id + '" style="color:#fff;margin-left:4px;" title="Reopen Record"><i class="fas fa-undo"></i> Reopen</button>';
+        }
+
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
           '<td><strong>' + nameVal + '</strong></td>' +
@@ -900,7 +905,7 @@
           '<td>' + compVal + '</td>' +
           '<td>' + desgVal + '</td>' +
           '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
-          '<td style="text-align:center"><button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button></td>' +
+          '<td style="text-align:center">' + actionBtns + '</td>' +
           '</tr>';
       });
       tbody.innerHTML = html;
@@ -909,6 +914,13 @@
         btn.addEventListener('click', function () {
           var id = this.getAttribute('data-id');
           openUpdateModal(id);
+        });
+      });
+
+      tbody.querySelectorAll('.reopen-alumni-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = this.getAttribute('data-id');
+          window.reopenAlumniRecord(id);
         });
       });
     }
@@ -936,6 +948,44 @@
 
   // --- UPDATE MODAL MANAGEMENT (For Leader Assignments Update) ---
   var currentSelectedAlumniId = null;
+  window._currentLeaderRecordIndex = -1;
+
+  function updateLeaderModalNavCounter() {
+    var prevBtn = document.getElementById('modalNavPrevBtn');
+    var nextBtn = document.getElementById('modalNavNextBtn');
+    var counterEl = document.getElementById('modalNavCounter');
+    if (!myFilteredAssignments || myFilteredAssignments.length === 0 || window._currentLeaderRecordIndex === -1) {
+      if (counterEl) counterEl.textContent = '0 / 0';
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+      return;
+    }
+    if (counterEl) counterEl.textContent = (window._currentLeaderRecordIndex + 1) + ' / ' + myFilteredAssignments.length;
+    if (prevBtn) prevBtn.disabled = window._currentLeaderRecordIndex <= 0;
+    if (nextBtn) nextBtn.disabled = window._currentLeaderRecordIndex >= myFilteredAssignments.length - 1;
+  }
+
+  window.navigateModalRecord = function(dir) {
+    if (!myFilteredAssignments || myFilteredAssignments.length === 0) return;
+    var newIdx = window._currentLeaderRecordIndex + dir;
+    if (newIdx < 0 || newIdx >= myFilteredAssignments.length) return;
+    var targetRecord = myFilteredAssignments[newIdx];
+    if (!targetRecord) return;
+
+    var form = document.getElementById('updateForm');
+    if (form) {
+      form.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+      form.style.opacity = '0.3';
+      form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
+      setTimeout(function() {
+        openUpdateModal(targetRecord.alumni_id);
+        form.style.opacity = '1';
+        form.style.transform = 'translateX(0)';
+      }, 150);
+    } else {
+      openUpdateModal(targetRecord.alumni_id);
+    }
+  };
 
   function ensureOptionExists(selectEl, val) {
     if (!val) return;
@@ -950,6 +1000,12 @@
 
   function openUpdateModal(alumniId) {
     currentSelectedAlumniId = alumniId;
+    var targetId = parseInt(alumniId, 10);
+    if (myFilteredAssignments && myFilteredAssignments.length > 0) {
+      window._currentLeaderRecordIndex = myFilteredAssignments.findIndex(function(r) { return r.alumni_id === targetId; });
+      updateLeaderModalNavCounter();
+    }
+
     var overlay = document.getElementById('updateModal');
 
     // Clear old errors
@@ -1029,8 +1085,14 @@
           document.getElementById('higherStudiesDetails').style.display = 'none';
         }
 
-        document.getElementById('fieldSmartParser').value = '';
-        loadAutosave(alumniId);
+        var undoBtn = document.getElementById('undoSubmitBtn');
+        if (undoBtn) {
+          undoBtn.style.display = isCompleted ? 'inline-flex' : 'none';
+        }
+
+        var smartParser = document.getElementById('fieldSmartParser');
+        if (smartParser) smartParser.value = '';
+        if (typeof loadAutosave === 'function') loadAutosave(alumniId);
 
         overlay.classList.add('show');
       }
@@ -2253,18 +2315,7 @@
       });
   };
 
-  // Auto refresh dashboard data every 20 seconds silently in the background
-  setInterval(function () {
-    // Only refresh if no modals are open to avoid disrupting typing or interactions
-    var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
-    var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
-    if (openModals.length === 0 && !isInputFocused) {
-      if (typeof fetchLeaderData === 'function') fetchLeaderData();
-      if (typeof fetchSpreadsheetData === 'function' && document.getElementById('section-myAssignments') && document.getElementById('section-myAssignments').style.display !== 'none') {
-        fetchSpreadsheetData();
-      }
-    }
-  }, 20000);
+  // Auto refresh dashboard data disabled by user request
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -2310,15 +2361,35 @@ window.openCirculateModal = function() {
     document.getElementById('circulateWorkloadTable').innerHTML = tbl;
 
     var sourceSel = document.getElementById('circulateSourceSelect');
-    var targetSel = document.getElementById('circulateTargetSelect');
+    var targetBox = document.getElementById('circulateTargetCheckboxes');
     sourceSel.innerHTML = '<option value="">-- Select Source --</option>';
-    targetSel.innerHTML = '';
+    
     data.members.forEach(function(m) {
-      var o1 = document.createElement('option'); o1.value = m.user_id; o1.text = m.name + ' (' + m.pending_count + ' pending)';
+      var o1 = document.createElement('option');
+      o1.value = m.user_id;
+      o1.text = m.name + ' (' + m.pending_count + ' pending)';
       sourceSel.appendChild(o1);
-      var o2 = document.createElement('option'); o2.value = m.user_id; o2.text = m.name + ' (' + m.pending_count + ' pending)';
-      targetSel.appendChild(o2);
     });
+
+    var renderCheckboxes = function() {
+      var srcId = parseInt(sourceSel.value, 10);
+      targetBox.innerHTML = '';
+      if (!srcId) {
+        targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        return;
+      }
+      data.members.forEach(function(m) {
+        if (m.user_id !== srcId) {
+          var label = document.createElement('label');
+          label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;color:var(--text-dark);';
+          label.innerHTML = '<input type="checkbox" class="circulate-target-cb" value="' + m.user_id + '" style="accent-color:var(--primary);width:16px;height:16px;"> ' + m.name + ' <small style="color:#64748B;">(' + m.pending_count + ' pending)</small>';
+          targetBox.appendChild(label);
+        }
+      });
+    };
+
+    sourceSel.onchange = renderCheckboxes;
+    renderCheckboxes();
   }).catch(function(err) {
     document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Network error.</p>';
   });
@@ -2329,10 +2400,10 @@ window.openCirculateModal = function() {
 window.circulatePreview = function() {
   var sourceMemberId = parseInt(document.getElementById('circulateSourceSelect').value, 10);
   if (!sourceMemberId) { Toast.warning('Circulate', 'Please select a source member.'); return; }
-  var targetSel = document.getElementById('circulateTargetSelect');
-  var targetMemberIds = Array.from(targetSel.selectedOptions).map(function(o) { return parseInt(o.value, 10); });
+
+  var cbs = document.querySelectorAll('.circulate-target-cb:checked');
+  var targetMemberIds = Array.from(cbs).map(function(cb) { return parseInt(cb.value, 10); });
   if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
-  if (targetMemberIds.includes(sourceMemberId)) { Toast.warning('Circulate', 'Source cannot be a target.'); return; }
   var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
 
   var token = localStorage.getItem('token');
@@ -2396,3 +2467,50 @@ if (typeof io !== 'undefined') {
     console.warn('Socket.io connection failed:', e);
   }
 }
+
+window.reopenAlumniRecord = function(alumniId) {
+  if (!confirm('Are you sure you want to reopen this record back to Pending status for modifications?')) return;
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reopen/' + alumniId, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.success) {
+      Toast.success('Reopen Record', res.message || 'Record reopened successfully.');
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchLeaderData === 'function') fetchLeaderData();
+    } else {
+      Toast.error('Reopen Record', res && res.message || 'Failed to reopen record.');
+    }
+  }).catch(function() {
+    Toast.error('Reopen Record', 'Network error reopening record.');
+  });
+};
+
+window.undoAlumniSubmission = function() {
+  if (!currentSelectedAlumniId) return;
+  if (!confirm('Are you sure you want to undo submission and set status back to Pending?')) return;
+
+  var undoBtn = document.getElementById('undoSubmitBtn');
+  if (undoBtn) { undoBtn.disabled = true; undoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...'; }
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reopen/' + currentSelectedAlumniId, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.success) {
+      Toast.success('Undo Submission', res.message || 'Submission undone successfully.');
+      var overlay = document.getElementById('updateModal');
+      if (overlay) overlay.classList.remove('show');
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchLeaderData === 'function') fetchLeaderData();
+    } else {
+      Toast.error('Undo Submission', res && res.message || 'Failed to undo submission.');
+    }
+  }).catch(function() {
+    Toast.error('Undo Submission', 'Network error undoing submission.');
+  }).finally(function() {
+    if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
+  });
+};

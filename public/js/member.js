@@ -324,9 +324,54 @@
         selectEl.appendChild(opt);
     }
 
+    window._currentModalRecordIndex = -1;
+
+    function updateModalNavCounter() {
+        var prevBtn = document.getElementById('modalNavPrevBtn');
+        var nextBtn = document.getElementById('modalNavNextBtn');
+        var counterEl = document.getElementById('modalNavCounter');
+        if (!alumniData || alumniData.length === 0 || window._currentModalRecordIndex === -1) {
+            if (counterEl) counterEl.textContent = '0 / 0';
+            if (prevBtn) prevBtn.disabled = true;
+            if (nextBtn) nextBtn.disabled = true;
+            return;
+        }
+        if (counterEl) counterEl.textContent = (window._currentModalRecordIndex + 1) + ' / ' + alumniData.length;
+        if (prevBtn) prevBtn.disabled = window._currentModalRecordIndex <= 0;
+        if (nextBtn) nextBtn.disabled = window._currentModalRecordIndex >= alumniData.length - 1;
+    }
+
+    window.navigateModalRecord = function(dir) {
+        if (!alumniData || alumniData.length === 0) return;
+        var newIdx = window._currentModalRecordIndex + dir;
+        if (newIdx < 0 || newIdx >= alumniData.length) return;
+        var targetRecord = alumniData[newIdx];
+        if (!targetRecord) return;
+
+        // Visual transition
+        var form = document.getElementById('updateForm');
+        if (form) {
+            form.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+            form.style.opacity = '0.3';
+            form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
+            setTimeout(function() {
+                openModal(targetRecord.id);
+                form.style.opacity = '1';
+                form.style.transform = 'translateX(0)';
+            }, 150);
+        } else {
+            openModal(targetRecord.id);
+        }
+    };
+
     function openModal(index) {
-        const record = alumniData.find(function (r) { return r.id === parseInt(index, 10); });
-        if (!record) return;
+        const targetId = parseInt(index, 10);
+        const recordIdx = alumniData.findIndex(function (r) { return r.id === targetId; });
+        if (recordIdx === -1) return;
+        window._currentModalRecordIndex = recordIdx;
+        const record = alumniData[recordIdx];
+
+        updateModalNavCounter();
 
         fieldIndex.value = record.id || '';
         modalTitle.textContent = record.name;
@@ -398,6 +443,10 @@
         loadAutosave(record.id);
 
         clearErrors();
+        var undoBtn = document.getElementById('undoSubmitBtn');
+        if (undoBtn) {
+            undoBtn.style.display = isCompleted ? 'inline-flex' : 'none';
+        }
         saveDraftBtn.classList.remove('loading');
         saveDraftBtn.disabled = false;
         submitRecordBtn.classList.remove('loading');
@@ -1264,6 +1313,7 @@
     }
 
     function fetchMemberData() {
+        window.fetchMemberData = fetchMemberData; // expose globally
         return Promise.all([
             API.getMemberDashboard().catch(function () { return null; }),
             API.getAssignedAlumni({ page: 1, limit: 500 }).catch(function () { return null; })
@@ -1549,13 +1599,38 @@ function _memberShowToast(message, type) {
     }, 3500);
 }
 
-// Auto refresh dashboard data every 20 seconds silently in the background
-setInterval(function () {
-  // Only refresh if no modals are open to avoid disrupting typing or interactions
-  var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
-  var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
-  if (openModals.length === 0 && !isInputFocused) {
-    if (typeof fetchMemberData === 'function') fetchMemberData();
-  }
-}, 20000);
+window.undoAlumniSubmission = function() {
+    var fieldIndexEl = document.getElementById('fieldIndex');
+    var idx = fieldIndexEl ? parseInt(fieldIndexEl.value, 10) : 0;
+    if (!idx) return;
+    if (!confirm('Are you sure you want to undo submission and set status back to Pending?')) return;
+
+    var undoBtn = document.getElementById('undoSubmitBtn');
+    if (undoBtn) { undoBtn.disabled = true; undoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...'; }
+
+    var token = localStorage.getItem('token');
+    fetch('/api/v1/assignments/reopen/' + idx, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res && res.success) {
+            if (window.Toast) window.Toast.success('Undo Submission', res.message || 'Submission undone. Record is back to Pending.');
+            else _memberShowToast('Submission undone. Record is back to Pending.', 'success');
+            // Close modal and refresh data
+            var modal = document.getElementById('updateModal');
+            if (modal) modal.classList.remove('show');
+            if (window.fetchMemberData) window.fetchMemberData();
+        } else {
+            if (window.Toast) window.Toast.error('Undo Submission', res && res.message || 'Failed to undo submission.');
+            else _memberShowToast(res && res.message || 'Failed to undo submission.', 'error');
+        }
+    }).catch(function() {
+        if (window.Toast) window.Toast.error('Undo Submission', 'Network error undoing submission.');
+        else _memberShowToast('Network error undoing submission.', 'error');
+    }).finally(function() {
+        if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
+    });
+};
+
+
 

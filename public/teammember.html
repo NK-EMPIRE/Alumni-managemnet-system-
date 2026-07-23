@@ -1383,14 +1383,21 @@
 <div class="modal-overlay" id="updateModal">
     <div class="modal modal-xl" style="max-width:900px;width:95vw;">
         <div class="modal-header">
-            <div class="modal-header-left">
-                <div class="avatar" id="modalAvatar">A</div>
+            <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
+                <div class="avatar" id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">A</div>
                 <div class="info">
-                    <h3 id="modalTitle">Update Profile</h3>
-                    <span id="modalSubtitle">Alumni Professional Details</span>
+                    <h3 id="modalTitle" style="font-size:16px;font-weight:700;color:#1E293B">Update Profile</h3>
+                    <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
                 </div>
             </div>
-            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="modal-nav-group" style="display:flex;align-items:center;gap:6px;background:#F1F5F9;padding:4px 8px;border-radius:8px;border:1px solid #CBD5E1;">
+                    <button type="button" class="btn btn-sm btn-secondary" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record (Left Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-left"></i></button>
+                    <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;">1 / 1</span>
+                    <button type="button" class="btn btn-sm btn-secondary" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record (Right Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-right"></i></button>
+                </div>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
         </div>
         <div class="modal-body">
             <form id="updateForm" novalidate>
@@ -1559,6 +1566,9 @@
                 </div>
                 <input type="hidden" id="fieldIndex" value="">
                 <div class="submit-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-warning" id="undoSubmitBtn" style="color:#fff;display:none;" onclick="undoAlumniSubmission()">
+                        <i class="fas fa-undo"></i> Undo Submit
+                    </button>
                     <button type="button" class="btn btn-outline" id="saveDraftBtn">
                         <span class="spinner"></span>
                         <span class="btn-text">Save Draft</span>
