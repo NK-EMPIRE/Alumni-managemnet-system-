@@ -3652,20 +3652,7 @@ window.submitEditAlumni = function() {
   });
 };
 
-// Auto refresh dashboard data every 20 seconds silently in the background
-setInterval(function () {
-  if (typeof _apiDataLoaded !== 'undefined' && _apiDataLoaded) {
-    // Only refresh if no modals are open to avoid disrupting typing or interactions
-    var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
-    var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
-    if (openModals.length === 0 && !isInputFocused) {
-      if (typeof fetchAllData === 'function') fetchAllData();
-      if (typeof fetchSpreadsheetData === 'function' && document.getElementById('section-spreadsheet') && document.getElementById('section-spreadsheet').style.display !== 'none') {
-        fetchSpreadsheetData();
-      }
-    }
-  }
-}, 20000);
+// Auto refresh dashboard data disabled by user request
 
 // ============================================================
 // FEATURE 1 — REASSIGN / REDISTRIBUTE (Admin)
@@ -3739,22 +3726,37 @@ window.reassignLoadTeam = function() {
     tbl += '</tbody></table>';
     document.getElementById('reassignWorkloadTable').innerHTML = tbl;
 
-    // Populate source/target selects
+    // Populate source select and target checkboxes
     var sourceSel = document.getElementById('reassignSourceSelect');
-    var targetSel = document.getElementById('reassignTargetSelect');
+    var targetBox = document.getElementById('reassignTargetCheckboxes');
     sourceSel.innerHTML = '<option value="">-- Select Source --</option>';
-    targetSel.innerHTML = '';
+    
     data.members.forEach(function(m) {
       var opt1 = document.createElement('option');
       opt1.value = m.user_id;
       opt1.text = m.name + ' (' + m.pending_count + ' pending)';
       sourceSel.appendChild(opt1);
-
-      var opt2 = document.createElement('option');
-      opt2.value = m.user_id;
-      opt2.text = m.name + ' (' + m.pending_count + ' pending)';
-      targetSel.appendChild(opt2);
     });
+
+    var renderCheckboxes = function() {
+      var srcId = parseInt(sourceSel.value, 10);
+      targetBox.innerHTML = '';
+      if (!srcId) {
+        targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        return;
+      }
+      data.members.forEach(function(m) {
+        if (m.user_id !== srcId) {
+          var label = document.createElement('label');
+          label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;color:var(--text-dark);';
+          label.innerHTML = '<input type="checkbox" class="reassign-target-cb" value="' + m.user_id + '" style="accent-color:var(--primary);width:16px;height:16px;"> ' + m.name + ' <small style="color:#64748B;">(' + m.pending_count + ' pending)</small>';
+          targetBox.appendChild(label);
+        }
+      });
+    };
+
+    sourceSel.onchange = renderCheckboxes;
+    renderCheckboxes();
 
     document.getElementById('reassignStep1').style.display = 'none';
     document.getElementById('reassignStep2').style.display = 'block';
@@ -3767,10 +3769,9 @@ window.reassignPreview = function() {
   var sourceMemberId = parseInt(document.getElementById('reassignSourceSelect').value, 10);
   if (!sourceMemberId) { Toast.warning('Reassign', 'Please select a source member.'); return; }
 
-  var targetSel = document.getElementById('reassignTargetSelect');
-  var targetMemberIds = Array.from(targetSel.selectedOptions).map(function(o) { return parseInt(o.value, 10); });
+  var cbs = document.querySelectorAll('.reassign-target-cb:checked');
+  var targetMemberIds = Array.from(cbs).map(function(cb) { return parseInt(cb.value, 10); });
   if (targetMemberIds.length === 0) { Toast.warning('Reassign', 'Please select at least one target member.'); return; }
-  if (targetMemberIds.includes(sourceMemberId)) { Toast.warning('Reassign', 'Source cannot be one of the targets.'); return; }
 
   var count = parseInt(document.getElementById('reassignCount').value, 10) || null;
 
@@ -3857,6 +3858,7 @@ if (typeof io !== 'undefined') {
 
 var _healthCurrentType = null;
 var _healthCurrentPage = 1;
+var _healthCurrentRows = [];
 
 window.openDbHealthModal = function() {
   document.getElementById('dbHealthDetailContainer').style.display = 'none';
@@ -3915,6 +3917,7 @@ window.loadDbHealthDetail = function(type) {
       return;
     }
     var rows = res.data.rows || [];
+    _healthCurrentRows = rows;
     var total = res.data.total || rows.length;
 
     var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><thead><tr style="background:#F1F5F9;">' +
@@ -3947,20 +3950,38 @@ window.loadDbHealthDetail = function(type) {
   });
 };
 
-window.notifySingleAlumni = function(alumniId) {
+
+window.notifyAllDbHealth = function() {
+  if (!_healthCurrentRows || _healthCurrentRows.length === 0) {
+    Toast.warning('Notify All', 'No records loaded in current view.');
+    return;
+  }
+  var alumniIds = _healthCurrentRows.map(function(r) { return r.alumni_id; }).filter(Boolean);
+  if (alumniIds.length === 0) {
+    Toast.warning('Notify All', 'No valid alumni IDs found to notify.');
+    return;
+  }
+
+  var btn = document.getElementById('notifyAllDbHealthBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Notifying...'; }
+
   var token = localStorage.getItem('token');
   fetch('/api/v1/health/notify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ alumniIds: [alumniId], message: 'Please update missing professional details for this alumni.' })
+    body: JSON.stringify({ alumniIds: alumniIds, message: 'Attention: Please complete missing information or process assigned alumni record.' })
   }).then(function(r) { return r.json(); }).then(function(res) {
     if (res && res.success) {
-      Toast.success('Notify', res.message || 'Notification sent.');
+      Toast.success('Notify All', res.message || ('Notifications sent to ' + (res.data ? res.data.notified : alumniIds.length) + ' assignees.'));
     } else {
-      Toast.error('Notify', res && res.message || 'Failed to send notification.');
+      Toast.error('Notify All', res && res.message || 'Failed to send notifications.');
     }
   }).catch(function() {
-    Toast.error('Notify', 'Network error sending notification.');
+    Toast.error('Notify All', 'Network error sending notifications.');
+  }).finally(function() {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Notify All Assignees'; }
   });
 };
+
+
 
