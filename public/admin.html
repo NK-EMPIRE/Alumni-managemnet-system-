@@ -523,6 +523,8 @@
               <button class="btn btn-info btn-sm" onclick="openDbHealthModal()"
                 style="height:36px;color:#fff;background:#0EA5E9;white-space:nowrap;"><i class="fas fa-heartbeat"></i>
                 DB Health</button>
+              <button class="btn btn-primary btn-sm" onclick="fetchRealtimeDatabaseData()"
+                style="height:36px;white-space:nowrap;" title="Fetch latest data from database"><i class="fas fa-sync-alt"></i> Fetch Data</button>
               <button class="btn btn-secondary btn-sm" onclick="openExportCustomizationModal()"
                 style="height:36px;white-space:nowrap;"><i class="fas fa-download"></i> Export</button>
             </div>
@@ -2079,6 +2081,21 @@
         </div>
       </div>
     </div>
+
+  <!-- Realtime Fetch Data Overlay Animation -->
+  <div class="export-progress-overlay" id="fetchProgressOverlay" style="display:none;">
+    <div class="export-progress-card" style="text-align:center;">
+      <div class="export-animated-icon" style="background:rgba(37,99,235,0.1);color:#2563EB;">
+        <i class="fas fa-sync-alt fa-spin"></i>
+      </div>
+      <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;" id="fetchProgressTitle">Fetching Database Data...</h3>
+      <p style="font-size:0.85rem;color:#64748B;margin:0;" id="fetchProgressSubtitle">Synchronizing latest alumni records & stats...</p>
+      <div class="export-progress-bar-bg" style="margin-top:16px;">
+        <div class="export-progress-bar-fill" id="fetchProgressBarFill" style="width:0%;background:linear-gradient(90deg,#2563EB,#0EA5E9);"></div>
+      </div>
+      <div style="font-size:0.8rem;color:#64748B;font-weight:600;margin-top:8px;" id="fetchProgressPercent">0%</div>
+    </div>
+  </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/app.js"></script>

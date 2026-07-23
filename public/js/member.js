@@ -999,10 +999,13 @@
                     var linkedin;
                     if (link) {
                       var href = link.startsWith('http') ? link : 'https://' + link;
-                      var safeHref = href.replace(/'/g, "\\'");
+                      var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
+                      var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
+                      var iconColor = isFb ? '#1877F2' : '#0A66C2';
+                      var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
                       linkedin = '<div style="display:flex;align-items:center;gap:10px;">' +
-                        '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
-                        '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + safeHref + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
+                        '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
+                        '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
                         '</div>';
                     } else {
                       linkedin = '-';
