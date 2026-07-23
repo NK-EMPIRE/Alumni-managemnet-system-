@@ -17,7 +17,8 @@ const ASSIGNMENT_STATUS = {
   DISTRIBUTED: 'DISTRIBUTED',
   PENDING: 'Pending',
   DRAFT: 'Draft',
-  COMPLETED: 'Completed'
+  COMPLETED: 'Completed',
+  REOPENED: 'Reopened'
 };
 
 const ASSIGNMENT_TYPES = {
