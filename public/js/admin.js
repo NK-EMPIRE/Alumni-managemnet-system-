@@ -2088,29 +2088,11 @@ window.saveAdminPassword = function() {
    30. EXPORT BUTTON
    ──────────────────────────────────────────────────────────── */
 function handleExport() {
-  var data = state.filteredData;
-  if (!data || data.length === 0) {
-    Toast.warning('Export', 'No data to export');
-    return;
+  if (typeof window.exportAlumniCSV === 'function') {
+    window.exportAlumniCSV();
+  } else {
+    Toast.warning('Export', 'Export function is not available.');
   }
-  var csv = '\uFEFF';
-  csv += 'S.No,Name,Department,Batch,Team Leader,Status,Progress(%)\r\n';
-  data.forEach(function (item, i) {
-    var name = '"' + (item.name || '').replace(/"/g, '""') + '"';
-    var dept = '"' + (item.dept || '').replace(/"/g, '""') + '"';
-    var batch = '"' + (item.batch || '').replace(/"/g, '""') + '"';
-    var leader = '"' + (item.leader || '').replace(/"/g, '""') + '"';
-    csv += (i + 1) + ',' + name + ',' + dept + ',' + batch + ',' + leader + ',' + (item.status || '') + ',' + (item.progress || 0) + '\r\n';
-  });
-  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  var link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'alumni_export_' + new Date().toISOString().slice(0, 10) + '.csv';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
-  Toast.success('Export', 'Exported ' + data.length + ' records');
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -3082,17 +3064,24 @@ var ssSortDirection = 'DESC';
 var ssColumns = [
   { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
   { key: 'name', label: 'Name', visible: true, width: 160 },
+  { key: 'father_name', label: 'Father Name', visible: true, width: 150 },
+  { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 120 },
+  { key: 'gender', label: 'Gender', visible: true, width: 80 },
   { key: 'department', label: 'Department', visible: true, width: 100 },
   { key: 'batch', label: 'Batch', visible: true, width: 80 },
-  { key: 'email', label: 'Email', visible: true, width: 180 },
-  { key: 'phone', label: 'Phone', visible: true, width: 120 },
+  { key: 'email', label: 'Primary Email', visible: true, width: 180 },
+  { key: 'secondary_email', label: 'Secondary Email', visible: true, width: 180 },
+  { key: 'phone', label: 'Primary Phone', visible: true, width: 120 },
+  { key: 'secondary_phone', label: 'Secondary Phone', visible: true, width: 120 },
   { key: 'company', label: 'Company', visible: true, width: 150 },
   { key: 'designation', label: 'Designation', visible: true, width: 150 },
   { key: 'experience', label: 'Experience', visible: true, width: 100 },
   { key: 'city', label: 'City', visible: true, width: 120 },
+  { key: 'state', label: 'State', visible: true, width: 120 },
   { key: 'country', label: 'Country', visible: true, width: 120 },
   { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
-  { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
+  { key: 'working_details', label: 'Working Details', visible: true, width: 200 },
+  { key: 'assignment_status', label: 'Current Status', visible: true, width: 130 },
   { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
   { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
   { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
@@ -3431,17 +3420,27 @@ window.toggleColumnVisibility = function(key) {
 };
 
 window.exportAlumniCSV = function() {
-  var dept = document.getElementById('ssFilterDept').value;
-  var batch = document.getElementById('ssFilterBatch').value;
-  var status = document.getElementById('ssFilterStatus').value;
+  var deptEl = document.getElementById('ssFilterDept');
+  var batchEl = document.getElementById('ssFilterBatch');
+  var statusEl = document.getElementById('ssFilterStatus');
+  var leaderEl = document.getElementById('ssFilterLeader');
+  var memberEl = document.getElementById('ssFilterMember');
+
+  var dept = deptEl ? deptEl.value : '';
+  var batch = batchEl ? batchEl.value : '';
+  var status = statusEl ? statusEl.value : '';
+  var leaderId = leaderEl ? leaderEl.value : '';
+  var memberId = memberEl ? memberEl.value : '';
 
   var params = {
     page: 1,
-    limit: 10000,
-    search: ssSearchQuery || undefined,
+    limit: 50000,
+    search: typeof ssSearchQuery !== 'undefined' && ssSearchQuery ? ssSearchQuery : undefined,
     department: dept || undefined,
     batch: batch || undefined,
-    status: status || undefined
+    status: status || undefined,
+    leaderId: leaderId || undefined,
+    memberId: memberId || undefined
   };
 
   API.getAlumni(params).then(function(res) {
@@ -3453,7 +3452,8 @@ window.exportAlumniCSV = function() {
       csv += headers.join(',') + '\r\n';
       data.forEach(function(row) {
         var line = ssColumns.map(function(col) {
-          var val = row[col.key] || '';
+          var val = row[col.key];
+          if (val === null || val === undefined) val = '';
           if (col.key === 'updated_date' && val) {
             val = new Date(val).toLocaleDateString('en-IN');
           }
@@ -3470,7 +3470,7 @@ window.exportAlumniCSV = function() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
-      Toast.success('Export', 'Alumni records exported successfully');
+      Toast.success('Export', 'Exported ' + data.length + ' alumni records successfully');
     }
   }).catch(function(err) {
     console.error('Export error:', err);
