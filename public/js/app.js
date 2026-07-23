@@ -228,6 +228,9 @@
         localStorage.setItem('theme', 'dark');
         toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
       }
+      try {
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: document.body.classList.contains('dark-mode') } }));
+      } catch (e) {}
     });
   }
 

@@ -428,6 +428,10 @@
 
   function initCharts() {
     if (typeof Chart === 'undefined') return;
+    var isDark = document.body.classList.contains('dark-mode');
+    var tickColor = isDark ? '#F8FAFC' : '#475569';
+    var gridColor = isDark ? 'rgba(255, 255, 255, 0.15)' : '#E2E8F0';
+
     var memberCanvas = document.getElementById('memberProgressChart');
     if (!memberCanvas) return;
     var memberCtx = memberCanvas.getContext('2d');
@@ -462,8 +466,23 @@
           }
         },
         scales: {
-          y: { beginAtZero: true, max: 100, grid: { color: '#F1F5F9' }, ticks: { callback: function (val) { return val + '%'; } } },
-          x: { grid: { display: false } }
+          y: { 
+            beginAtZero: true, 
+            max: 100, 
+            grid: { color: gridColor }, 
+            ticks: { 
+              color: tickColor,
+              font: { family: 'Poppins', size: 11, weight: '500' },
+              callback: function (val) { return val + '%'; } 
+            } 
+          },
+          x: { 
+            grid: { display: false },
+            ticks: {
+              color: tickColor,
+              font: { family: 'Poppins', size: 11, weight: '500' }
+            }
+          }
         }
       }
     });
@@ -490,7 +509,12 @@
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { padding: 16, usePointStyle: true, font: { family: 'Poppins', size: 11 } }
+            labels: { 
+              padding: 16, 
+              usePointStyle: true, 
+              color: tickColor,
+              font: { family: 'Poppins', size: 11, weight: '500' } 
+            }
           },
           tooltip: {
             callbacks: {
@@ -505,6 +529,10 @@
       }
     });
   }
+
+  window.addEventListener('themeChanged', function () {
+    if (typeof initCharts === 'function') initCharts();
+  });
 
   function setupSidebar() {
     var body = document.body;

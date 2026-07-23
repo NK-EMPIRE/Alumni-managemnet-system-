@@ -5474,3 +5474,83 @@ body.dark-mode .guidelines-box ul,
 body.dark-mode .guidelines-box li {
   color: #FFFFFF !important;
 }
+
+/* ────────────────────────────────────────────────────────────
+   GLOBAL TUTORIAL & SHORTCUTS STYLING
+   ──────────────────────────────────────────────────────────── */
+.welcome-banner {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #BFDBFE;
+  transition: all 0.3s ease;
+}
+
+.welcome-banner h4 {
+  margin: 0 0 6px !important;
+  color: #1E40AF !important;
+}
+
+.welcome-banner p {
+  margin: 0 !important;
+  font-size: 0.88rem;
+  color: #1E3A8A !important;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.shortcut-card {
+  background: #F8FAFC;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  transition: all 0.3s ease;
+}
+
+.shortcut-card kbd {
+  background: #E2E8F0;
+  color: #1E293B !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.shortcut-card .shortcut-desc {
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Dark mode overrides for tutorial & shortcuts */
+body.dark-mode .welcome-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(30, 58, 138, 0.45)) !important;
+  border-color: rgba(96, 165, 250, 0.35) !important;
+}
+
+body.dark-mode .welcome-banner h4 {
+  color: #60A5FA !important;
+}
+
+body.dark-mode .welcome-banner p {
+  color: #93C5FD !important;
+}
+
+body.dark-mode .shortcut-card {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .shortcut-card kbd {
+  background: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .shortcut-card .shortcut-desc {
+  color: #94A3B8 !important;
+}
+

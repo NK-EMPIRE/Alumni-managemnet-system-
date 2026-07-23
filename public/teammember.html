@@ -1652,9 +1652,9 @@
         <button class="modal-close" onclick="closeModal('welcomeTourModal')">&times;</button>
       </div>
       <div class="modal-body" style="padding:20px;max-height:75vh;overflow-y:auto;">
-        <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid #BFDBFE;">
-          <h4 style="margin:0 0 6px;color:#1E40AF;"><i class="fas fa-smile" style="margin-right:6px;"></i>Welcome Team Member</h4>
-          <p style="margin:0;font-size:0.88rem;color:#1E3A8A;">Review assigned alumni profiles, update contact and professional details, and save progress effortlessly.</p>
+        <div class="welcome-banner">
+          <h4><i class="fas fa-smile"></i>Welcome Team Member</h4>
+          <p>Review assigned alumni profiles, update contact and professional details, and save progress effortlessly.</p>
         </div>
 
         <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt" style="color:var(--warning);margin-right:6px;"></i>Key Features</h5>
@@ -1665,22 +1665,22 @@
         </ul>
 
         <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard" style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.82rem;">
-          <div style="background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #E2E8F0;">
-            <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">Ctrl</kbd> + <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">K</kbd>
-            <div style="color:var(--text-muted);margin-top:2px;">Focus Table Search</div>
+        <div class="shortcut-grid">
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>K</kbd>
+            <div class="shortcut-desc">Focus Table Search</div>
           </div>
-          <div style="background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #E2E8F0;">
-            <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">Esc</kbd>
-            <div style="color:var(--text-muted);margin-top:2px;">Close Active Modal</div>
+          <div class="shortcut-card">
+            <kbd>Esc</kbd>
+            <div class="shortcut-desc">Close Active Modal</div>
           </div>
-          <div style="background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #E2E8F0;">
-            <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">Ctrl</kbd> + <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">S</kbd>
-            <div style="color:var(--text-muted);margin-top:2px;">Save / Submit Record</div>
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>S</kbd>
+            <div class="shortcut-desc">Save / Submit Record</div>
           </div>
-          <div style="background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #E2E8F0;">
-            <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">Alt</kbd> + <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;">E</kbd>
-            <div style="color:var(--text-muted);margin-top:2px;">Export Records</div>
+          <div class="shortcut-card">
+            <kbd>Alt</kbd> + <kbd>E</kbd>
+            <div class="shortcut-desc">Export Records</div>
           </div>
         </div>
       </div>
