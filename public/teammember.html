@@ -947,6 +947,53 @@
         }
 
         /* ── DARK MODE OVERRIDES (FIX WHITE ELEMENTS AND TOUCH/FOCUS REFLECTIONS) ── */
+
+        /* Fix inline-styled modal nav pill (← 6/31 →) */
+        body.dark-mode .modal-nav-group {
+            background: #0F172A !important;
+            border-color: #334155 !important;
+        }
+        body.dark-mode #modalNavCounter {
+            color: #CBD5E1 !important;
+        }
+        body.dark-mode #modalTitle {
+            color: #F8FAFC !important;
+        }
+        body.dark-mode #modalSubtitle {
+            color: #94A3B8 !important;
+        }
+        body.dark-mode .modal-header {
+            background-color: #1E293B !important;
+        }
+        body.dark-mode .modal-body,
+        body.dark-mode .modal-footer {
+            background-color: #1E293B !important;
+        }
+
+        /* Fix hardcoded inline background colors */
+        body.dark-mode [style*="background:#F8FAFC"],
+        body.dark-mode [style*="background: #F8FAFC"],
+        body.dark-mode [style*="background:#EEF2F6"],
+        body.dark-mode [style*="background:#F1F5F9"],
+        body.dark-mode [style*="background:#fff"],
+        body.dark-mode [style*="background: #fff"] {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        /* Fix hardcoded inline text colors */
+        body.dark-mode [style*="color:#1E293B"],
+        body.dark-mode [style*="color: #1E293B"],
+        body.dark-mode [style*="color:#475569"],
+        body.dark-mode [style*="color:#0F172A"] {
+            color: #F8FAFC !important;
+        }
+        body.dark-mode [style*="color:#64748B"],
+        body.dark-mode [style*="color: #64748B"] {
+            color: #94A3B8 !important;
+        }
+
         body.dark-mode .table-container {
             background: #1E293B !important;
             border: 1px solid #334155 !important;

@@ -281,10 +281,246 @@
       border-radius: 12px;
       font-weight: 600;
     }
+    /* ── DARK MODE OVERRIDES FOR TEAM LEADER SECTION ── */
+    body.dark-mode {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+    }
+
+    /* Fix inline-styled modal nav pill */
+    body.dark-mode .modal-nav-group {
+      background: #0F172A !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode #modalNavCounter {
+      color: #CBD5E1 !important;
+    }
+    body.dark-mode #modalTitle {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #modalSubtitle {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode .modal-header {
+      background-color: #1E293B !important;
+    }
+    body.dark-mode .modal-body,
+    body.dark-mode .modal-footer {
+      background-color: #1E293B !important;
+    }
+    /* Fix hardcoded inline-bg table header rows */
+    body.dark-mode [style*="background:#F8FAFC"],
+    body.dark-mode [style*="background: #F8FAFC"],
+    body.dark-mode [style*="background:#EEF2F6"],
+    body.dark-mode [style*="background:#fff"],
+    body.dark-mode [style*="background: #fff"] {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+    /* Fix hardcoded inline text colors */
+    body.dark-mode [style*="color:#1E293B"],
+    body.dark-mode [style*="color: #1E293B"],
+    body.dark-mode [style*="color:#475569"],
+    body.dark-mode [style*="color:#0F172A"] {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode [style*="color:#64748B"],
+    body.dark-mode [style*="color: #64748B"],
+    body.dark-mode [style*="color:#94A3B8"] {
+      color: #94A3B8 !important;
+    }
+
     body.dark-mode .leader-badge {
       background: rgba(37, 99, 235, 0.25) !important;
       color: #60A5FA !important;
       border: 1px solid rgba(96, 165, 250, 0.3) !important;
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .stat-card,
+    body.dark-mode .table-card,
+    body.dark-mode .table-container,
+    body.dark-mode .modal-content,
+    body.dark-mode .export-modal-card {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+      box-shadow: none !important;
+    }
+
+    body.dark-mode .table-header h3,
+    body.dark-mode .section-header h2,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode #navbarUserNameHeader,
+    body.dark-mode #hdrClockDate,
+    body.dark-mode .sidebar-brand-text {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #hdrClockTime,
+    body.dark-mode .text-muted,
+    body.dark-mode .pagination-info,
+    body.dark-mode #ssPaginationInfo,
+    body.dark-mode #paginationInfo,
+    body.dark-mode #myAssignmentsPaginationInfo {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode div[style*="background:#fff"],
+    body.dark-mode div[style*="background: #fff"],
+    body.dark-mode div[style*="background:var(--bg-white"],
+    body.dark-mode div[style*="background:#F8FAFC"],
+    body.dark-mode div[style*="background: #F8FAFC"] {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode th,
+    body.dark-mode #memberDetailsTable th {
+      background-color: #0F172A !important;
+      color: #94A3B8 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode td,
+    body.dark-mode #memberDetailsTable td {
+      color: #E2E8F0 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode tr:hover td {
+      background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea,
+    body.dark-mode .form-control,
+    body.dark-mode .filter-select,
+    body.dark-mode #rowsPerPageSelect,
+    body.dark-mode #myAssignmentsRowsPerPageSelect,
+    body.dark-mode #ssRowsPerPageSelect {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode input:focus,
+    body.dark-mode select:focus,
+    body.dark-mode textarea:focus,
+    body.dark-mode .form-control:focus {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode select option,
+    body.dark-mode .form-control option {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .pagination button,
+    body.dark-mode .pagination-item {
+      background: #1E293B !important;
+      color: #CBD5E1 !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .pagination button:hover:not(:disabled),
+    body.dark-mode .pagination-item:hover:not(:disabled) {
+      background: var(--primary, #2563EB) !important;
+      color: #ffffff !important;
+      border-color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode .pagination button.active,
+    body.dark-mode .pagination-item.active {
+      background: var(--primary, #2563EB) !important;
+      color: #ffffff !important;
+      border-color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode .pagination button:disabled,
+    body.dark-mode .pagination-item:disabled {
+      background: #0F172A !important;
+      color: #475569 !important;
+      border-color: #334155 !important;
+      opacity: 0.5 !important;
+    }
+
+    body.dark-mode #myAssignmentsFilteredCount {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode #filterDrawer {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .modal-header {
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode .modal-footer {
+      border-top-color: #334155 !important;
+      background-color: #1E293B !important;
+    }
+
+    body.dark-mode .tabs {
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-item {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .tab-item.active {
+      color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode .btn-secondary,
+    body.dark-mode .btn-outline {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .btn-secondary:hover,
+    body.dark-mode .btn-outline:hover {
+      background-color: #1E293B !important;
+    }
+
+    body.dark-mode #lockMessage {
+      background-color: rgba(239, 68, 68, 0.15) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+      color: #FCA5A5 !important;
+    }
+
+    body.dark-mode #totalPoolCount {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #notifDropdown {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .notification-item.unread {
+      background-color: rgba(37, 99, 235, 0.15) !important;
+    }
+
+    body.dark-mode .notification-item.unread:hover {
+      background-color: rgba(37, 99, 235, 0.25) !important;
     }
   </style>
 </head>
@@ -805,9 +1041,9 @@
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <div class="modal-nav-group">
+          <div class="modal-nav-group" style="display:flex;align-items:center;gap:6px;background:#F1F5F9;padding:4px 8px;border-radius:8px;border:1px solid #CBD5E1;">
             <button type="button" class="btn btn-sm btn-secondary" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record (Left Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-left"></i></button>
-            <span id="modalNavCounter">1 / 1</span>
+            <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;">1 / 1</span>
             <button type="button" class="btn btn-sm btn-secondary" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record (Right Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-right"></i></button>
           </div>
           <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>

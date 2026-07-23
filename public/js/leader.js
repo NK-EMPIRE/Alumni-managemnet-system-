@@ -63,16 +63,17 @@
     if (!badge) return;
     var icon = badge.querySelector('.lock-icon');
     var text = badge.querySelector('.lock-text');
+    var isDark = document.body.classList.contains('dark-mode');
     if (isDistributionLocked) {
-      badge.style.background = '#FEF2F2';
-      badge.style.borderColor = '#FECACA';
+      badge.style.background = isDark ? 'rgba(239, 68, 68, 0.2)' : '#FEF2F2';
+      badge.style.borderColor = isDark ? 'rgba(239, 68, 68, 0.4)' : '#FECACA';
       if (icon) { icon.className = 'fas fa-lock lock-icon'; icon.style.color = '#EF4444'; }
-      if (text) { text.textContent = 'Distribution: Locked'; text.style.color = '#991B1B'; }
+      if (text) { text.textContent = 'Distribution: Locked'; text.style.color = isDark ? '#FCA5A5' : '#991B1B'; }
     } else {
-      badge.style.background = '#F0FDF4';
-      badge.style.borderColor = '#BBF7D0';
+      badge.style.background = isDark ? 'rgba(16, 185, 129, 0.2)' : '#F0FDF4';
+      badge.style.borderColor = isDark ? 'rgba(16, 185, 129, 0.4)' : '#BBF7D0';
       if (icon) { icon.className = 'fas fa-lock-open lock-icon'; icon.style.color = '#10B981'; }
-      if (text) { text.textContent = 'Distribution: Open'; text.style.color = '#166534'; }
+      if (text) { text.textContent = 'Distribution: Open'; text.style.color = isDark ? '#6EE7B7' : '#166534'; }
     }
   }
 
@@ -529,6 +530,7 @@
 
   window.addEventListener('themeChanged', function () {
     if (typeof initCharts === 'function') initCharts();
+    if (typeof updateLockBadge === 'function') updateLockBadge();
   });
 
   function setupSidebar() {
