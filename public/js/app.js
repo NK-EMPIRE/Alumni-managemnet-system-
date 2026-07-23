@@ -606,7 +606,83 @@
     if (badge) badge.style.display = 'none';
   };
 
-  window.startWelcomeTour = function () {
+  /* ────────────────────────────────────────────────────────────
+     INTERACTIVE WELCOME TUTORIAL TOUR & TODAY'S TASKS
+     ──────────────────────────────────────────────────────────── */
+  var tourSteps = [
+    {
+      title: "Welcome to AlumniMS! 👋",
+      subtitle: "Your complete alumni professional details management platform.",
+      content: "Let's take a quick 3-step tour of the newly upgraded features designed to streamline your daily workflow and updates! 🚀",
+      motivation: "Great work begins with a clear plan. Let's make today awesome! 😊"
+    },
+    {
+      title: "1. Realtime Data Sync & Filters ⚡",
+      subtitle: "Instant updates from database without reloading.",
+      content: "Use the new <strong>'Fetch Data'</strong> button in the toolbar to pull live SQL Server data in realtime with progress animations. When filters are active, a dynamic dot indicator alerts you instantly! 🔴",
+      motivation: "Real-time accuracy ensures your team works seamlessly without data delays. 👍"
+    },
+    {
+      title: "2. Today's Tasks & Checklists 📋",
+      subtitle: "Auto-generated daily action items.",
+      content: "Click the green <strong>Tasks (<i class='fas fa-tasks'></i>)</strong> icon in the topbar anytime to view your personalized daily summary, pending assignments, draft reminders, and strike off completed goals! 🎯",
+      motivation: "Step by step, progress adds up! Strike off tasks and keep moving forward! 💪"
+    },
+    {
+      title: "3. Smart Reopen & Dark Mode 🌙",
+      subtitle: "Full control & smooth aesthetics.",
+      content: "Admin can now safely <strong>Reopen (<i class='fas fa-redo-alt'></i>)</strong> completed records via confirmation modal. Enjoy butter-smooth dark mode transitions with no visual glitches! 🎨",
+      motivation: "You are all set! Work smoothly, maintain accuracy, and have a wonderful day ahead! 😊✨"
+    }
+  ];
+
+  var currentTourIndex = 0;
+
+  window.renderTourStep = function (index) {
+    if (index < 0 || index >= tourSteps.length) return;
+    currentTourIndex = index;
+    var step = tourSteps[index];
+
+    var titleEl = document.getElementById('tourStepTitle');
+    var subEl = document.getElementById('tourStepSub');
+    var contentEl = document.getElementById('tourStepContent');
+    var motivEl = document.getElementById('tourMotivationBanner');
+    var prevBtn = document.getElementById('tourPrevBtn');
+    var nextBtn = document.getElementById('tourNextBtn');
+
+    if (titleEl) titleEl.textContent = step.title;
+    if (subEl) subEl.textContent = step.subtitle;
+    if (contentEl) contentEl.innerHTML = step.content;
+    if (motivEl) motivEl.textContent = '"' + step.motivation + '"';
+
+    if (prevBtn) prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
+    if (nextBtn) {
+      if (index === tourSteps.length - 1) {
+        nextBtn.innerHTML = 'Complete Tour 🎉';
+        nextBtn.onclick = function () { window.finishWelcomeTour(); };
+      } else {
+        nextBtn.innerHTML = 'Next Step <i class="fas fa-arrow-right" style="margin-left:4px;"></i>';
+        nextBtn.onclick = function () { window.navigateTourStep(1); };
+      }
+    }
+  };
+
+  window.navigateTourStep = function (direction) {
+    window.renderTourStep(currentTourIndex + direction);
+  };
+
+  window.finishWelcomeTour = function () {
+    var cb = document.getElementById('dontShowTourCheckbox');
+    if (cb && cb.checked) {
+      localStorage.setItem('alumni_tour_dismissed', 'true');
+    }
+    if (window.closeModal) window.closeModal('welcomeTourModal');
+    if (window.Toast) window.Toast.success('Tour Completed!', 'Have a smooth and productive work day! 😊');
+  };
+
+  window.startWelcomeTour = function (force) {
+    if (!force && localStorage.getItem('alumni_tour_dismissed') === 'true') return;
+    window.renderTourStep(0);
     if (window.openModal && typeof window.openModal === 'function') {
       window.openModal('welcomeTourModal');
     } else {
@@ -614,6 +690,78 @@
       if (modal) modal.style.display = 'flex';
     }
   };
+
+  window.openTodayTasksModal = function () {
+    if (!API || typeof API.getMyTasks !== 'function') return;
+    var list = document.getElementById('todayTasksList');
+    var contextText = document.getElementById('todayContextText');
+    var countEl = document.getElementById('todayTaskProgressCount');
+    var dot = document.getElementById('todayTasksDot');
+
+    if (list) list.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Loading today\'s tasks...</div>';
+    if (window.openModal) window.openModal('todayTasksModal');
+
+    API.getMyTasks()
+      .then(function (res) {
+        if (res && res.success && res.data) {
+          var data = res.data;
+          if (contextText) contextText.textContent = data.contextText || 'Stay focused and complete your daily updates!';
+          
+          var tasks = data.tasks || [];
+          if (tasks.length === 0) {
+            if (list) list.innerHTML = '<div style="text-align:center;padding:24px;color:#10B981;font-weight:600;"><i class="fas fa-check-circle" style="font-size:2rem;display:block;margin-bottom:8px;"></i>All tasks completed! Great work today! 🎉</div>';
+            if (countEl) countEl.textContent = '0 tasks remaining';
+            if (dot) dot.style.display = 'none';
+            return;
+          }
+
+          var activeCount = tasks.filter(function (t) { return !t.completed; }).length;
+          if (countEl) countEl.textContent = activeCount + ' task(s) remaining';
+          if (dot) dot.style.display = activeCount > 0 ? 'block' : 'none';
+
+          var html = '';
+          tasks.forEach(function (t) {
+            var isDone = t.completed;
+            var textStyle = isDone ? 'text-decoration:line-through;color:#94A3B8;' : 'color:#1E293B;font-weight:600;';
+            html += '<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;transition:all 0.2s;">' +
+              '<input type="checkbox" ' + (isDone ? 'checked' : '') + ' onchange="window.toggleTaskState(this, \'' + t.id + '\')" style="margin-top:4px;width:18px;height:18px;accent-color:#10B981;cursor:pointer;" />' +
+              '<div style="flex:1;">' +
+                '<div style="' + textStyle + 'font-size:0.9rem;">' + t.title + '</div>' +
+                '<div style="font-size:0.78rem;color:#64748B;margin-top:2px;">' + t.desc + '</div>' +
+              '</div>' +
+            '</div>';
+          });
+          if (list) list.innerHTML = html;
+        }
+      })
+      .catch(function (err) {
+        if (list) list.innerHTML = '<div style="text-align:center;padding:16px;color:#EF4444;">Failed to load daily tasks</div>';
+      });
+  };
+
+  window.toggleTaskState = function (checkbox, taskId) {
+    var row = checkbox.closest('div');
+    var titleEl = row ? row.querySelector('div > div:first-child') : null;
+    if (checkbox.checked) {
+      if (titleEl) {
+        titleEl.style.textDecoration = 'line-through';
+        titleEl.style.color = '#94A3B8';
+      }
+      if (window.Toast) window.Toast.success('Task Finished! 🎉', 'Great job completing this task! Move to the next one!');
+    } else {
+      if (titleEl) {
+        titleEl.style.textDecoration = 'none';
+        titleEl.style.color = '#1E293B';
+      }
+    }
+  };
+
+  // Auto trigger welcome tour on login if not dismissed
+  setTimeout(function () {
+    if (document.getElementById('welcomeTourModal')) {
+      window.startWelcomeTour(false);
+    }
+  }, 1200);
 
   // Keyboard Shortcuts Listener
   document.addEventListener('keydown', function (e) {

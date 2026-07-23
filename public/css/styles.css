@@ -3515,6 +3515,10 @@ textarea.form-control {
 /* ────────────────────────────────────────────────────────────
    DARK MODE COMPONENT OVERRIDES
    ──────────────────────────────────────────────────────────── */
+body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
 body.dark-mode {
   /* Admin & Team Leader variables */
   --bg-white: #1E293B;
@@ -3532,6 +3536,10 @@ body.dark-mode {
 
   background-color: #0F172A !important;
   color: #F8FAFC !important;
+}
+
+body, .top-navbar, .topbar, .page-wrapper, .main-content, .card, .stat-card, .modal-content, .table-card, .sidebar {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 body.dark-mode .top-navbar,

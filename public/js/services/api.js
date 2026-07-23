@@ -100,6 +100,9 @@
     getLeaderStats: function (leaderId) {
         return get('/dashboard/leader/' + leaderId + '/stats');
     },
+    getMyTasks: function () {
+        return get('/tasks/my-tasks');
+    },
 
     // Users
     getUsers: function (params) {

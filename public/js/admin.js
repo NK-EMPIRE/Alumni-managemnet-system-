@@ -3296,9 +3296,9 @@ window.renderSpreadsheetTable = function (data) {
     actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
     var _safeName = String(row.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
+    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
     if (isCompleted || row.assignment_status === 'Completed') {
-      actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="adminReopenAlumniRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-undo"></i></button>';
+      actionButtons += '<button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#EF4444; border:none;" onclick="confirmAdminReopenModal(' + row.alumni_id + ', \'' + _safeName + '\')" title="Reopen Record"><i class="fas fa-redo-alt"></i></button>';
     }
     actionButtons += '</div>';
 
@@ -3307,22 +3307,32 @@ window.renderSpreadsheetTable = function (data) {
   });
   body.innerHTML = bodyHtml;
 
-  window.adminReopenAlumniRecord = function (alumniId) {
-    if (!confirm('Are you sure you want to reopen this alumni record? It will be marked as "Reopened" and returned to the assigned user.')) return;
-    API.reopenAlumni(alumniId)
-      .then(function (res) {
-        if (res && res.success) {
-          Toast.success('Reopened', 'Alumni record has been reopened and returned to assigned user');
-          if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
-          if (typeof loadDashboardData === 'function') loadDashboardData();
-        } else {
-          Toast.danger('Reopen Failed', res ? res.message : 'Unknown error');
-        }
-      })
-      .catch(function (err) {
-        Toast.danger('Error', err.message || 'Failed to reopen record');
-      });
+  window.confirmAdminReopenModal = function (alumniId, name) {
+    var msg = document.getElementById('reopenConfirmMsg');
+    if (msg) msg.textContent = 'Are you sure you want to reopen record for "' + (name || 'Alumni') + '"? It will be marked as "Reopened" and returned to the assigned member.';
+    var btn = document.getElementById('reopenConfirmBtn');
+    if (btn) {
+      btn.onclick = function () {
+        closeModal('reopenConfirmModal');
+        API.reopenAlumni(alumniId)
+          .then(function (res) {
+            if (res && res.success) {
+              Toast.success('Reopened', 'Alumni record has been reopened and returned to assigned user');
+              if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+              if (typeof loadDashboardData === 'function') loadDashboardData();
+            } else {
+              Toast.danger('Reopen Failed', res ? res.message : 'Unknown error');
+            }
+          })
+          .catch(function (err) {
+            Toast.danger('Error', err.message || 'Failed to reopen record');
+          });
+      };
+    }
+    openModal('reopenConfirmModal');
   };
+
+  window.adminReopenAlumniRecord = window.confirmAdminReopenModal;
 
   window.fetchRealtimeDatabaseData = function () {
     var overlay = document.getElementById('fetchProgressOverlay');
