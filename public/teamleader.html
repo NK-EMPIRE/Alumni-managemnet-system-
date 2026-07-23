@@ -517,9 +517,12 @@
               <i class="fas fa-search search-icon"></i>
               <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem; height:36px;" />
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="openModal('myAssignmentsFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
-              <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="myAssignmentsActiveFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
-            </button>
+            <div class="filter-btn-wrap" id="myAssignmentsFilterBtnWrap">
+              <button class="btn btn-secondary btn-sm" onclick="openModal('myAssignmentsFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="myAssignmentsActiveFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+              </button>
+              <span class="filter-active-dot" title="Filters active"></span>
+            </div>
             <span id="myAssignmentsFilteredCount" class="badge-record-count" style="font-size: 0.85rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-flex; align-items:center; height:36px;">0 Records</span>
           </div>
         </div>
@@ -575,9 +578,12 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" placeholder="Search..." id="ssSearch" oninput="debounceSearch()">
               </div>
-              <button class="btn btn-secondary btn-sm" onclick="openModal('ssFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
-                <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
-              </button>
+              <div class="filter-btn-wrap" id="ssFilterBtnWrap">
+                <button class="btn btn-secondary btn-sm" onclick="openModal('ssFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                  <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+                </button>
+                <span class="filter-active-dot" title="Filters active"></span>
+              </div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn" style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
@@ -1057,49 +1063,67 @@
        CIRCULATE / REASSIGN MODAL (Leader)
        ============================================================ -->
   <div class="modal-overlay" id="circulateModal">
-    <div class="modal" style="max-width:920px;width:95vw;">
-      <div class="modal-header">
-        <h3><i class="fas fa-exchange-alt" style="color:var(--primary);margin-right:8px;"></i>Circulate / Redistribute Within Team</h3>
-        <button class="modal-close" onclick="closeModal('circulateModal')">&times;</button>
+    <div class="modal" style="max-width:720px;width:95vw;border-radius:16px;overflow:hidden;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#F59E0B,#EF4444);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-exchange-alt" style="color:#fff;font-size:0.85rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1rem;font-weight:700;color:#1E293B;">Circulate Alumni</h3>
+            <p style="margin:0;font-size:0.75rem;color:#64748B;">Redistribute pending records within your team</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('circulateModal')" style="width:32px;height:32px;border:none;background:#F1F5F9;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:1.1rem;">&times;</button>
       </div>
       <div class="modal-body" style="padding:0;">
 
         <!-- Step 1: Workload + source/target -->
-        <div id="circulateStep1" style="padding:24px;">
-          <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:18px;">
-            <p style="color:var(--text-secondary);font-size:0.85rem;">Loading team workload...</p>
+        <div id="circulateStep1" style="padding:20px 24px;">
+          <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:16px;border-radius:10px;border:1px solid var(--border);background:#F8FAFC;">
+            <p style="color:var(--text-secondary);font-size:0.85rem;padding:14px;">Loading team workload...</p>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;">
-            <div class="form-group">
-              <label style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:8px;display:block;"><i class="fas fa-user-minus" style="color:#EF4444;margin-right:6px;"></i>SOURCE MEMBER (Has Backlog)</label>
-              <select class="form-control form-select" id="circulateSourceSelect" style="padding:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+            <div>
+              <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                <span style="width:18px;height:18px;background:#FEE2E2;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-user-minus" style="color:#EF4444;font-size:0.65rem;"></i></span>
+                Source Member
+              </label>
+              <select class="form-control" id="circulateSourceSelect" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;">
                 <option value="">-- Select Source --</option>
               </select>
             </div>
-            <div class="form-group">
-              <label style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:8px;display:block;"><i class="fas fa-user-plus" style="color:#10B981;margin-right:6px;"></i>TARGET MEMBERS (Will Receive)</label>
-              <div id="circulateTargetCheckboxes" style="max-height:140px;overflow-y:auto;border:1px solid #CBD5E1;border-radius:8px;padding:10px;background:#F8FAFC;display:flex;flex-direction:column;gap:8px;">
+            <div>
+              <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                <span style="width:18px;height:18px;background:#D1FAE5;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-user-plus" style="color:#10B981;font-size:0.65rem;"></i></span>
+                Target Members
+              </label>
+              <div id="circulateTargetCheckboxes" style="max-height:120px;overflow-y:auto;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;background:#F8FAFC;display:flex;flex-direction:column;gap:6px;font-size:0.85rem;">
                 <span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>
               </div>
             </div>
           </div>
-          <div class="form-group" style="margin-bottom:16px;">
-            <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;">Records to move (blank = all Pending)</label>
-            <input class="form-control" type="number" id="circulateCount" min="1" placeholder="e.g. 10" style="max-width:200px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="flex:1;">
+              <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:0.05em;">Records to Move <span style="font-weight:400;color:#94A3B8;">(blank = all Pending)</span></label>
+              <input class="form-control" type="number" id="circulateCount" min="1" placeholder="e.g. 10" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;max-width:180px;">
+            </div>
           </div>
-          <button class="btn btn-primary" onclick="circulatePreview()" style="width:100%;">Preview Redistribution <i class="fas fa-eye" style="margin-left:6px;"></i></button>
+          <button class="btn btn-primary" onclick="circulatePreview()" style="width:100%;padding:11px;border-radius:10px;font-weight:600;font-size:0.88rem;">
+            <i class="fas fa-eye" style="margin-right:8px;"></i>Preview Redistribution
+          </button>
         </div>
 
         <!-- Step 2: Preview + Confirm -->
-        <div id="circulateStep2" style="display:none;padding:24px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <strong style="font-size:1rem;color:var(--text-primary);">Preview — Records to be Moved</strong>
-            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('circulateStep2').style.display='none';document.getElementById('circulateStep1').style.display='block';">
-              <i class="fas fa-arrow-left"></i> Back
+        <div id="circulateStep2" style="display:none;padding:20px 24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <strong style="font-size:0.9rem;color:var(--text-primary);">Preview — Records to be Moved</strong>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('circulateStep2').style.display='none';document.getElementById('circulateStep1').style.display='block';" style="padding:6px 14px;border-radius:8px;font-size:0.8rem;">
+              <i class="fas fa-arrow-left" style="margin-right:4px;"></i>Back
             </button>
           </div>
-          <div id="circulatePreviewContent" style="max-height:360px;overflow-y:auto;margin-bottom:18px;"></div>
-          <button class="btn btn-success" onclick="circulateCommit()" style="width:100%;font-weight:600;">
+          <div id="circulatePreviewContent" style="max-height:300px;overflow-y:auto;margin-bottom:14px;border:1px solid var(--border);border-radius:10px;background:#F8FAFC;"></div>
+          <button class="btn btn-success" onclick="circulateCommit()" style="width:100%;padding:11px;border-radius:10px;font-weight:600;font-size:0.88rem;">
             <i class="fas fa-check-circle" style="margin-right:8px;"></i>Confirm Redistribution
           </button>
         </div>

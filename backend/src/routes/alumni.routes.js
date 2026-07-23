@@ -80,7 +80,7 @@ router.patch(
   '/:alumniId/draft',
   param('alumniId').isInt().toInt(),
   validate,
-  authorize(ROLES.MEMBER),
+  authorize(ROLES.MEMBER, ROLES.LEADER),
   alumniController.saveDraft
 );
 
