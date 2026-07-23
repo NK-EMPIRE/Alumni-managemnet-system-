@@ -75,6 +75,13 @@ const saveDraft = asyncHandler(async (req, res) => {
   success(res, result, 'Draft saved successfully');
 });
 
+const reopenAlumni = asyncHandler(async (req, res) => {
+  const { alumniId } = req.params;
+  const currentUser = req.user;
+  const result = await alumniService.reopenAlumni(alumniId, currentUser);
+  success(res, result, 'Alumni record reopened successfully');
+});
+
 module.exports = {
   getAlumni,
   getAlumniById,
@@ -85,5 +92,6 @@ module.exports = {
   updateAssignmentStatus,
   getStats,
   getFilters,
-  saveDraft
+  saveDraft,
+  reopenAlumni
 };

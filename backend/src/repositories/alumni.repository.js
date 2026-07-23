@@ -479,6 +479,21 @@ async function getAssignmentHistory({ page, limit, offset }) {
   return { total, rows: result.recordset };
 }
 
+async function reopenAlumniRecord(alumniId) {
+  const pool = await getPool();
+  await pool.request()
+    .input('alumniId', sql.Int, alumniId)
+    .query(`
+      UPDATE AlumniAssignments
+      SET status = 'Reopened', completed_date = NULL
+      WHERE alumni_id = @alumniId;
+
+      UPDATE Alumni
+      SET is_updated = 0
+      WHERE alumni_id = @alumniId;
+    `);
+}
+
 module.exports = {
   findAll,
   findById,
@@ -492,6 +507,7 @@ module.exports = {
   getPendingAssignmentsByTeam,
   updateAssignmentMember,
   updateAssignmentStatus,
+  reopenAlumniRecord,
   getStats,
   getAssignmentHistory
 };

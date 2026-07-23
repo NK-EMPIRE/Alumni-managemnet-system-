@@ -28,7 +28,7 @@ async function getDbSummary() {
 
   // 3. Missing fields breakdown
   const fields = [
-    'email', 'phone', 'company', 'designation',
+    'father_name', 'email', 'phone', 'company', 'designation',
     'address', 'city', 'state', 'date_of_birth',
     'linkedin_profile', 'working_details'
   ];
@@ -85,7 +85,7 @@ async function getDbDetail({ type }) {
   } else if (type.startsWith('missing_')) {
     const field = type.replace('missing_', '');
     const allowedFields = [
-      'email', 'phone', 'company', 'designation',
+      'father_name', 'email', 'phone', 'company', 'designation',
       'address', 'city', 'state', 'date_of_birth',
       'linkedin_profile', 'working_details'
     ];

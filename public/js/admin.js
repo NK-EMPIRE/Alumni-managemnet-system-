@@ -3050,8 +3050,12 @@ function populateViewModal(record) {
     var url = record.linkedin_profile || record.linkedin;
     var href = url.startsWith('http') ? url : 'https://' + url;
     var safeHref = href.replace(/'/g, "\\'");
+    var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
+    var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
+    var iconColor = isFb ? '#1877F2' : '#0A66C2';
+    var labelText = isFb ? 'Facebook Profile' : 'LinkedIn Profile';
     li.innerHTML = '<div style="display:flex;align-items:center;gap:14px;">' +
-      '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:5px;color:#0A66C2;font-size:1rem;text-decoration:none;font-weight:600;"><i class="fab fa-linkedin"></i> Profile</a>' +
+      '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:5px;color:' + iconColor + ';font-size:1rem;text-decoration:none;font-weight:600;"><i class="' + iconClass + '"></i> ' + labelText + '</a>' +
       '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + safeHref + '\')" style="display:flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;" title="Show URL"><i class="far fa-eye"></i> Preview</button>' +
       '</div>';
   } else {
@@ -3206,7 +3210,7 @@ window.renderSpreadsheetTable = function (data) {
     headHtml += '<div class="resizer" onclick="event.stopPropagation()"></div>';
     headHtml += '</th>';
   });
-  headHtml += '<th style="width: 140px; text-align: center; position: sticky; right: 0; background: var(--bg-light); z-index: 4;">Actions</th>';
+  headHtml += '<th style="width: 200px; min-width: 200px; text-align: center; position: sticky; right: 0; background: var(--bg-light); z-index: 4;">Actions</th>';
   headRow.innerHTML = headHtml;
 
   // Render rows
@@ -3234,7 +3238,8 @@ window.renderSpreadsheetTable = function (data) {
         else if (status === 'Pending') badgeClass = 'badge-warning';
         else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
         else if (status === 'Draft') badgeClass = 'badge-info';
-        val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
+        else if (status === 'Reopened') badgeClass = 'badge-danger';
+        val = '<span class="badge ' + badgeClass + '">' + (status === 'Reopened' ? '<i class="fas fa-undo"></i> Reopened' : status) + '</span>';
       } else if (col.key === 'email') {
         var primary = row.email || '';
         var secondary = row.secondary_email || '';
@@ -3255,8 +3260,12 @@ window.renderSpreadsheetTable = function (data) {
         var link = row.linkedin_profile || '';
         if (link) {
           var href = link.startsWith('http') ? link : 'https://' + link;
+          var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
+          var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
+          var iconColor = isFb ? '#1877F2' : '#0A66C2';
+          var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
           val = '<div style="display:flex;align-items:center;gap:10px;">' +
-            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
+            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
             '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
             '</div>';
         } else {
@@ -3278,18 +3287,73 @@ window.renderSpreadsheetTable = function (data) {
     });
 
     // Action column
-    var isCompleted = row.assignment_status === 'Completed';
-    var actionButtons = '<div style="display:flex; gap:6px; justify-content:center;">';
+    var isCompleted = row.assignment_status === 'Completed' || row.assignment_status === 'Updated';
+    var actionButtons = '<div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:nowrap;">';
     actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
     var _safeName = String(row.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
+    if (isCompleted || row.assignment_status === 'Completed') {
+      actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="adminReopenAlumniRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-undo"></i></button>';
+    }
     actionButtons += '</div>';
 
-    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center;">' + actionButtons + '</td>';
+    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center; min-width: 200px; width: 200px; white-space: nowrap;">' + actionButtons + '</td>';
     bodyHtml += '</tr>';
   });
   body.innerHTML = bodyHtml;
+
+  window.adminReopenAlumniRecord = function (alumniId) {
+    if (!confirm('Are you sure you want to reopen this alumni record? It will be marked as "Reopened" and returned to the assigned user.')) return;
+    API.reopenAlumni(alumniId)
+      .then(function (res) {
+        if (res && res.success) {
+          Toast.success('Reopened', 'Alumni record has been reopened and returned to assigned user');
+          if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+          if (typeof loadDashboardData === 'function') loadDashboardData();
+        } else {
+          Toast.danger('Reopen Failed', res ? res.message : 'Unknown error');
+        }
+      })
+      .catch(function (err) {
+        Toast.danger('Error', err.message || 'Failed to reopen record');
+      });
+  };
+
+  window.fetchRealtimeDatabaseData = function () {
+    var overlay = document.getElementById('fetchProgressOverlay');
+    var barFill = document.getElementById('fetchProgressBarFill');
+    var percentText = document.getElementById('fetchProgressPercent');
+    var titleText = document.getElementById('fetchProgressTitle');
+    var subtitleText = document.getElementById('fetchProgressSubtitle');
+
+    if (overlay) {
+      overlay.style.display = 'flex';
+      barFill.style.width = '15%';
+      percentText.textContent = '15%';
+      titleText.textContent = 'Fetching Database Data...';
+      subtitleText.textContent = 'Connecting to database server...';
+    }
+
+    setTimeout(function () {
+      if (barFill) { barFill.style.width = '55%'; percentText.textContent = '55%'; subtitleText.textContent = 'Updating stats & record views...'; }
+      
+      Promise.all([
+        typeof fetchSpreadsheetData === 'function' ? fetchSpreadsheetData() : Promise.resolve(),
+        typeof loadDashboardData === 'function' ? loadDashboardData() : Promise.resolve(),
+        typeof fetchUsers === 'function' ? fetchUsers() : Promise.resolve()
+      ]).then(function () {
+        if (barFill) { barFill.style.width = '100%'; percentText.textContent = '100%'; titleText.textContent = 'Fetch Complete!'; subtitleText.textContent = 'All alumni data and metrics updated live.'; }
+        setTimeout(function () {
+          if (overlay) overlay.style.display = 'none';
+          Toast.success('Data Synchronized', 'All database records and UI metrics updated successfully.');
+        }, 600);
+      }).catch(function (err) {
+        if (overlay) overlay.style.display = 'none';
+        Toast.danger('Sync Error', err.message || 'Failed to sync latest data.');
+      });
+    }, 400);
+  };
 
   // Initialize resizers
   var table = document.querySelector('.spreadsheet-table');

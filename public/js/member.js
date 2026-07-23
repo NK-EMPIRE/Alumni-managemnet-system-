@@ -162,8 +162,9 @@
                 const serial = start + i + 1;
                 const isCompleted = r.status === 'Completed';
                 const isDraft = r.status === 'Draft';
-                const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : 'pending');
-                const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
+                const isReopened = r.status === 'Reopened';
+                const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : (isReopened ? 'badge-danger' : 'pending'));
+                const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-undo' : 'fa-clock'));
                 html += '<tr>' +
                     '<td style="font-weight:600;color:var(--text-secondary);">' + serial + '</td>' +
                     '<td><strong>' + r.name + '</strong></td>' +
@@ -171,7 +172,7 @@
                     '<td>' + r.batch + '</td>' +
                     '<td>' + r.company + '</td>' +
                     '<td>' + r.designation + '</td>' +
-                    '<td><span class="status-badge ' + badgeClass + '"><i class="fas ' + badgeIcon + '"></i> ' + r.status + '</span></td>' +
+                    '<td><span class="status-badge ' + badgeClass + '" style="' + (isReopened ? 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;' : '') + '"><i class="fas ' + badgeIcon + '"></i> ' + r.status + '</span></td>' +
                     '<td><button class="btn-update" data-index="' + r.id + '"><i class="fas fa-edit"></i> Update</button></td>' +
                     '</tr>';
             }
@@ -998,10 +999,13 @@
                     var linkedin;
                     if (link) {
                       var href = link.startsWith('http') ? link : 'https://' + link;
-                      var safeHref = href.replace(/'/g, "\\'");
+                      var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
+                      var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
+                      var iconColor = isFb ? '#1877F2' : '#0A66C2';
+                      var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
                       linkedin = '<div style="display:flex;align-items:center;gap:10px;">' +
-                        '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
-                        '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + safeHref + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
+                        '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
+                        '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
                         '</div>';
                     } else {
                       linkedin = '-';

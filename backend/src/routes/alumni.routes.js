@@ -92,6 +92,14 @@ router.patch(
   alumniController.submitProfessionalInfo
 );
 
+router.patch(
+  '/:alumniId/reopen',
+  param('alumniId').isInt().toInt(),
+  validate,
+  authorize(ROLES.ADMIN),
+  alumniController.reopenAlumni
+);
+
 router.post(
   '/:alumniId/professional-info',
   param('alumniId').isInt().toInt(),

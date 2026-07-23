@@ -34,9 +34,20 @@ async function getPool() {
       BEGIN
         ALTER TABLE dbo.ImportHistory ADD duration_sec DECIMAL(10, 2) NULL;
       END
+
+      -- Migration: Add 'Reopened' to CK_AlumniAssignments_status constraint if present
+      IF EXISTS (
+        SELECT * FROM sys.check_constraints 
+        WHERE parent_object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'CK_AlumniAssignments_status'
+      )
+      BEGIN
+        ALTER TABLE dbo.AlumniAssignments DROP CONSTRAINT CK_AlumniAssignments_status;
+        ALTER TABLE dbo.AlumniAssignments ADD CONSTRAINT CK_AlumniAssignments_status 
+          CHECK (status IN ('Available', 'ASSIGNED_TO_LEADER', 'DISTRIBUTED', 'Pending', 'Draft', 'Completed', 'Reopened'));
+      END
     `);
   } catch (e) {
-    console.error('ImportHistory migration failed:', e);
+    console.error('Database migration failed:', e);
   }
   pool.on('error', (err) => {
     console.error('SQL Pool error:', err);
