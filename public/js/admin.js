@@ -3206,7 +3206,7 @@ window.renderSpreadsheetTable = function (data) {
     headHtml += '<div class="resizer" onclick="event.stopPropagation()"></div>';
     headHtml += '</th>';
   });
-  headHtml += '<th style="width: 140px; text-align: center; position: sticky; right: 0; background: var(--bg-light); z-index: 4;">Actions</th>';
+  headHtml += '<th style="width: 200px; min-width: 200px; text-align: center; position: sticky; right: 0; background: var(--bg-light); z-index: 4;">Actions</th>';
   headRow.innerHTML = headHtml;
 
   // Render rows
@@ -3280,17 +3280,17 @@ window.renderSpreadsheetTable = function (data) {
 
     // Action column
     var isCompleted = row.assignment_status === 'Completed' || row.assignment_status === 'Updated';
-    var actionButtons = '<div style="display:flex; gap:6px; justify-content:center;">';
+    var actionButtons = '<div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:nowrap;">';
     actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
     var _safeName = String(row.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
     if (isCompleted || row.assignment_status === 'Completed') {
-      actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="adminReopenAlumniRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-undo"></i> Reopen</button>';
+      actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B; white-space:nowrap;" onclick="adminReopenAlumniRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-undo"></i> Reopen</button>';
     }
     actionButtons += '</div>';
 
-    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center;">' + actionButtons + '</td>';
+    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center; min-width: 200px; width: 200px; white-space: nowrap;">' + actionButtons + '</td>';
     bodyHtml += '</tr>';
   });
   body.innerHTML = bodyHtml;
