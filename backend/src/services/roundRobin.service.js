@@ -353,15 +353,42 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     // Add matched groups to preview
     Object.values(matchedGroups).forEach(g => preview.push(g));
 
-    // Add unmatched group with userId = -1 sentinel so caller knows to show manual assignment
+    // Fallback unmatched alumni if requested (RoundRobin or BatchWise)
+    const fallbackMethod = params.unmatchedFallback; // 'RoundRobin', 'BatchWise', or undefined
     if (unmatched.length > 0) {
-      preview.push({
-        userId: -1,
-        userName: 'Unmatched (Manual Assignment Required)',
-        count: unmatched.length,
-        alumniList: unmatched,
-        isUnmatched: true
-      });
+      if (fallbackMethod === 'RoundRobin' && activeUsers.length > 0) {
+        let qIdx = 0;
+        const fallbackMap = {};
+        activeUsers.forEach(u => {
+          fallbackMap[u.user_id] = { userId: u.user_id, userName: u.name, count: 0, alumniList: [], isFallback: true };
+        });
+        for (const alum of unmatched) {
+          const targetU = activeUsers[qIdx % activeUsers.length];
+          fallbackMap[targetU.user_id].alumniList.push(alum);
+          fallbackMap[targetU.user_id].count++;
+          qIdx++;
+        }
+        Object.values(fallbackMap).forEach(g => {
+          if (g.count > 0) {
+            const existingGroup = preview.find(p => p.userId === g.userId);
+            if (existingGroup) {
+              existingGroup.alumniList.push(...g.alumniList);
+              existingGroup.count += g.count;
+            } else {
+              preview.push(g);
+            }
+          }
+        });
+      } else {
+        // Sentinel unmatched group for manual option selection
+        preview.push({
+          userId: -1,
+          userName: 'Unmatched (Faculty Not Assigned)',
+          count: unmatched.length,
+          alumniList: unmatched,
+          isUnmatched: true
+        });
+      }
     }
 
   } else {
