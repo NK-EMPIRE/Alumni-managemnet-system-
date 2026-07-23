@@ -293,9 +293,9 @@
 
     var html = '';
     var unreadCount = 0;
-    
-    var completedList = updatedRecords.filter(function(r) { return r.status === 'Completed'; });
-    var draftList = updatedRecords.filter(function(r) { return r.status === 'Draft'; });
+
+    var completedList = updatedRecords.filter(function (r) { return r.status === 'Completed'; });
+    var draftList = updatedRecords.filter(function (r) { return r.status === 'Draft'; });
 
     if (completedList.length > 0) {
       unreadCount++;
@@ -466,17 +466,17 @@
           }
         },
         scales: {
-          y: { 
-            beginAtZero: true, 
-            max: 100, 
-            grid: { color: gridColor }, 
-            ticks: { 
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: {
               color: tickColor,
               font: { family: 'Poppins', size: 11, weight: '500' },
-              callback: function (val) { return val + '%'; } 
-            } 
+              callback: function (val) { return val + '%'; }
+            }
           },
-          x: { 
+          x: {
             grid: { display: false },
             ticks: {
               color: tickColor,
@@ -509,11 +509,11 @@
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { 
-              padding: 16, 
-              usePointStyle: true, 
+            labels: {
+              padding: 16,
+              usePointStyle: true,
               color: tickColor,
-              font: { family: 'Poppins', size: 11, weight: '500' } 
+              font: { family: 'Poppins', size: 11, weight: '500' }
             }
           },
           tooltip: {
@@ -766,7 +766,7 @@
   function populateMyAssignmentsFilters() {
     var depts = {};
     var batches = {};
-    
+
     myAssignmentsData.forEach(function (r) {
       if (r.department) {
         var d = String(r.department).trim();
@@ -965,7 +965,7 @@
     if (nextBtn) nextBtn.disabled = window._currentLeaderRecordIndex >= myFilteredAssignments.length - 1;
   }
 
-  window.navigateModalRecord = function(dir) {
+  window.navigateModalRecord = function (dir) {
     if (!myFilteredAssignments || myFilteredAssignments.length === 0) return;
     var newIdx = window._currentLeaderRecordIndex + dir;
     if (newIdx < 0 || newIdx >= myFilteredAssignments.length) return;
@@ -977,7 +977,7 @@
       form.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
       form.style.opacity = '0.3';
       form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
-      setTimeout(function() {
+      setTimeout(function () {
         openUpdateModal(targetRecord.alumni_id);
         form.style.opacity = '1';
         form.style.transform = 'translateX(0)';
@@ -1002,7 +1002,7 @@
     currentSelectedAlumniId = alumniId;
     var targetId = parseInt(alumniId, 10);
     if (myFilteredAssignments && myFilteredAssignments.length > 0) {
-      window._currentLeaderRecordIndex = myFilteredAssignments.findIndex(function(r) { return r.alumni_id === targetId; });
+      window._currentLeaderRecordIndex = myFilteredAssignments.findIndex(function (r) { return r.alumni_id === targetId; });
       updateLeaderModalNavCounter();
     }
 
@@ -1386,15 +1386,22 @@
   var ssColumns = [
     { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
     { key: 'name', label: 'Name', visible: true, width: 160 },
+    { key: 'father_name', label: 'Father Name', visible: true, width: 150 },
+    { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 120 },
+    { key: 'gender', label: 'Gender', visible: true, width: 80 },
     { key: 'department', label: 'Department', visible: true, width: 100 },
     { key: 'batch', label: 'Batch', visible: true, width: 80 },
-    { key: 'email', label: 'Email', visible: true, width: 180 },
-    { key: 'phone', label: 'Phone', visible: true, width: 120 },
+    { key: 'email', label: 'Primary Email', visible: true, width: 180 },
+    { key: 'secondary_email', label: 'Secondary Email', visible: true, width: 180 },
+    { key: 'phone', label: 'Primary Phone', visible: true, width: 120 },
+    { key: 'secondary_phone', label: 'Secondary Phone', visible: true, width: 120 },
     { key: 'company', label: 'Company/Institution', visible: true, width: 150 },
     { key: 'designation', label: 'Designation', visible: true, width: 150 },
+    { key: 'experience', label: 'Experience', visible: true, width: 100 },
     { key: 'city', label: 'City', visible: true, width: 120 },
+    { key: 'state', label: 'State', visible: true, width: 120 },
     { key: 'country', label: 'Country', visible: true, width: 120 },
-    { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL', visible: true, width: 180 },
+    { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
     { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
     { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
     { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
@@ -1649,6 +1656,9 @@
               cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '';
             }
             var cleanVal = String(cellVal).replace(/"/g, '""');
+            if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && cleanVal.trim()) {
+              return '"\t' + cleanVal + '"';
+            }
             return '"' + cleanVal + '"';
           });
           csvContent += line.join(',') + '\r\n';
@@ -2055,7 +2065,7 @@
 
     // Populate Department and Batch filter dropdowns dynamically from database
     if (window.API && typeof API.getAlumniFilters === 'function') {
-      API.getAlumniFilters().then(function(res) {
+      API.getAlumniFilters().then(function (res) {
         if (res && res.success && res.data) {
           var depts = res.data.departments || [];
           var batches = res.data.batches || [];
@@ -2065,18 +2075,18 @@
 
           if (ssDept) {
             ssDept.innerHTML = '<option value="">All Depts</option>';
-            depts.forEach(function(d) {
+            depts.forEach(function (d) {
               ssDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
             });
           }
           if (ssBatch) {
             ssBatch.innerHTML = '<option value="">All Batches</option>';
-            batches.forEach(function(b) {
+            batches.forEach(function (b) {
               ssBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
             });
           }
         }
-      }).catch(function(e) {
+      }).catch(function (e) {
         console.warn('Failed to load dynamic alumni filters:', e);
       });
     }
@@ -2330,7 +2340,7 @@
 
 var _circulatePreviewData = null;
 
-window.openCirculateModal = function() {
+window.openCirculateModal = function () {
   _circulatePreviewData = null;
   document.getElementById('circulateStep1').style.display = 'block';
   document.getElementById('circulateStep2').style.display = 'none';
@@ -2339,7 +2349,7 @@ window.openCirculateModal = function() {
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/team-load', {
     headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function(r) { return r.json(); }).then(function(res) {
+  }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) {
       document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Failed to load team data.</p>';
       return;
@@ -2352,7 +2362,7 @@ window.openCirculateModal = function() {
       '<th style="padding:8px;text-align:center;border-bottom:2px solid #E2E8F0;">Pending</th>' +
       '<th style="padding:8px;text-align:center;border-bottom:2px solid #E2E8F0;">Completed</th>' +
       '</tr></thead><tbody>';
-    data.members.forEach(function(m) {
+    data.members.forEach(function (m) {
       tbl += '<tr><td style="padding:8px;border-bottom:1px solid #E2E8F0;">' + m.name + ' <small style="color:#94A3B8;">(' + m.role + ')</small></td>' +
         '<td style="padding:8px;text-align:center;border-bottom:1px solid #E2E8F0;color:var(--warning);font-weight:600;">' + m.pending_count + '</td>' +
         '<td style="padding:8px;text-align:center;border-bottom:1px solid #E2E8F0;color:var(--success);">' + m.completed_count + '</td></tr>';
@@ -2363,22 +2373,22 @@ window.openCirculateModal = function() {
     var sourceSel = document.getElementById('circulateSourceSelect');
     var targetBox = document.getElementById('circulateTargetCheckboxes');
     sourceSel.innerHTML = '<option value="">-- Select Source --</option>';
-    
-    data.members.forEach(function(m) {
+
+    data.members.forEach(function (m) {
       var o1 = document.createElement('option');
       o1.value = m.user_id;
       o1.text = m.name + ' (' + m.pending_count + ' pending)';
       sourceSel.appendChild(o1);
     });
 
-    var renderCheckboxes = function() {
+    var renderCheckboxes = function () {
       var srcId = parseInt(sourceSel.value, 10);
       targetBox.innerHTML = '';
       if (!srcId) {
         targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
         return;
       }
-      data.members.forEach(function(m) {
+      data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
           var label = document.createElement('label');
           label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;color:var(--text-dark);';
@@ -2390,19 +2400,19 @@ window.openCirculateModal = function() {
 
     sourceSel.onchange = renderCheckboxes;
     renderCheckboxes();
-  }).catch(function(err) {
+  }).catch(function (err) {
     document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Network error.</p>';
   });
 
   openModal('circulateModal');
 };
 
-window.circulatePreview = function() {
+window.circulatePreview = function () {
   var sourceMemberId = parseInt(document.getElementById('circulateSourceSelect').value, 10);
   if (!sourceMemberId) { Toast.warning('Circulate', 'Please select a source member.'); return; }
 
   var cbs = document.querySelectorAll('.circulate-target-cb:checked');
-  var targetMemberIds = Array.from(cbs).map(function(cb) { return parseInt(cb.value, 10); });
+  var targetMemberIds = Array.from(cbs).map(function (cb) { return parseInt(cb.value, 10); });
   if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
   var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
 
@@ -2411,19 +2421,19 @@ window.circulatePreview = function() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
-  }).then(function(r) { return r.json(); }).then(function(res) {
+  }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Preview failed.'); return; }
     _circulatePreviewData = res.data;
 
     var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records from <strong>' + res.data.sourceName + '</strong>:</p>';
-    res.data.preview.forEach(function(group) {
+    res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:14px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;padding:8px 12px;border-radius:8px;margin-bottom:6px;">' +
         '<strong style="color:#1E40AF;">' + group.targetName + '</strong>' +
         '<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.75rem;">' + group.count + ' records</span></div>' +
         '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;">' +
         '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th></tr></thead><tbody>';
-      group.alumni.forEach(function(a) {
+      group.alumni.forEach(function (a) {
         html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td></tr>';
       });
       html += '</tbody></table></div>';
@@ -2431,26 +2441,26 @@ window.circulatePreview = function() {
     document.getElementById('circulatePreviewContent').innerHTML = html;
     document.getElementById('circulateStep1').style.display = 'none';
     document.getElementById('circulateStep2').style.display = 'block';
-  }).catch(function(err) { Toast.error('Circulate', 'Network error.'); });
+  }).catch(function (err) { Toast.error('Circulate', 'Network error.'); });
 };
 
-window.circulateCommit = function() {
+window.circulateCommit = function () {
   if (!_circulatePreviewData) { Toast.error('Circulate', 'No preview data.'); return; }
   var allocations = {};
-  _circulatePreviewData.preview.forEach(function(group) {
-    allocations[group.targetMemberId] = group.alumni.map(function(a) { return a.assignment_id; });
+  _circulatePreviewData.preview.forEach(function (group) {
+    allocations[group.targetMemberId] = group.alumni.map(function (a) { return a.assignment_id; });
   });
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/commit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({ sourceMemberId: _circulatePreviewData.sourceMemberId, allocations: allocations })
-  }).then(function(r) { return r.json(); }).then(function(res) {
+  }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Commit failed.'); return; }
     Toast.success('Circulate', res.message || (res.data.moved + ' alumni redistributed!'));
     closeModal('circulateModal');
     if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
-  }).catch(function(err) { Toast.error('Circulate', 'Network error.'); });
+  }).catch(function (err) { Toast.error('Circulate', 'Network error.'); });
 };
 
 // Real-time sync listener (Feature 5)
@@ -2459,7 +2469,7 @@ if (typeof io !== 'undefined') {
     var socket = io();
     var user = API.getCurrentUser ? API.getCurrentUser() : null;
     socket.emit('join', { role: 'LEADER', teamId: user ? user.team_id : null });
-    socket.on('assignmentsUpdated', function() {
+    socket.on('assignmentsUpdated', function () {
       if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
       if (typeof fetchDashboardStats === 'function') fetchDashboardStats();
     });
@@ -2468,13 +2478,13 @@ if (typeof io !== 'undefined') {
   }
 }
 
-window.reopenAlumniRecord = function(alumniId) {
+window.reopenAlumniRecord = function (alumniId) {
   if (!confirm('Are you sure you want to reopen this record back to Pending status for modifications?')) return;
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reopen/' + alumniId, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function(r) { return r.json(); }).then(function(res) {
+  }).then(function (r) { return r.json(); }).then(function (res) {
     if (res && res.success) {
       Toast.success('Reopen Record', res.message || 'Record reopened successfully.');
       if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
@@ -2482,12 +2492,12 @@ window.reopenAlumniRecord = function(alumniId) {
     } else {
       Toast.error('Reopen Record', res && res.message || 'Failed to reopen record.');
     }
-  }).catch(function() {
+  }).catch(function () {
     Toast.error('Reopen Record', 'Network error reopening record.');
   });
 };
 
-window.undoAlumniSubmission = function() {
+window.undoAlumniSubmission = function () {
   if (!currentSelectedAlumniId) return;
   if (!confirm('Are you sure you want to undo submission and set status back to Pending?')) return;
 
@@ -2498,7 +2508,7 @@ window.undoAlumniSubmission = function() {
   fetch('/api/v1/assignments/reopen/' + currentSelectedAlumniId, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function(r) { return r.json(); }).then(function(res) {
+  }).then(function (r) { return r.json(); }).then(function (res) {
     if (res && res.success) {
       Toast.success('Undo Submission', res.message || 'Submission undone successfully.');
       var overlay = document.getElementById('updateModal');
@@ -2508,9 +2518,9 @@ window.undoAlumniSubmission = function() {
     } else {
       Toast.error('Undo Submission', res && res.message || 'Failed to undo submission.');
     }
-  }).catch(function() {
+  }).catch(function () {
     Toast.error('Undo Submission', 'Network error undoing submission.');
-  }).finally(function() {
+  }).finally(function () {
     if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
   });
 };
