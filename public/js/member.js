@@ -33,8 +33,6 @@
     const modalAvatar = document.getElementById('modalAvatar');
     const modalStatusBadge = document.getElementById('modalStatusBadge');
     const fieldIndex = document.getElementById('fieldIndex');
-    const higherStudiesSelect = document.getElementById('fieldHigherStudies');
-    const higherStudiesDetails = document.getElementById('higherStudiesDetails');
     const notifBtn = document.getElementById('notifBtn');
     const notifDropdown = document.getElementById('notifDropdown');
     const markAllRead = document.getElementById('markAllRead');
@@ -304,13 +302,7 @@
         record.secondary_email = document.getElementById('fieldSecondaryEmail').value.trim();
         record.secondary_phone = document.getElementById('fieldSecondaryPhone').value.trim();
         record.linkedin_profile = document.getElementById('fieldLinkedin').value.trim();
-        record.working_details = document.getElementById('fieldWorkingDetails').value.trim();
-        record.higherStudies = document.getElementById('fieldHigherStudies').value;
-        record.higherDetails = document.getElementById('fieldHigherDetails').value.trim();
-        record.entrepreneur = document.getElementById('fieldEntrepreneur').value;
         record.govtJob = document.getElementById('fieldGovtJob').value;
-        record.otherOcc = document.getElementById('fieldOtherOcc').value.trim();
-        record.remarks = document.getElementById('fieldRemarks').value.trim();
     }
 
     function ensureOptionExists(selectEl, val) {
@@ -404,13 +396,7 @@
         document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
         document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
-        document.getElementById('fieldWorkingDetails').value = record.working_details || '';
-        document.getElementById('fieldHigherStudies').value = record.higherStudies || record.higher_studies || 'No';
-        document.getElementById('fieldHigherDetails').value = record.higherDetails || record.higher_studies_details || '';
-        document.getElementById('fieldEntrepreneur').value = record.entrepreneur || (record.is_entrepreneur ? 'Yes' : 'No') || 'No';
         document.getElementById('fieldGovtJob').value = record.govtJob || (record.is_government_job ? 'Yes' : 'No') || 'No';
-        document.getElementById('fieldOtherOcc').value = record.otherOcc || record.other_occupation || '';
-        document.getElementById('fieldRemarks').value = record.remarks || '';
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
@@ -431,12 +417,6 @@
         } else {
             secPhoneContainer.style.display = 'none';
             if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
-        }
-
-        if (record.higherStudies === 'Yes') {
-            higherStudiesDetails.classList.add('active');
-        } else {
-            higherStudiesDetails.classList.remove('active');
         }
 
         document.getElementById('fieldSmartParser').value = '';
@@ -498,13 +478,7 @@
             email: document.getElementById('fieldEmail').value,
             phone: document.getElementById('fieldPhone').value,
             linkedin_profile: document.getElementById('fieldLinkedin').value,
-            working_details: document.getElementById('fieldWorkingDetails').value,
-            higherStudies: document.getElementById('fieldHigherStudies').value,
-            higherDetails: document.getElementById('fieldHigherDetails').value,
-            entrepreneur: document.getElementById('fieldEntrepreneur').value,
             govtJob: document.getElementById('fieldGovtJob').value,
-            otherOcc: document.getElementById('fieldOtherOcc').value,
-            remarks: document.getElementById('fieldRemarks').value,
             timestamp: Date.now()
         };
         localStorage.setItem('autosave_member_alumni_' + idx, JSON.stringify(data));
@@ -528,19 +502,8 @@
                     document.getElementById('fieldEmail').value = data.email || '';
                     document.getElementById('fieldPhone').value = data.phone || '';
                     document.getElementById('fieldLinkedin').value = data.linkedin_profile || '';
-                    document.getElementById('fieldWorkingDetails').value = data.working_details || '';
-                    document.getElementById('fieldHigherStudies').value = data.higherStudies || 'No';
-                    document.getElementById('fieldHigherDetails').value = data.higherDetails || '';
-                    document.getElementById('fieldEntrepreneur').value = data.entrepreneur || 'No';
                     document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
-                    document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
-                    document.getElementById('fieldRemarks').value = data.remarks || '';
 
-                    if (data.higherStudies === 'Yes') {
-                        higherStudiesDetails.classList.add('active');
-                    } else {
-                        higherStudiesDetails.classList.remove('active');
-                    }
                     showToast('Loaded unsaved changes from auto-save draft.', 'success');
                 }
             } catch (e) {
@@ -587,11 +550,6 @@
                 }
             }
         });
-
-        // Also set working details to full pasted text as a fallback
-        if (val.length > 10) {
-            document.getElementById('fieldWorkingDetails').value = val.substring(0, 500);
-        }
 
         showToast('Parsed profile details auto-filled successfully!', 'success');
         saveAutosave(); // Save progress immediately
@@ -869,15 +827,6 @@
         }
     }
 
-    function handleHigherStudiesChange() {
-        if (this.value === 'Yes') {
-            higherStudiesDetails.classList.add('active');
-        } else {
-            higherStudiesDetails.classList.remove('active');
-            document.getElementById('fieldHigherDetails').value = '';
-        }
-    }
-
     function handleUpdateClick(e) {
         var btn = e.target.closest('.btn-update');
         if (btn) {
@@ -990,7 +939,7 @@
         window.loadPreviewSpreadsheet = function () {
             var body = document.getElementById('previewSpreadsheetBody');
             if (!body) return;
-            body.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
+            body.innerHTML = '<tr><td colspan="18" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
 
             var search = document.getElementById('previewSearch').value || '';
             var dept = filterDept ? filterDept.value : '';
@@ -1023,7 +972,7 @@
                 }
 
                 if (records.length === 0) {
-                    body.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:24px;color:var(--text-secondary);">No records found matching filters.</td></tr>';
+                    body.innerHTML = '<tr><td colspan="18" style="text-align:center;padding:24px;color:var(--text-secondary);">No records found matching filters.</td></tr>';
                     renderPreviewPagination(total);
                     return;
                 }
@@ -1064,6 +1013,7 @@
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600;">' + (row.name || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.register_no || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.father_name || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.date_of_birth || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.department || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.batch || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.email || '-') + '</td>' +
@@ -1083,7 +1033,7 @@
                 renderPreviewPagination(total);
             }).catch(function (err) {
                 console.error(err);
-                body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
+                body.innerHTML = '<tr><td colspan="18" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
             });
         };
 
@@ -1424,8 +1374,6 @@
         }
 
         recordsBody.addEventListener('click', handleUpdateClick);
-
-        higherStudiesSelect.addEventListener('change', handleHigherStudiesChange);
 
         saveDraftBtn.addEventListener('click', handleSaveDraft);
         submitRecordBtn.addEventListener('click', handleSubmitRecord);

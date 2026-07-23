@@ -117,12 +117,10 @@
 
   function populateTeamTable() {
     var searchVal = (document.getElementById('tableSearch').value || '').toLowerCase().trim();
-    var statusVal = document.getElementById('statusFilter').value;
 
     filteredMembers = teamMembers.filter(function (m) {
       var matchSearch = m.name.toLowerCase().indexOf(searchVal) !== -1;
-      var matchStatus = statusVal === 'all' || m.status === statusVal;
-      return matchSearch && matchStatus;
+      return matchSearch;
     });
 
     filteredMembers.sort(function (a, b) {
@@ -143,7 +141,6 @@
     } else {
       var rows = '';
       pageData.forEach(function (m, idx) {
-        var statusClass = m.status === 'On Track' ? 'badge-success' : m.status === 'Behind' ? 'badge-warning' : 'badge-danger';
         var barClass = m.progress >= 75 ? 'green' : m.progress >= 50 ? '' : 'red';
         var sno = start + idx + 1;
         var displayName = m.name;
@@ -631,13 +628,6 @@
       currentPage = 1;
       populateTeamTable();
     });
-    var statusF = document.getElementById('statusFilter');
-    if (statusF) {
-      statusF.addEventListener('change', function () {
-        currentPage = 1;
-        populateTeamTable();
-      });
-    }
     var globalSearch = document.getElementById('globalSearch');
     if (globalSearch) {
       globalSearch.addEventListener('input', function () {
@@ -1063,13 +1053,7 @@
         document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
         document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
-        document.getElementById('fieldWorkingDetails').value = record.working_details || '';
-        document.getElementById('fieldHigherStudies').value = record.higher_studies || '';
-        document.getElementById('fieldHigherDetails').value = record.higher_studies_details || '';
-        document.getElementById('fieldEntrepreneur').value = record.is_entrepreneur ? 'Yes' : 'No';
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
-        document.getElementById('fieldOtherOcc').value = record.other_occupation || '';
-        document.getElementById('fieldRemarks').value = record.remarks || '';
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
@@ -1090,12 +1074,6 @@
         } else {
           secPhoneContainer.style.display = 'none';
           if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
-        }
-
-        if (record.higher_studies === 'Yes') {
-          document.getElementById('higherStudiesDetails').style.display = 'block';
-        } else {
-          document.getElementById('higherStudiesDetails').style.display = 'none';
         }
 
         var undoBtn = document.getElementById('undoSubmitBtn');
@@ -1129,13 +1107,7 @@
       secondary_email: document.getElementById('fieldSecondaryEmail').value.trim(),
       secondary_phone: document.getElementById('fieldSecondaryPhone').value.trim(),
       linkedin_url: document.getElementById('fieldLinkedin').value.trim(),
-      working_details: document.getElementById('fieldWorkingDetails').value.trim(),
-      higher_studies: document.getElementById('fieldHigherStudies').value,
-      higher_studies_details: document.getElementById('fieldHigherDetails').value.trim(),
-      is_entrepreneur: document.getElementById('fieldEntrepreneur').value === 'Yes',
       is_government_job: document.getElementById('fieldGovtJob').value === 'Yes',
-      other_occupation: document.getElementById('fieldOtherOcc').value.trim(),
-      remarks: document.getElementById('fieldRemarks').value.trim()
     };
   }
 
@@ -1181,13 +1153,7 @@
       email: document.getElementById('fieldEmail').value,
       phone: document.getElementById('fieldPhone').value,
       linkedin_profile: document.getElementById('fieldLinkedin').value,
-      working_details: document.getElementById('fieldWorkingDetails').value,
-      higherStudies: document.getElementById('fieldHigherStudies').value,
-      higherDetails: document.getElementById('fieldHigherDetails').value,
-      entrepreneur: document.getElementById('fieldEntrepreneur').value,
       govtJob: document.getElementById('fieldGovtJob').value,
-      otherOcc: document.getElementById('fieldOtherOcc').value,
-      remarks: document.getElementById('fieldRemarks').value,
       timestamp: Date.now()
     };
     localStorage.setItem('autosave_leader_alumni_' + currentSelectedAlumniId, JSON.stringify(data));
@@ -1211,15 +1177,7 @@
           document.getElementById('fieldEmail').value = data.email || '';
           document.getElementById('fieldPhone').value = data.phone || '';
           document.getElementById('fieldLinkedin').value = data.linkedin_profile || '';
-          document.getElementById('fieldWorkingDetails').value = data.working_details || '';
-          document.getElementById('fieldHigherStudies').value = data.higherStudies || 'No';
-          document.getElementById('fieldHigherDetails').value = data.higherDetails || '';
-          document.getElementById('fieldEntrepreneur').value = data.entrepreneur || 'No';
           document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
-          document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
-          document.getElementById('fieldRemarks').value = data.remarks || '';
-
-          document.getElementById('higherStudiesDetails').style.display = data.higherStudies === 'Yes' ? 'block' : 'none';
           showToast('Info', 'Loaded unsaved changes from auto-save draft.', 'info');
         }
       } catch (e) {
@@ -1264,22 +1222,11 @@
       }
     });
 
-    if (val.length > 10) {
-      document.getElementById('fieldWorkingDetails').value = val.substring(0, 500);
-    }
-
     showToast('Success', 'Parsed profile details auto-filled successfully!', 'success');
     saveAutosave();
   };
 
   function setupUpdateModalEvents() {
-    var select = document.getElementById('fieldHigherStudies');
-    if (select) {
-      select.addEventListener('change', function () {
-        document.getElementById('higherStudiesDetails').style.display = this.value === 'Yes' ? 'block' : 'none';
-      });
-    }
-
     var form = document.getElementById('updateForm');
     if (form) {
       form.querySelectorAll('input, select, textarea').forEach(function (inputEl) {
