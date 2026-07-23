@@ -528,7 +528,7 @@
             inset: 0;
             background: rgba(15,23,42,0.5);
             backdrop-filter: blur(6px);
-            z-index: 2000;
+            z-index: 100000;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -975,7 +975,8 @@
             border-color: #334155 !important;
         }
 
-        body.dark-mode .filter-select option {
+        body.dark-mode .filter-select option,
+        body.dark-mode .form-select option {
             background-color: #1E293B !important;
             color: #F8FAFC !important;
         }
@@ -984,6 +985,17 @@
             background-color: #0F172A !important;
             color: #F8FAFC !important;
             border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .table-footer select,
+        body.dark-mode .btn-secondary {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .btn-secondary:hover {
+            background-color: #1E293B !important;
         }
 
         body.dark-mode .table-footer {
@@ -1282,6 +1294,7 @@
                             <th style="padding:12px 16px;text-align:left;">Name</th>
                             <th style="padding:12px 16px;text-align:left;">Register No</th>
                             <th style="padding:12px 16px;text-align:left;">Father's Name</th>
+                            <th style="padding:12px 16px;text-align:left;">Date of Birth</th>
                             <th style="padding:12px 16px;text-align:left;">Department</th>
                             <th style="padding:12px 16px;text-align:left;">Batch</th>
                             <th style="padding:12px 16px;text-align:left;">Email</th>
