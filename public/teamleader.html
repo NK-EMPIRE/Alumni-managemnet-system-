@@ -536,7 +536,7 @@
                   <th>Alumni Name</th>
                   <th>Department</th>
                   <th>Batch</th>
-                  <th>Company</th>
+                  <th>Company/Institution</th>
                   <th>Designation</th>
                   <th>Status</th>
                   <th style="text-align:center">Action</th>
@@ -859,8 +859,8 @@
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldCompany" placeholder="Current company" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company/Institution <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldCompany" placeholder="Current company/institution" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
             </div>
           </div>
@@ -924,38 +924,10 @@
               <input type="text" id="fieldSecondaryPhone" placeholder="Secondary Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
           </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">LinkedIn URL</label>
-              <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-            </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Working Detail</label>
-              <textarea id="fieldWorkingDetails" placeholder="Current working details" rows="2" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC;min-height:80px;resize:vertical;"></textarea>
-            </div>
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Higher Studies</label>
-              <select id="fieldHigherStudies" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-                <option value="">Select</option>
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group full-width higher-studies-details" id="higherStudiesDetails" style="display:none;margin-bottom:16px">
-            <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Higher Studies Details</label>
-            <input type="text" id="fieldHigherDetails" placeholder="University, Course, Year" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Entrepreneur</label>
-              <select id="fieldEntrepreneur" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-                <option value="">Select</option>
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">LinkedIn/Facebook URL</label>
+              <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username or https://facebook.com/username" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Government Job</label>
@@ -964,16 +936,6 @@
                 <option value="No">No</option>
                 <option value="Yes">Yes</option>
               </select>
-            </div>
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Other Occupation</label>
-              <input type="text" id="fieldOtherOcc" placeholder="Other occupation if any" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-            </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Remarks</label>
-              <textarea id="fieldRemarks" placeholder="Additional remarks..." style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC;min-height:80px;resize:vertical;"></textarea>
             </div>
           </div>
           <input type="hidden" id="fieldIndex" value="">

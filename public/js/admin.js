@@ -1057,9 +1057,10 @@ function showAllNotifications() {
 }
 
 function populateDynamicFilters(filters) {
-  if (!filters || !filters.success || !filters.data) return;
-  var depts = filters.data.departments || [];
-  var batches = filters.data.batches || [];
+  if (!filters) return;
+  var data = filters.data || filters;
+  var depts = data.departments || [];
+  var batches = data.batches || [];
   
   // Populate all department selects
   var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment', 'dashFilterDept'];
@@ -2902,7 +2903,7 @@ function parseAuditDate(ts) {
 function viewReportData(type, title) {
   var columns, rows;
   if (type === 'alumni') {
-    columns = ['Name', 'Department', 'Batch', 'Company', 'Designation', 'Status'];
+    columns = ['Name', 'Department', 'Batch', 'Company/Institution', 'Designation', 'Status'];
     if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
       rows = _apiAlumni.records.map(function (a) {
         return [a.name || (a.first_name + ' ' + (a.last_name || '')).trim(), a.department || a.dept || '-', a.batch || '-', a.company || a.working_details || '-', a.designation || '-', a.assignment_status || 'Pending'];
@@ -3082,16 +3083,18 @@ var ssSortDirection = 'DESC';
 var ssColumns = [
   { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
   { key: 'name', label: 'Name', visible: true, width: 160 },
+  { key: 'father_name', label: "Father's Name", visible: true, width: 140 },
+  { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 110 },
   { key: 'department', label: 'Department', visible: true, width: 100 },
   { key: 'batch', label: 'Batch', visible: true, width: 80 },
   { key: 'email', label: 'Email', visible: true, width: 180 },
   { key: 'phone', label: 'Phone', visible: true, width: 120 },
-  { key: 'company', label: 'Company', visible: true, width: 150 },
+  { key: 'company', label: 'Company/Institution', visible: true, width: 150 },
   { key: 'designation', label: 'Designation', visible: true, width: 150 },
   { key: 'experience', label: 'Experience', visible: true, width: 100 },
   { key: 'city', label: 'City', visible: true, width: 120 },
   { key: 'country', label: 'Country', visible: true, width: 120 },
-  { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
+  { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL', visible: true, width: 180 },
   { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
   { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
   { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
@@ -3212,7 +3215,7 @@ window.renderSpreadsheetTable = function(data) {
     ssColumns.forEach(function(col) {
       if (!col.visible) return;
       var val = row[col.key];
-      var isDate = col.key === 'updated_date' || col.key === 'created_at';
+      var isDate = col.key === 'updated_date' || col.key === 'created_at' || col.key === 'date_of_birth';
       if (isDate) {
         val = val ? new Date(val).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
       } else if (col.key === 'assignment_status') {

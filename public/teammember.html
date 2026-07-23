@@ -1227,7 +1227,7 @@
                             <th>Alumni Name</th>
                             <th>Department</th>
                             <th>Batch</th>
-                            <th>Company</th>
+                            <th>Company/Institution</th>
                             <th>Designation</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -1285,15 +1285,14 @@
                             <th style="padding:12px 16px;text-align:left;">Batch</th>
                             <th style="padding:12px 16px;text-align:left;">Email</th>
                             <th style="padding:12px 16px;text-align:left;">Phone</th>
-                            <th style="padding:12px 16px;text-align:left;">Company</th>
+                            <th style="padding:12px 16px;text-align:left;">Company/Institution</th>
                             <th style="padding:12px 16px;text-align:left;">Designation</th>
                             <th style="padding:12px 16px;text-align:left;">Experience</th>
                             <th style="padding:12px 16px;text-align:left;">City</th>
                             <th style="padding:12px 16px;text-align:left;">Country</th>
-                            <th style="padding:12px 16px;text-align:left;">LinkedIn Profile</th>
+                            <th style="padding:12px 16px;text-align:left;">LinkedIn/Facebook URL</th>
                             <th style="padding:12px 16px;text-align:left;">Current Status</th>
                             <th style="padding:12px 16px;text-align:left;">Updated Date</th>
-                            <th style="padding:12px 16px;text-align:left;">Working Details</th>
                         </tr>
                     </thead>
                     <tbody id="previewSpreadsheetBody">
@@ -1447,8 +1446,8 @@
                         <div class="error-text" id="errorBatch">Batch is required</div>
                     </div>
                     <div class="form-group">
-                        <label>Company <span class="required">*</span></label>
-                        <input type="text" id="fieldCompany" placeholder="Current company">
+                        <label>Company/Institution <span class="required">*</span></label>
+                        <input type="text" id="fieldCompany" placeholder="Current company/institution">
                         <div class="error-text" id="errorCompany">Company is required</div>
                     </div>
                 </div>
@@ -1514,36 +1513,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>LinkedIn URL</label>
-                        <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username">
-                    </div>
-                    <div class="form-group">
-                        <label>Working Detail</label>
-                        <textarea id="fieldWorkingDetails" placeholder="Current working details" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Higher Studies</label>
-                        <select id="fieldHigherStudies">
-                            <option value="">Select</option>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group full-width higher-studies-details" id="higherStudiesDetails">
-                    <label>Higher Studies Details</label>
-                    <input type="text" id="fieldHigherDetails" placeholder="University, Course, Year">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Entrepreneur</label>
-                        <select id="fieldEntrepreneur">
-                            <option value="">Select</option>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                        </select>
+                        <label>LinkedIn/Facebook URL</label>
+                        <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username or https://facebook.com/username">
                     </div>
                     <div class="form-group">
                         <label>Government Job</label>
@@ -1552,16 +1523,6 @@
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
                         </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Other Occupation</label>
-                        <input type="text" id="fieldOtherOcc" placeholder="Other occupation if any">
-                    </div>
-                    <div class="form-group">
-                        <label>Remarks</label>
-                        <textarea id="fieldRemarks" placeholder="Additional remarks..."></textarea>
                     </div>
                 </div>
                 <input type="hidden" id="fieldIndex" value="">
