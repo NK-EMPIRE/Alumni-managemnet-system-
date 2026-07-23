@@ -1874,6 +1874,9 @@
   <!-- ============================================================
        EXPORT CUSTOMIZATION & ANIMATION MODAL
        ============================================================ -->
+  <!-- ============================================================
+       EXPORT CUSTOMIZATION & ANIMATION MODAL
+       ============================================================ -->
   <div class="modal-overlay" id="exportCustomizationModal">
     <div class="export-modal-card">
       <div class="export-modal-header">
@@ -1892,29 +1895,69 @@
         </div>
         <div class="export-stat-box">
           <div class="count" id="expStatStatus">ALL</div>
-          <div class="label">Active Filters</div>
+          <div class="label">Status Filter</div>
         </div>
       </div>
 
-      <div style="padding:20px 24px;">
-        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="padding:20px 24px;max-height:70vh;overflow-y:auto;">
+        <!-- Filter Controls inside Export Modal -->
+        <div class="export-section-title">
+          <span><i class="fas fa-filter" style="color:var(--primary);margin-right:6px;"></i> Customize Export Filters</span>
+          <a href="javascript:void(0)" onclick="resetExportModalFilters()" style="font-size:0.8rem;color:#64748B;text-decoration:none;">Reset Filters</a>
+        </div>
+        
+        <div class="export-filter-grid">
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Team Leader</label>
+            <select class="form-control" id="expFilterLeader" onchange="onExportFilterChange()">
+              <option value="">All Leaders</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Team Member</label>
+            <select class="form-control" id="expFilterMember" onchange="onExportFilterChange()">
+              <option value="">All Members</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Department</label>
+            <select class="form-control" id="expFilterDept" onchange="onExportFilterChange()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Batch / Year</label>
+            <select class="form-control" id="expFilterBatch" onchange="onExportFilterChange()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Assignment Status</label>
+            <select class="form-control" id="expFilterStatus" onchange="onExportFilterChange()">
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
+              <option value="Pending">Pending Member</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Search Query</label>
+            <input type="text" id="expFilterSearch" class="form-control" placeholder="Search name/reg no..." oninput="onExportFilterChange()">
+          </div>
+        </div>
+
+        <!-- Column Selector -->
+        <div class="export-section-title">
           <span><i class="fas fa-columns" style="color:var(--primary);margin-right:6px;"></i> Select Export Columns</span>
           <div style="font-size:0.8rem;font-weight:normal;display:flex;gap:12px;">
             <a href="javascript:void(0)" onclick="selectAllExportCols(true)" style="color:var(--primary);text-decoration:none;">Select All</a>
             <a href="javascript:void(0)" onclick="selectAllExportCols(false)" style="color:#64748B;text-decoration:none;">Clear All</a>
           </div>
-        </h4>
+        </div>
         <div class="export-cols-grid" id="exportColsContainer">
           <!-- Populated by JS -->
-        </div>
-
-        <div style="margin-top:16px;background:#F8FAFC;padding:12px 16px;border-radius:10px;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-          <div style="font-size:0.82rem;color:#64748B;">
-            <i class="fas fa-info-circle" style="color:var(--primary);margin-right:4px;"></i> Active spreadsheet filters will be applied to export.
-          </div>
-          <div style="font-size:0.82rem;color:var(--text-dark);font-weight:600;">
-            Format: <span class="badge badge-primary">CSV / Excel</span>
-          </div>
         </div>
       </div>
 
