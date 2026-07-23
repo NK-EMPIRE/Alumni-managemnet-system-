@@ -1856,6 +1856,9 @@ window.startExportDownloadProcess = function () {
             if (col.key === 'updated_date') {
               val = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
             }
+            if (col.key === 'date_of_birth' || col.key === 'dob') {
+              val = row.date_of_birth || row.dob || val || '';
+            }
             if (val === null || val === undefined) val = '';
 
             if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {

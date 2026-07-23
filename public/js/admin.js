@@ -1524,7 +1524,7 @@ function setupClickOutside() {
 /* ────────────────────────────────────────────────────────────
    24. MODAL CONTROLS
    ──────────────────────────────────────────────────────────── */
-function openModal(id) {
+window.openModal = function (id) {
   var modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.add('show');
@@ -1535,9 +1535,9 @@ function openModal(id) {
   if (id === 'assignAlumniModal') {
     initAssignModal();
   }
-}
+};
 
-function closeModal(id) {
+window.closeModal = function (id) {
   var modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.remove('show');
@@ -3668,6 +3668,9 @@ window.startExportDownloadProcess = function () {
         data.forEach(function (row) {
           var line = activeCols.map(function (col) {
             var val = row[col.key];
+            if (col.key === 'date_of_birth' || col.key === 'dob') {
+              val = row.date_of_birth || row.dob || val || '';
+            }
             if (val === null || val === undefined) val = '';
 
             if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {
