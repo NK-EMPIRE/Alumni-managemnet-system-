@@ -1542,15 +1542,12 @@ window.closeModal = function (id) {
   if (!modal) return;
   modal.classList.remove('show');
   document.body.style.overflow = '';
-  /* Reset form */
-  var inputs = modal.querySelectorAll('.form-control');
-  inputs.forEach(function (inp) { inp.value = ''; });
   clearAllErrors(modal);
 }
 
 /* Close modal on overlay click */
 document.addEventListener('click', function (e) {
-  if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('show')) {
+  if (e.target.classList.contains('modal-overlay')) {
     closeModal(e.target.id);
   }
 });
