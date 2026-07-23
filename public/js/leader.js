@@ -1386,16 +1386,23 @@
   var ssColumns = [
     { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
     { key: 'name', label: 'Name', visible: true, width: 160 },
+    { key: 'father_name', label: 'Father Name', visible: true, width: 150 },
+    { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 120 },
+    { key: 'gender', label: 'Gender', visible: true, width: 80 },
     { key: 'department', label: 'Department', visible: true, width: 100 },
     { key: 'batch', label: 'Batch', visible: true, width: 80 },
-    { key: 'email', label: 'Email', visible: true, width: 180 },
-    { key: 'phone', label: 'Phone', visible: true, width: 120 },
+    { key: 'email', label: 'Primary Email', visible: true, width: 180 },
+    { key: 'secondary_email', label: 'Secondary Email', visible: true, width: 180 },
+    { key: 'phone', label: 'Primary Phone', visible: true, width: 120 },
+    { key: 'secondary_phone', label: 'Secondary Phone', visible: true, width: 120 },
     { key: 'company', label: 'Company', visible: true, width: 150 },
     { key: 'designation', label: 'Designation', visible: true, width: 150 },
+    { key: 'experience', label: 'Experience', visible: true, width: 100 },
     { key: 'city', label: 'City', visible: true, width: 120 },
+    { key: 'state', label: 'State', visible: true, width: 120 },
     { key: 'country', label: 'Country', visible: true, width: 120 },
     { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
-    { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
+    { key: 'working_details', label: 'Working Details', visible: true, width: 200 },
     { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
     { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
     { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
@@ -1649,6 +1656,9 @@
               cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '';
             }
             var cleanVal = String(cellVal).replace(/"/g, '""');
+            if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && cleanVal.trim()) {
+              return '"\t' + cleanVal + '"';
+            }
             return '"' + cleanVal + '"';
           });
           csvContent += line.join(',') + '\r\n';

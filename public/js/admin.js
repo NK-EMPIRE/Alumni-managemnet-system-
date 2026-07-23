@@ -3081,7 +3081,6 @@ var ssColumns = [
   { key: 'country', label: 'Country', visible: true, width: 120 },
   { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
   { key: 'working_details', label: 'Working Details', visible: true, width: 200 },
-  { key: 'assignment_status', label: 'Current Status', visible: true, width: 130 },
   { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
   { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
   { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
@@ -3457,7 +3456,12 @@ window.exportAlumniCSV = function() {
           if (col.key === 'updated_date' && val) {
             val = new Date(val).toLocaleDateString('en-IN');
           }
-          return '"' + String(val).replace(/"/g, '""') + '"';
+          var strVal = String(val);
+          // Prevent Excel scientific notation (e.g. 9.19965E+11) for phone numbers and register numbers
+          if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && strVal.trim()) {
+            return '"\t' + strVal.replace(/"/g, '""') + '"';
+          }
+          return '"' + strVal.replace(/"/g, '""') + '"';
         });
         csv += line.join(',') + '\r\n';
       });

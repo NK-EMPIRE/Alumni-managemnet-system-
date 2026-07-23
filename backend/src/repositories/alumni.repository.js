@@ -49,7 +49,7 @@ async function findAll({ page, limit, offset, search, department, batch, status,
   const result = await request.query(`
     WITH AlumniCTE AS (
       SELECT
-        a.alumni_id, a.register_no, a.name, a.gender, a.batch,
+        a.alumni_id, a.register_no, a.name, a.father_name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.experience, a.salary, a.city, a.country,
