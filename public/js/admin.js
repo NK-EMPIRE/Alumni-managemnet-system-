@@ -3228,6 +3228,10 @@ window.renderSpreadsheetTable = function (data) {
     ssColumns.forEach(function (col) {
       if (!col.visible) return;
       var val = row[col.key];
+      if (val === null || val === undefined) {
+        if (col.key === 'father_name') val = row.fatherName;
+        else if (col.key === 'date_of_birth') val = row.dob;
+      }
       var isDate = col.key === 'updated_date' || col.key === 'created_at' || col.key === 'date_of_birth';
       if (isDate) {
         val = val ? new Date(val).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
@@ -3753,6 +3757,9 @@ window.startExportDownloadProcess = function () {
         data.forEach(function (row) {
           var line = activeCols.map(function (col) {
             var val = row[col.key];
+            if ((val === null || val === undefined) && col.key === 'father_name') {
+              val = row.fatherName || '';
+            }
             if (col.key === 'date_of_birth' || col.key === 'dob') {
               val = row.date_of_birth || row.dob || val || '';
             }
