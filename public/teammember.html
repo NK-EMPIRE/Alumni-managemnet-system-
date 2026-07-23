@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/export_modal.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -1654,12 +1655,111 @@
             <div class="shortcut-desc">Export Records</div>
           </div>
         </div>
-      </div>
       <div class="modal-footer" style="padding:14px 20px;text-align:right;">
         <button class="btn btn-primary" onclick="closeModal('welcomeTourModal')">Got it, Let's Start!</button>
       </div>
     </div>
-</div>
+  </div>
+
+  <!-- ============================================================
+       EXPORT CUSTOMIZATION & ANIMATION MODAL (MEMBER)
+       ============================================================ -->
+  <div class="modal-overlay" id="exportCustomizationModal">
+    <div class="export-modal-card">
+      <div class="export-modal-header">
+        <h3><i class="fas fa-file-export" style="color:#60A5FA;"></i> Export Alumni Report</h3>
+        <button class="export-modal-close" onclick="closeModal('exportCustomizationModal')">&times;</button>
+      </div>
+
+      <div class="export-stats-banner">
+        <div class="export-stat-box">
+          <div class="count" id="expStatTotal">0</div>
+          <div class="label">Matched Records</div>
+        </div>
+        <div class="export-stat-box">
+          <div class="count" id="expStatCols">0</div>
+          <div class="label">Selected Columns</div>
+        </div>
+        <div class="export-stat-box">
+          <div class="count" id="expStatStatus">ALL</div>
+          <div class="label">Status Filter</div>
+        </div>
+      </div>
+
+      <div style="padding:20px 24px;max-height:70vh;overflow-y:auto;">
+        <!-- Filter Controls inside Export Modal -->
+        <div class="export-section-title">
+          <span><i class="fas fa-filter" style="color:var(--primary);margin-right:6px;"></i> Customize Export Filters</span>
+          <a href="javascript:void(0)" onclick="resetExportModalFilters()" style="font-size:0.8rem;color:#64748B;text-decoration:none;">Reset Filters</a>
+        </div>
+        
+        <div class="export-filter-grid">
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Department</label>
+            <select class="form-control" id="expFilterDept" onchange="onExportFilterChange()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Batch / Year</label>
+            <select class="form-control" id="expFilterBatch" onchange="onExportFilterChange()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Assignment Status</label>
+            <select class="form-control" id="expFilterStatus" onchange="onExportFilterChange()">
+              <option value="">All Statuses</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2;">
+            <label class="form-label" style="font-size:0.8rem;">Search Query</label>
+            <input type="text" id="expFilterSearch" class="form-control" placeholder="Search name/reg no..." oninput="onExportFilterChange()">
+          </div>
+        </div>
+
+        <!-- Column Selector -->
+        <div class="export-section-title">
+          <span><i class="fas fa-columns" style="color:var(--primary);margin-right:6px;"></i> Select Export Columns</span>
+          <div style="font-size:0.8rem;font-weight:normal;display:flex;gap:12px;">
+            <a href="javascript:void(0)" onclick="selectAllExportCols(true)" style="color:var(--primary);text-decoration:none;">Select All</a>
+            <a href="javascript:void(0)" onclick="selectAllExportCols(false)" style="color:#64748B;text-decoration:none;">Clear All</a>
+          </div>
+        </div>
+        <div class="export-cols-grid" id="exportColsContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn btn-secondary" onclick="closeModal('exportCustomizationModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="startExportDownloadProcess()" style="padding:10px 24px;font-weight:600;">
+          <i class="fas fa-download"></i> Start Export Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Realtime Downloading Overlay Animation -->
+  <div class="export-progress-overlay" id="exportProgressOverlay">
+    <div class="export-progress-card">
+      <div class="export-animated-icon">
+        <i class="fas fa-cloud-download-alt"></i>
+      </div>
+      <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;" id="exportProgressTitle">Generating Export...</h3>
+      <p style="font-size:0.85rem;color:#64748B;margin:0;" id="exportProgressSubtitle">Fetching alumni records from database...</p>
+      
+      <div class="export-progress-bar-bg">
+        <div class="export-progress-bar-fill" id="exportProgressBarFill"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748B;font-weight:600;" id="exportProgressStats">
+        <span id="exportProgressPercent">0%</span>
+        <span id="exportProgressCount">0 / 0 records</span>
+      </div>
+    </div>
+  </div>
 
 <script src="js/app.js"></script>
 <script src="js/charts.js"></script>

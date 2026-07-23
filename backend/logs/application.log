@@ -1275,3 +1275,7 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-23 10:46:57.941"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-23 10:46:57.942"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-23 10:46:57.942"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-23 10:47:13.776"}
+{"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-23 10:47:13.780"}
+{"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-23 10:47:13.780"}
+{"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-23 10:47:13.781"}

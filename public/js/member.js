@@ -1632,5 +1632,278 @@ window.undoAlumniSubmission = function() {
     });
 };
 
+/* ────────────────────────────────────────────────────────────
+   INTERACTIVE EXPORT ENGINE & CUSTOMIZATION MODAL (MEMBER)
+   ──────────────────────────────────────────────────────────── */
+var _memberColumns = [
+  { key: 'register_no', label: 'Register Number', visible: true },
+  { key: 'name', label: 'Name', visible: true },
+  { key: 'father_name', label: 'Father Name', visible: true },
+  { key: 'date_of_birth', label: 'Date of Birth', visible: true },
+  { key: 'gender', label: 'Gender', visible: true },
+  { key: 'department', label: 'Department', visible: true },
+  { key: 'batch', label: 'Batch', visible: true },
+  { key: 'email', label: 'Primary Email', visible: true },
+  { key: 'secondary_email', label: 'Secondary Email', visible: true },
+  { key: 'phone', label: 'Primary Phone', visible: true },
+  { key: 'secondary_phone', label: 'Secondary Phone', visible: true },
+  { key: 'company', label: 'Company', visible: true },
+  { key: 'designation', label: 'Designation', visible: true },
+  { key: 'experience', label: 'Experience', visible: true },
+  { key: 'city', label: 'City', visible: true },
+  { key: 'state', label: 'State', visible: true },
+  { key: 'country', label: 'Country', visible: true },
+  { key: 'linkedin_profile', label: 'LinkedIn', visible: true },
+  { key: 'working_details', label: 'Working Details', visible: true },
+  { key: 'updated_date', label: 'Updated Date', visible: true }
+];
+
+var _exportSelectedCols = {};
+
+window.handleExport = function () {
+  openExportCustomizationModal();
+};
+
+window.exportAlumniCSV = function () {
+  openExportCustomizationModal();
+};
+
+window.openExportCustomizationModal = function () {
+  _memberColumns.forEach(function (col) {
+    if (_exportSelectedCols[col.key] === undefined) {
+      _exportSelectedCols[col.key] = true;
+    }
+  });
+
+  populateExportModalFilterOptions();
+  renderExportColumnChips();
+  onExportFilterChange();
+
+  if (window.openModal) openModal('exportCustomizationModal');
+};
+
+window.populateExportModalFilterOptions = function () {
+  var deptSel = document.getElementById('expFilterDept');
+  var batchSel = document.getElementById('expFilterBatch');
+
+  var srcDept = document.getElementById('previewFilterDept');
+  var srcBatch = document.getElementById('previewFilterBatch');
+
+  if (deptSel && srcDept && deptSel.options.length <= 1) {
+    deptSel.innerHTML = srcDept.innerHTML;
+  }
+  if (batchSel && srcBatch && batchSel.options.length <= 1) {
+    batchSel.innerHTML = srcBatch.innerHTML;
+  }
+};
+
+window.resetExportModalFilters = function () {
+  var expDept = document.getElementById('expFilterDept');
+  var expBatch = document.getElementById('expFilterBatch');
+  var expStatus = document.getElementById('expFilterStatus');
+  var expSearch = document.getElementById('expFilterSearch');
+
+  if (expDept) expDept.value = '';
+  if (expBatch) expBatch.value = '';
+  if (expStatus) expStatus.value = '';
+  if (expSearch) expSearch.value = '';
+
+  onExportFilterChange();
+};
+
+var _exportFilterDebounce = null;
+window.onExportFilterChange = function () {
+  updateExportStatsBanner();
+
+  if (_exportFilterDebounce) clearTimeout(_exportFilterDebounce);
+  _exportFilterDebounce = setTimeout(function () {
+    var params = buildExportParams();
+    params.limit = 1;
+
+    API.getMyAssignments(params).then(function (res) {
+      if (res && res.success && res.data && res.data.pagination) {
+        var total = res.data.pagination.total;
+        var totalEl = document.getElementById('expStatTotal');
+        if (totalEl) totalEl.innerText = total;
+      }
+    }).catch(function (err) {
+      console.warn('Export count error:', err);
+    });
+  }, 250);
+};
+
+window.buildExportParams = function () {
+  var expDept = document.getElementById('expFilterDept');
+  var expBatch = document.getElementById('expFilterBatch');
+  var expStatus = document.getElementById('expFilterStatus');
+  var expSearch = document.getElementById('expFilterSearch');
+
+  return {
+    page: 1,
+    limit: 100000,
+    search: expSearch && expSearch.value.trim() ? expSearch.value.trim() : undefined,
+    department: expDept && expDept.value ? expDept.value : undefined,
+    batch: expBatch && expBatch.value ? expBatch.value : undefined,
+    status: expStatus && expStatus.value ? expStatus.value : undefined
+  };
+};
+
+window.renderExportColumnChips = function () {
+  var container = document.getElementById('exportColsContainer');
+  if (!container) return;
+
+  var html = '';
+  _memberColumns.forEach(function (col) {
+    var checked = _exportSelectedCols[col.key] ? 'checked' : '';
+    html += '<label class="export-col-chip">' +
+      '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
+      '<span>' + col.label + '</span>' +
+      '</label>';
+  });
+  container.innerHTML = html;
+};
+
+window.toggleExportCol = function (key, isChecked) {
+  _exportSelectedCols[key] = isChecked;
+  updateExportStatsBanner();
+};
+
+window.selectAllExportCols = function (selectState) {
+  _memberColumns.forEach(function (col) {
+    _exportSelectedCols[col.key] = selectState;
+  });
+  renderExportColumnChips();
+  updateExportStatsBanner();
+};
+
+window.updateExportStatsBanner = function () {
+  var colsEl = document.getElementById('expStatCols');
+  var statusEl = document.getElementById('expStatStatus');
+
+  var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
+  if (colsEl) colsEl.innerText = selectedCount + ' / ' + _memberColumns.length;
+
+  var expStatus = document.getElementById('expFilterStatus');
+  var statusVal = expStatus ? expStatus.value : '';
+  if (statusEl) statusEl.innerText = statusVal ? statusVal.toUpperCase() : 'ALL';
+};
+
+window.startExportDownloadProcess = function () {
+  var selectedKeys = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; });
+  if (selectedKeys.length === 0) {
+    _memberShowToast('Please select at least one column to export.', 'warning');
+    return;
+  }
+
+  if (window.closeModal) closeModal('exportCustomizationModal');
+
+  var overlay = document.getElementById('exportProgressOverlay');
+  var fill = document.getElementById('exportProgressBarFill');
+  var title = document.getElementById('exportProgressTitle');
+  var sub = document.getElementById('exportProgressSubtitle');
+  var percentEl = document.getElementById('exportProgressPercent');
+  var countEl = document.getElementById('exportProgressCount');
+
+  if (overlay) overlay.classList.add('show');
+  if (fill) fill.style.width = '10%';
+  if (title) title.innerText = 'Querying Database...';
+  if (sub) sub.innerText = 'Fetching assigned alumni records...';
+  if (percentEl) percentEl.innerText = '10%';
+
+  var params = buildExportParams();
+
+  API.getMyAssignments(params).then(function (res) {
+    if (res && res.success) {
+      var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+      if (data.length === 0) {
+        if (overlay) overlay.classList.remove('show');
+        _memberShowToast('No alumni records found matching selected export filters.', 'warning');
+        return;
+      }
+
+      if (countEl) countEl.innerText = '0 / ' + data.length + ' records';
+
+      var progress = 15;
+      var interval = setInterval(function () {
+        progress += 25;
+        if (progress >= 90) {
+          clearInterval(interval);
+          progress = 90;
+        }
+        if (fill) fill.style.width = progress + '%';
+        if (percentEl) percentEl.innerText = progress + '%';
+        if (countEl) countEl.innerText = Math.floor((progress / 100) * data.length) + ' / ' + data.length + ' records';
+        if (title) title.innerText = 'Formatting Excel Data...';
+        if (sub) sub.innerText = 'Generating CSV with selected fields...';
+      }, 100);
+
+      setTimeout(function () {
+        clearInterval(interval);
+        if (fill) fill.style.width = '100%';
+        if (percentEl) percentEl.innerText = '100%';
+        if (countEl) countEl.innerText = data.length + ' / ' + data.length + ' records';
+        if (title) title.innerText = 'Export Ready!';
+        if (sub) sub.innerText = 'Downloading file to your computer...';
+
+        var activeCols = _memberColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
+        var csv = '\uFEFF';
+        var headers = activeCols.map(function (c) { return c.label; });
+        csv += headers.join(',') + '\r\n';
+
+        data.forEach(function (row) {
+          var line = activeCols.map(function (col) {
+            var val = row[col.key];
+            if (col.key === 'updated_date') {
+              val = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
+            }
+            if (val === null || val === undefined) val = '';
+
+            if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {
+              if (String(val).includes('T')) {
+                var d = new Date(val);
+                if (!isNaN(d.getTime())) {
+                  var day = String(d.getDate()).padStart(2, '0');
+                  var month = String(d.getMonth() + 1).padStart(2, '0');
+                  var year = d.getFullYear();
+                  val = day + '/' + month + '/' + year;
+                }
+              }
+            }
+
+            var strVal = String(val);
+            if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && strVal.trim()) {
+              return '"\t' + strVal.replace(/"/g, '""') + '"';
+            }
+            return '"' + strVal.replace(/"/g, '""') + '"';
+          });
+          csv += line.join(',') + '\r\n';
+        });
+
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'Member_Assigned_Alumni_' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        setTimeout(function () {
+          if (overlay) overlay.classList.remove('show');
+          _memberShowToast('Exported ' + data.length + ' records with ' + activeCols.length + ' selected columns!', 'success');
+        }, 600);
+      }, 700);
+
+    } else {
+      if (overlay) overlay.classList.remove('show');
+      _memberShowToast('Failed to retrieve alumni records for export.', 'error');
+    }
+  }).catch(function (err) {
+    console.error('Export error:', err);
+    if (overlay) overlay.classList.remove('show');
+    _memberShowToast('An error occurred during export: ' + (err.message || 'Network error'), 'error');
+  });
+};
+
 
 
