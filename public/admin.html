@@ -205,7 +205,7 @@
         </button>
 
         <!-- Quick Tour / Welcome Tutorial Button -->
-        <button class="navbar-btn" onclick="startWelcomeTour()" title="Quick System Tour & Guide"
+        <button class="navbar-btn" onclick="startIntelligentProductTour()" title="Interactive SaaS Product Tour"
           style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.1rem;">
           <i class="fas fa-graduation-cap"></i>
         </button>
@@ -2195,9 +2195,9 @@
         danger: function (t, m) { window.showToast(t, m, 'danger'); },
         error: function (t, m) { window.showToast(t, m, 'danger'); }
       };
-      var Toast = window.Toast;
       if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
     </script>
+    <script src="js/dynamic-tour.js"></script>
     <script src="js/admin.js"></script>
 </body>
 

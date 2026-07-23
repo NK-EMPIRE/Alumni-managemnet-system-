@@ -3515,10 +3515,6 @@ textarea.form-control {
 /* ────────────────────────────────────────────────────────────
    DARK MODE COMPONENT OVERRIDES
    ──────────────────────────────────────────────────────────── */
-body {
-  transition: background-color 0.25s ease, color 0.25s ease;
-}
-
 body.dark-mode {
   /* Admin & Team Leader variables */
   --bg-white: #1E293B;
@@ -3538,16 +3534,8 @@ body.dark-mode {
   color: #F8FAFC !important;
 }
 
-body, .top-navbar, .topbar, .page-wrapper, .main-content, .card, .stat-card, .modal-content, .table-card, .sidebar {
-  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
 body.dark-mode .top-navbar,
-body.dark-mode .topbar {
-  background: #1E293B !important;
-  border-bottom-color: #334155 !important;
-}
-
+body.dark-mode .topbar,
 body.dark-mode .page-wrapper,
 body.dark-mode .main-content {
   background-color: #0F172A !important;
@@ -3558,18 +3546,58 @@ body.dark-mode .card,
 body.dark-mode .stat-card,
 body.dark-mode .quick-action-btn,
 body.dark-mode .dropdown-menu,
+body.dark-mode .modal,
 body.dark-mode .modal-content,
 body.dark-mode .table-card {
   background-color: #1E293B !important;
   color: #F8FAFC !important;
   border-color: #334155 !important;
-  box-shadow: none !important;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5) !important;
+}
+
+body.dark-mode .modal-body,
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer,
+body.dark-mode #todayTasksModal .modal-body,
+body.dark-mode #todayTasksModal div[style*="background:#F8FAFC"],
+body.dark-mode #welcomeTourModal div[style*="background:#F8FAFC"],
+body.dark-mode #reopenConfirmModal div[style*="background:#F8FAFC"] {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #todayContextBanner {
+  background-color: #064E3B !important;
+  border-color: #059669 !important;
+  color: #A7F3D0 !important;
+}
+
+body.dark-mode #todayContextBanner span,
+body.dark-mode #todayContextBanner i {
+  color: #A7F3D0 !important;
+}
+
+body.dark-mode #todayTasksList > div {
+  background-color: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #tourStepContent {
+  color: #E2E8F0 !important;
+}
+
+body.dark-mode #tourMotivationBanner {
+  background-color: #064E3B !important;
+  color: #A7F3D0 !important;
+  border-left-color: #10B981 !important;
 }
 
 body.dark-mode .card-value,
 body.dark-mode .quick-action-btn span,
 body.dark-mode .modal-header h3,
-body.dark-mode .modal-header h4 {
+body.dark-mode .modal-header h4,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5 {
   color: #F8FAFC !important;
 }
 
