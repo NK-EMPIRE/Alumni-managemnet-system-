@@ -2088,13 +2088,15 @@ window.saveAdminPassword = function () {
 /* ────────────────────────────────────────────────────────────
    30. EXPORT BUTTON
    ──────────────────────────────────────────────────────────── */
-function handleExport() {
-  if (typeof window.exportAlumniCSV === 'function') {
+window.handleExport = function () {
+  if (typeof window.openExportCustomizationModal === 'function') {
+    window.openExportCustomizationModal();
+  } else if (typeof window.exportAlumniCSV === 'function') {
     window.exportAlumniCSV();
   } else {
     Toast.warning('Export', 'Export function is not available.');
   }
-}
+};
 
 /* ────────────────────────────────────────────────────────────
    31. QUICK ACTION FAB
