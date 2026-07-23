@@ -3234,7 +3234,8 @@ window.renderSpreadsheetTable = function (data) {
         else if (status === 'Pending') badgeClass = 'badge-warning';
         else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
         else if (status === 'Draft') badgeClass = 'badge-info';
-        val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
+        else if (status === 'Reopened') badgeClass = 'badge-danger';
+        val = '<span class="badge ' + badgeClass + '">' + (status === 'Reopened' ? '<i class="fas fa-undo"></i> Reopened' : status) + '</span>';
       } else if (col.key === 'email') {
         var primary = row.email || '';
         var secondary = row.secondary_email || '';
@@ -3278,18 +3279,38 @@ window.renderSpreadsheetTable = function (data) {
     });
 
     // Action column
-    var isCompleted = row.assignment_status === 'Completed';
+    var isCompleted = row.assignment_status === 'Completed' || row.assignment_status === 'Updated';
     var actionButtons = '<div style="display:flex; gap:6px; justify-content:center;">';
     actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
     var _safeName = String(row.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
+    if (isCompleted || row.assignment_status === 'Completed') {
+      actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="adminReopenAlumniRecord(' + row.alumni_id + ')" title="Reopen Record"><i class="fas fa-undo"></i> Reopen</button>';
+    }
     actionButtons += '</div>';
 
     bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center;">' + actionButtons + '</td>';
     bodyHtml += '</tr>';
   });
   body.innerHTML = bodyHtml;
+
+  window.adminReopenAlumniRecord = function (alumniId) {
+    if (!confirm('Are you sure you want to reopen this alumni record? It will be marked as "Reopened" and returned to the assigned user.')) return;
+    API.reopenAlumni(alumniId)
+      .then(function (res) {
+        if (res && res.success) {
+          Toast.success('Reopened', 'Alumni record has been reopened and returned to assigned user');
+          if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+          if (typeof loadDashboardData === 'function') loadDashboardData();
+        } else {
+          Toast.danger('Reopen Failed', res ? res.message : 'Unknown error');
+        }
+      })
+      .catch(function (err) {
+        Toast.danger('Error', err.message || 'Failed to reopen record');
+      });
+  };
 
   // Initialize resizers
   var table = document.querySelector('.spreadsheet-table');

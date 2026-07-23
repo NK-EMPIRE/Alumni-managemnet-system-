@@ -879,7 +879,8 @@
         var status = r.status || 'Pending';
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
-        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
+        var isReopened = status === 'Reopened';
+        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : (isReopened ? 'badge-danger' : 'badge-warning'));
 
         var nameVal = r.name || '-';
         var deptVal = r.department || '-';

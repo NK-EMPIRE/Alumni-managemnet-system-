@@ -162,8 +162,9 @@
                 const serial = start + i + 1;
                 const isCompleted = r.status === 'Completed';
                 const isDraft = r.status === 'Draft';
-                const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : 'pending');
-                const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
+                const isReopened = r.status === 'Reopened';
+                const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : (isReopened ? 'badge-danger' : 'pending'));
+                const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-undo' : 'fa-clock'));
                 html += '<tr>' +
                     '<td style="font-weight:600;color:var(--text-secondary);">' + serial + '</td>' +
                     '<td><strong>' + r.name + '</strong></td>' +
@@ -171,7 +172,7 @@
                     '<td>' + r.batch + '</td>' +
                     '<td>' + r.company + '</td>' +
                     '<td>' + r.designation + '</td>' +
-                    '<td><span class="status-badge ' + badgeClass + '"><i class="fas ' + badgeIcon + '"></i> ' + r.status + '</span></td>' +
+                    '<td><span class="status-badge ' + badgeClass + '" style="' + (isReopened ? 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;' : '') + '"><i class="fas ' + badgeIcon + '"></i> ' + r.status + '</span></td>' +
                     '<td><button class="btn-update" data-index="' + r.id + '"><i class="fas fa-edit"></i> Update</button></td>' +
                     '</tr>';
             }

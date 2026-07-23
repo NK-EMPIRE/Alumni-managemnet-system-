@@ -176,6 +176,10 @@
         return patch('/alumni/assignments/' + assignmentId + '/status', data);
     },
 
+    reopenAlumni: function (id) {
+        return patch('/alumni/' + id + '/reopen', {});
+    },
+
     uploadImport: function (formData) {
         return fetch(BASE_URL + '/upload/import', {
             method: 'POST',
