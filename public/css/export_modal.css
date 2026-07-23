@@ -1,0 +1,212 @@
+/* ────────────────────────────────────────────────────────────
+   EXPORT CUSTOMIZATION MODAL & REALTIME DOWNLOAD ANIMATION
+   ──────────────────────────────────────────────────────────── */
+.export-modal-card {
+  background: var(--bg-white, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 650px;
+  width: 92vw;
+  overflow: hidden;
+  border: 1px solid var(--border, #e2e8f0);
+}
+
+.export-modal-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1E293B, #0F172A);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.export-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+}
+
+.export-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.export-modal-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.export-stats-banner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px 24px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+body.dark-mode .export-stats-banner {
+  background: #1E293B;
+  border-color: #334155;
+}
+
+.export-stat-box {
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+body.dark-mode .export-stat-box {
+  background: #0F172A;
+  border-color: #334155;
+}
+
+.export-stat-box .count {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary, #2563EB);
+  line-height: 1.2;
+}
+
+.export-stat-box .label {
+  font-size: 0.75rem;
+  color: #64748B;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.export-cols-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.export-col-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F1F5F9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #E2E8F0;
+  transition: all 0.2s ease;
+}
+
+body.dark-mode .export-col-chip {
+  background: #1E293B;
+  border-color: #334155;
+  color: #F8FAFC;
+}
+
+.export-col-chip input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary, #2563EB);
+  cursor: pointer;
+}
+
+.export-col-chip:hover {
+  background: #E2E8F0;
+}
+
+body.dark-mode .export-col-chip:hover {
+  background: #334155;
+}
+
+/* Download Progress Overlay */
+.export-progress-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.export-progress-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.export-progress-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 40px;
+  width: 420px;
+  max-width: 90vw;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .export-progress-card {
+  background: #0F172A;
+  color: #ffffff;
+}
+
+.export-animated-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 20px;
+  animation: pulsePulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulsePulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 16px rgba(37, 99, 235, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+.export-progress-bar-bg {
+  background: #E2E8F0;
+  border-radius: 10px;
+  height: 12px;
+  width: 100%;
+  overflow: hidden;
+  margin: 18px 0 10px;
+}
+
+body.dark-mode .export-progress-bar-bg {
+  background: #334155;
+}
+
+.export-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2563EB, #10B981);
+  border-radius: 10px;
+  transition: width 0.15s ease-out;
+}
