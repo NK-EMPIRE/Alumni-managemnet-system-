@@ -316,14 +316,12 @@
           </div>
           <div class="stat-card">
             <div class="stat-card-icon" style="background:#FCE7F3;color:#DB2777;">
-              <i class="fas fa-chart-pie"></i>
+              <i class="fas fa-file-alt"></i>
             </div>
             <div class="stat-card-content">
-              <div class="stat-card-value" id="overallProgress">0%</div>
-              <div class="stat-card-label">Overall Progress</div>
-              <div class="progress mt-2" style="height:6px;">
-                <div class="progress-bar" id="progressBar" style="width:0%;"></div>
-              </div>
+              <div class="stat-card-value" id="draftCount">0</div>
+              <div class="stat-card-label">Draft</div>
+              <span class="stat-card-change up"><i class="fas fa-pen"></i> Saved as Draft</span>
             </div>
           </div>
         </div>
@@ -360,29 +358,9 @@
                   <i class="fas fa-search search-icon"></i>
                   <input type="text" placeholder="Search alumni..." id="tableSearch" oninput="filterTable()">
                 </div>
-                <select class="form-control form-select" id="filterDepartment" style="width:140px;"
-                  onchange="filterTable()">
-                  <option value="">All Depts</option>
-                  <option value="CSE">CSE</option>
-                  <option value="ECE">ECE</option>
-                  <option value="EEE">EEE</option>
-                  <option value="ME">ME</option>
-                  <option value="CE">CE</option>
-                  <option value="IT">IT</option>
-                </select>
-                <select class="form-control form-select" id="filterStatus" style="width:140px;" onchange="filterTable()">
-                  <option value="">All Status</option>
-                  <option value="Completed">Completed</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
-                </select>
-                <select class="form-control form-select" id="filterBatch" style="width:120px;" onchange="filterTable()">
-                  <option value="">All Batch</option>
-                  <option value="2020">2020</option>
-                  <option value="2021">2021</option>
-                  <option value="2022">2022</option>
-                  <option value="2023">2023</option>
-                </select>
+                <button class="btn btn-secondary btn-sm" onclick="openModal('dashboardFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                  <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="dashboardActiveFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+                </button>
               </div>
               <div style="margin-left:12px;">
                 <span id="dashboardFilteredCount" class="badge-record-count" style="font-size: 0.9rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block;">0 Records</span>
@@ -1788,6 +1766,48 @@
       <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
         <button class="btn btn-secondary" onclick="resetSpreadsheetFilters()"><i class="fas fa-undo"></i> Clear All</button>
         <button class="btn btn-primary" onclick="closeModal('ssFilterModal');fetchSpreadsheetData()"><i class="fas fa-check"></i> Apply Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       DASHBOARD FILTER MODAL (Recent Assignments)
+       ============================================================ -->
+  <div class="modal-overlay" id="dashboardFilterModal">
+    <div class="modal" style="max-width:450px;width:90vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Dashboard Filters</h3>
+        <button class="modal-close" onclick="closeModal('dashboardFilterModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Department</label>
+            <select class="form-control" id="dashFilterDept" onchange="applyDashboardFilters()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Batch</label>
+            <select class="form-control" id="dashFilterBatch" onchange="applyDashboardFilters()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2;">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="dashFilterStatus" onchange="applyDashboardFilters()">
+              <option value="">All Statuses</option>
+              <option value="Completed">Completed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="resetDashboardFilters()"><i class="fas fa-undo"></i> Clear All</button>
+        <button class="btn btn-primary" onclick="closeModal('dashboardFilterModal')"><i class="fas fa-check"></i> Apply</button>
       </div>
     </div>
   </div>

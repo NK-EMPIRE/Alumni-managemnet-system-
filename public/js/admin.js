@@ -95,8 +95,6 @@ function initSpreadsheetHandlers() {
       
       var ssFilterDept = document.getElementById('ssFilterDept');
       var ssFilterBatch = document.getElementById('ssFilterBatch');
-      var filterDeptDash = document.getElementById('filterDepartment');
-      var filterBatchDash = document.getElementById('filterBatch');
       
       if (ssFilterDept) {
         ssFilterDept.innerHTML = '<option value="">All Depts</option>';
@@ -104,23 +102,11 @@ function initSpreadsheetHandlers() {
           ssFilterDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
         });
       }
-      if (filterDeptDash) {
-        filterDeptDash.innerHTML = '<option value="">All Depts</option>';
-        depts.forEach(function(d) {
-          filterDeptDash.innerHTML += '<option value="' + d + '">' + d + '</option>';
-        });
-      }
       
       if (ssFilterBatch) {
         ssFilterBatch.innerHTML = '<option value="">All Batches</option>';
         batches.forEach(function(b) {
           ssFilterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
-        });
-      }
-      if (filterBatchDash) {
-        filterBatchDash.innerHTML = '<option value="">All Batch</option>';
-        batches.forEach(function(b) {
-          filterBatchDash.innerHTML += '<option value="' + b + '">' + b + '</option>';
         });
       }
     }
@@ -299,7 +285,7 @@ function setCurrentDate() {
     5. DASHBOARD STATS
     ──────────────────────────────────────────────────────────── */
 function populateDashboardStats() {
-  var total, pending, completed, tlCount, tmCount, progressPct;
+  var total, pending, completed, tlCount, tmCount, draft;
   if (_apiDataLoaded && _dashboardData) {
     var d = _dashboardData;
     total = d.totalAlumni || 0;
@@ -307,14 +293,14 @@ function populateDashboardStats() {
     completed = d.completedRecords || 0;
     tlCount = d.totalLeaders || 0;
     tmCount = d.totalMembers || 0;
-    progressPct = d.completionPercentage || 0;
+    draft = d.draftRecords || 0;
   } else {
     total = 0;
     pending = 0;
     completed = 0;
     tlCount = 0;
     tmCount = 0;
-    progressPct = 0;
+    draft = 0;
   }
 
   setText('totalAlumni', total);
@@ -322,15 +308,7 @@ function populateDashboardStats() {
   setText('completedUpdates', completed);
   setText('totalTeamLeaders', tlCount);
   setText('totalTeamMembers', tmCount);
-  setText('overallProgress', progressPct + '%');
-
-  var bar = document.getElementById('progressBar');
-  if (bar) {
-    bar.style.width = progressPct + '%';
-    if (progressPct >= 80) bar.classList.add('green');
-    else if (progressPct >= 50) { /* keep default blue */ }
-    else bar.classList.add('yellow');
-  }
+  setText('draftCount', draft);
 }
 
 function setText(id, val) {
@@ -531,9 +509,9 @@ function filterTable() {
 }
 function _doFilter() {
   var q = getVal('tableSearch').toLowerCase();
-  var dept = getVal('filterDepartment');
-  var status = getVal('filterStatus');
-  var batch = getVal('filterBatch');
+  var dept = getVal('dashFilterDept');
+  var status = getVal('dashFilterStatus');
+  var batch = getVal('dashFilterBatch');
 
   var source = _alumniMapped || [];
 
@@ -559,8 +537,43 @@ function _doFilter() {
     cntEl.textContent = state.filteredData.length + ' Records';
   }
 
+  updateDashboardFilterBadge();
+
   state.currentPage = 1;
   renderTable();
+}
+
+function applyDashboardFilters() {
+  filterTable();
+}
+
+function resetDashboardFilters() {
+  var dept = document.getElementById('dashFilterDept');
+  var batch = document.getElementById('dashFilterBatch');
+  var status = document.getElementById('dashFilterStatus');
+  if (dept) dept.value = '';
+  if (batch) batch.value = '';
+  if (status) status.value = '';
+  filterTable();
+}
+
+function updateDashboardFilterBadge() {
+  var dept = getVal('dashFilterDept');
+  var batch = getVal('dashFilterBatch');
+  var status = getVal('dashFilterStatus');
+  var count = 0;
+  if (dept) count++;
+  if (batch) count++;
+  if (status) count++;
+  var badge = document.getElementById('dashboardActiveFilterBadge');
+  if (badge) {
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
 }
 
 function getVal(id) {
@@ -1049,12 +1062,12 @@ function populateDynamicFilters(filters) {
   var batches = filters.data.batches || [];
   
   // Populate all department selects
-  var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment'];
+  var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment', 'dashFilterDept'];
   deptSelects.forEach(function(id) {
     var sel = document.getElementById(id);
     if (!sel) return;
     var currentVal = sel.value;
-    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('ssFilter');
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('dash') || id.startsWith('ssFilter');
     var html = isFilter ? '<option value="">All Depts</option>' : '<option value="" disabled selected hidden>Select Department</option>';
     depts.forEach(function(d) {
       if (d) html += '<option value="' + d + '">' + d + '</option>';
@@ -1064,12 +1077,12 @@ function populateDynamicFilters(filters) {
   });
 
   // Populate all batch selects
-  var batchSelects = ['filterBatch', 'ssFilterBatch', 'assignBatch'];
+  var batchSelects = ['filterBatch', 'ssFilterBatch', 'assignBatch', 'dashFilterBatch'];
   batchSelects.forEach(function(id) {
     var sel = document.getElementById(id);
     if (!sel) return;
     var currentVal = sel.value;
-    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('ssFilter');
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('dash') || id.startsWith('ssFilter');
     var html = isFilter ? '<option value="">All Batches</option>' : '<option value="" disabled selected hidden>Select Batch</option>';
     batches.forEach(function(b) {
       if (b) html += '<option value="' + b + '">' + b + '</option>';

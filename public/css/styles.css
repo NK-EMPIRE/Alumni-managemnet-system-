@@ -1550,7 +1550,7 @@ textarea.form-control {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1050;
+  z-index: 100000;
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
