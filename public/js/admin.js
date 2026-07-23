@@ -2091,10 +2091,10 @@ window.saveAdminPassword = function () {
 window.handleExport = function () {
   if (typeof window.openExportCustomizationModal === 'function') {
     window.openExportCustomizationModal();
-  } else if (typeof window.exportAlumniCSV === 'function') {
-    window.exportAlumniCSV();
   } else {
-    Toast.warning('Export', 'Export function is not available.');
+    console.error('openExportCustomizationModal not loaded yet');
+    var modal = document.getElementById('exportCustomizationModal');
+    if (modal) modal.classList.add('show');
   }
 };
 
@@ -3434,11 +3434,13 @@ window.exportAlumniCSV = function () {
 
 window.openExportCustomizationModal = function () {
   // 1. Initialize default column selections
-  ssColumns.forEach(function (col) {
-    if (_exportSelectedCols[col.key] === undefined) {
-      _exportSelectedCols[col.key] = true;
-    }
-  });
+  if (typeof ssColumns !== 'undefined' && Array.isArray(ssColumns)) {
+    ssColumns.forEach(function (col) {
+      if (_exportSelectedCols[col.key] === undefined) {
+        _exportSelectedCols[col.key] = true;
+      }
+    });
+  }
 
   // 2. Populate filter dropdowns inside the export modal if empty
   populateExportModalFilterOptions();
