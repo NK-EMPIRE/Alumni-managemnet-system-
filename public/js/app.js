@@ -245,20 +245,23 @@
         if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
       }, 750);
 
-      if (isDarkNow) {
-        document.body.classList.remove('dark-mode');
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-        toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-      } else {
-        document.body.classList.add('dark-mode');
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-        toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-      }
-      try {
-        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: document.body.classList.contains('dark-mode') } }));
-      } catch (err) {}
+      // Toggle theme at the midpoint (350ms) of ripple expansion for flawless visual sync
+      setTimeout(function () {
+        if (isDarkNow) {
+          document.body.classList.remove('dark-mode');
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+          toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        } else {
+          document.body.classList.add('dark-mode');
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+          toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        try {
+          window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: document.body.classList.contains('dark-mode') } }));
+        } catch (err) {}
+      }, 350);
     });
   }
 
