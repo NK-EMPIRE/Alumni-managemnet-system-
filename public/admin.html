@@ -197,17 +197,10 @@
       </div>
 
       <div class="navbar-right" style="display:flex;align-items:center;gap:12px;">
-        <!-- Today's Tasks Modal Button -->
-        <button class="navbar-btn" onclick="openTodayTasksModal()" title="Today's Tasks & Auto Summary"
-          style="background:none;border:none;color:#10B981;cursor:pointer;font-size:1.1rem;position:relative;">
-          <i class="fas fa-tasks"></i>
-          <span id="todayTasksDot" style="position:absolute;top:2px;right:2px;width:8px;height:8px;background:#EF4444;border-radius:50%;display:none;"></span>
-        </button>
-
-        <!-- Quick Tour / Welcome Tutorial Button -->
-        <button class="navbar-btn" onclick="startIntelligentProductTour()" title="Interactive SaaS Product Tour"
-          style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.1rem;">
-          <i class="fas fa-graduation-cap"></i>
+        <!-- Interactive SaaS Product Tour Button -->
+        <button class="navbar-btn" onclick="startIntelligentProductTour()" title="Start Interactive Product Tour"
+          style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;">
+          <i class="fas fa-magic"></i>
         </button>
 
         <!-- Reset Requests Dropdown -->
@@ -1803,6 +1796,9 @@
           <i class="fas fa-redo-alt" style="margin-right:6px;"></i>Reopen
         </button>
       </div>
+    </div>
+  </div>
+
   <!-- ============================================================
        TODAY'S TASKS MODAL (Admin, Leader & Member)
        ============================================================ -->
@@ -1981,69 +1977,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       SYSTEM WELCOME TOUR & SHORTCUTS MODAL
-       ============================================================ -->
-  <div class="modal-overlay" id="welcomeTourModal">
-    <div class="modal" style="max-width:650px;width:90vw;">
-      <div class="modal-header">
-        <h3><i class="fas fa-compass" style="color:var(--primary);margin-right:8px;"></i>Welcome & Quick System Guide
-        </h3>
-        <button class="modal-close" onclick="closeModal('welcomeTourModal')">&times;</button>
-      </div>
-      <div class="modal-body" style="padding:20px;max-height:75vh;overflow-y:auto;">
-        <div class="welcome-banner">
-          <h4><i class="fas fa-smile"></i>Welcome to AMS Portal</h4>
-          <p>This interactive platform empowers Admins, Team Leaders, and Members to manage alumni datasets smoothly
-            with real-time updates.</p>
-        </div>
-
-        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt"
-            style="color:var(--warning);margin-right:6px;"></i>Key Platform Features</h5>
-        <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
-          <li><strong>Global Date Filter:</strong> Select any custom date range in the top-right navbar calendar icon to
-            filter working datasets across all views.</li>
-          <li><strong>Consolidated Filters:</strong> Click the <em>Filters</em> button on any spreadsheet to filter by
-            Leader, Member, Dept, Batch, or Status cleanly in a single modal.</li>
-          <li><strong>Reassign & Redistribute:</strong> Dynamically shift pending assignments from one user to another
-            with full audit log tracking.</li>
-          <li><strong>Full Screen View:</strong> Expand any spreadsheet into full-screen mode to easily work with large
-            datasets.</li>
-        </ul>
-
-        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard"
-            style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
-        <div class="shortcut-grid">
-          <div class="shortcut-card">
-            <kbd>Ctrl</kbd> + <kbd>K</kbd>
-            <div class="shortcut-desc">Focus Global Search</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Esc</kbd>
-            <div class="shortcut-desc">Close Active Modal</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Ctrl</kbd> + <kbd>S</kbd>
-            <div class="shortcut-desc">Save / Submit Record</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Alt</kbd> + <kbd>E</kbd>
-            <div class="shortcut-desc">Export CSV</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Ctrl</kbd> + <kbd>F</kbd>
-            <div class="shortcut-desc">Toggle Filter Modal</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Alt</kbd> + <kbd>R</kbd>
-            <div class="shortcut-desc">Refresh Data</div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="padding:14px 20px;text-align:right;">
-        <button class="btn btn-primary" onclick="closeModal('welcomeTourModal')">Got it, Let's Start!</button>
-      </div>
-    </div>
   </div>
 
   <!-- ============================================================

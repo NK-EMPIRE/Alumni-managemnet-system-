@@ -186,27 +186,64 @@
       });
     }
 
-    // 8. Role-Specific Extensions
+    // 8. View Modal Feature Guide
+    var viewBtn = document.querySelector('.btn-secondary.btn-sm[onclick*="viewAlumniDetails"]') || document.querySelector('button[title="View Details"]');
+    if (viewBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: viewBtn,
+        title: 'Alumni Profile Preview Modal',
+        badge: 'Detailed View',
+        description: 'Opens complete alumni profile including father name, date of birth, social profile link (with auto Facebook/LinkedIn icon detection) and audit trail.'
+      });
+    }
+
+    // 9. Update Record Modal Feature Guide (Member/Leader)
+    var updateBtn = document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]') || document.querySelector('button[onclick*="editAlumniRecord"]');
+    if (updateBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: updateBtn,
+        title: 'Alumni Information Update Form',
+        badge: 'Data Verification',
+        description: 'Update verified alumni details (father name, email, phone, company, designation, city, state, LinkedIn/Facebook profile). Supports Save Draft & Submit.'
+      });
+    }
+
+    // 10. Export Customization Modal Feature Guide (Admin/Leader)
+    var exportBtn = document.querySelector('button[onclick*="openExportCustomizationModal"]');
+    if (exportBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: exportBtn,
+        title: 'Customizable Export & Download',
+        badge: 'Data Export',
+        description: 'Opens export customization modal to select specific columns, filter matched records, and download Excel/CSV reports cleanly.'
+      });
+    }
+
+    // 11. Database Health Check Feature Guide (Admin)
+    var dbHealthBtn = document.querySelector('button[onclick*="openDbHealthModal"]');
+    if (dbHealthBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: dbHealthBtn,
+        title: 'Database Health Diagnostics',
+        badge: 'Quality Control',
+        description: 'Monitors database completion rate, missing field breakdown (including father name), and sends automated notifications to assignees.'
+      });
+    }
+
+    // 12. Role-Specific Extensions
     if (role === 'LEADER') {
-      var reassignBtn = document.querySelector('button[onclick*="openReassignModal"]') || document.querySelector('button[onclick*="distribute"]');
+      var reassignBtn = document.querySelector('button[onclick*="openReassignModal"]') || document.querySelector('button[onclick*="openCirculateModal"]');
       if (reassignBtn) {
         steps.push({
           type: 'role',
           selector: reassignBtn,
-          title: 'Intelligent Member Distribution',
+          title: 'Member Distribution & Circulate',
           badge: 'Team Leader Feature',
-          description: 'Distribute or reassign alumni records across team members manually or auto-evenly.'
-        });
-      }
-    } else if (role === 'MEMBER') {
-      var updateBtn = document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]');
-      if (updateBtn) {
-        steps.push({
-          type: 'role',
-          selector: updateBtn,
-          title: 'Update Alumni Record',
-          badge: 'Member Verification',
-          description: 'Fill in essential alumni professional details, father name, phone, email, and social profiles.'
+          description: 'Distribute or reassign alumni records across team members manually or auto-evenly with sleek minimal modals.'
         });
       }
     }
