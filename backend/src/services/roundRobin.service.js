@@ -502,6 +502,9 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   }
 
   const assignment = assignResult.recordset[0];
+  if (currentUser.role === 'MEMBER' && assignment.member_id && Number(assignment.member_id) !== Number(currentUser.userId)) {
+    throw new AppError('You are not authorized to undo this record.', 403);
+  }
   if (assignment.status !== 'Completed') {
     throw new AppError('Only completed records can be reopened.', 400);
   }
@@ -510,10 +513,10 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   await transaction.begin();
 
   try {
-    // Update the assignment record status to Pending (keeping it assigned to the member)
+    // Update the assignment record status to Draft (keeping it assigned to the member)
     await transaction.request()
       .input('alumniId', sql.Int, alumniId)
-      .query("UPDATE AlumniAssignments SET status = 'Pending', completed_date = NULL WHERE alumni_id = @alumniId");
+      .query("UPDATE AlumniAssignments SET status = 'Draft', completed_date = NULL WHERE alumni_id = @alumniId");
 
     await transaction.commit();
   } catch (err) {

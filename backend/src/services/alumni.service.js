@@ -312,7 +312,7 @@ async function reopenAlumni(alumniId, currentUser) {
     description: `Reopened record for ${alumni.name} (${alumni.register_no}) and returned to assignment`
   });
 
-  return { alumniId, status: 'Reopened' };
+  return { alumniId, status: 'Draft' };
 }
 
 module.exports = {

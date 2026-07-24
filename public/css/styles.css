@@ -59,6 +59,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-y: auto;
 }
 
 body {
@@ -69,6 +70,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  overflow-y: auto;
   min-height: 100vh;
 }
 
@@ -957,17 +959,25 @@ ul {
 }
 
 /* Outline button */
-.btn-outline {
+.btn-outline, #saveDraftBtn {
   background: transparent;
-  color: var(--primary);
-  border: 1.5px solid var(--primary);
+  color: var(--primary, #2563EB) !important;
+  border: 1.5px solid var(--primary, #2563EB);
+  transition: all 0.2s ease;
 }
 
-.btn-outline:hover {
-  background: var(--primary);
-  color: #FFFFFF;
+.btn-outline:hover, .btn-outline:focus, .btn-outline:active,
+#saveDraftBtn:hover, #saveDraftBtn:focus, #saveDraftBtn:active {
+  background: var(--primary, #2563EB) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary, #2563EB) !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.btn-outline:hover *, .btn-outline:focus *, .btn-outline:active *,
+#saveDraftBtn:hover *, #saveDraftBtn:focus *, #saveDraftBtn:active * {
+  color: #FFFFFF !important;
 }
 
 /* Danger button */
@@ -3591,6 +3601,17 @@ body.dark-mode #tourMotivationBanner {
   background-color: #064E3B !important;
   color: #A7F3D0 !important;
   border-left-color: #10B981 !important;
+}
+
+body.dark-mode #welcomeTourModal label,
+body.dark-mode #welcomeTourModal input + span {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode #tourPrevBtn {
+  background-color: #334155 !important;
+  color: #F8FAFC !important;
+  border-color: #475569 !important;
 }
 
 body.dark-mode .card-value,

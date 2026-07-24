@@ -63,9 +63,41 @@
       letter-spacing: 0.5px;
       margin-bottom: 8px;
     }
+    body.dark-mode .tour-tooltip-card {
+      background: #1E293B !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+    }
     body.dark-mode .tour-tooltip-badge {
       background: rgba(37, 99, 235, 0.25) !important;
       color: #60A5FA !important;
+    }
+    body.dark-mode .tour-step-counter {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode .tour-tooltip-card h4 {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode .tour-tooltip-card p {
+      color: #CBD5E1 !important;
+    }
+    body.dark-mode .tour-tooltip-footer {
+      border-top-color: #334155 !important;
+    }
+    body.dark-mode #tourSkipBtn {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode #tourSkipBtn:hover {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #tourBackStepBtn {
+      background: #334155 !important;
+      color: #F8FAFC !important;
+      border: 1px solid #475569 !important;
+    }
+    body.dark-mode #tourBackStepBtn:hover {
+      background: #475569 !important;
     }
   `;
   document.head.appendChild(tourStyle);
@@ -288,11 +320,11 @@
       tooltipCard.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="tour-tooltip-badge">${step.badge || 'Feature Guide'}</span>
-          <span style="font-size:0.75rem;color:#64748B;font-weight:600;">Step ${index + 1} of ${activeTourSteps.length}</span>
+          <span class="tour-step-counter" style="font-size:0.75rem;color:#64748B;font-weight:600;">Step ${index + 1} of ${activeTourSteps.length}</span>
         </div>
         <h4 style="margin:4px 0 8px;font-size:1.1rem;font-weight:700;">${step.title}</h4>
         <p style="font-size:0.85rem;color:var(--text-secondary,#64748B);margin:0 0 16px;line-height:1.5;">${step.description}</p>
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #E2E8F0;padding-top:14px;margin-top:12px;">
+        <div class="tour-tooltip-footer" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #E2E8F0;padding-top:14px;margin-top:12px;">
           <button id="tourSkipBtn" style="background:none;border:none;color:#64748B;font-size:0.8rem;cursor:pointer;font-weight:600;">Skip Tour</button>
           <div style="display:flex;gap:8px;">
             ${index > 0 ? '<button id="tourBackStepBtn" style="padding:6px 12px;background:#E2E8F0;color:#1E293B;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;">Back</button>' : ''}

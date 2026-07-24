@@ -551,6 +551,7 @@
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'instant' });
 
         var globalHeader = document.getElementById('globalPageHeader');
         if (globalHeader) {
@@ -2353,7 +2354,7 @@
 
     setTimeout(function () {
       document.getElementById('loadingScreen').classList.add('hide');
-      document.body.style.overflow = 'visible';
+      document.body.style.overflow = '';
     }, 800);
 
     document.querySelectorAll('.stat-card').forEach(function (card, idx) {

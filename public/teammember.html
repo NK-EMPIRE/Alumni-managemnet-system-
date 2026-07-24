@@ -156,8 +156,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-y: auto;
         }
 
         .topbar {
@@ -672,13 +672,53 @@
             min-height: 80px;
             resize: vertical;
         }
-        .btn-outline {
+        .btn-outline, #saveDraftBtn {
             background: transparent;
-            color: var(--primary);
-            border: 1.5px solid var(--primary);
+            color: var(--primary, #2563EB) !important;
+            border: 1.5px solid var(--primary, #2563EB);
+            transition: all 0.2s ease;
         }
-        .btn-outline:hover {
-            background: var(--bg-light);
+        .btn-outline:hover, .btn-outline:focus, .btn-outline:active,
+        #saveDraftBtn:hover, #saveDraftBtn:focus, #saveDraftBtn:active {
+            background: var(--primary, #2563EB) !important;
+            color: #FFFFFF !important;
+            border-color: var(--primary, #2563EB) !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+        .btn-outline:hover *, .btn-outline:focus *, .btn-outline:active *,
+        #saveDraftBtn:hover *, #saveDraftBtn:focus *, #saveDraftBtn:active * {
+            color: #FFFFFF !important;
+        }
+        .btn-undo-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #FFFBEB;
+            color: #D97706;
+            border: 1px solid #FCD34D;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .btn-undo-icon:hover {
+            background: #F59E0B;
+            color: #FFFFFF;
+            border-color: #F59E0B;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            transform: scale(1.08);
+        }
+        body.dark-mode .btn-undo-icon {
+            background: rgba(245, 158, 11, 0.18);
+            color: #FBBF24;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+        body.dark-mode .btn-undo-icon:hover {
+            background: #F59E0B;
+            color: #FFFFFF;
         }
         .submit-row {
             display: flex;
@@ -1594,9 +1634,6 @@
                 </div>
                 <input type="hidden" id="fieldIndex" value="">
                 <div class="submit-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-warning" id="undoSubmitBtn" style="color:#fff;display:none;" onclick="undoAlumniSubmission()">
-                        <i class="fas fa-undo"></i> Undo Submit
-                    </button>
                     <button type="button" class="btn btn-outline" id="saveDraftBtn">
                         <span class="spinner"></span>
                         <span class="btn-text">Save Draft</span>
@@ -1842,6 +1879,30 @@
       <div style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:0.8rem;color:#64748B;" id="todayTaskProgressCount">0 tasks remaining</span>
         <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')" style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNDO CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="undoConfirmModal" style="display:none;">
+    <div class="modal" style="max-width:440px;width:92vw;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:16px 20px;">
+        <h3 style="color:#B45309;margin:0;font-size:1.1rem;font-weight:700;"><i class="fas fa-undo" style="margin-right:8px;color:#F59E0B;"></i>Confirm Undo Submission</h3>
+        <button class="modal-close" onclick="closeUndoModal()" style="color:#B45309;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <p style="font-size:0.9rem;color:var(--text-dark);margin:0 0 12px;line-height:1.5;">
+          Are you sure you want to undo submission for <strong id="undoTargetName" style="color:#2563EB;">this record</strong>?
+        </p>
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:10px 14px;border-radius:8px;font-size:0.82rem;line-height:1.4;">
+          <i class="fas fa-info-circle" style="margin-right:4px;"></i> This record will automatically revert to <strong>Draft</strong> status so you can continue editing it.
+        </div>
+      </div>
+      <div style="padding:14px 20px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeUndoModal()">Cancel</button>
+        <button class="btn btn-warning btn-sm" id="confirmUndoBtn" onclick="executeUndoSubmission()" style="background:#F59E0B;color:#fff;border:none;font-weight:600;">
+          <i class="fas fa-undo"></i> Undo & Change to Draft
+        </button>
       </div>
     </div>
   </div>
