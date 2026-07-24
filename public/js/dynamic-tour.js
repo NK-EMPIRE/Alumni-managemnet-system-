@@ -19,13 +19,18 @@
       pointer-events: auto;
       transition: opacity 0.3s ease;
     }
+    .tour-highlight-box {
+      position: fixed;
+      z-index: 99995;
+      pointer-events: none;
+      box-shadow: 0 0 0 4px #3B82F6, 0 0 35px rgba(59, 130, 246, 0.95);
+      border-radius: 8px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: tourPulse 2s infinite ease-in-out;
+    }
     .tour-spotlight-active {
       position: relative !important;
-      z-index: 99995 !important;
-      box-shadow: 0 0 0 4px #3B82F6, 0 0 35px rgba(59, 130, 246, 1), 0 0 0 9999px rgba(15, 23, 42, 0.75) !important;
-      border-radius: 8px;
-      transition: all 0.3s ease !important;
-      animation: tourPulse 2s infinite ease-in-out !important;
+      z-index: 99990 !important;
     }
     @keyframes tourPulse {
       0% { box-shadow: 0 0 0 4px #3B82F6, 0 0 15px rgba(59, 130, 246, 0.6); }
@@ -354,12 +359,22 @@
     return steps;
   }
 
-  // Create Backdrop & Tooltip DOM elements
+  var spotlightBackdrop = null;
+  var highlightBox = null;
+  var tooltipCard = null;
+  var currentHighlightedEl = null;
+
+  // Create Backdrop, Highlight Box & Tooltip DOM elements
   function initSpotlightDOM() {
     if (!spotlightBackdrop) {
       spotlightBackdrop = document.createElement('div');
       spotlightBackdrop.className = 'tour-spotlight-backdrop';
       document.body.appendChild(spotlightBackdrop);
+    }
+    if (!highlightBox) {
+      highlightBox = document.createElement('div');
+      highlightBox.className = 'tour-highlight-box';
+      document.body.appendChild(highlightBox);
     }
     if (!tooltipCard) {
       tooltipCard = document.createElement('div');
@@ -374,6 +389,8 @@
       currentHighlightedEl = null;
     }
     if (spotlightBackdrop) spotlightBackdrop.style.display = 'none';
+    if (highlightBox) spotlightBackdrop.style.display = 'none';
+    if (highlightBox) highlightBox.style.display = 'none';
     if (tooltipCard) tooltipCard.style.display = 'none';
   }
 
@@ -407,10 +424,18 @@
       el.classList.add('tour-spotlight-active');
       currentHighlightedEl = el;
 
+      var rect = el.getBoundingClientRect();
+
+      // Position glowing highlight ring directly around element
+      highlightBox.style.top = (rect.top - 4) + 'px';
+      highlightBox.style.left = (rect.left - 4) + 'px';
+      highlightBox.style.width = (rect.width + 8) + 'px';
+      highlightBox.style.height = (rect.height + 8) + 'px';
+      highlightBox.style.display = 'block';
+
       spotlightBackdrop.style.display = 'block';
 
       // Position tooltip near target element
-      var rect = el.getBoundingClientRect();
       var tooltipTop = rect.bottom + 16;
       var tooltipLeft = Math.max(16, rect.left + (rect.width / 2) - 190);
 
