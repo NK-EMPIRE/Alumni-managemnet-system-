@@ -298,7 +298,7 @@ async function getAssignmentsByMember(memberId, { page, limit, offset, search, d
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at, a.father_name,
+        a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.status,
         aa.assigned_date, aa.completed_date
       FROM AlumniAssignments aa
@@ -339,7 +339,7 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at, a.father_name,
+        a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.member_id, aa.status,
         aa.assigned_date, aa.completed_date,
         ISNULL(u.first_name + ' ' + u.last_name, 'Unassigned') AS assigned_to

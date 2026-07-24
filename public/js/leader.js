@@ -1930,19 +1930,14 @@
   }
 
   function loadTeamReport() {
-    // Populate filter dropdown with members
-    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function (res) {
-      if (res && res.success && Array.isArray(res.data.records)) {
-        var dropdown = document.getElementById('ssFilterMember');
-        if (dropdown) {
-          var html = '<option value="">All Members</option>';
-          res.data.records.forEach(function (m) {
-            html += '<option value="' + m.user_id + '">' + m.first_name + ' ' + m.last_name + '</option>';
-          });
-          dropdown.innerHTML = html;
-        }
-      }
-    });
+    var dropdown = document.getElementById('ssFilterMember');
+    if (dropdown) {
+      var html = '<option value="">All Members</option>';
+      teamMembers.forEach(function (m) {
+        html += '<option value="' + m.id + '">' + m.name + '</option>';
+      });
+      dropdown.innerHTML = html;
+    }
 
     fetchSpreadsheetData();
   }

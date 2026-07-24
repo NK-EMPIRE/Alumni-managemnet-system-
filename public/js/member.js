@@ -1274,6 +1274,8 @@
                         phone: a.phone || '',
                         linkedin_profile: a.linkedin_profile || '',
                         working_details: a.working_details || '',
+                        date_of_birth: a.date_of_birth || '',
+                        father_name: a.father_name || '',
                         higherStudies: a.higher_studies || a.higherStudies || 'No',
                         higherDetails: a.higher_details || a.higherDetails || '',
                         entrepreneur: a.is_entrepreneur ? 'Yes' : (a.entrepreneur || 'No'),
