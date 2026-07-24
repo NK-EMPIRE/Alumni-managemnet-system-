@@ -2714,3 +2714,96 @@ window.undoAlumniSubmission = function () {
     if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
   });
 };
+
+/* ── EMAIL CAMPAIGN (n8n AUTOMATION) HANDLERS ── */
+var _activeCampaignPollInterval = null;
+
+window.openEmailCampaignModal = function () {
+  var setupState = document.getElementById('campaignSetupState');
+  var progressState = document.getElementById('campaignProgressState');
+  var launchBtn = document.getElementById('launchCampaignSubmitBtn');
+  var badge = document.getElementById('campaignRecipientBadge');
+
+  if (setupState) setupState.style.display = 'block';
+  if (progressState) progressState.style.display = 'none';
+  if (launchBtn) { launchBtn.style.display = 'inline-flex'; launchBtn.disabled = false; }
+  if (badge) badge.textContent = 'Counting team records...';
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments?limit=1000', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.data) {
+      var count = Array.isArray(res.data) ? res.data.length : (res.data.assignments ? res.data.assignments.length : 0);
+      if (badge) badge.textContent = count + ' Alumni Records';
+    } else {
+      if (badge) badge.textContent = 'Team Assignments Ready';
+    }
+  }).catch(function () {
+    if (badge) badge.textContent = 'Team Assignments Ready';
+  });
+
+  if (window.openModal) window.openModal('emailCampaignModal');
+};
+
+window.submitEmailCampaignLaunch = function () {
+  var launchBtn = document.getElementById('launchCampaignSubmitBtn');
+  if (launchBtn) { launchBtn.disabled = true; launchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dispatching to n8n...'; }
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({})
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success) {
+      Toast.success('Campaign Dispatched', 'n8n email automation campaign has been queued.');
+      var setupState = document.getElementById('campaignSetupState');
+      var progressState = document.getElementById('campaignProgressState');
+      if (setupState) setupState.style.display = 'none';
+      if (progressState) progressState.style.display = 'block';
+      if (launchBtn) launchBtn.style.display = 'none';
+
+      var campaignId = res.data.campaignId;
+      window.pollCampaignProgress(campaignId);
+    } else {
+      Toast.error('Campaign Failed', res && res.message || 'Failed to dispatch campaign');
+      if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
+    }
+  }).catch(function () {
+    Toast.error('Campaign Failed', 'Network error dispatching campaign');
+    if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
+  });
+};
+
+window.pollCampaignProgress = function (campaignId) {
+  if (_activeCampaignPollInterval) clearInterval(_activeCampaignPollInterval);
+
+  var token = localStorage.getItem('token');
+  var progressBar = document.getElementById('campaignProgressBar');
+  var progressStats = document.getElementById('campaignProgressStats');
+
+  _activeCampaignPollInterval = setInterval(function () {
+    fetch('/api/v1/email-campaigns/' + campaignId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res && res.data) {
+        var c = res.data;
+        var total = c.total_recipients || 1;
+        var processed = (c.sent_count || 0) + (c.failed_count || 0);
+        var pct = Math.min(100, Math.round((processed / total) * 100));
+
+        if (progressBar) progressBar.style.width = pct + '%';
+        if (progressStats) progressStats.textContent = 'Sent: ' + (c.sent_count || 0) + ' / Failed: ' + (c.failed_count || 0) + ' (Total: ' + total + ')';
+
+        if (c.status === 'Completed' || c.status === 'Failed' || processed >= total) {
+          clearInterval(_activeCampaignPollInterval);
+          Toast.success('Campaign Completed', 'All emails have been processed via n8n automation.');
+        }
+      }
+    }).catch(function () {});
+  }, 3000);
+};

@@ -16,6 +16,7 @@ const reassignRoutes = require('./reassign.routes');
 const healthRoutes = require('./health.routes');
 
 const taskRoutes = require('./task.routes');
+const emailCampaignRoutes = require('./emailCampaign.routes');
 
 const router = Router();
 
@@ -46,5 +47,6 @@ router.use('/audit-logs', auditRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/health', healthRoutes);
 router.use('/tasks', taskRoutes);
+router.use('/email-campaigns', emailCampaignRoutes);
 
 module.exports = router;

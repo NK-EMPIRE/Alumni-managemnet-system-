@@ -652,12 +652,18 @@
             <h3 style="font-size: 0.95rem; font-weight: 600;"><i class="fas fa-bolt" style="color:#7C3AED;margin-right:8px"></i> Quick Actions</h3>
           </div>
           <div class="card-body" style="padding: 16px 20px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px">
               <div class="quick-action-btn" id="distributeModalBtn" style="padding: 10px 14px">
                 <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED;width:36px;height:36px;font-size:0.95rem">
                   <i class="fas fa-share-alt"></i>
                 </div>
                 <span style="font-size:0.85rem;font-weight:500">Distribute to Members</span>
+              </div>
+              <div class="quick-action-btn" onclick="openEmailCampaignModal()" style="padding: 10px 14px; cursor: pointer;">
+                <div class="icon-wrap" style="background:#DBEAFE;color:#2563EB;width:36px;height:36px;font-size:0.95rem">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+                <span style="font-size:0.85rem;font-weight:500">Request Details (Email)</span>
               </div>
               <div class="quick-action-btn" id="refreshDataBtn" style="padding: 10px 14px">
                 <div class="icon-wrap" style="background:#D1FAE5;color:#10B981;width:36px;height:36px;font-size:0.95rem">
@@ -1684,8 +1690,54 @@
           <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)" style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right" style="margin-left:4px;"></i></button>
         </div>
       </div>
+  <!-- Email Campaign Preview Modal -->
+  <div class="modal-overlay" id="emailCampaignModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content" style="width:100%;max-width:540px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-paper-plane" style="font-size:1.1rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Request Details (n8n Automation)</h3>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Send bulk email requests for professional detail updates</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('emailCampaignModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;">
+        <div id="campaignSetupState">
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:0.85rem;font-weight:600;color:#1E40AF;">Target Team Recipients</span>
+              <span class="badge badge-primary" id="campaignRecipientBadge">Loading...</span>
+            </div>
+            <p style="margin:0;font-size:0.78rem;color:#1E3A8A;line-height:1.4;">Automated emails will be queued via n8n with individual trackable Reply-To tags to capture incoming replies.</p>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="font-size:0.8rem;font-weight:600;color:#475569;display:block;margin-bottom:6px;">Email Subject Preview</label>
+            <input type="text" readonly value="Request for Professional Information Update - Mount Zion College" style="width:100%;padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:0.85rem;background:#F8FAFC;color:#334155;">
+          </div>
+        </div>
+
+        <div id="campaignProgressState" style="display:none;text-align:center;padding:10px 0;">
+          <h4 style="margin:0 0 10px;font-size:1rem;color:#1E293B;">Campaign Dispatched & Processing</h4>
+          <div style="width:100%;background:#E2E8F0;border-radius:8px;height:12px;overflow:hidden;margin-bottom:14px;">
+            <div id="campaignProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#2563EB,#3B82F6);transition:width 0.4s ease;"></div>
+          </div>
+          <p id="campaignProgressStats" style="font-size:0.85rem;color:#64748B;margin:0;">Sent: 0 / Failed: 0</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('emailCampaignModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="launchCampaignSubmitBtn" onclick="submitEmailCampaignLaunch()">
+          <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign
+        </button>
+      </div>
     </div>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/socket.io/socket.io.js"></script>

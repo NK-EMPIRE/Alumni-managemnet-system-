@@ -1,0 +1,139 @@
+{
+  "name": "AMS Email Reply Watcher",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "format": "resolved",
+        "options": {
+          "customHeaders": "Delivered-To,To"
+        }
+      },
+      "name": "IMAP Email Trigger",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\nconst toHeader = item.to || item.headers['to'] || item.headers['delivered-to'] || '';\nconst match = toHeader.match(/alumnirequests\\+(\\d+)@/i);\n\nif (match && match[1]) {\n  return {\n    json: {\n      assignmentId: parseInt(match[1], 10),\n      rawReplyText: item.text || item.html || '',\n      receivedAt: item.date || new Date().toISOString()\n    }\n  };\n} else {\n  return {\n    json: {\n      unmatched: true,\n      toHeader,\n      subject: item.subject,\n      from: item.from\n    }\n  };\n}"
+      },
+      "name": "Parse Plus Address Tag",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.unmatched}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Is Unmatched?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/v1/email-campaigns/replies/ingest",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-Automation-Secret",
+              "value": "YOUR_N8N_SHARED_SECRET"
+            }
+          ]
+        },
+        "requestMethod": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"assignmentId\": {{$json.assignmentId}},\n  \"rawReplyText\": \"{{$json.rawReplyText}}\",\n  \"receivedAt\": \"{{$json.receivedAt}}\"\n}"
+      },
+      "name": "Ingest Reply to AMS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        940,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "alumnirequests@mountzion.ac.in",
+        "toEmail": "admin@mountzion.ac.in",
+        "subject": "Unmatched Alumni Email Reply Received",
+        "html": "<p>An unmatched reply arrived without a valid assignment tag.</p><p><b>To:</b> {{$json.toHeader}}<br><b>From:</b> {{$json.from}}<br><b>Subject:</b> {{$json.subject}}</p>"
+      },
+      "name": "Notify Admin Unmatched",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        940,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "IMAP Email Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Plus Address Tag",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Plus Address Tag": {
+      "main": [
+        [
+          {
+            "node": "Is Unmatched?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsUnmatched?": {
+      "main": [
+        [
+          {
+            "node": "Notify Admin Unmatched",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ingest Reply to AMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

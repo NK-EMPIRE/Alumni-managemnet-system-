@@ -1,0 +1,219 @@
+{
+  "name": "AMS Email Campaign Sender",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "campaign-trigger",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "ams-campaign-trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Webhook Trigger\"].json[\"headers\"][\"x-automation-secret\"]}}",
+              "value2": "YOUR_N8N_SHARED_SECRET"
+            }
+          ]
+        }
+      },
+      "name": "Secret Auth Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.recipients",
+        "options": {
+          "batchSize": 25
+        }
+      },
+      "name": "Split in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "alumnirequests@mountzion.ac.in",
+        "toEmail": "={{$json.email}}",
+        "subject": "Request for Professional Information Update - Mount Zion College of Engineering and Technology",
+        "html": "<p>Dear {{$json.name}},</p><p>We hope this email finds you well. Please update your current professional details with your alma mater using your student portal.</p><p>Best regards,<br>Mount Zion Alumni Relations Team</p>",
+        "options": {
+          "replyTo": "=alumnirequests+{{$json.assignmentId}}@mountzion.ac.in"
+        }
+      },
+      "name": "SMTP Send Mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-Automation-Secret",
+              "value": "YOUR_N8N_SHARED_SECRET"
+            }
+          ]
+        },
+        "requestMethod": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"recipientId\": {{$json[\"recipientId\"]}},\n  \"status\": \"Sent\",\n  \"messageId\": \"{{$node[\"SMTP Send Mail\"].json[\"messageId\"]}}\"\n}"
+      },
+      "name": "Log Success to AMS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-Automation-Secret",
+              "value": "YOUR_N8N_SHARED_SECRET"
+            }
+          ]
+        },
+        "requestMethod": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"recipientId\": {{$node[\"Split in Batches\"].json[\"recipientId\"]}},\n  \"status\": \"Failed\",\n  \"messageId\": \"SMTP Error\"\n}"
+      },
+      "name": "Log Failure to AMS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "name": "Batch Delay Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Secret Auth Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Secret Auth Check": {
+      "main": [
+        [
+          {
+            "node": "Split in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split in Batches": {
+      "main": [
+        [
+          {
+            "node": "SMTP Send Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMTP Send Mail": {
+      "main": [
+        [
+          {
+            "node": "Log Success to AMS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Failure to AMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Success to AMS": {
+      "main": [
+        [
+          {
+            "node": "Batch Delay Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Failure to AMS": {
+      "main": [
+        [
+          {
+            "node": "Batch Delay Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Delay Wait": {
+      "main": [
+        [
+          {
+            "node": "Split in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

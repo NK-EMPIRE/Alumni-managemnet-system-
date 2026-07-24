@@ -18,10 +18,24 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendEmail({ to, subject, html }) {
+async function sendEmail({ to, subject, html, from }) {
   const { logger } = require('../utils/logger');
-  logger.info('Email service disabled. Mocking email delivery.', { to, subject });
-  return { messageId: 'mock-delivered' };
+  try {
+    const mailTransporter = getTransporter();
+    const fromAddress = from || process.env.EMAIL_FROM || process.env.EMAIL_USER;
+    logger.info('Attempting to send email...', { to, subject, from: fromAddress });
+    const info = await mailTransporter.sendMail({
+      from: fromAddress,
+      to,
+      subject,
+      html
+    });
+    logger.info('Email sent successfully', { messageId: info.messageId, response: info.response });
+    return info;
+  } catch (error) {
+    logger.error('Failed to send email', { error: error.message, to, subject });
+    throw error;
+  }
 }
 
 async function sendPasswordResetEmail(email, temporaryPassword) {
