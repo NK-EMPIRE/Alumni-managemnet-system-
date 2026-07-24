@@ -40,74 +40,6 @@
     const sidebar = document.getElementById('sidebar');
     const todayCountEl = document.getElementById('todayCount');
 
-    const departments = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
-    const batches = ['2020', '2021', '2022', '2023'];
-    const companies = ['Google', 'Microsoft', 'Amazon', 'TCS', 'Infosys', 'Wipro', 'HCL', 'Accenture', 'Deloitte', 'Goldman Sachs', 'IBM', 'Cisco', 'Oracle', 'Adobe', 'Meta'];
-    const positions = ['Software Engineer', 'Data Analyst', 'Product Manager', 'Consultant', 'UI/UX Designer', 'Cloud Architect', 'DevOps Engineer', 'Business Analyst', 'Data Scientist', 'Project Manager', 'Full Stack Developer', 'AI Engineer', 'System Analyst', 'Network Engineer', 'Security Analyst'];
-    const cities = ['Bangalore', 'Hyderabad', 'Chennai', 'Mumbai', 'Delhi', 'Pune', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Lucknow'];
-    const states = ['Karnataka', 'Telangana', 'Tamil Nadu', 'Maharashtra', 'Delhi', 'Rajasthan', 'Uttar Pradesh', 'West Bengal', 'Gujarat', 'Punjab'];
-    const statuses = ['Completed', 'Pending', 'Draft'];
-
-    function getRandomItem(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function buildAlumniData() {
-        const names = [
-            'Aarav Sharma', 'Aditi Patel', 'Arjun Singhania', 'Deepika Krishnan',
-            'Karthik Iyer', 'Meera Nair', 'Pranav Joshi', 'Riya Kapoor',
-            'Sahil Mehta', 'Tanvi Gupta', 'Vikram Reddy', 'Ananya Deshmukh',
-            'Rohit Verma', 'Isha Saxena', 'Manish Tiwari', 'Neha Aggarwal',
-            'Siddharth Rao', 'Priya Menon', 'Amit Khanna', 'Shreya Dutta',
-            'Rahul Bose', 'Kavya Srinivasan', 'Harsh Vardhan', 'Divya Nair',
-            'Suresh Babu', 'Anjali Kulkarni', 'Vivek Oberoi', 'Pooja Jain',
-            'Nitin Choudhury', 'Lakshmi Narayan', 'Gaurav Bhatia', 'Sneha Roy'
-        ];
-        const data = [];
-        for (let i = 0; i < names.length; i++) {
-            const dept = getRandomItem(departments);
-            const batch = getRandomItem(batches);
-            const company = getRandomItem(companies);
-            const position = getRandomItem(positions);
-            const city = getRandomItem(cities);
-            const state = getRandomItem(states);
-            let status;
-            if (i < 13) {
-                status = statuses[i % 2];
-            } else if (i < 19) {
-                status = 'Draft';
-            } else {
-                status = statuses[(i - 6) % 2];
-            }
-            data.push({
-                id: i + 1,
-                name: names[i],
-                department: dept,
-                batch: batch,
-                company: company,
-                designation: position,
-                city: city,
-                state: state,
-                country: 'India',
-                email: names[i].toLowerCase().replace(/\s+/g, '.') + '@alumni.edu',
-                phone: '+91 ' + getRandomInt(7000000000, 9999999999),
-                linkedin: 'https://linkedin.com/in/' + names[i].toLowerCase().replace(/\s+/g, ''),
-                higherStudies: i % 4 === 0 ? 'Yes' : 'No',
-                higherDetails: i % 4 === 0 ? 'MIT, MBA, 2024' : '',
-                entrepreneur: i % 5 === 0 ? 'Yes' : 'No',
-                govtJob: i % 7 === 0 ? 'Yes' : 'No',
-                otherOcc: '',
-                remarks: '',
-                status: status
-            });
-        }
-        return data;
-    }
-
     function renderTable() {
         const searchTerm = tableSearch.value.toLowerCase().trim();
         const deptFilter = filterDept.value;
@@ -988,7 +920,7 @@
                 var html = '';
                 records.forEach(function (row, idx) {
                     var serial = (previewPage - 1) * previewLimit + idx + 1;
-                    var status = row.assignment_status || 'Available';
+                    var status = row.status || 'Pending';
                     var badgeClass = 'badge-secondary';
                     if (status === 'Completed') badgeClass = 'badge-success';
                     else if (status === 'Pending') badgeClass = 'badge-warning';
@@ -1266,6 +1198,25 @@
         list.innerHTML = html;
     }
 
+    function populateFiltersFromData() {
+        var deptMap = {};
+        var batchMap = {};
+        alumniData.forEach(function (r) {
+            if (r.department) deptMap[r.department] = true;
+            if (r.batch) batchMap[r.batch] = true;
+        });
+        if (filterDept) {
+            var html = '<option value="">All Departments</option>';
+            Object.keys(deptMap).sort().forEach(function (d) { html += '<option value="' + d + '">' + d + '</option>'; });
+            filterDept.innerHTML = html;
+        }
+        if (filterBatch) {
+            var html = '<option value="">All Batches</option>';
+            Object.keys(batchMap).sort().forEach(function (b) { html += '<option value="' + b + '">' + b + '</option>'; });
+            filterBatch.innerHTML = html;
+        }
+    }
+
     function fetchMemberData() {
         window.fetchMemberData = fetchMemberData; // expose globally
         return Promise.all([
@@ -1325,6 +1276,7 @@
             } else {
                 alumniData = [];
             }
+            populateFiltersFromData();
             renderTable();
             populateNotifications();
         }).catch(function () {
@@ -1335,30 +1287,6 @@
     }
     function init() {
         setMemberUserInfo();
-
-        // Populate dynamic filters from database
-        API.getAlumniFilters().then(function (res) {
-            if (res && res.success && res.data) {
-                const depts = res.data.departments || [];
-                const batches = res.data.batches || [];
-                if (filterDept) {
-                    filterDept.innerHTML = '<option value="">All Departments</option>';
-                    depts.forEach(d => {
-                        filterDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
-                    });
-                }
-                if (filterBatch) {
-                    filterBatch.innerHTML = '<option value="">All Batches</option>';
-                    batches.forEach(b => {
-                        filterBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
-                    });
-                }
-
-            }
-        }
-        ).catch(err => {
-            console.error('Failed to load dynamic filters in member:', err);
-        });
 
         var hideLoading = function () {
             var ls = document.getElementById('loadingScreen');

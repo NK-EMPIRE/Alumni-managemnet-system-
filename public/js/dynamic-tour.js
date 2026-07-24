@@ -80,10 +80,12 @@
   function discoverAppFeatures() {
     var steps = [];
     var role = 'ADMIN';
-    if (window.API && window.API.getUser) {
-      var user = window.API.getUser();
-      if (user && user.role) role = user.role.toUpperCase();
-    }
+    try {
+      if (window.API && window.API.getUser) {
+        var user = window.API.getUser();
+        if (user && user.role) role = user.role.toUpperCase();
+      }
+    } catch(e) {}
 
     // 1. Sidebar Navigation
     var sidebarItems = document.querySelectorAll('.sidebar-item, .sidebar-nav a');

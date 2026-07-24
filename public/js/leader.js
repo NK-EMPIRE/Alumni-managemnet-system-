@@ -1413,6 +1413,7 @@
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
         var pagination = (res.data && res.data.pagination) ? res.data.pagination : null;
         ssTotal = (pagination && pagination.total) ? pagination.total : records.length;
+        populateSpreadsheetFilters(records);
         renderSpreadsheetTable(records);
         renderSpreadsheetPagination();
       } else {
@@ -1423,6 +1424,26 @@
       showToast('An error occurred fetching records', 'error');
     });
   };
+
+  function populateSpreadsheetFilters(records) {
+    var deptMap = {}, batchMap = {};
+    records.forEach(function (r) {
+      if (r.department) deptMap[r.department] = true;
+      if (r.batch) batchMap[r.batch] = true;
+    });
+    var ssDept = document.getElementById('ssFilterDept');
+    var ssBatch = document.getElementById('ssFilterBatch');
+    if (ssDept) {
+      var html = '<option value="">All Depts</option>';
+      Object.keys(deptMap).sort().forEach(function (d) { html += '<option value="' + d + '">' + d + '</option>'; });
+      ssDept.innerHTML = html;
+    }
+    if (ssBatch) {
+      var html = '<option value="">All Batches</option>';
+      Object.keys(batchMap).sort().forEach(function (b) { html += '<option value="' + b + '">' + b + '</option>'; });
+      ssBatch.innerHTML = html;
+    }
+  }
 
   window.renderSpreadsheetTable = function (data) {
     var headRow = document.getElementById('ssTableHeadRow');
@@ -1460,7 +1481,7 @@
         if (!col.visible) return;
         var val = '';
         if (col.key === 'assignment_status') {
-          var status = row.assignment_status || 'Pending';
+          var status = row.status || 'Pending';
           var badgeClass = status === 'Completed' ? 'badge-success' : (status === 'Draft' ? 'badge-info' : 'badge-warning');
           val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
         } else if (col.key === 'member_name') {
@@ -2259,34 +2280,6 @@
     setupSidebar();
     setupNotifications();
     setupProfileDropdown();
-
-    // Populate Department and Batch filter dropdowns dynamically from database
-    if (window.API && typeof API.getAlumniFilters === 'function') {
-      API.getAlumniFilters().then(function (res) {
-        if (res && res.success && res.data) {
-          var depts = res.data.departments || [];
-          var batches = res.data.batches || [];
-
-          var ssDept = document.getElementById('ssFilterDept');
-          var ssBatch = document.getElementById('ssFilterBatch');
-
-          if (ssDept) {
-            ssDept.innerHTML = '<option value="">All Depts</option>';
-            depts.forEach(function (d) {
-              ssDept.innerHTML += '<option value="' + d + '">' + d + '</option>';
-            });
-          }
-          if (ssBatch) {
-            ssBatch.innerHTML = '<option value="">All Batches</option>';
-            batches.forEach(function (b) {
-              ssBatch.innerHTML += '<option value="' + b + '">' + b + '</option>';
-            });
-          }
-        }
-      }).catch(function (e) {
-        console.warn('Failed to load dynamic alumni filters:', e);
-      });
-    }
     setupSearchAndFilter();
     setupModals();
     setupLockFeatures();
