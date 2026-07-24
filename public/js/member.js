@@ -311,9 +311,13 @@
         modalAvatar.textContent = record.name.charAt(0).toUpperCase();
         const isCompleted = record.status === 'Completed';
         const isDraft = record.status === 'Draft';
-        const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : 'pending');
-        const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
+        const isReopened = record.status === 'Reopened';
+        const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : (isReopened ? 'badge-danger' : 'pending'));
+        const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-redo-alt' : 'fa-clock'));
         modalStatusBadge.className = 'status-badge ' + badgeClass;
+        if (isReopened) {
+          modalStatusBadge.style.cssText = 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
+        }
         modalStatusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + record.status;
 
         const deptEl = document.getElementById('fieldDept');

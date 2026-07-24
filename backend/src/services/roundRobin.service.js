@@ -513,10 +513,10 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   await transaction.begin();
 
   try {
-    // Update the assignment record status to Draft (keeping it assigned to the member)
+    // Update the assignment record status to Reopened (keeping it assigned to the member/leader)
     await transaction.request()
       .input('alumniId', sql.Int, alumniId)
-      .query("UPDATE AlumniAssignments SET status = 'Draft', completed_date = NULL WHERE alumni_id = @alumniId");
+      .query("UPDATE AlumniAssignments SET status = 'Reopened', completed_date = NULL WHERE alumni_id = @alumniId");
 
     await transaction.commit();
   } catch (err) {

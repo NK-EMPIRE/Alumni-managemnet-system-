@@ -485,7 +485,7 @@ async function reopenAlumniRecord(alumniId) {
     .input('alumniId', sql.Int, alumniId)
     .query(`
       UPDATE AlumniAssignments
-      SET status = 'Draft', completed_date = NULL
+      SET status = 'Reopened', completed_date = NULL
       WHERE alumni_id = @alumniId;
 
       UPDATE Alumni

@@ -1030,11 +1030,15 @@
         var status = record.assignment_status || 'Pending';
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
-        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
-        var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
+        var isReopened = status === 'Reopened';
+        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : (isReopened ? 'badge-danger' : 'badge-warning'));
+        var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-redo-alt' : 'fa-clock'));
 
         var statusBadge = document.getElementById('modalStatusBadge');
         statusBadge.className = 'status-badge ' + badgeClass;
+        if (isReopened) {
+          statusBadge.style.cssText = 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
+        }
         statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
 
         var deptEl = document.getElementById('fieldDept');
