@@ -22,7 +22,7 @@
     .tour-spotlight-active {
       position: relative !important;
       z-index: 99995 !important;
-      box-shadow: 0 0 0 4px #3B82F6, 0 0 25px rgba(59, 130, 246, 0.8) !important;
+      box-shadow: 0 0 0 4px #3B82F6, 0 0 35px rgba(59, 130, 246, 1), 0 0 0 9999px rgba(15, 23, 42, 0.75) !important;
       border-radius: 8px;
       transition: all 0.3s ease !important;
       animation: tourPulse 2s infinite ease-in-out !important;
