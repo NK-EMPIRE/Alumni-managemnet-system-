@@ -821,12 +821,11 @@
       var searchInput = document.getElementById('ssSearch') || document.getElementById('globalSearchInput') || document.getElementById('tableSearch');
       if (searchInput) searchInput.focus();
     }
-    // Ctrl + F -> Toggle Filter Modal
     if (e.ctrlKey && e.key.toLowerCase() === 'f') {
       var modal = document.getElementById('ssFilterModal');
       if (modal) {
         e.preventDefault();
-        if (modal.style.display === 'flex' || modal.classList.contains('active')) {
+        if (modal.classList.contains('show')) {
           if (window.closeModal) window.closeModal('ssFilterModal');
         } else {
           if (window.openModal) window.openModal('ssFilterModal');

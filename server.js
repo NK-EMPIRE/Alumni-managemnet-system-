@@ -97,7 +97,7 @@ async function startServer() {
       await runMigrations();
       logger.info('Migrations executed successfully');
     } catch (migErr) {
-      logger.warn('Migration run failed: ' + migErr.message);
+      logger.error('Migration run failed: ' + migErr.message + '. Server will start but some features may not work.');
     }
     server.listen(PORT, () => {
       logger.info(`Server running on http://localhost:${PORT}`);

@@ -1,4 +1,5 @@
 const sql = require('mssql');
+const { logger } = require('../utils/logger');
 
 let pool = null;
 
@@ -24,7 +25,12 @@ function buildConfig() {
 
 async function getPool() {
   if (pool) return pool;
-  pool = await sql.connect(buildConfig());
+  try {
+    pool = await sql.connect(buildConfig());
+  } catch (e) {
+    logger.error('Database connection failed:', e);
+    throw e;
+  }
   try {
     await pool.query(`
       IF NOT EXISTS (
@@ -35,7 +41,6 @@ async function getPool() {
         ALTER TABLE dbo.ImportHistory ADD duration_sec DECIMAL(10, 2) NULL;
       END
 
-      -- Migration: Add 'Reopened' to CK_AlumniAssignments_status constraint if present
       IF EXISTS (
         SELECT * FROM sys.check_constraints 
         WHERE parent_object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'CK_AlumniAssignments_status'
@@ -47,10 +52,10 @@ async function getPool() {
       END
     `);
   } catch (e) {
-    console.error('Database migration failed:', e);
+    logger.error('Database migration failed:', e);
   }
   pool.on('error', (err) => {
-    console.error('SQL Pool error:', err);
+    logger.error('SQL Pool error:', err);
     pool = null;
   });
   return pool;

@@ -1444,3 +1444,23 @@
 {"level":"info","message":"Server running on http://localhost:3000","timestamp":"2026-07-24 10:38:56.184"}
 {"level":"info","message":"Frontend: http://localhost:3000","timestamp":"2026-07-24 10:38:56.185"}
 {"level":"info","message":"API: http://localhost:3000/api/v1","timestamp":"2026-07-24 10:38:56.185"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-24 12:27:23.392"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-07-24 12:27:23.396"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-07-24 12:27:23.396"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-07-24 12:27:23.396"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-24 12:27:57.648"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-07-24 12:27:57.652"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-07-24 12:27:57.653"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-07-24 12:27:57.653"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-24 12:32:45.996"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-07-24 12:32:46.002"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-07-24 12:32:46.002"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-07-24 12:32:46.002"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-24 12:32:59.178"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-07-24 12:32:59.182"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-07-24 12:32:59.183"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-07-24 12:32:59.183"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-07-24 12:34:32.481"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-07-24 12:34:32.484"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-07-24 12:34:32.485"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-07-24 12:34:32.485"}
