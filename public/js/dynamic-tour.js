@@ -10,15 +10,6 @@
   var tourStyle = document.createElement('style');
   tourStyle.id = 'dynamic-tour-styles';
   tourStyle.innerHTML = `
-    .tour-spotlight-backdrop {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(2px);
-      z-index: 99980;
-      pointer-events: auto;
-      transition: opacity 0.3s ease;
-    }
     .tour-highlight-box {
       position: fixed;
       z-index: 99995;
@@ -109,9 +100,6 @@
 
   var activeTourSteps = [];
   var currentStepIndex = 0;
-  var spotlightBackdrop = null;
-  var tooltipCard = null;
-  var currentHighlightedEl = null;
 
   // Feature Discovery Engine: Scans DOM & Role context
   function discoverAppFeatures() {
@@ -359,21 +347,31 @@
     return steps;
   }
 
-  var spotlightBackdrop = null;
+  var cutoutTop = null;
+  var cutoutBottom = null;
+  var cutoutLeft = null;
+  var cutoutRight = null;
   var highlightBox = null;
   var tooltipCard = null;
   var currentHighlightedEl = null;
 
-  // Create Backdrop, Highlight Box & Tooltip DOM elements
+  function createCutoutPanel(className) {
+    var panel = document.createElement('div');
+    panel.className = className;
+    panel.style.cssText = 'position:fixed;background:rgba(15,23,42,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none;z-index:99980;display:none;';
+    document.body.appendChild(panel);
+    return panel;
+  }
+
   function initSpotlightDOM() {
-    if (!spotlightBackdrop) {
-      spotlightBackdrop = document.createElement('div');
-      spotlightBackdrop.className = 'tour-spotlight-backdrop';
-      document.body.appendChild(spotlightBackdrop);
-    }
+    if (!cutoutTop) { cutoutTop = createCutoutPanel('tour-cutout-top'); }
+    if (!cutoutBottom) { cutoutBottom = createCutoutPanel('tour-cutout-bottom'); }
+    if (!cutoutLeft) { cutoutLeft = createCutoutPanel('tour-cutout-left'); }
+    if (!cutoutRight) { cutoutRight = createCutoutPanel('tour-cutout-right'); }
     if (!highlightBox) {
       highlightBox = document.createElement('div');
       highlightBox.className = 'tour-highlight-box';
+      highlightBox.style.cssText = 'position:fixed;z-index:99995;pointer-events:none;border-radius:8px;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);animation:tourPulse 2s infinite ease-in-out;display:none;';
       document.body.appendChild(highlightBox);
     }
     if (!tooltipCard) {
@@ -383,13 +381,33 @@
     }
   }
 
+  function positionCutout(rect) {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var pad = 8;
+    var t = Math.max(0, rect.top - pad);
+    var b = Math.min(vh, rect.bottom + pad);
+    var l = Math.max(0, rect.left - pad);
+    var r = Math.min(vw, rect.right + pad);
+    // top panel
+    cutoutTop.style.cssText = 'position:fixed;top:0;left:0;width:' + vw + 'px;height:' + t + 'px;background:rgba(15,23,42,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none;z-index:99980;display:block;';
+    // bottom panel
+    cutoutBottom.style.cssText = 'position:fixed;top:' + b + 'px;left:0;width:' + vw + 'px;height:' + (vh - b) + 'px;background:rgba(15,23,42,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none;z-index:99980;display:block;';
+    // left panel (between top and bottom, left of target)
+    cutoutLeft.style.cssText = 'position:fixed;top:' + t + 'px;left:0;width:' + l + 'px;height:' + (b - t) + 'px;background:rgba(15,23,42,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none;z-index:99980;display:block;';
+    // right panel (between top and bottom, right of target)
+    cutoutRight.style.cssText = 'position:fixed;top:' + t + 'px;left:' + r + 'px;width:' + (vw - r) + 'px;height:' + (b - t) + 'px;background:rgba(15,23,42,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none;z-index:99980;display:block;';
+  }
+
   function clearSpotlight() {
     if (currentHighlightedEl) {
       currentHighlightedEl.classList.remove('tour-spotlight-active');
       currentHighlightedEl = null;
     }
-    if (spotlightBackdrop) spotlightBackdrop.style.display = 'none';
-    if (highlightBox) spotlightBackdrop.style.display = 'none';
+    if (cutoutTop) cutoutTop.style.display = 'none';
+    if (cutoutBottom) cutoutBottom.style.display = 'none';
+    if (cutoutLeft) cutoutLeft.style.display = 'none';
+    if (cutoutRight) cutoutRight.style.display = 'none';
     if (highlightBox) highlightBox.style.display = 'none';
     if (tooltipCard) tooltipCard.style.display = 'none';
   }
@@ -426,14 +444,15 @@
 
       var rect = el.getBoundingClientRect();
 
+      // Position 4-side cutout panels around the target
+      positionCutout(rect);
+
       // Position glowing highlight ring directly around element
       highlightBox.style.top = (rect.top - 4) + 'px';
       highlightBox.style.left = (rect.left - 4) + 'px';
       highlightBox.style.width = (rect.width + 8) + 'px';
       highlightBox.style.height = (rect.height + 8) + 'px';
       highlightBox.style.display = 'block';
-
-      spotlightBackdrop.style.display = 'block';
 
       // Position tooltip near target element
       var tooltipTop = rect.bottom + 16;
