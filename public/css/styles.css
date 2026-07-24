@@ -3757,9 +3757,33 @@ body.dark-mode .text-muted {
   color: #94A3B8 !important;
 }
 
+/* ── Search bars & Input groups ── */
+body.dark-mode .search-bar,
+body.dark-mode .table-search,
+body.dark-mode .table-actions input {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .search-bar input {
+  background-color: transparent !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .search-icon {
+  color: #94A3B8 !important;
+}
+
 /* ── Badges ── */
 body.dark-mode .badge {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .badge-record-count {
+  background: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
 }
 
 body.dark-mode .leader-badge {
@@ -3769,32 +3793,51 @@ body.dark-mode .leader-badge {
 }
 
 /* ── Pagination ── */
+body.dark-mode .pagination button,
 body.dark-mode .pagination-item {
   background: #1E293B !important;
   border-color: #334155 !important;
   color: #CBD5E1 !important;
 }
 
+body.dark-mode .pagination button.active,
 body.dark-mode .pagination-item.active {
   background: #4F46E5 !important;
   color: #fff !important;
   border-color: #4F46E5 !important;
 }
 
+body.dark-mode .pagination button:hover:not(:disabled),
 body.dark-mode .pagination-item:hover:not(:disabled) {
   background: #334155 !important;
 }
 
-/* ── Settings tabs ── */
-body.dark-mode .settings-tab-btn {
+/* ── Settings & Tabs ── */
+body.dark-mode .settings-tab-btn,
+body.dark-mode .tab-item {
   background: #1E293B !important;
   color: #94A3B8 !important;
   border-color: #334155 !important;
 }
 
-body.dark-mode .settings-tab-btn.active {
+body.dark-mode .settings-tab-btn.active,
+body.dark-mode .tab-item.active {
   background: #4F46E5 !important;
   color: #fff !important;
+}
+
+/* ── Tables & Spreadsheet Headers ── */
+body.dark-mode .spreadsheet-table thead,
+body.dark-mode .spreadsheet-table th,
+body.dark-mode #ssTableHeadRow th {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .sticky-col {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
 }
 
 /* ── Avatar / profile initials ── */
