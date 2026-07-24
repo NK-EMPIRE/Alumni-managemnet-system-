@@ -1477,6 +1477,17 @@ window.saveMemberPassword = function () {
 
 /* Internal toast helper so the global functions can show toasts */
 function _memberShowToast(message, type) {
+    if (window.Toast) {
+        if (type === 'error' || type === 'danger') window.Toast.error(type === 'error' ? 'Error' : 'Alert', message);
+        else if (type === 'warning') window.Toast.warning('Warning', message);
+        else if (type === 'info') window.Toast.info('Notification', message);
+        else window.Toast.success('Success', message);
+        return;
+    }
+    if (typeof window.showToast === 'function') {
+        window.showToast(type === 'error' ? 'Error' : (type === 'warning' ? 'Warning' : 'Success'), message, type === 'error' ? 'danger' : type);
+        return;
+    }
     type = type || 'success';
     var container = document.getElementById('toastContainer');
     if (!container) {
@@ -1486,14 +1497,22 @@ function _memberShowToast(message, type) {
         document.body.appendChild(container);
     }
     var toast = document.createElement('div');
-    toast.className = 'toast ' + type;
-    var icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-    toast.innerHTML = '<i class="fas ' + (icons[type] || 'fa-info-circle') + '"></i> ' + message;
+    toast.className = 'toast ' + (type === 'error' ? 'danger' : type);
+    var icons = { success: 'fa-check-circle', danger: 'fa-times-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+    toast.innerHTML =
+        '<div class="toast-icon"><i class="fas ' + (icons[type] || 'fa-info-circle') + '"></i></div>' +
+        '<div class="toast-content">' +
+        '<p class="toast-title">' + (type === 'error' ? 'Error' : (type === 'warning' ? 'Warning' : (type === 'info' ? 'Info' : 'Success'))) + '</p>' +
+        '<p class="toast-message">' + message + '</p>' +
+        '</div>' +
+        '<button class="toast-close" onclick="this.parentElement.classList.add(\'exit\');setTimeout(function(){if(this.parentElement)this.parentElement.remove()}.bind(this),300)"><i class="fas fa-times"></i></button>';
     container.appendChild(toast);
     setTimeout(function () {
-        toast.classList.add('removing');
-        setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
-    }, 3500);
+        if (toast.parentElement) {
+            toast.classList.add('exit');
+            setTimeout(function () { if (toast.parentElement) toast.remove(); }, 300);
+        }
+    }, 4000);
 }
 
 var _undoTargetId = null;
