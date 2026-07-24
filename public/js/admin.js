@@ -525,10 +525,13 @@ function _doFilter() {
   }
   state.filteredData = source.filter(function (item) {
     var match = true;
-    if (q && item.name.toLowerCase().indexOf(q) === -1) match = false;
-    if (dept && item.dept !== dept) match = false;
-    if (status && item.status !== status) match = false;
-    if (batch && String(item.batch) !== batch) match = false;
+    if (q) {
+      var haystack = (item.name + ' ' + item.dept + ' ' + item.batch + ' ' + item.leader + ' ' + item.company).toLowerCase();
+      if (haystack.indexOf(q) === -1) match = false;
+    }
+    if (dept && item.dept.toLowerCase() !== dept.toLowerCase()) match = false;
+    if (status && item.status.toLowerCase() !== status.toLowerCase()) match = false;
+    if (batch && String(item.batch) !== String(batch)) match = false;
     return match;
   });
 
@@ -565,7 +568,7 @@ function updateDashboardFilterBadge() {
   if (dept) count++;
   if (batch) count++;
   if (status) count++;
-  var badge = document.getElementById('dashboardActiveFilterBadge');
+  var badge = document.getElementById('filterBadge') || document.getElementById('dashboardActiveFilterBadge');
   if (badge) {
     if (count > 0) {
       badge.textContent = count;
@@ -1092,12 +1095,12 @@ function populateDynamicFilters(filters) {
   var batches = data.batches || [];
 
   // Populate all department selects
-  var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment', 'dashFilterDept'];
+  var deptSelects = ['filterDepartment', 'ssFilterDept', 'tlDept', 'tmDept', 'assignDept', 'editDepartment', 'dashFilterDept', 'expFilterDept'];
   deptSelects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
     var currentVal = sel.value;
-    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('dash') || id.startsWith('ssFilter');
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('dash') || id.startsWith('ssFilter') || id.startsWith('expFilter');
     var html = isFilter ? '<option value="">All Depts</option>' : '<option value="" disabled selected hidden>Select Department</option>';
     depts.forEach(function (d) {
       if (d) html += '<option value="' + d + '">' + d + '</option>';
@@ -1107,12 +1110,12 @@ function populateDynamicFilters(filters) {
   });
 
   // Populate all batch selects
-  var batchSelects = ['filterBatch', 'ssFilterBatch', 'assignBatch', 'dashFilterBatch'];
+  var batchSelects = ['filterBatch', 'ssFilterBatch', 'assignBatch', 'dashFilterBatch', 'expFilterBatch'];
   batchSelects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
     var currentVal = sel.value;
-    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('dash') || id.startsWith('ssFilter');
+    var isFilter = id.indexOf('Filter') !== -1 || id.indexOf('filter') !== -1 || id.startsWith('dash') || id.startsWith('ssFilter') || id.startsWith('expFilter');
     var html = isFilter ? '<option value="">All Batches</option>' : '<option value="" disabled selected hidden>Select Batch</option>';
     batches.forEach(function (b) {
       if (b) html += '<option value="' + b + '">' + b + '</option>';
@@ -1126,7 +1129,7 @@ function populateDynamicFilters(filters) {
    15. TEAM LEADER DROPDOWNS (for modals)
    ──────────────────────────────────────────────────────────── */
 function populateTeamLeaderDropdowns() {
-  var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader', 'tmFilterLeader'];
+  var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader', 'tmFilterLeader', 'expFilterLeader'];
   var leaders;
   if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
     leaders = _apiUsers.records.map(function (u) {
@@ -1139,7 +1142,7 @@ function populateTeamLeaderDropdowns() {
   selects.forEach(function (id) {
     var sel = document.getElementById(id);
     if (!sel) return;
-    var isFilter = id === 'ssFilterLeader' || id === 'tmFilterLeader';
+    var isFilter = id === 'ssFilterLeader' || id === 'tmFilterLeader' || id === 'expFilterLeader';
     sel.innerHTML = isFilter ? '<option value="">All Leaders</option>' : '<option value="" disabled selected hidden>Select Team Leader</option>';
     leaders.forEach(function (tl) {
       var opt = document.createElement('option');
@@ -1150,9 +1153,11 @@ function populateTeamLeaderDropdowns() {
     });
   });
 
-  // Populate ssFilterMember dropdown
-  var memberSel = document.getElementById('ssFilterMember');
-  if (memberSel) {
+  // Populate ssFilterMember and expFilterMember dropdowns
+  ['ssFilterMember', 'expFilterMember'].forEach(function (memId) {
+    var memberSel = document.getElementById(memId);
+    if (!memberSel) return;
+    var currentMemberVal = memberSel.value;
     memberSel.innerHTML = '<option value="">All Members</option>';
     var members = [];
     if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
@@ -1162,8 +1167,8 @@ function populateTeamLeaderDropdowns() {
       });
     }
 
-    // Get current leader selection if any
-    var currentLeaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
+    var leaderSrcId = memId === 'expFilterMember' ? 'expFilterLeader' : 'ssFilterLeader';
+    var currentLeaderId = document.getElementById(leaderSrcId) ? document.getElementById(leaderSrcId).value : '';
 
     members.forEach(function (m) {
       if (currentLeaderId && String(m.leaderId) !== String(currentLeaderId)) {
@@ -1174,7 +1179,8 @@ function populateTeamLeaderDropdowns() {
       opt.textContent = m.name + (m.dept ? ' (' + m.dept + ')' : '');
       memberSel.appendChild(opt);
     });
-  }
+    if (currentMemberVal) memberSel.value = currentMemberVal;
+  });
 
   // Bind change event to ssFilterLeader to filter ssFilterMember options dynamically
   var leaderSel = document.getElementById('ssFilterLeader');
@@ -1328,6 +1334,7 @@ function navigateTo(section, el) {
     target.style.display = 'block';
     target.classList.add('active');
   }
+  window.scrollTo({ top: 0, behavior: 'instant' });
 
   if (section === 'audit') {
     fetchLatestAuditLogs(populateAuditLogTable);
@@ -3588,6 +3595,11 @@ window.syncSpreadsheetFiltersToExportModal = function () {
   var srcStatus = document.getElementById('ssFilterStatus');
   var srcSearch = document.getElementById('ssSearch');
 
+  var dashDept = document.getElementById('dashFilterDept');
+  var dashBatch = document.getElementById('dashFilterBatch');
+  var dashStatus = document.getElementById('dashFilterStatus');
+  var dashSearch = document.getElementById('tableSearch');
+
   var expLeader = document.getElementById('expFilterLeader');
   var expMember = document.getElementById('expFilterMember');
   var expDept = document.getElementById('expFilterDept');
@@ -3595,12 +3607,12 @@ window.syncSpreadsheetFiltersToExportModal = function () {
   var expStatus = document.getElementById('expFilterStatus');
   var expSearch = document.getElementById('expFilterSearch');
 
-  if (expLeader && srcLeader) expLeader.value = srcLeader.value;
-  if (expMember && srcMember) expMember.value = srcMember.value;
-  if (expDept && srcDept) expDept.value = srcDept.value;
-  if (expBatch && srcBatch) expBatch.value = srcBatch.value;
-  if (expStatus && srcStatus) expStatus.value = srcStatus.value;
-  if (expSearch && srcSearch) expSearch.value = srcSearch.value;
+  if (expLeader) expLeader.value = (srcLeader && srcLeader.value) || '';
+  if (expMember) expMember.value = (srcMember && srcMember.value) || '';
+  if (expDept) expDept.value = (srcDept && srcDept.value) || (dashDept && dashDept.value) || '';
+  if (expBatch) expBatch.value = (srcBatch && srcBatch.value) || (dashBatch && dashBatch.value) || '';
+  if (expStatus) expStatus.value = (srcStatus && srcStatus.value) || (dashStatus && dashStatus.value) || '';
+  if (expSearch) expSearch.value = (srcSearch && srcSearch.value) || (dashSearch && dashSearch.value) || '';
 };
 
 window.resetExportModalFilters = function () {

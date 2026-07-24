@@ -63,9 +63,41 @@
       letter-spacing: 0.5px;
       margin-bottom: 8px;
     }
+    body.dark-mode .tour-tooltip-card {
+      background: #1E293B !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+    }
     body.dark-mode .tour-tooltip-badge {
       background: rgba(37, 99, 235, 0.25) !important;
       color: #60A5FA !important;
+    }
+    body.dark-mode .tour-step-counter {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode .tour-tooltip-card h4 {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode .tour-tooltip-card p {
+      color: #CBD5E1 !important;
+    }
+    body.dark-mode .tour-tooltip-footer {
+      border-top-color: #334155 !important;
+    }
+    body.dark-mode #tourSkipBtn {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode #tourSkipBtn:hover {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #tourBackStepBtn {
+      background: #334155 !important;
+      color: #F8FAFC !important;
+      border: 1px solid #475569 !important;
+    }
+    body.dark-mode #tourBackStepBtn:hover {
+      background: #475569 !important;
     }
   `;
   document.head.appendChild(tourStyle);
@@ -188,27 +220,64 @@
       });
     }
 
-    // 8. Role-Specific Extensions
+    // 8. View Modal Feature Guide
+    var viewBtn = document.querySelector('.btn-secondary.btn-sm[onclick*="viewAlumniDetails"]') || document.querySelector('button[title="View Details"]');
+    if (viewBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: viewBtn,
+        title: 'Alumni Profile Preview Modal',
+        badge: 'Detailed View',
+        description: 'Opens complete alumni profile including father name, date of birth, social profile link (with auto Facebook/LinkedIn icon detection) and audit trail.'
+      });
+    }
+
+    // 9. Update Record Modal Feature Guide (Member/Leader)
+    var updateBtn = document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]') || document.querySelector('button[onclick*="editAlumniRecord"]');
+    if (updateBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: updateBtn,
+        title: 'Alumni Information Update Form',
+        badge: 'Data Verification',
+        description: 'Update verified alumni details (father name, email, phone, company, designation, city, state, LinkedIn/Facebook profile). Supports Save Draft & Submit.'
+      });
+    }
+
+    // 10. Export Customization Modal Feature Guide (Admin/Leader)
+    var exportBtn = document.querySelector('button[onclick*="openExportCustomizationModal"]');
+    if (exportBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: exportBtn,
+        title: 'Customizable Export & Download',
+        badge: 'Data Export',
+        description: 'Opens export customization modal to select specific columns, filter matched records, and download Excel/CSV reports cleanly.'
+      });
+    }
+
+    // 11. Database Health Check Feature Guide (Admin)
+    var dbHealthBtn = document.querySelector('button[onclick*="openDbHealthModal"]');
+    if (dbHealthBtn) {
+      steps.push({
+        type: 'modal-feature',
+        selector: dbHealthBtn,
+        title: 'Database Health Diagnostics',
+        badge: 'Quality Control',
+        description: 'Monitors database completion rate, missing field breakdown (including father name), and sends automated notifications to assignees.'
+      });
+    }
+
+    // 12. Role-Specific Extensions
     if (role === 'LEADER') {
-      var reassignBtn = document.querySelector('button[onclick*="openReassignModal"]') || document.querySelector('button[onclick*="distribute"]');
+      var reassignBtn = document.querySelector('button[onclick*="openReassignModal"]') || document.querySelector('button[onclick*="openCirculateModal"]');
       if (reassignBtn) {
         steps.push({
           type: 'role',
           selector: reassignBtn,
-          title: 'Intelligent Member Distribution',
+          title: 'Member Distribution & Circulate',
           badge: 'Team Leader Feature',
-          description: 'Distribute or reassign alumni records across team members manually or auto-evenly.'
-        });
-      }
-    } else if (role === 'MEMBER') {
-      var updateBtn = document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]');
-      if (updateBtn) {
-        steps.push({
-          type: 'role',
-          selector: updateBtn,
-          title: 'Update Alumni Record',
-          badge: 'Member Verification',
-          description: 'Fill in essential alumni professional details, father name, phone, email, and social profiles.'
+          description: 'Distribute or reassign alumni records across team members manually or auto-evenly with sleek minimal modals.'
         });
       }
     }
@@ -290,11 +359,11 @@
       tooltipCard.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="tour-tooltip-badge">${step.badge || 'Feature Guide'}</span>
-          <span style="font-size:0.75rem;color:#64748B;font-weight:600;">Step ${index + 1} of ${activeTourSteps.length}</span>
+          <span class="tour-step-counter" style="font-size:0.75rem;color:#64748B;font-weight:600;">Step ${index + 1} of ${activeTourSteps.length}</span>
         </div>
         <h4 style="margin:4px 0 8px;font-size:1.1rem;font-weight:700;">${step.title}</h4>
         <p style="font-size:0.85rem;color:var(--text-secondary,#64748B);margin:0 0 16px;line-height:1.5;">${step.description}</p>
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #E2E8F0;padding-top:14px;margin-top:12px;">
+        <div class="tour-tooltip-footer" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #E2E8F0;padding-top:14px;margin-top:12px;">
           <button id="tourSkipBtn" style="background:none;border:none;color:#64748B;font-size:0.8rem;cursor:pointer;font-weight:600;">Skip Tour</button>
           <div style="display:flex;gap:8px;">
             ${index > 0 ? '<button id="tourBackStepBtn" style="padding:6px 12px;background:#E2E8F0;color:#1E293B;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;">Back</button>' : ''}

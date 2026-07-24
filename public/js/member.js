@@ -97,6 +97,13 @@
                 const isReopened = r.status === 'Reopened';
                 const badgeClass = isCompleted ? 'completed' : (isDraft ? 'draft' : (isReopened ? 'badge-danger' : 'pending'));
                 const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-undo' : 'fa-clock'));
+                var actionButtons = '<div style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;">' +
+                    '<button class="btn-update" data-index="' + r.id + '"><i class="fas fa-edit"></i> Update</button>';
+                if (isCompleted) {
+                    var safeName = (r.name || '').replace(/'/g, "\\'");
+                    actionButtons += '<button class="btn-undo-icon" onclick="confirmUndoSubmission(' + r.id + ', \'' + safeName + '\')" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
+                }
+                actionButtons += '</div>';
                 html += '<tr>' +
                     '<td style="font-weight:600;color:var(--text-secondary);">' + serial + '</td>' +
                     '<td><strong>' + r.name + '</strong></td>' +
@@ -105,7 +112,7 @@
                     '<td>' + r.company + '</td>' +
                     '<td>' + r.designation + '</td>' +
                     '<td><span class="status-badge ' + badgeClass + '" style="' + (isReopened ? 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;' : '') + '"><i class="fas ' + badgeIcon + '"></i> ' + r.status + '</span></td>' +
-                    '<td><button class="btn-update" data-index="' + r.id + '"><i class="fas fa-edit"></i> Update</button></td>' +
+                    '<td>' + actionButtons + '</td>' +
                     '</tr>';
             }
             recordsBody.innerHTML = html;
@@ -856,6 +863,10 @@
                     loadPreviewSpreadsheet();
                 }
 
+                var mainContent = document.querySelector('.main-content');
+                if (mainContent) mainContent.scrollTop = 0;
+                window.scrollTo({ top: 0, behavior: 'instant' });
+
                 if (window.innerWidth <= 992) {
                     sidebar.classList.remove('active');
                 }
@@ -1479,37 +1490,61 @@ function _memberShowToast(message, type) {
     }, 3500);
 }
 
+var _undoTargetId = null;
+
+window.confirmUndoSubmission = function(alumniId, name) {
+    _undoTargetId = alumniId;
+    var nameEl = document.getElementById('undoTargetName');
+    if (nameEl) nameEl.textContent = name || 'this record';
+    var modal = document.getElementById('undoConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    }
+};
+
+window.closeUndoModal = function() {
+    _undoTargetId = null;
+    var modal = document.getElementById('undoConfirmModal');
+    if (modal) {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+    }
+};
+
+window.executeUndoSubmission = function() {
+    if (!_undoTargetId) return;
+    var btn = document.getElementById('confirmUndoBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...';
+    }
+
+    var apiCall = (window.API && typeof window.API.reopenAssignment === 'function')
+        ? window.API.reopenAssignment(_undoTargetId, 'Undone by member')
+        : window.API.reopenAlumni(_undoTargetId);
+
+    apiCall.then(function(res) {
+        if (window.Toast) window.Toast.success('Submission Undone!', 'Record moved back to Draft successfully.');
+        else _memberShowToast('Submission undone. Record is back in Draft.', 'success');
+        window.closeUndoModal();
+        if (window.fetchMemberData) window.fetchMemberData();
+    }).catch(function(err) {
+        if (window.Toast) window.Toast.error('Undo Failed', err && err.message || 'Failed to undo submission.');
+        else _memberShowToast(err && err.message || 'Failed to undo submission.', 'error');
+    }).finally(function() {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-undo"></i> Undo & Change to Draft';
+        }
+    });
+};
+
 window.undoAlumniSubmission = function() {
     var fieldIndexEl = document.getElementById('fieldIndex');
     var idx = fieldIndexEl ? parseInt(fieldIndexEl.value, 10) : 0;
     if (!idx) return;
-    if (!confirm('Are you sure you want to undo submission and set status back to Pending?')) return;
-
-    var undoBtn = document.getElementById('undoSubmitBtn');
-    if (undoBtn) { undoBtn.disabled = true; undoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...'; }
-
-    var token = localStorage.getItem('token');
-    fetch('/api/v1/assignments/reopen/' + idx, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
-    }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res && res.success) {
-            if (window.Toast) window.Toast.success('Undo Submission', res.message || 'Submission undone. Record is back to Pending.');
-            else _memberShowToast('Submission undone. Record is back to Pending.', 'success');
-            // Close modal and refresh data
-            var modal = document.getElementById('updateModal');
-            if (modal) modal.classList.remove('show');
-            if (window.fetchMemberData) window.fetchMemberData();
-        } else {
-            if (window.Toast) window.Toast.error('Undo Submission', res && res.message || 'Failed to undo submission.');
-            else _memberShowToast(res && res.message || 'Failed to undo submission.', 'error');
-        }
-    }).catch(function() {
-        if (window.Toast) window.Toast.error('Undo Submission', 'Network error undoing submission.');
-        else _memberShowToast('Network error undoing submission.', 'error');
-    }).finally(function() {
-        if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
-    });
+    window.confirmUndoSubmission(idx, '');
 };
 
 /* ────────────────────────────────────────────────────────────

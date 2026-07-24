@@ -96,7 +96,7 @@ router.patch(
   '/:alumniId/reopen',
   param('alumniId').isInt().toInt(),
   validate,
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
   alumniController.reopenAlumni
 );
 

@@ -216,21 +216,52 @@
       toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
     }
 
-    toggleBtn.addEventListener('click', function () {
-      if (document.body.classList.contains('dark-mode')) {
-        document.body.classList.remove('dark-mode');
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-        toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-      } else {
-        document.body.classList.add('dark-mode');
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-        toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-      }
-      try {
-        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: document.body.classList.contains('dark-mode') } }));
-      } catch (e) {}
+    toggleBtn.addEventListener('click', function (e) {
+      // Create radial expanding circular ripple from button position
+      var rect = toggleBtn.getBoundingClientRect();
+      var x = rect.left + rect.width / 2;
+      var y = rect.top + rect.height / 2;
+      var maxRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+
+      var isDarkNow = document.body.classList.contains('dark-mode');
+      var circleColor = isDarkNow ? '#F8FAFC' : '#0F172A'; // White circle to Light, Dark circle to Dark
+
+      var overlay = document.createElement('div');
+      overlay.className = 'theme-ripple-overlay';
+      var circle = document.createElement('div');
+      circle.className = 'theme-ripple-circle';
+      circle.style.left = x + 'px';
+      circle.style.top = y + 'px';
+      circle.style.width = (maxRadius * 2) + 'px';
+      circle.style.height = (maxRadius * 2) + 'px';
+      circle.style.background = circleColor;
+      overlay.appendChild(circle);
+      document.body.appendChild(overlay);
+
+      setTimeout(function () {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 750);
+
+      // Toggle theme at the midpoint (350ms) of ripple expansion for flawless visual sync
+      setTimeout(function () {
+        if (isDarkNow) {
+          document.body.classList.remove('dark-mode');
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+          toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        } else {
+          document.body.classList.add('dark-mode');
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+          toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        try {
+          window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: document.body.classList.contains('dark-mode') } }));
+        } catch (err) {}
+      }, 350);
     });
   }
 
@@ -756,12 +787,31 @@
     }
   };
 
-  // Auto trigger welcome tour on login if not dismissed
+  // Auto trigger today's tasks and prompt for tutorial after login
   setTimeout(function () {
-    if (document.getElementById('welcomeTourModal')) {
-      window.startWelcomeTour(false);
+    var user = API && API.getUser ? API.getUser() : null;
+    var role = user ? (user.role || '').toUpperCase() : '';
+
+    // Auto-trigger Today's Tasks Modal for Members & Leaders after 1.5s
+    if (role === 'MEMBER' || role === 'LEADER') {
+      if (typeof window.openTodayTasksModal === 'function') {
+        window.openTodayTasksModal();
+      }
     }
-  }, 1200);
+
+    // Prompt for Interactive Product Tour for first-time logins after 3.5s
+    if (localStorage.getItem('alumni_tour_dismissed') !== 'true') {
+      setTimeout(function () {
+        if (typeof window.startIntelligentProductTour === 'function') {
+          if (confirm("👋 Welcome! Would you like a quick interactive tour to discover all features & tools?")) {
+            window.startIntelligentProductTour();
+          } else {
+            localStorage.setItem('alumni_tour_dismissed', 'true');
+          }
+        }
+      }, 2000);
+    }
+  }, 1500);
 
   // Keyboard Shortcuts Listener
   document.addEventListener('keydown', function (e) {

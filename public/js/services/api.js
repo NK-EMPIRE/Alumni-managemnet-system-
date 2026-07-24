@@ -182,6 +182,9 @@
     reopenAlumni: function (id) {
         return patch('/alumni/' + id + '/reopen', {});
     },
+    reopenAssignment: function (id, reason) {
+        return post('/assignments/reopen/' + id, { reason: reason || 'Undone by user' });
+    },
 
     uploadImport: function (formData) {
         return fetch(BASE_URL + '/upload/import', {
