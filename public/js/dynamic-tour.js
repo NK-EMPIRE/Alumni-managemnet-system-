@@ -307,7 +307,22 @@
     }
 
     // 12. Role-Specific Extensions
-    if (role === 'LEADER') {
+    if (role === 'ADMIN') {
+      var assignNewBtn = document.querySelector('button[onclick*="assignAlumniModal"]');
+      if (assignNewBtn) {
+        steps.push({
+          type: 'role',
+          selector: assignNewBtn,
+          title: 'Assign New Alumni Datasets ➕',
+          badge: 'Admin Command',
+          description: 'Assign batch & department datasets directly to Team Leaders or Team Members with auto round-robin distribution.',
+          demo: function () {
+            if (window.openModal) window.openModal('assignAlumniModal');
+            setTimeout(function () { if (window.closeModal) window.closeModal('assignAlumniModal'); }, 2200);
+          }
+        });
+      }
+    } else if (role === 'LEADER') {
       var reassignBtn = document.querySelector('button[onclick*="openReassignModal"]') || document.querySelector('button[onclick*="openCirculateModal"]');
       if (reassignBtn) {
         steps.push({
@@ -319,10 +334,19 @@
           demo: function () {
             var mId = document.getElementById('reassignModal') ? 'reassignModal' : 'circulateModal';
             if (window.openModal) window.openModal(mId);
-            setTimeout(function () {
-              if (window.closeModal) window.closeModal(mId);
-            }, 2200);
+            setTimeout(function () { if (window.closeModal) window.closeModal(mId); }, 2200);
           }
+        });
+      }
+    } else if (role === 'MEMBER') {
+      var draftSaveBtn = document.querySelector('#saveDraftBtn') || document.querySelector('button[onclick*="saveDraft"]');
+      if (draftSaveBtn) {
+        steps.push({
+          type: 'role',
+          selector: draftSaveBtn,
+          title: 'Draft & Auto-Save Work 💾',
+          badge: 'Team Member Feature',
+          description: 'Save partial alumni details as Draft anytime. Automatically backs up your work so zero data is lost!',
         });
       }
     }
