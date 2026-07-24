@@ -1810,276 +1810,207 @@
           <i class="fas fa-redo-alt" style="margin-right:6px;"></i>Reopen
         </button>
       </div>
-      <!-- ============================================================
+    </div>
+  </div>
+
+  <!-- ============================================================
        TODAY'S TASKS MODAL (Admin, Leader & Member)
        ============================================================ -->
-      <div class="modal-overlay" id="todayTasksModal">
-        <div class="modal" style="max-width:540px;width:92vw;border-radius:16px;overflow:hidden;">
-          <div class="modal-header"
-            style="background:linear-gradient(135deg, #10B981, #059669);color:#fff;padding:18px 24px;">
-            <h3 style="color:#fff;margin:0;font-size:1.15rem;font-weight:700;"><i class="fas fa-check-double"
-                style="margin-right:8px;"></i>Today's Work Summary & Tasks</h3>
-            <button class="modal-close" onclick="closeModal('todayTasksModal')" style="color:#fff;">&times;</button>
-          </div>
-          <div class="modal-body" style="padding:20px 24px;">
-            <div id="todayContextBanner"
-              style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:500;margin-bottom:16px;line-height:1.5;">
-              <i class="fas fa-lightbulb" style="margin-right:6px;color:#059669;"></i><span
-                id="todayContextText">Loading your daily summary...</span>
-            </div>
-            <h4
-              style="font-size:0.85rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
-              Action Items Checklist</h4>
-            <div id="todayTasksList" style="display:flex;flex-direction:column;gap:10px;">
-              <div style="text-align:center;padding:20px;color:#94A3B8;">Loading tasks...</div>
-            </div>
-          </div>
-          <div
-            style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:0.8rem;color:#64748B;" id="todayTaskProgressCount">0 tasks remaining</span>
-            <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')"
-              style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
-          </div>
+  <div class="modal-overlay" id="todayTasksModal">
+    <div class="modal" style="max-width:540px;width:92vw;border-radius:16px;overflow:hidden;">
+      <div class="modal-header"
+        style="background:linear-gradient(135deg, #10B981, #059669);color:#fff;padding:18px 24px;">
+        <h3 style="color:#fff;margin:0;font-size:1.15rem;font-weight:700;"><i class="fas fa-check-double"
+            style="margin-right:8px;"></i>Today's Work Summary & Tasks</h3>
+        <button class="modal-close" onclick="closeModal('todayTasksModal')" style="color:#fff;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;">
+        <div id="todayContextBanner"
+          style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:500;margin-bottom:16px;line-height:1.5;">
+          <i class="fas fa-lightbulb" style="margin-right:6px;color:#059669;"></i><span
+            id="todayContextText">Loading your daily summary...</span>
+        </div>
+        <h4
+          style="font-size:0.85rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+          Action Items Checklist</h4>
+        <div id="todayTasksList" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="text-align:center;padding:20px;color:#94A3B8;">Loading tasks...</div>
         </div>
       </div>
+      <div
+        style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.8rem;color:#64748B;" id="todayTaskProgressCount">0 tasks remaining</span>
+        <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')"
+          style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
+      </div>
+    </div>
+  </div>
 
-      <!-- ============================================================
+  <!-- ============================================================
        WELCOME TUTORIAL & DEMO TOUR MODAL (Interactive Assistant)
        ============================================================ -->
-      <div class="modal-overlay" id="welcomeTourModal">
-        <div class="modal"
-          style="max-width:580px;width:92vw;border-radius:18px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);">
-          <div
-            style="background:linear-gradient(135deg, #2563EB, #4F46E5);color:#fff;padding:28px 24px 20px;text-align:center;position:relative;">
-            <button onclick="closeModal('welcomeTourModal')"
-              style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
-            <div
-              style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
-              🎓
-            </div>
-            <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to
-              AlumniMS! 👋</h2>
-            <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your
-              interactive guide to system features and recent updates.</p>
-          </div>
-          <div class="modal-body" style="padding:24px;">
-            <div id="tourStepContent" style="font-size:0.92rem;color:#334155;line-height:1.6;min-height:110px;">
-              <!-- Populated dynamically by tour script -->
-            </div>
-            <!-- Motivation Quote Banner -->
-            <div
-              style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;"
-              id="tourMotivationBanner">
-              "Success is the sum of small efforts repeated day in and day out. Work smoothly and have a wonderful day!
-              😊"
-            </div>
-          </div>
-          <div
-            style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-            <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#64748B;cursor:pointer;">
-              <input type="checkbox" id="dontShowTourCheckbox" style="accent-color:#2563EB;" /> Don't show again on
-              login
-            </label>
-            <div style="display:flex;gap:10px;">
-              <button class="btn btn-secondary btn-sm" id="tourPrevBtn" onclick="navigateTourStep(-1)"
-                style="display:none;">Back</button>
-              <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)"
-                style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right"
-                  style="margin-left:4px;"></i></button>
-            </div>
-          </div>
+  <div class="modal-overlay" id="welcomeTourModal">
+    <div class="modal"
+      style="max-width:580px;width:92vw;border-radius:18px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);">
+      <div
+        style="background:linear-gradient(135deg, #2563EB, #4F46E5);color:#fff;padding:28px 24px 20px;text-align:center;position:relative;">
+        <button onclick="closeModal('welcomeTourModal')"
+          style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
+        <div
+          style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
+          🎓
+        </div>
+        <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to
+          AlumniMS! 👋</h2>
+        <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your
+          interactive guide to system features and recent updates.</p>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+        <div id="tourStepContent" style="font-size:0.92rem;color:#334155;line-height:1.6;min-height:110px;">
+          <!-- Populated dynamically by tour script -->
+        </div>
+        <!-- Motivation Quote Banner -->
+        <div
+          style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;"
+          id="tourMotivationBanner">
+          "Success is the sum of small efforts repeated day in and day out. Work smoothly and have a wonderful day!
+          😊"
         </div>
       </div>
+      <div
+        style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#64748B;cursor:pointer;">
+          <input type="checkbox" id="dontShowTourCheckbox" style="accent-color:#2563EB;" /> Don't show again on
+          login
+        </label>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondary btn-sm" id="tourPrevBtn" onclick="navigateTourStep(-1)"
+            style="display:none;">Back</button>
+          <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)"
+            style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right"
+              style="margin-left:4px;"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <!-- ============================================================
-       SCRIPTS
-       ============================================================ -->
-      <!-- ============================================================
+  <!-- ============================================================
        SPREADSHEET FILTER MODAL (Admin & Global)
        ============================================================ -->
-      <div class="modal-overlay" id="ssFilterModal">
-        <div class="modal" style="max-width:550px;width:90vw;">
-          <div class="modal-header">
-            <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Spreadsheet Filters</h3>
-            <button class="modal-close" onclick="closeModal('ssFilterModal')">&times;</button>
+  <div class="modal-overlay" id="ssFilterModal">
+    <div class="modal" style="max-width:550px;width:90vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Spreadsheet Filters</h3>
+        <button class="modal-close" onclick="closeModal('ssFilterModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Team Leader</label>
+            <select class="form-control" id="ssFilterLeader" onchange="fetchSpreadsheetData()">
+              <option value="">All Leaders</option>
+            </select>
           </div>
-          <div class="modal-body" style="padding:20px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-              <div>
-                <label class="form-label">Team Leader</label>
-                <select class="form-control" id="ssFilterLeader" onchange="fetchSpreadsheetData()">
-                  <option value="">All Leaders</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Team Member</label>
-                <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()">
-                  <option value="">All Members</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Department</label>
-                <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()">
-                  <option value="">All Depts</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Batch / Year</label>
-                <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()">
-                  <option value="">All Batches</option>
-                </select>
-              </div>
-              <div style="grid-column:span 2;">
-                <label class="form-label">Status</label>
-                <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()">
-                  <option value="">All Statuses</option>
-                  <option value="Available">Available</option>
-                  <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
-                  <option value="Pending">Pending Member</option>
-                  <option value="Draft">Draft</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Date From</label>
-                <input type="date" id="ssDateFrom" class="form-control" onchange="fetchSpreadsheetData()">
-              </div>
-              <div>
-                <label class="form-label">Date To</label>
-                <input type="date" id="ssDateTo" class="form-control" onchange="fetchSpreadsheetData()">
-              </div>
-              <div style="grid-column:span 2;">
-                <label class="form-label">Filter Field</label>
-                <select id="ssDateField" class="form-control form-select" onchange="fetchSpreadsheetData()">
-                  <option value="created_at">Import Date</option>
-                  <option value="assigned_date">Distributed Date</option>
-                </select>
-              </div>
-            </div>
+          <div>
+            <label class="form-label">Team Member</label>
+            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()">
+              <option value="">All Members</option>
+            </select>
           </div>
-          <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
-            <button class="btn btn-secondary" onclick="resetSpreadsheetFilters()"><i class="fas fa-undo"></i> Clear
-              All</button>
-            <button class="btn btn-primary" onclick="fetchSpreadsheetData();closeModal('ssFilterModal')"><i
-                class="fas fa-check"></i> Apply Filters</button>
+          <div>
+            <label class="form-label">Department</label>
+            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Batch / Year</label>
+            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2;">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()">
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
+              <option value="Pending">Pending Member</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+              <option value="Reopened">Reopened</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Date From</label>
+            <input type="date" id="ssDateFrom" class="form-control" onchange="fetchSpreadsheetData()">
+          </div>
+          <div>
+            <label class="form-label">Date To</label>
+            <input type="date" id="ssDateTo" class="form-control" onchange="fetchSpreadsheetData()">
+          </div>
+          <div style="grid-column:span 2;">
+            <label class="form-label">Filter Field</label>
+            <select id="ssDateField" class="form-control form-select" onchange="fetchSpreadsheetData()">
+              <option value="created_at">Import Date</option>
+              <option value="assigned_date">Distributed Date</option>
+            </select>
           </div>
         </div>
       </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="resetSpreadsheetFilters()"><i class="fas fa-undo"></i> Clear
+          All</button>
+        <button class="btn btn-primary" onclick="fetchSpreadsheetData();closeModal('ssFilterModal')"><i
+            class="fas fa-check"></i> Apply Filters</button>
+      </div>
+    </div>
+  </div>
 
-      <!-- ============================================================
+  <!-- ============================================================
        DASHBOARD FILTER MODAL (Recent Assignments)
        ============================================================ -->
-      <div class="modal-overlay" id="dashboardFilterModal">
-        <div class="modal" style="max-width:450px;width:90vw;">
-          <div class="modal-header">
-            <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Dashboard Filters</h3>
-            <button class="modal-close" onclick="closeModal('dashboardFilterModal')">&times;</button>
+  <div class="modal-overlay" id="dashboardFilterModal">
+    <div class="modal" style="max-width:450px;width:90vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Dashboard Filters</h3>
+        <button class="modal-close" onclick="closeModal('dashboardFilterModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Department</label>
+            <select class="form-control" id="dashFilterDept" onchange="applyDashboardFilters()">
+              <option value="">All Depts</option>
+            </select>
           </div>
-          <div class="modal-body" style="padding:20px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-              <div>
-                <label class="form-label">Department</label>
-                <select class="form-control" id="dashFilterDept" onchange="applyDashboardFilters()">
-                  <option value="">All Depts</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Batch</label>
-                <select class="form-control" id="dashFilterBatch" onchange="applyDashboardFilters()">
-                  <option value="">All Batches</option>
-                </select>
-              </div>
-              <div style="grid-column:span 2;">
-                <label class="form-label">Status</label>
-                <select class="form-control" id="dashFilterStatus" onchange="applyDashboardFilters()">
-                  <option value="">All Statuses</option>
-                  <option value="Completed">Completed</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Draft">Draft</option>
-                </select>
-              </div>
-            </div>
+          <div>
+            <label class="form-label">Batch</label>
+            <select class="form-control" id="dashFilterBatch" onchange="applyDashboardFilters()">
+              <option value="">All Batches</option>
+            </select>
           </div>
-          <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
-            <button class="btn btn-secondary" onclick="resetDashboardFilters()"><i class="fas fa-undo"></i> Clear
-              All</button>
-            <button class="btn btn-primary" onclick="closeModal('dashboardFilterModal')"><i class="fas fa-check"></i>
-              Apply</button>
+          <div style="grid-column:span 2;">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="dashFilterStatus" onchange="applyDashboardFilters()">
+              <option value="">All Statuses</option>
+              <option value="Completed">Completed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+              <option value="Reopened">Reopened</option>
+            </select>
           </div>
         </div>
       </div>
-
-      <!-- ============================================================
-       SYSTEM WELCOME TOUR & SHORTCUTS MODAL
-       ============================================================ -->
-      <div class="modal-overlay" id="welcomeTourModal">
-        <div class="modal" style="max-width:650px;width:90vw;">
-          <div class="modal-header">
-            <h3><i class="fas fa-compass" style="color:var(--primary);margin-right:8px;"></i>Welcome & Quick System
-              Guide
-            </h3>
-            <button class="modal-close" onclick="closeModal('welcomeTourModal')">&times;</button>
-          </div>
-          <div class="modal-body" style="padding:20px;max-height:75vh;overflow-y:auto;">
-            <div class="welcome-banner">
-              <h4><i class="fas fa-smile"></i>Welcome to AMS Portal</h4>
-              <p>This interactive platform empowers Admins, Team Leaders, and Members to manage alumni datasets smoothly
-                with real-time updates.</p>
-            </div>
-
-            <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt"
-                style="color:var(--warning);margin-right:6px;"></i>Key Platform Features</h5>
-            <ul
-              style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
-              <li><strong>Global Date Filter:</strong> Select any custom date range in the top-right navbar calendar
-                icon to
-                filter working datasets across all views.</li>
-              <li><strong>Consolidated Filters:</strong> Click the <em>Filters</em> button on any spreadsheet to filter
-                by
-                Leader, Member, Dept, Batch, or Status cleanly in a single modal.</li>
-              <li><strong>Reassign & Redistribute:</strong> Dynamically shift pending assignments from one user to
-                another
-                with full audit log tracking.</li>
-              <li><strong>Full Screen View:</strong> Expand any spreadsheet into full-screen mode to easily work with
-                large
-                datasets.</li>
-            </ul>
-
-            <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard"
-                style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
-            <div class="shortcut-grid">
-              <div class="shortcut-card">
-                <kbd>Ctrl</kbd> + <kbd>K</kbd>
-                <div class="shortcut-desc">Focus Global Search</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>Esc</kbd>
-                <div class="shortcut-desc">Close Active Modal</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>Ctrl</kbd> + <kbd>S</kbd>
-                <div class="shortcut-desc">Save / Submit Record</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>Alt</kbd> + <kbd>E</kbd>
-                <div class="shortcut-desc">Export CSV</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>Ctrl</kbd> + <kbd>F</kbd>
-                <div class="shortcut-desc">Toggle Filter Modal</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>Alt</kbd> + <kbd>R</kbd>
-                <div class="shortcut-desc">Refresh Data</div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer" style="padding:14px 20px;text-align:right;">
-            <button class="btn btn-primary" onclick="closeModal('welcomeTourModal')">Got it, Let's Start!</button>
-          </div>
-        </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="resetDashboardFilters()"><i class="fas fa-undo"></i> Clear
+          All</button>
+        <button class="btn btn-primary" onclick="closeModal('dashboardFilterModal')"><i class="fas fa-check"></i>
+          Apply</button>
       </div>
+    </div>
+  </div>
 
       <!-- ============================================================
        EXPORT CUSTOMIZATION & ANIMATION MODAL
@@ -2149,6 +2080,7 @@
                   <option value="Pending">Pending Member</option>
                   <option value="Draft">Draft</option>
                   <option value="Completed">Completed</option>
+                  <option value="Reopened">Reopened</option>
                 </select>
               </div>
             </div>
@@ -2179,7 +2111,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Realtime Downloading Overlay Animation -->
     <div class="export-progress-overlay" id="exportProgressOverlay">
