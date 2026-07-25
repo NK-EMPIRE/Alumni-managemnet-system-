@@ -1715,9 +1715,22 @@
             <p style="margin:0;font-size:0.78rem;color:#1E3A8A;line-height:1.4;">Automated emails will be queued via n8n with individual trackable Reply-To tags to capture incoming replies.</p>
           </div>
 
-          <div style="margin-bottom:16px;">
+          <div style="margin-bottom:14px;">
             <label style="font-size:0.8rem;font-weight:600;color:#475569;display:block;margin-bottom:6px;">Email Subject Preview</label>
             <input type="text" readonly value="Request for Professional Information Update - Mount Zion College" style="width:100%;padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:0.85rem;background:#F8FAFC;color:#334155;">
+          </div>
+
+          <div>
+            <label style="font-size:0.8rem;font-weight:600;color:#475569;display:block;margin-bottom:6px;">Email Body Template Preview</label>
+            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:14px;font-size:0.82rem;color:#334155;line-height:1.5;">
+              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:8px;margin-bottom:10px;font-size:0.75rem;color:#64748B;">
+                <span><strong>From:</strong> alumnirequests@mountzion.ac.in</span>
+                <span><strong>Reply-To:</strong> alumnirequests+<em style="color:#2563EB;">{assignmentId}</em>@...</span>
+              </div>
+              <p style="margin:0 0 8px;">Dear <strong style="color:#2563EB;">{Alumnus Name}</strong>,</p>
+              <p style="margin:0 0 8px;">We hope this email finds you well. Please update your current professional details (Company, Designation, City, LinkedIn) with your alma mater using your student portal.</p>
+              <p style="margin:0;color:#64748B;font-size:0.78rem;">Best regards,<br><strong>Mount Zion Alumni Relations Team</strong></p>
+            </div>
           </div>
         </div>
 
