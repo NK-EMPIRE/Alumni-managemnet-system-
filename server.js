@@ -44,7 +44,7 @@ app.use('/api/', limiter);
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' }
@@ -55,7 +55,7 @@ app.use('/api/setup', setupRoutes);
 app.use('/api/v1', appRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'APIUMS API is running', timestamp: new Date().toISOString(), uptime: process.uptime() });
+  res.json({ success: true, message: 'AMS API is running', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });
 
 app.get('/{*path}', (req, res) => {
