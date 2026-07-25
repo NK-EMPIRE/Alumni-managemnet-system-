@@ -2822,7 +2822,11 @@ function populateAuditActionFilter() {
   actions.forEach(function (a) {
     select.innerHTML += '<option value="' + a + '">' + a.charAt(0).toUpperCase() + a.slice(1) + '</option>';
   });
-  select.value = currentVal;
+  if (currentVal && Array.from(select.options).some(function(opt){ return opt.value === currentVal; })) {
+    select.value = currentVal;
+  } else {
+    select.value = 'all';
+  }
 }
 
 function fetchLatestAuditLogs(callback) {
@@ -2892,10 +2896,11 @@ function applyAuditFilters() {
     }
     auditState.filteredData = fullData.filter(function (item) {
       var match = true;
-      if (actionVal !== 'all' && item.action !== actionVal) match = false;
-      if (roleVal !== 'all' && item.role !== roleVal) match = false;
+      if (actionVal !== 'all' && (item.action || '').toUpperCase() !== actionVal.toUpperCase()) match = false;
+      if (roleVal !== 'all' && (item.role || '').toUpperCase() !== roleVal.toUpperCase()) match = false;
       if (fromVal) {
         var fromDate = new Date(fromVal);
+        fromDate.setHours(0, 0, 0, 0);
         var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
         if (itemDate < fromDate) match = false;
       }

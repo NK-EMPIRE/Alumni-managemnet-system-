@@ -845,6 +845,11 @@
                     return;
                 }
 
+                if (page === 'replies') {
+                    // Handled via modal overlay, keep current view intact
+                    return;
+                }
+
                 document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
                 item.classList.add('active');
 
