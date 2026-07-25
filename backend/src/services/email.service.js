@@ -97,7 +97,7 @@ async function createCampaign({ leaderId, assignmentIds }) {
 
   // Fire n8n webhook asynchronously if configured
   const n8nWebhookUrl = process.env.N8N_CAMPAIGN_WEBHOOK_URL;
-  const sharedSecret = process.env.N8N_SHARED_SECRET || 'default_n8n_secret_key_change_in_prod';
+  const sharedSecret = process.env.N8N_SHARED_SECRET;
 
   if (n8nWebhookUrl) {
     try {

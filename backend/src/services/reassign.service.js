@@ -232,13 +232,20 @@ async function commitReassign(currentUser, { leaderId, sourceMemberId, allocatio
       if (assignIds.length === 0) continue;
 
       for (const assignId of assignIds) {
+        // Insert audit log before mutating member_id
         await transaction.request()
           .input('assignId', sql.Int, assignId)
           .input('targetMemberId', sql.Int, parseInt(targetId, 10))
+          .input('leaderUserId', sql.Int, leaderUserId)
           .query(`
+            INSERT INTO dbo.AssignmentAuditLog (alumni_id, old_member_id, new_member_id, changed_by)
+            SELECT alumni_id, member_id, @targetMemberId, @leaderUserId
+            FROM dbo.AlumniAssignments
+            WHERE assignment_id = @assignId;
+
             UPDATE AlumniAssignments
             SET member_id = @targetMemberId
-            WHERE assignment_id = @assignId AND status = 'Pending'
+            WHERE assignment_id = @assignId AND status = 'Pending';
           `);
         totalMoved++;
       }

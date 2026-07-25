@@ -39,11 +39,13 @@ async function login(loginId, password, ip, userAgent) {
   return {
     token: accessToken,
     refreshToken,
+    mustChangePassword: !!user.must_change_password,
     user: {
       id: user.user_id,
       name: `${user.first_name} ${user.last_name}`,
       email: user.email,
-      role: user.role_name
+      role: user.role_name,
+      mustChangePassword: !!user.must_change_password
     }
   };
 }

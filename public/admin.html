@@ -951,39 +951,20 @@
           </div>
         </div>
 
-        <!-- Audit Filters -->
-        <div class="card" style="padding:20px;margin-bottom:20px;">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-            <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Action
-                Type</label>
-              <select class="form-control" id="auditActionFilter">
-                <option value="all">All Actions</option>
-              </select>
+        <!-- Audit Filters Toolbar -->
+        <div class="card" style="padding:14px 20px;margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;flex:1;max-width:400px;">
+              <div class="search-bar" style="width:100%;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search audit logs..." id="auditSearchInput" oninput="filterAuditLogsLocal()">
+              </div>
             </div>
-            <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">User
-                Role</label>
-              <select class="form-control" id="auditRoleFilter">
-                <option value="all">All Roles</option>
-                <option value="ADMIN">Admin</option>
-                <option value="LEADER">Team Leader</option>
-                <option value="MEMBER">Team Member</option>
-              </select>
-            </div>
-            <div class="form-group" style="min-width:160px;flex:1;">
-              <label style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">Date
-                Range</label>
-              <input type="date" class="form-control" id="auditDateFrom">
-            </div>
-            <div class="form-group" style="min-width:160px;flex:1;">
-              <label
-                style="font-size:0.8rem;font-weight:500;color:#64748B;margin-bottom:4px;display:block;">&nbsp;</label>
-              <input type="date" class="form-control" id="auditDateTo">
-            </div>
-            <div>
-              <button class="btn btn-primary" id="auditFilterBtn"><i class="fas fa-filter"></i> Apply</button>
-              <button class="btn btn-outline" id="auditResetBtn"><i class="fas fa-undo"></i> Reset</button>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button class="btn btn-secondary btn-sm" onclick="openModal('auditFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="auditActiveFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+              </button>
+              <button class="btn btn-outline btn-sm" id="auditResetBtn" onclick="resetAuditFilters()" style="height:36px;"><i class="fas fa-undo"></i> Reset</button>
             </div>
           </div>
         </div>
@@ -2149,6 +2130,54 @@
             style="width:0%;background:linear-gradient(90deg,#2563EB,#0EA5E9);"></div>
         </div>
         <div style="font-size:0.8rem;color:#64748B;font-weight:600;margin-top:8px;" id="fetchProgressPercent">0%</div>
+      </div>
+    </div>
+
+    <!-- Audit Logs Filter Modal -->
+    <div class="modal-overlay" id="auditFilterModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+      <div class="modal-content" style="width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+        <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <i class="fas fa-filter" style="font-size:1rem;"></i>
+            </div>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Filter Audit Logs</h3>
+          </div>
+          <button class="modal-close" onclick="closeModal('auditFilterModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:20px 24px;">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Action Type</label>
+              <select class="form-control" id="auditActionFilter" style="width:100%;">
+                <option value="all">All Actions</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">User Role</label>
+              <select class="form-control" id="auditRoleFilter" style="width:100%;">
+                <option value="all">All Roles</option>
+                <option value="ADMIN">Admin</option>
+                <option value="LEADER">Team Leader</option>
+                <option value="MEMBER">Team Member</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <div class="form-group" style="flex:1;">
+                <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Date From</label>
+                <input type="date" class="form-control" id="auditDateFrom" style="width:100%;">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Date To</label>
+                <input type="date" class="form-control" id="auditDateTo" style="width:100%;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+          <button class="btn btn-secondary btn-sm" onclick="resetAuditFilters();closeModal('auditFilterModal');">Reset</button>
+          <button class="btn btn-primary btn-sm" id="auditFilterBtn" onclick="applyAuditFiltersModal()"><i class="fas fa-check"></i> Apply Filters</button>
+        </div>
       </div>
     </div>
 

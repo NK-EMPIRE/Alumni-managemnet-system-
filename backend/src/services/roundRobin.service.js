@@ -423,6 +423,11 @@ async function leaderDistribute(currentUser, params) {
           .query(`
             IF EXISTS (SELECT 1 FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId)
             BEGIN
+              INSERT INTO dbo.AssignmentAuditLog (alumni_id, old_member_id, new_member_id, changed_by)
+              SELECT alumni_id, member_id, @memberId, @assignedBy
+              FROM dbo.AlumniAssignments
+              WHERE alumni_id = @alumniId AND team_id = @teamId;
+
               UPDATE AlumniAssignments
               SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
               WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER';

@@ -2844,11 +2844,29 @@ function applyAuditFilters() {
     var roleFilter = document.getElementById('auditRoleFilter');
     var dateFrom = document.getElementById('auditDateFrom');
     var dateTo = document.getElementById('auditDateTo');
+    var searchInput = document.getElementById('auditSearchInput');
 
     var actionVal = actionFilter ? actionFilter.value : 'all';
     var roleVal = roleFilter ? roleFilter.value : 'all';
     var fromVal = dateFrom ? dateFrom.value : '';
     var toVal = dateTo ? dateTo.value : '';
+    var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+    var activeCount = 0;
+    if (actionVal !== 'all') activeCount++;
+    if (roleVal !== 'all') activeCount++;
+    if (fromVal) activeCount++;
+    if (toVal) activeCount++;
+
+    var badge = document.getElementById('auditActiveFilterBadge');
+    if (badge) {
+      if (activeCount > 0) {
+        badge.textContent = activeCount;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
 
     var fullData;
     if (_apiDataLoaded && _apiAuditLogs && _apiAuditLogs.records) {
@@ -2887,12 +2905,41 @@ function applyAuditFilters() {
         var itemDate = item.created_at ? new Date(item.created_at) : parseAuditDate(item.ts);
         if (itemDate > toDate) match = false;
       }
+      if (q) {
+        var blob = (item.user + ' ' + item.role + ' ' + item.action + ' ' + item.target + ' ' + item.ip + ' ' + item.status + ' ' + item.ts).toLowerCase();
+        if (blob.indexOf(q) === -1) match = false;
+      }
       return match;
     });
     auditState.currentPage = 1;
     renderAuditLogTable();
   });
 }
+
+window.applyAuditFiltersModal = function () {
+  applyAuditFilters();
+  if (window.closeModal) window.closeModal('auditFilterModal');
+};
+
+window.filterAuditLogsLocal = function () {
+  applyAuditFilters();
+};
+
+window.resetAuditFilters = function () {
+  var actionFilter = document.getElementById('auditActionFilter');
+  var roleFilter = document.getElementById('auditRoleFilter');
+  var dateFrom = document.getElementById('auditDateFrom');
+  var dateTo = document.getElementById('auditDateTo');
+  var searchInput = document.getElementById('auditSearchInput');
+
+  if (actionFilter) actionFilter.value = 'all';
+  if (roleFilter) roleFilter.value = 'all';
+  if (dateFrom) dateFrom.value = '';
+  if (dateTo) dateTo.value = '';
+  if (searchInput) searchInput.value = '';
+
+  applyAuditFilters();
+};
 
 function parseAuditDate(ts) {
   /* ts format: "08 Jul 2026, 09:15:32" */

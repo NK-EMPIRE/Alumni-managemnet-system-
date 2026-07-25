@@ -35,6 +35,26 @@ async function getPool() {
     await pool.query(`
       IF NOT EXISTS (
         SELECT * FROM sys.columns 
+        WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'must_change_password'
+      )
+      BEGIN
+        ALTER TABLE dbo.Users ADD must_change_password BIT DEFAULT 0 NOT NULL;
+      END
+
+      IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = OBJECT_ID('dbo.AssignmentAuditLog'))
+      BEGIN
+        CREATE TABLE dbo.AssignmentAuditLog (
+          audit_id INT IDENTITY PRIMARY KEY,
+          alumni_id INT NOT NULL,
+          old_member_id INT NULL,
+          new_member_id INT NULL,
+          changed_by INT NULL,
+          changed_at DATETIME2 DEFAULT GETUTCDATE()
+        );
+      END
+
+      IF NOT EXISTS (
+        SELECT * FROM sys.columns 
         WHERE object_id = OBJECT_ID('dbo.ImportHistory') AND name = 'duration_sec'
       )
       BEGIN
