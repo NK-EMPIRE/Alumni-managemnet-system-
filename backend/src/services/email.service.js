@@ -104,8 +104,10 @@ async function createCampaign({ leaderId, assignmentIds }) {
 
   if (n8nWebhookUrl) {
     try {
+      const amsBaseUrl = process.env.AMS_BASE_URL || 'http://localhost:3000';
       const payload = JSON.stringify({
         campaignId,
+        amsBaseUrl,
         recipients: recipientPayloads
       });
 
