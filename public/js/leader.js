@@ -2718,31 +2718,94 @@ window.undoAlumniSubmission = function () {
 /* ── EMAIL CAMPAIGN (n8n AUTOMATION) HANDLERS ── */
 var _activeCampaignPollInterval = null;
 
+window.switchCampaignTab = function (tab) {
+  var recipientsTab = document.getElementById('campaignTabRecipients');
+  var templateTab = document.getElementById('campaignTabTemplate');
+  var btnRecipients = document.getElementById('tabBtnCampaignRecipients');
+  var btnTemplate = document.getElementById('tabBtnCampaignTemplate');
+
+  if (tab === 'recipients') {
+    if (recipientsTab) recipientsTab.style.display = 'block';
+    if (templateTab) templateTab.style.display = 'none';
+    if (btnRecipients) { btnRecipients.style.color = '#2563EB'; btnRecipients.style.borderBottom = '2px solid #2563EB'; }
+    if (btnTemplate) { btnTemplate.style.color = '#64748B'; btnTemplate.style.borderBottom = 'none'; }
+  } else {
+    if (recipientsTab) recipientsTab.style.display = 'none';
+    if (templateTab) templateTab.style.display = 'block';
+    if (btnRecipients) { btnRecipients.style.color = '#64748B'; btnRecipients.style.borderBottom = 'none'; }
+    if (btnTemplate) { btnTemplate.style.color = '#2563EB'; btnTemplate.style.borderBottom = '2px solid #2563EB'; }
+  }
+};
+
+window.previewIndividualAlumniEmail = function (name, email, assignmentId) {
+  var nameEl = document.getElementById('previewAlumniName');
+  var emailEl = document.getElementById('previewToEmail');
+  var tagEl = document.getElementById('previewReplyToTag');
+
+  if (nameEl) nameEl.textContent = name || 'Alumnus';
+  if (emailEl) emailEl.textContent = email || 'alumni@mountzion.ac.in';
+  if (tagEl) tagEl.textContent = 'alumnirequests+' + (assignmentId || 'ID') + '@mountzion.ac.in';
+
+  window.switchCampaignTab('template');
+};
+
 window.openEmailCampaignModal = function () {
   var setupState = document.getElementById('campaignSetupState');
   var progressState = document.getElementById('campaignProgressState');
   var launchBtn = document.getElementById('launchCampaignSubmitBtn');
   var badge = document.getElementById('campaignRecipientBadge');
+  var countTag = document.getElementById('campaignRecipientsCountTag');
+  var tbody = document.getElementById('campaignRecipientsPreviewTableBody');
 
   if (setupState) setupState.style.display = 'block';
   if (progressState) progressState.style.display = 'none';
-  if (launchBtn) { launchBtn.style.display = 'inline-flex'; launchBtn.disabled = false; }
+  if (launchBtn) { launchBtn.style.display = 'inline-flex'; launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign'; }
   if (badge) badge.textContent = 'Counting team records...';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading team alumni records...</td></tr>';
+
+  window.switchCampaignTab('recipients');
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/alumni?limit=1000', {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (res && res.data) {
-      var total = (res.data.pagination && res.data.pagination.total !== undefined)
-        ? res.data.pagination.total
-        : ((res.data.records && Array.isArray(res.data.records)) ? res.data.records.length : (Array.isArray(res.data) ? res.data.length : 0));
+      var records = (res.data.records && Array.isArray(res.data.records)) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+      var total = (res.data.pagination && res.data.pagination.total !== undefined) ? res.data.pagination.total : records.length;
       if (badge) badge.textContent = total + ' Alumni Records';
+      if (countTag) countTag.textContent = records.length;
+
+      if (records.length > 0) {
+        var html = '';
+        records.forEach(function (rec) {
+          var safeName = (rec.name || 'Alumnus').replace(/'/g, "\\'");
+          var safeEmail = (rec.email || 'No Email').replace(/'/g, "\\'");
+          var assignId = rec.assignment_id || rec.id || 0;
+          html += '<tr style="border-bottom:1px solid #F1F5F9;">';
+          html += '  <td style="padding:8px 12px;font-weight:600;color:#1E293B;">' + (rec.name || '-') + '</td>';
+          html += '  <td style="padding:8px 12px;color:#64748B;">' + (rec.department || '-') + ' (' + (rec.batch || '-') + ')</td>';
+          html += '  <td style="padding:8px 12px;color:#2563EB;">' + (rec.email || '<span style="color:#EF4444;">No Email</span>') + '</td>';
+          html += '  <td style="padding:8px 12px;text-align:right;">';
+          html += '    <button type="button" class="btn btn-secondary btn-sm" onclick="previewIndividualAlumniEmail(\'' + safeName + '\', \'' + safeEmail + '\', ' + assignId + ')" style="padding:2px 8px;font-size:0.72rem;"><i class="fas fa-eye"></i> Preview</button>';
+          html += '  </td>';
+          html += '</tr>';
+        });
+        if (tbody) tbody.innerHTML = html;
+
+        // Auto render first record preview
+        var first = records[0];
+        window.previewIndividualAlumniEmail(first.name, first.email, first.assignment_id || first.id || 0);
+        window.switchCampaignTab('recipients');
+      } else {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">No team alumni records found.</td></tr>';
+      }
     } else {
       if (badge) badge.textContent = 'Team Assignments Ready';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">Unable to load recipients list.</td></tr>';
     }
   }).catch(function () {
     if (badge) badge.textContent = 'Team Assignments Ready';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">Unable to load recipients list.</td></tr>';
   });
 
   if (window.openModal) window.openModal('emailCampaignModal');

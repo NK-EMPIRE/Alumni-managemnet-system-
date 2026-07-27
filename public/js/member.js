@@ -287,16 +287,16 @@
             form.style.opacity = '0.3';
             form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
             setTimeout(function() {
-                openModal(targetRecord.id);
+                openRecordUpdateModal(targetRecord.id);
                 form.style.opacity = '1';
                 form.style.transform = 'translateX(0)';
             }, 150);
         } else {
-            openModal(targetRecord.id);
+            openRecordUpdateModal(targetRecord.id);
         }
     };
 
-    function openModal(index) {
+    function openRecordUpdateModal(index) {
         const targetId = parseInt(index, 10);
         const recordIdx = alumniData.findIndex(function (r) { return r.id === targetId; });
         if (recordIdx === -1) return;
@@ -725,7 +725,7 @@
             });
 
             if (nextRecord) {
-                openModal(nextRecord.id);
+                openRecordUpdateModal(nextRecord.id);
             } else {
                 closeModal();
                 showToast('All assigned records completed! Great job!', 'success');
@@ -775,7 +775,7 @@
         var btn = e.target.closest('.btn-update');
         if (btn) {
             const idx = btn.getAttribute('data-index');
-            openModal(idx);
+            openRecordUpdateModal(idx);
         }
     }
 
