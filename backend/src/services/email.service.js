@@ -235,7 +235,7 @@ async function getReplies({ userId, role }) {
   const pool = await getPool();
   let query = `
     SELECT r.reply_id, r.assignment_id, r.alumni_id, r.raw_reply_text, r.received_at, r.review_status,
-           a.name AS alumni_name, a.email AS alumni_email, u.full_name AS assigned_member_name
+           a.name AS alumni_name, a.email AS alumni_email, (u.first_name + ' ' + u.last_name) AS assigned_member_name
     FROM dbo.AlumniReplies r
     JOIN dbo.AlumniAssignments aa ON r.assignment_id = aa.assignment_id
     JOIN dbo.Alumni a ON r.alumni_id = a.alumni_id
