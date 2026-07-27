@@ -7,7 +7,8 @@ const router = Router();
 
 // 1. POST /api/v1/email-campaigns (Leader only)
 router.post('/', authenticate, (req, res, next) => {
-  if (req.user.role !== 'Leader' && req.user.role !== 'Admin') {
+  const userRole = (req.user.role || '').toUpperCase();
+  if (userRole !== 'LEADER' && userRole !== 'ADMIN') {
     return res.status(403).json({ success: false, message: 'Only leaders or admins can launch email campaigns' });
   }
   next();

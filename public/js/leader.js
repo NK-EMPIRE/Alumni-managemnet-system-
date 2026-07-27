@@ -2730,12 +2730,14 @@ window.openEmailCampaignModal = function () {
   if (badge) badge.textContent = 'Counting team records...';
 
   var token = localStorage.getItem('token');
-  fetch('/api/v1/assignments?limit=1000', {
+  fetch('/api/v1/alumni?limit=1000', {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (res && res.data) {
-      var count = Array.isArray(res.data) ? res.data.length : (res.data.assignments ? res.data.assignments.length : 0);
-      if (badge) badge.textContent = count + ' Alumni Records';
+      var total = (res.data.pagination && res.data.pagination.total !== undefined)
+        ? res.data.pagination.total
+        : ((res.data.records && Array.isArray(res.data.records)) ? res.data.records.length : (Array.isArray(res.data) ? res.data.length : 0));
+      if (badge) badge.textContent = total + ' Alumni Records';
     } else {
       if (badge) badge.textContent = 'Team Assignments Ready';
     }

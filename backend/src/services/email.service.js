@@ -27,8 +27,11 @@ async function createCampaign({ leaderId, assignmentIds }) {
     SELECT aa.assignment_id, aa.alumni_id, a.name, a.email
     FROM dbo.AlumniAssignments aa
     JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
-    WHERE aa.assigned_to_user_id IN (
-      SELECT user_id FROM dbo.Users WHERE team_id = @teamId
+    WHERE (
+      aa.member_id IN (
+        SELECT user_id FROM dbo.Users WHERE team_id = @teamId
+      )
+      OR aa.team_id = @teamId
     )
     AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
   `;
@@ -146,8 +149,9 @@ async function getCampaignStatus(campaignId, userId, role) {
   }
 
   const campaign = res.recordset[0];
+  const userRole = (role || '').toUpperCase();
 
-  if (role !== 'Admin' && campaign.leader_id !== userId) {
+  if (userRole !== 'ADMIN' && campaign.leader_id !== userId) {
     const err = new Error('Unauthorized to view this campaign status');
     err.statusCode = 403;
     throw err;
@@ -203,7 +207,7 @@ async function ingestReply({ assignmentId, rawReplyText, receivedAt }) {
 
   const assignRes = await pool.request()
     .input('assignmentId', sql.Int, assignmentId)
-    .query('SELECT assignment_id, alumni_id, assigned_to_user_id FROM dbo.AlumniAssignments WHERE assignment_id = @assignmentId');
+    .query('SELECT assignment_id, alumni_id, member_id FROM dbo.AlumniAssignments WHERE assignment_id = @assignmentId');
 
   if (assignRes.recordset.length === 0) {
     const err = new Error('Invalid assignmentId: assignment not found');
@@ -235,17 +239,19 @@ async function getReplies({ userId, role }) {
     FROM dbo.AlumniReplies r
     JOIN dbo.AlumniAssignments aa ON r.assignment_id = aa.assignment_id
     JOIN dbo.Alumni a ON r.alumni_id = a.alumni_id
-    LEFT JOIN dbo.Users u ON aa.assigned_to_user_id = u.user_id
+    LEFT JOIN dbo.Users u ON aa.member_id = u.user_id
   `;
 
   const request = pool.request();
+  const userRole = (role || '').toUpperCase();
 
-  if (role === 'Member') {
-    query += ' WHERE aa.assigned_to_user_id = @userId';
+  if (userRole === 'MEMBER') {
+    query += ' WHERE aa.member_id = @userId';
     request.input('userId', sql.Int, userId);
-  } else if (role === 'Leader') {
-    query += ` WHERE aa.assigned_to_user_id IN (
-      SELECT user_id FROM dbo.Users WHERE team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId)
+  } else if (userRole === 'LEADER') {
+    query += ` WHERE (
+      aa.member_id IN (SELECT user_id FROM dbo.Users WHERE team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId))
+      OR aa.team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId)
     )`;
     request.input('userId', sql.Int, userId);
   }
