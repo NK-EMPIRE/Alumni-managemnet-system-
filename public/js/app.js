@@ -102,13 +102,19 @@
   try { window.eval('var Toast = window.Toast;'); } catch (e) { }
 
   window.openModal = function (modalId) {
-    var modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('show');
+    var modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+    }
   };
 
   window.closeModal = function (modalId) {
-    var modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('show');
+    var modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+    }
   };
 
   document.querySelectorAll('.modal-overlay').forEach(function (overlay) {

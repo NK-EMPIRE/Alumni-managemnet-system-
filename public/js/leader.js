@@ -546,6 +546,12 @@
           setTimeout(function () { window.location.href = 'index.html?logout=success'; }, 1500);
           return;
         }
+        if (page === 'campaign' || page === 'email-campaign') {
+          if (typeof window.openEmailCampaignModal === 'function') {
+            window.openEmailCampaignModal();
+          }
+          return;
+        }
         document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });
         this.classList.add('active');
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });

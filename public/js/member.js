@@ -846,7 +846,9 @@
                 }
 
                 if (page === 'replies') {
-                    // Handled via modal overlay, keep current view intact
+                    if (typeof window.openAlumniRepliesModal === 'function') {
+                        window.openAlumniRepliesModal();
+                    }
                     return;
                 }
 
