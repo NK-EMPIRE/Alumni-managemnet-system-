@@ -16,3 +16,4 @@ backend/logs/
 .env
 
 scratch/
+backend/logs/application.log

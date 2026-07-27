@@ -273,7 +273,7 @@
         if (nextBtn) nextBtn.disabled = window._currentModalRecordIndex >= alumniData.length - 1;
     }
 
-    window.navigateModalRecord = function(dir) {
+    window.navigateModalRecord = function (dir) {
         if (!alumniData || alumniData.length === 0) return;
         var newIdx = window._currentModalRecordIndex + dir;
         if (newIdx < 0 || newIdx >= alumniData.length) return;
@@ -286,17 +286,17 @@
             form.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
             form.style.opacity = '0.3';
             form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
-            setTimeout(function() {
-                openRecordUpdateModal(targetRecord.id);
+            setTimeout(function () {
+                openModal(targetRecord.id);
                 form.style.opacity = '1';
                 form.style.transform = 'translateX(0)';
             }, 150);
         } else {
-            openRecordUpdateModal(targetRecord.id);
+            openModal(targetRecord.id);
         }
     };
 
-    function openRecordUpdateModal(index) {
+    function openModal(index) {
         const targetId = parseInt(index, 10);
         const recordIdx = alumniData.findIndex(function (r) { return r.id === targetId; });
         if (recordIdx === -1) return;
@@ -316,7 +316,7 @@
         const badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-redo-alt' : 'fa-clock'));
         modalStatusBadge.className = 'status-badge ' + badgeClass;
         if (isReopened) {
-          modalStatusBadge.style.cssText = 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
+            modalStatusBadge.style.cssText = 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
         }
         modalStatusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + record.status;
 
@@ -725,7 +725,7 @@
             });
 
             if (nextRecord) {
-                openRecordUpdateModal(nextRecord.id);
+                openModal(nextRecord.id);
             } else {
                 closeModal();
                 showToast('All assigned records completed! Great job!', 'success');
@@ -775,7 +775,7 @@
         var btn = e.target.closest('.btn-update');
         if (btn) {
             const idx = btn.getAttribute('data-index');
-            openRecordUpdateModal(idx);
+            openModal(idx);
         }
     }
 
@@ -842,13 +842,6 @@
                     setTimeout(function () {
                         window.location.href = 'index.html?logout=success';
                     }, 1500);
-                    return;
-                }
-
-                if (page === 'replies') {
-                    if (typeof window.openAlumniRepliesModal === 'function') {
-                        window.openAlumniRepliesModal();
-                    }
                     return;
                 }
 
@@ -952,17 +945,17 @@
                     var link = row.linkedin_profile || '';
                     var linkedin;
                     if (link) {
-                      var href = link.startsWith('http') ? link : 'https://' + link;
-                      var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
-                      var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
-                      var iconColor = isFb ? '#1877F2' : '#0A66C2';
-                      var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
-                      linkedin = '<div style="display:flex;align-items:center;gap:10px;">' +
-                        '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
-                        '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
-                        '</div>';
+                        var href = link.startsWith('http') ? link : 'https://' + link;
+                        var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
+                        var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
+                        var iconColor = isFb ? '#1877F2' : '#0A66C2';
+                        var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
+                        linkedin = '<div style="display:flex;align-items:center;gap:10px;">' +
+                            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
+                            '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
+                            '</div>';
                     } else {
-                      linkedin = '-';
+                        linkedin = '-';
                     }
                     var updatedDateStr = row.updated_date ? new Date(row.updated_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
@@ -1524,7 +1517,7 @@ function _memberShowToast(message, type) {
 
 var _undoTargetId = null;
 
-window.confirmUndoSubmission = function(alumniId, name) {
+window.confirmUndoSubmission = function (alumniId, name) {
     _undoTargetId = alumniId;
     var nameEl = document.getElementById('undoTargetName');
     if (nameEl) nameEl.textContent = name || 'this record';
@@ -1535,7 +1528,7 @@ window.confirmUndoSubmission = function(alumniId, name) {
     }
 };
 
-window.closeUndoModal = function() {
+window.closeUndoModal = function () {
     _undoTargetId = null;
     var modal = document.getElementById('undoConfirmModal');
     if (modal) {
@@ -1544,7 +1537,7 @@ window.closeUndoModal = function() {
     }
 };
 
-window.executeUndoSubmission = function() {
+window.executeUndoSubmission = function () {
     if (!_undoTargetId) return;
     var btn = document.getElementById('confirmUndoBtn');
     if (btn) {
@@ -1556,15 +1549,15 @@ window.executeUndoSubmission = function() {
         ? window.API.reopenAssignment(_undoTargetId, 'Undone by member')
         : window.API.reopenAlumni(_undoTargetId);
 
-    apiCall.then(function(res) {
+    apiCall.then(function (res) {
         if (window.Toast) window.Toast.success('Submission Undone!', 'Record moved back to Draft successfully.');
         else _memberShowToast('Submission undone. Record is back in Draft.', 'success');
         window.closeUndoModal();
         if (window.fetchMemberData) window.fetchMemberData();
-    }).catch(function(err) {
+    }).catch(function (err) {
         if (window.Toast) window.Toast.error('Undo Failed', err && err.message || 'Failed to undo submission.');
         else _memberShowToast(err && err.message || 'Failed to undo submission.', 'error');
-    }).finally(function() {
+    }).finally(function () {
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-undo"></i> Undo & Change to Draft';
@@ -1572,7 +1565,7 @@ window.executeUndoSubmission = function() {
     });
 };
 
-window.undoAlumniSubmission = function() {
+window.undoAlumniSubmission = function () {
     var fieldIndexEl = document.getElementById('fieldIndex');
     var idx = fieldIndexEl ? parseInt(fieldIndexEl.value, 10) : 0;
     if (!idx) return;
@@ -1583,346 +1576,342 @@ window.undoAlumniSubmission = function() {
    INTERACTIVE EXPORT ENGINE & CUSTOMIZATION MODAL (MEMBER)
    ──────────────────────────────────────────────────────────── */
 var _memberColumns = [
-  { key: 'register_no', label: 'Register Number', visible: true },
-  { key: 'name', label: 'Name', visible: true },
-  { key: 'father_name', label: 'Father Name', visible: true },
-  { key: 'date_of_birth', label: 'Date of Birth', visible: true },
-  { key: 'gender', label: 'Gender', visible: true },
-  { key: 'department', label: 'Department', visible: true },
-  { key: 'batch', label: 'Batch', visible: true },
-  { key: 'email', label: 'Primary Email', visible: true },
-  { key: 'secondary_email', label: 'Secondary Email', visible: true },
-  { key: 'phone', label: 'Primary Phone', visible: true },
-  { key: 'secondary_phone', label: 'Secondary Phone', visible: true },
-  { key: 'company', label: 'Company', visible: true },
-  { key: 'designation', label: 'Designation', visible: true },
-  { key: 'experience', label: 'Experience', visible: true },
-  { key: 'city', label: 'City', visible: true },
-  { key: 'state', label: 'State', visible: true },
-  { key: 'country', label: 'Country', visible: true },
-  { key: 'linkedin_profile', label: 'LinkedIn', visible: true },
-  { key: 'working_details', label: 'Working Details', visible: true },
-  { key: 'updated_date', label: 'Updated Date', visible: true }
+    { key: 'register_no', label: 'Register Number', visible: true },
+    { key: 'name', label: 'Name', visible: true },
+    { key: 'father_name', label: 'Father Name', visible: true },
+    { key: 'date_of_birth', label: 'Date of Birth', visible: true },
+    { key: 'gender', label: 'Gender', visible: true },
+    { key: 'department', label: 'Department', visible: true },
+    { key: 'batch', label: 'Batch', visible: true },
+    { key: 'email', label: 'Primary Email', visible: true },
+    { key: 'secondary_email', label: 'Secondary Email', visible: true },
+    { key: 'phone', label: 'Primary Phone', visible: true },
+    { key: 'secondary_phone', label: 'Secondary Phone', visible: true },
+    { key: 'company', label: 'Company', visible: true },
+    { key: 'designation', label: 'Designation', visible: true },
+    { key: 'experience', label: 'Experience', visible: true },
+    { key: 'city', label: 'City', visible: true },
+    { key: 'state', label: 'State', visible: true },
+    { key: 'country', label: 'Country', visible: true },
+    { key: 'linkedin_profile', label: 'LinkedIn', visible: true },
+    { key: 'working_details', label: 'Working Details', visible: true },
+    { key: 'updated_date', label: 'Updated Date', visible: true }
 ];
 
 var _exportSelectedCols = {};
 
 window.handleExport = function () {
-  openExportCustomizationModal();
+    openExportCustomizationModal();
 };
 
 window.exportAlumniCSV = function () {
-  openExportCustomizationModal();
+    openExportCustomizationModal();
 };
 
 window.openExportCustomizationModal = function () {
-  _memberColumns.forEach(function (col) {
-    if (_exportSelectedCols[col.key] === undefined) {
-      _exportSelectedCols[col.key] = true;
-    }
-  });
+    _memberColumns.forEach(function (col) {
+        if (_exportSelectedCols[col.key] === undefined) {
+            _exportSelectedCols[col.key] = true;
+        }
+    });
 
-  populateExportModalFilterOptions();
-  renderExportColumnChips();
-  onExportFilterChange();
+    populateExportModalFilterOptions();
+    renderExportColumnChips();
+    onExportFilterChange();
 
-  if (window.openModal) openModal('exportCustomizationModal');
+    if (window.openModal) openModal('exportCustomizationModal');
 };
 
 window.populateExportModalFilterOptions = function () {
-  var deptSel = document.getElementById('expFilterDept');
-  var batchSel = document.getElementById('expFilterBatch');
+    var deptSel = document.getElementById('expFilterDept');
+    var batchSel = document.getElementById('expFilterBatch');
 
-  var srcDept = document.getElementById('previewFilterDept');
-  var srcBatch = document.getElementById('previewFilterBatch');
+    var srcDept = document.getElementById('previewFilterDept');
+    var srcBatch = document.getElementById('previewFilterBatch');
 
-  if (deptSel && srcDept && deptSel.options.length <= 1) {
-    deptSel.innerHTML = srcDept.innerHTML;
-  }
-  if (batchSel && srcBatch && batchSel.options.length <= 1) {
-    batchSel.innerHTML = srcBatch.innerHTML;
-  }
+    if (deptSel && srcDept && deptSel.options.length <= 1) {
+        deptSel.innerHTML = srcDept.innerHTML;
+    }
+    if (batchSel && srcBatch && batchSel.options.length <= 1) {
+        batchSel.innerHTML = srcBatch.innerHTML;
+    }
 };
 
 window.resetExportModalFilters = function () {
-  var expDept = document.getElementById('expFilterDept');
-  var expBatch = document.getElementById('expFilterBatch');
-  var expStatus = document.getElementById('expFilterStatus');
-  var expSearch = document.getElementById('expFilterSearch');
+    var expDept = document.getElementById('expFilterDept');
+    var expBatch = document.getElementById('expFilterBatch');
+    var expStatus = document.getElementById('expFilterStatus');
+    var expSearch = document.getElementById('expFilterSearch');
 
-  if (expDept) expDept.value = '';
-  if (expBatch) expBatch.value = '';
-  if (expStatus) expStatus.value = '';
-  if (expSearch) expSearch.value = '';
+    if (expDept) expDept.value = '';
+    if (expBatch) expBatch.value = '';
+    if (expStatus) expStatus.value = '';
+    if (expSearch) expSearch.value = '';
 
-  onExportFilterChange();
+    onExportFilterChange();
 };
 
 var _exportFilterDebounce = null;
 window.onExportFilterChange = function () {
-  updateExportStatsBanner();
+    updateExportStatsBanner();
 
-  if (_exportFilterDebounce) clearTimeout(_exportFilterDebounce);
-  _exportFilterDebounce = setTimeout(function () {
-    var params = buildExportParams();
-    params.limit = 1;
+    if (_exportFilterDebounce) clearTimeout(_exportFilterDebounce);
+    _exportFilterDebounce = setTimeout(function () {
+        var params = buildExportParams();
+        params.limit = 1;
 
-    API.getMyAssignments(params).then(function (res) {
-      if (res && res.success && res.data && res.data.pagination) {
-        var total = res.data.pagination.total;
-        var totalEl = document.getElementById('expStatTotal');
-        if (totalEl) totalEl.innerText = total;
-      }
-    }).catch(function (err) {
-      console.warn('Export count error:', err);
-    });
-  }, 250);
+        API.getMyAssignments(params).then(function (res) {
+            if (res && res.success && res.data && res.data.pagination) {
+                var total = res.data.pagination.total;
+                var totalEl = document.getElementById('expStatTotal');
+                if (totalEl) totalEl.innerText = total;
+            }
+        }).catch(function (err) {
+            console.warn('Export count error:', err);
+        });
+    }, 250);
 };
 
 window.buildExportParams = function () {
-  var expDept = document.getElementById('expFilterDept');
-  var expBatch = document.getElementById('expFilterBatch');
-  var expStatus = document.getElementById('expFilterStatus');
-  var expSearch = document.getElementById('expFilterSearch');
+    var expDept = document.getElementById('expFilterDept');
+    var expBatch = document.getElementById('expFilterBatch');
+    var expStatus = document.getElementById('expFilterStatus');
+    var expSearch = document.getElementById('expFilterSearch');
 
-  return {
-    page: 1,
-    limit: 100000,
-    search: expSearch && expSearch.value.trim() ? expSearch.value.trim() : undefined,
-    department: expDept && expDept.value ? expDept.value : undefined,
-    batch: expBatch && expBatch.value ? expBatch.value : undefined,
-    status: expStatus && expStatus.value ? expStatus.value : undefined
-  };
+    return {
+        page: 1,
+        limit: 100000,
+        search: expSearch && expSearch.value.trim() ? expSearch.value.trim() : undefined,
+        department: expDept && expDept.value ? expDept.value : undefined,
+        batch: expBatch && expBatch.value ? expBatch.value : undefined,
+        status: expStatus && expStatus.value ? expStatus.value : undefined
+    };
 };
 
 window.renderExportColumnChips = function () {
-  var container = document.getElementById('exportColsContainer');
-  if (!container) return;
+    var container = document.getElementById('exportColsContainer');
+    if (!container) return;
 
-  var html = '';
-  _memberColumns.forEach(function (col) {
-    var checked = _exportSelectedCols[col.key] ? 'checked' : '';
-    html += '<label class="export-col-chip">' +
-      '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
-      '<span>' + col.label + '</span>' +
-      '</label>';
-  });
-  container.innerHTML = html;
+    var html = '';
+    _memberColumns.forEach(function (col) {
+        var checked = _exportSelectedCols[col.key] ? 'checked' : '';
+        html += '<label class="export-col-chip">' +
+            '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
+            '<span>' + col.label + '</span>' +
+            '</label>';
+    });
+    container.innerHTML = html;
 };
 
 window.toggleExportCol = function (key, isChecked) {
-  _exportSelectedCols[key] = isChecked;
-  updateExportStatsBanner();
+    _exportSelectedCols[key] = isChecked;
+    updateExportStatsBanner();
 };
 
 window.selectAllExportCols = function (selectState) {
-  _memberColumns.forEach(function (col) {
-    _exportSelectedCols[col.key] = selectState;
-  });
-  renderExportColumnChips();
-  updateExportStatsBanner();
+    _memberColumns.forEach(function (col) {
+        _exportSelectedCols[col.key] = selectState;
+    });
+    renderExportColumnChips();
+    updateExportStatsBanner();
 };
 
 window.updateExportStatsBanner = function () {
-  var colsEl = document.getElementById('expStatCols');
-  var statusEl = document.getElementById('expStatStatus');
+    var colsEl = document.getElementById('expStatCols');
+    var statusEl = document.getElementById('expStatStatus');
 
-  var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
-  if (colsEl) colsEl.innerText = selectedCount + ' / ' + _memberColumns.length;
+    var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
+    if (colsEl) colsEl.innerText = selectedCount + ' / ' + _memberColumns.length;
 
-  var expStatus = document.getElementById('expFilterStatus');
-  var statusVal = expStatus ? expStatus.value : '';
-  if (statusEl) statusEl.innerText = statusVal ? statusVal.toUpperCase() : 'ALL';
+    var expStatus = document.getElementById('expFilterStatus');
+    var statusVal = expStatus ? expStatus.value : '';
+    if (statusEl) statusEl.innerText = statusVal ? statusVal.toUpperCase() : 'ALL';
 };
 
 window.startExportDownloadProcess = function () {
-  var selectedKeys = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; });
-  if (selectedKeys.length === 0) {
-    _memberShowToast('Please select at least one column to export.', 'warning');
-    return;
-  }
-
-  if (window.closeModal) closeModal('exportCustomizationModal');
-
-  var overlay = document.getElementById('exportProgressOverlay');
-  var fill = document.getElementById('exportProgressBarFill');
-  var title = document.getElementById('exportProgressTitle');
-  var sub = document.getElementById('exportProgressSubtitle');
-  var percentEl = document.getElementById('exportProgressPercent');
-  var countEl = document.getElementById('exportProgressCount');
-
-  if (overlay) overlay.classList.add('show');
-  if (fill) fill.style.width = '10%';
-  if (title) title.innerText = 'Querying Database...';
-  if (sub) sub.innerText = 'Fetching assigned alumni records...';
-  if (percentEl) percentEl.innerText = '10%';
-
-  var params = buildExportParams();
-
-  API.getMyAssignments(params).then(function (res) {
-    if (res && res.success) {
-      var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
-      if (data.length === 0) {
-        if (overlay) overlay.classList.remove('show');
-        _memberShowToast('No alumni records found matching selected export filters.', 'warning');
+    var selectedKeys = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; });
+    if (selectedKeys.length === 0) {
+        _memberShowToast('Please select at least one column to export.', 'warning');
         return;
-      }
-
-      if (countEl) countEl.innerText = '0 / ' + data.length + ' records';
-
-      var progress = 15;
-      var interval = setInterval(function () {
-        progress += 25;
-        if (progress >= 90) {
-          clearInterval(interval);
-          progress = 90;
-        }
-        if (fill) fill.style.width = progress + '%';
-        if (percentEl) percentEl.innerText = progress + '%';
-        if (countEl) countEl.innerText = Math.floor((progress / 100) * data.length) + ' / ' + data.length + ' records';
-        if (title) title.innerText = 'Formatting Excel Data...';
-        if (sub) sub.innerText = 'Generating CSV with selected fields...';
-      }, 100);
-
-      setTimeout(function () {
-        clearInterval(interval);
-        if (fill) fill.style.width = '100%';
-        if (percentEl) percentEl.innerText = '100%';
-        if (countEl) countEl.innerText = data.length + ' / ' + data.length + ' records';
-        if (title) title.innerText = 'Export Ready!';
-        if (sub) sub.innerText = 'Downloading file to your computer...';
-
-        var activeCols = _memberColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
-        var csv = '\uFEFF';
-        var headers = activeCols.map(function (c) { return c.label; });
-        csv += headers.join(',') + '\r\n';
-
-        data.forEach(function (row) {
-          var line = activeCols.map(function (col) {
-            var val = row[col.key];
-            if (col.key === 'updated_date') {
-              val = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
-            }
-            if (col.key === 'date_of_birth' || col.key === 'dob') {
-              val = row.date_of_birth || row.dob || val || '';
-            }
-            if (val === null || val === undefined) val = '';
-
-            if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {
-              if (String(val).includes('T')) {
-                var d = new Date(val);
-                if (!isNaN(d.getTime())) {
-                  var day = String(d.getDate()).padStart(2, '0');
-                  var month = String(d.getMonth() + 1).padStart(2, '0');
-                  var year = d.getFullYear();
-                  val = day + '/' + month + '/' + year;
-                }
-              }
-            }
-
-            var strVal = String(val);
-            if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && strVal.trim()) {
-              return '"\t' + strVal.replace(/"/g, '""') + '"';
-            }
-            return '"' + strVal.replace(/"/g, '""') + '"';
-          });
-          csv += line.join(',') + '\r\n';
-        });
-
-        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'Member_Assigned_Alumni_' + new Date().toISOString().slice(0, 10) + '.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-
-        setTimeout(function () {
-          if (overlay) overlay.classList.remove('show');
-          _memberShowToast('Exported ' + data.length + ' records with ' + activeCols.length + ' selected columns!', 'success');
-        }, 600);
-      }, 700);
-
-    } else {
-      if (overlay) overlay.classList.remove('show');
-      _memberShowToast('Failed to retrieve alumni records for export.', 'error');
     }
-  }).catch(function (err) {
-    console.error('Export error:', err);
-    if (overlay) overlay.classList.remove('show');
-    _memberShowToast('An error occurred during export: ' + (err.message || 'Network error'), 'error');
-  });
+
+    if (window.closeModal) closeModal('exportCustomizationModal');
+
+    var overlay = document.getElementById('exportProgressOverlay');
+    var fill = document.getElementById('exportProgressBarFill');
+    var title = document.getElementById('exportProgressTitle');
+    var sub = document.getElementById('exportProgressSubtitle');
+    var percentEl = document.getElementById('exportProgressPercent');
+    var countEl = document.getElementById('exportProgressCount');
+
+    if (overlay) overlay.classList.add('show');
+    if (fill) fill.style.width = '10%';
+    if (title) title.innerText = 'Querying Database...';
+    if (sub) sub.innerText = 'Fetching assigned alumni records...';
+    if (percentEl) percentEl.innerText = '10%';
+
+    var params = buildExportParams();
+
+    API.getMyAssignments(params).then(function (res) {
+        if (res && res.success) {
+            var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+            if (data.length === 0) {
+                if (overlay) overlay.classList.remove('show');
+                _memberShowToast('No alumni records found matching selected export filters.', 'warning');
+                return;
+            }
+
+            if (countEl) countEl.innerText = '0 / ' + data.length + ' records';
+
+            var progress = 15;
+            var interval = setInterval(function () {
+                progress += 25;
+                if (progress >= 90) {
+                    clearInterval(interval);
+                    progress = 90;
+                }
+                if (fill) fill.style.width = progress + '%';
+                if (percentEl) percentEl.innerText = progress + '%';
+                if (countEl) countEl.innerText = Math.floor((progress / 100) * data.length) + ' / ' + data.length + ' records';
+                if (title) title.innerText = 'Formatting Excel Data...';
+                if (sub) sub.innerText = 'Generating CSV with selected fields...';
+            }, 100);
+
+            setTimeout(function () {
+                clearInterval(interval);
+                if (fill) fill.style.width = '100%';
+                if (percentEl) percentEl.innerText = '100%';
+                if (countEl) countEl.innerText = data.length + ' / ' + data.length + ' records';
+                if (title) title.innerText = 'Export Ready!';
+                if (sub) sub.innerText = 'Downloading file to your computer...';
+
+                var activeCols = _memberColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
+                var csv = '\uFEFF';
+                var headers = activeCols.map(function (c) { return c.label; });
+                csv += headers.join(',') + '\r\n';
+
+                data.forEach(function (row) {
+                    var line = activeCols.map(function (col) {
+                        var val = row[col.key];
+                        if (col.key === 'updated_date') {
+                            val = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
+                        }
+                        if (col.key === 'date_of_birth' || col.key === 'dob') {
+                            val = row.date_of_birth || row.dob || val || '';
+                        }
+                        if (val === null || val === undefined) val = '';
+
+                        if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {
+                            if (String(val).includes('T')) {
+                                var d = new Date(val);
+                                if (!isNaN(d.getTime())) {
+                                    var day = String(d.getDate()).padStart(2, '0');
+                                    var month = String(d.getMonth() + 1).padStart(2, '0');
+                                    var year = d.getFullYear();
+                                    val = day + '/' + month + '/' + year;
+                                }
+                            }
+                        }
+
+                        var strVal = String(val);
+                        if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && strVal.trim()) {
+                            return '"\t' + strVal.replace(/"/g, '""') + '"';
+                        }
+                        return '"' + strVal.replace(/"/g, '""') + '"';
+                    });
+                    csv += line.join(',') + '\r\n';
+                });
+
+                var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'Member_Assigned_Alumni_' + new Date().toISOString().slice(0, 10) + '.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                setTimeout(function () {
+                    if (overlay) overlay.classList.remove('show');
+                    _memberShowToast('Exported ' + data.length + ' records with ' + activeCols.length + ' selected columns!', 'success');
+                }, 600);
+            }, 700);
+
+        } else {
+            if (overlay) overlay.classList.remove('show');
+            _memberShowToast('Failed to retrieve alumni records for export.', 'error');
+        }
+    }).catch(function (err) {
+        console.error('Export error:', err);
+        if (overlay) overlay.classList.remove('show');
+        _memberShowToast('An error occurred during export: ' + (err.message || 'Network error'), 'error');
+    });
 };
 
 /* ── ALUMNI REPLIES INBOX HANDLERS ── */
 window.openAlumniRepliesModal = function () {
-  var container = document.getElementById('alumniRepliesListContainer');
-  if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading alumni replies...</p>';
+    var container = document.getElementById('alumniRepliesListContainer');
+    if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading alumni replies...</p>';
 
-  var token = localStorage.getItem('token');
-  fetch('/api/v1/email-campaigns/replies/all', {
-    headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function (r) { return r.json(); }).then(function (res) {
-    if (res && res.data && res.data.length > 0) {
-      var html = '<div style="display:flex;flex-direction:column;gap:12px;">';
-      res.data.forEach(function (reply) {
-        var isPending = reply.review_status === 'Pending Review';
-        var badgeStyle = isPending ? 'background:#FEF3C7;color:#D97706;border:1px solid #FCD34D;' : 'background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;';
-        
-        html += '<div style="border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;background:#F8FAFC;">';
-        html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-        html += '    <div>';
-        html += '      <strong style="font-size:0.92rem;color:#1E293B;">' + (reply.alumni_name || 'Alumnus') + '</strong>';
-        html += '      <span style="font-size:0.78rem;color:#64748B;margin-left:8px;">(' + (reply.alumni_email || '') + ')</span>';
-        html += '    </div>';
-        html += '    <span class="badge" style="padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;' + badgeStyle + '">' + reply.review_status + '</span>';
-        html += '  </div>';
-        html += '  <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:0.83rem;color:#334155;white-space:pre-wrap;margin-bottom:10px;">' + (reply.raw_reply_text || '') + '</div>';
-        html += '  <div style="display:flex;justify-content:space-between;align-items:center;">';
-        html += '    <span style="font-size:0.75rem;color:#94A3B8;"><i class="far fa-clock" style="margin-right:4px;"></i>' + new Date(reply.received_at).toLocaleString() + '</span>';
-        if (isPending) {
-          html += '    <button class="btn btn-primary btn-sm" onclick="markReplyAsReviewed(' + reply.reply_id + ')" style="padding:4px 12px;font-size:0.78rem;"><i class="fas fa-check" style="margin-right:4px;"></i> Mark Reviewed</button>';
-        }
-        html += '  </div>';
-        html += '</div>';
-      });
-      html += '</div>';
-      if (container) container.innerHTML = html;
+    var token = localStorage.getItem('token');
+    fetch('/api/v1/email-campaigns/replies/all', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function (r) { return r.json(); }).then(function (res) {
+        if (res && res.data && res.data.length > 0) {
+            var html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+            res.data.forEach(function (reply) {
+                var isPending = reply.review_status === 'Pending Review';
+                var badgeStyle = isPending ? 'background:#FEF3C7;color:#D97706;border:1px solid #FCD34D;' : 'background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;';
 
-      var badge = document.getElementById('pendingRepliesCountBadge');
-      var pendingCount = res.data.filter(function(r){ return r.review_status === 'Pending Review'; }).length;
-      if (badge) {
-        if (pendingCount > 0) {
-          badge.textContent = pendingCount;
-          badge.style.display = 'inline-block';
+                html += '<div style="border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;background:#F8FAFC;">';
+                html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+                html += '    <div>';
+                html += '      <strong style="font-size:0.92rem;color:#1E293B;">' + (reply.alumni_name || 'Alumnus') + '</strong>';
+                html += '      <span style="font-size:0.78rem;color:#64748B;margin-left:8px;">(' + (reply.alumni_email || '') + ')</span>';
+                html += '    </div>';
+                html += '    <span class="badge" style="padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;' + badgeStyle + '">' + reply.review_status + '</span>';
+                html += '  </div>';
+                html += '  <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:0.83rem;color:#334155;white-space:pre-wrap;margin-bottom:10px;">' + (reply.raw_reply_text || '') + '</div>';
+                html += '  <div style="display:flex;justify-content:space-between;align-items:center;">';
+                html += '    <span style="font-size:0.75rem;color:#94A3B8;"><i class="far fa-clock" style="margin-right:4px;"></i>' + new Date(reply.received_at).toLocaleString() + '</span>';
+                if (isPending) {
+                    html += '    <button class="btn btn-primary btn-sm" onclick="markReplyAsReviewed(' + reply.reply_id + ')" style="padding:4px 12px;font-size:0.78rem;"><i class="fas fa-check" style="margin-right:4px;"></i> Mark Reviewed</button>';
+                }
+                html += '  </div>';
+                html += '</div>';
+            });
+            html += '</div>';
+            if (container) container.innerHTML = html;
+
+            var badge = document.getElementById('pendingRepliesCountBadge');
+            var pendingCount = res.data.filter(function (r) { return r.review_status === 'Pending Review'; }).length;
+            if (badge) {
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
         } else {
-          badge.style.display = 'none';
+            if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:24px;"><i class="fas fa-inbox" style="font-size:2rem;color:#CBD5E1;display:block;margin-bottom:8px;"></i> No alumni email replies found.</p>';
         }
-      }
-    } else {
-      if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:24px;"><i class="fas fa-inbox" style="font-size:2rem;color:#CBD5E1;display:block;margin-bottom:8px;"></i> No alumni email replies found.</p>';
-    }
-  }).catch(function (err) {
-    if (container) container.innerHTML = '<p style="text-align:center;color:#EF4444;padding:16px;">Failed to load alumni replies.</p>';
-  });
+    }).catch(function (err) {
+        if (container) container.innerHTML = '<p style="text-align:center;color:#EF4444;padding:16px;">Failed to load alumni replies.</p>';
+    });
 
-  if (window.openModal) window.openModal('alumniRepliesModal');
+    if (window.openModal) window.openModal('alumniRepliesModal');
 };
 
 window.markReplyAsReviewed = function (replyId) {
-  var token = localStorage.getItem('token');
-  fetch('/api/v1/email-campaigns/replies/' + replyId + '/review', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function (r) { return r.json(); }).then(function (res) {
-    if (res && res.success) {
-      if (typeof _memberShowToast === 'function') _memberShowToast('Reply marked as reviewed!', 'success');
-      window.openAlumniRepliesModal();
-    }
-  }).catch(function () {});
+    var token = localStorage.getItem('token');
+    fetch('/api/v1/email-campaigns/replies/' + replyId + '/review', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function (r) { return r.json(); }).then(function (res) {
+        if (res && res.success) {
+            if (typeof _memberShowToast === 'function') _memberShowToast('Reply marked as reviewed!', 'success');
+            window.openAlumniRepliesModal();
+        }
+    }).catch(function () { });
 };
-
-
-
-
