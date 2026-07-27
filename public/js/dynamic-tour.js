@@ -292,9 +292,21 @@
     }
 
     // ── MEMBER PAGE TOUR STEPS ──
-    if (role === 'MEMBER' || document.getElementById('alumniRepliesModal')) {
-      // 1. Alumni Replies Inbox
-      var repliesNav = document.querySelector('a[data-page="replies"]') || document.querySelector('button[onclick*="openAlumniRepliesModal"]');
+    if (role === 'MEMBER' || document.getElementById('recordsBody') || document.getElementById('memberName')) {
+      // 1. Member Analytics & Stat Cards
+      var memberStat = document.querySelector('.stat-card') || document.querySelector('.cards-row');
+      if (memberStat) {
+        steps.push({
+          type: 'modal-feature',
+          selector: memberStat,
+          title: 'Personal Progress & Workload Stats 📈',
+          badge: 'Member Analytics',
+          description: 'Track assigned alumni records, completed updates, drafts, and daily targets live in real-time.'
+        });
+      }
+
+      // 2. Alumni Replies Inbox
+      var repliesNav = document.querySelector('[data-page="replies"]') || document.querySelector('button[onclick*="openAlumniRepliesModal"]') || document.querySelector('a[data-page="replies"]');
       if (repliesNav) {
         steps.push({
           type: 'modal-feature',
@@ -309,8 +321,24 @@
         });
       }
 
-      // 2. Member Assigned List & Edit Profile
-      var updateBtn = document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]') || document.querySelector('.btn-update');
+      // 3. Today's Tasks Modal
+      var todayTasksBtn = document.querySelector('button[onclick*="openTodayTasksModal"]');
+      if (todayTasksBtn) {
+        steps.push({
+          type: 'modal-feature',
+          selector: todayTasksBtn,
+          title: 'Today\'s Task List & Daily Checklist 📋',
+          badge: 'Daily Planner',
+          description: 'Review today\'s assigned targets, auto-generated task summary, and remaining alumni verifications.',
+          demo: function () {
+            if (window.openTodayTasksModal) window.openTodayTasksModal();
+            setTimeout(function () { if (window.closeModal) window.closeModal('todayTasksModal'); }, 2200);
+          }
+        });
+      }
+
+      // 4. Member Assigned List & Edit Profile
+      var updateBtn = document.querySelector('.btn-update') || document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]');
       if (updateBtn) {
         steps.push({
           type: 'modal-feature',
@@ -324,6 +352,50 @@
               var m = document.getElementById('updateAlumniModal') || document.getElementById('updateModal');
               if (m && window.closeModal) window.closeModal(m.id);
             }, 2400);
+          }
+        });
+      }
+
+      // 5. Spreadsheet Sheet View Nav
+      var previewNav = document.querySelector('[data-page="preview"]');
+      if (previewNav) {
+        steps.push({
+          type: 'modal-feature',
+          selector: previewNav,
+          title: 'Full-Screen Spreadsheet View 📊',
+          badge: 'Data Grid',
+          description: 'Switch to a full-screen interactive spreadsheet grid to view all assigned fields across alumni in a clean tabular view.'
+        });
+      }
+
+      // 6. Dataset Filtering
+      var filterBtn = document.querySelector('button[onclick*="openFilterModal"]');
+      if (filterBtn) {
+        steps.push({
+          type: 'modal-feature',
+          selector: filterBtn,
+          title: 'Advanced Record Filtering 🎛️',
+          badge: 'Dataset Filter',
+          description: 'Filter your assigned list by Department, Batch, Verification Status, or Date range.',
+          demo: function () {
+            if (window.openFilterModal) window.openFilterModal();
+            setTimeout(function () { if (window.closeFilterModal) window.closeFilterModal(); }, 2000);
+          }
+        });
+      }
+
+      // 7. Custom Column Exporter
+      var memberExportBtn = document.querySelector('button[onclick*="openExportCustomizationModal"]') || document.querySelector('button[onclick*="handleExport"]');
+      if (memberExportBtn) {
+        steps.push({
+          type: 'modal-feature',
+          selector: memberExportBtn,
+          title: 'Custom Column CSV Exporter 📤',
+          badge: 'Data Export',
+          description: 'Select exact fields to export and download your assigned alumni records as a formatted CSV file.',
+          demo: function () {
+            if (window.openExportCustomizationModal) window.openExportCustomizationModal();
+            setTimeout(function () { if (window.closeModal) window.closeModal('exportCustomizationModal'); }, 2000);
           }
         });
       }

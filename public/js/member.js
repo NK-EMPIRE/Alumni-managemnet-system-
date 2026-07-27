@@ -1851,6 +1851,7 @@ window.startExportDownloadProcess = function () {
     if (overlay) overlay.classList.remove('show');
     _memberShowToast('An error occurred during export: ' + (err.message || 'Network error'), 'error');
   });
+};
 
 /* ── ALUMNI REPLIES INBOX HANDLERS ── */
 window.openAlumniRepliesModal = function () {
