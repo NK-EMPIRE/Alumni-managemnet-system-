@@ -22,7 +22,7 @@
           "string": [
             {
               "value1": "={{$node[\"Webhook Trigger\"].json[\"headers\"][\"x-automation-secret\"]}}",
-              "value2": "YOUR_N8N_SHARED_SECRET"
+              "value2": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
             }
           ]
         }
@@ -52,12 +52,12 @@
     },
     {
       "parameters": {
-        "fromEmail": "alumnirequests@mountzion.ac.in",
+        "fromEmail": "alumnims@mountzion.ac.in",
         "toEmail": "={{$json.email}}",
         "subject": "Request for Professional Information Update - Mount Zion College of Engineering and Technology",
         "html": "<p>Dear {{$json.name}},</p><p>We hope this email finds you well. Please update your current professional details with your alma mater using your student portal.</p><p>Best regards,<br>Mount Zion Alumni Relations Team</p>",
         "options": {
-          "replyTo": "=alumnirequests+{{$json.assignmentId}}@mountzion.ac.in"
+          "replyTo": "=alumnims+{{$json.assignmentId}}@mountzion.ac.in"
         }
       },
       "name": "SMTP Send Mail",
@@ -70,13 +70,13 @@
     },
     {
       "parameters": {
-        "url": "http://localhost:3000/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
+        "url": "={{$node[\"Webhook Trigger\"].json[\"body\"][\"amsBaseUrl\"] || \"http://localhost:3000\"}}/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
         "options": {},
         "headerParametersUi": {
           "parameter": [
             {
               "name": "X-Automation-Secret",
-              "value": "YOUR_N8N_SHARED_SECRET"
+              "value": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
             }
           ]
         },
@@ -94,13 +94,13 @@
     },
     {
       "parameters": {
-        "url": "http://localhost:3000/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
+        "url": "={{$node[\"Webhook Trigger\"].json[\"body\"][\"amsBaseUrl\"] || \"http://localhost:3000\"}}/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
         "options": {},
         "headerParametersUi": {
           "parameter": [
             {
               "name": "X-Automation-Secret",
-              "value": "YOUR_N8N_SHARED_SECRET"
+              "value": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
             }
           ]
         },
