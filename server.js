@@ -17,6 +17,8 @@ const compression = require('compression');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 app.use(compression());
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.disable('x-powered-by');
@@ -38,6 +40,7 @@ const limiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 2000,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { success: false, message: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
@@ -47,6 +50,7 @@ const loginLimiter = rateLimit({
   max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' }
 });
 app.use('/api/v1/auth/login', loginLimiter);
