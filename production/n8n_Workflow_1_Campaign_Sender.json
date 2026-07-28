@@ -4,7 +4,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "campaign-trigger",
+        "path": "ams-campaign-send",
         "options": {}
       },
       "name": "Webhook Trigger",

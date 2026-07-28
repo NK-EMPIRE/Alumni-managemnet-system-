@@ -2772,12 +2772,12 @@ window.openEmailCampaignModal = function () {
   window.switchCampaignTab('recipients');
 
   var token = localStorage.getItem('token');
-  fetch('/api/v1/alumni?limit=1000', {
+  fetch('/api/v1/email-campaigns/preview-recipients', {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
-    if (res && res.data) {
+    if (res && res.success && res.data) {
       var records = (res.data.records && Array.isArray(res.data.records)) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
-      var total = (res.data.pagination && res.data.pagination.total !== undefined) ? res.data.pagination.total : records.length;
+      var total = res.data.total !== undefined ? res.data.total : records.length;
       if (badge) badge.textContent = total + ' Alumni Records';
       if (countTag) countTag.textContent = records.length;
 

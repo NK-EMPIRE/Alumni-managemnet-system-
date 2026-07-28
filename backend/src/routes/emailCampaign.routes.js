@@ -5,6 +5,15 @@ const emailController = require('../controllers/emailCampaign.controller');
 
 const router = Router();
 
+// 0. GET /api/v1/email-campaigns/preview-recipients (Leader only)
+router.get('/preview-recipients', authenticate, (req, res, next) => {
+  const userRole = (req.user.role || '').toUpperCase();
+  if (userRole !== 'LEADER' && userRole !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Only leaders or admins can preview email campaign recipients' });
+  }
+  next();
+}, emailController.previewRecipients);
+
 // 1. POST /api/v1/email-campaigns (Leader only)
 router.post('/', authenticate, (req, res, next) => {
   const userRole = (req.user.role || '').toUpperCase();
