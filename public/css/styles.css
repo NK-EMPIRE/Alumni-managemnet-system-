@@ -607,6 +607,17 @@ ul {
   border: 2px solid var(--bg-white);
 }
 
+.notification-dropdown,
+.notification-menu,
+.notification-list,
+.notification-body,
+#notificationDropdown,
+#notificationListContainer {
+  max-height: 380px !important;
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
+}
+
 .navbar-profile {
   display: flex;
   align-items: center;

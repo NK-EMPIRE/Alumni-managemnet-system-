@@ -391,6 +391,71 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
       }
     }
 
+  } else if (method === 'DepartmentWise') {
+    const usersResult = await pool.request()
+      .input('teamId', sql.Int, teamId)
+      .query(`
+        SELECT u.user_id, (u.first_name + ' ' + u.last_name) AS name, u.department
+        FROM Users u
+        WHERE u.user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = @teamId
+          UNION
+          SELECT leader_id FROM Teams WHERE team_id = @teamId
+        ) AND u.is_active = 1
+      `);
+
+    const activeUsers = usersResult.recordset;
+    const deptAlumniMap = {};
+    for (const alum of poolAlumni) {
+      const dept = (alum.department || 'Unspecified').toUpperCase().trim();
+      if (!deptAlumniMap[dept]) deptAlumniMap[dept] = [];
+      deptAlumniMap[dept].push(alum);
+    }
+
+    const departmentMapping = params.departmentMapping || {};
+    const memberGroupMap = {};
+    activeUsers.forEach(u => {
+      memberGroupMap[u.user_id] = {
+        userId: u.user_id,
+        userName: u.name,
+        userDepartment: u.department || 'N/A',
+        count: 0,
+        alumniList: []
+      };
+    });
+
+    const unmatchedAlumni = [];
+
+    Object.keys(deptAlumniMap).forEach(dept => {
+      const targetUserId = departmentMapping[dept];
+      if (targetUserId && memberGroupMap[targetUserId]) {
+        memberGroupMap[targetUserId].alumniList.push(...deptAlumniMap[dept]);
+        memberGroupMap[targetUserId].count += deptAlumniMap[dept].length;
+      } else {
+        const autoMatchUser = activeUsers.find(u => u.department && u.department.toUpperCase().trim() === dept);
+        if (autoMatchUser) {
+          memberGroupMap[autoMatchUser.user_id].alumniList.push(...deptAlumniMap[autoMatchUser.user_id]);
+          memberGroupMap[autoMatchUser.user_id].count += deptAlumniMap[dept].length;
+        } else {
+          unmatchedAlumni.push(...deptAlumniMap[dept]);
+        }
+      }
+    });
+
+    Object.values(memberGroupMap).forEach(g => {
+      if (g.count > 0) preview.push(g);
+    });
+
+    if (unmatchedAlumni.length > 0) {
+      preview.push({
+        userId: -1,
+        userName: 'Unmatched (No Department Faculty Assigned)',
+        count: unmatchedAlumni.length,
+        alumniList: unmatchedAlumni,
+        isUnmatched: true
+      });
+    }
+
   } else {
     throw new AppError(`Unknown distribution method: ${method}`, 400);
   }
