@@ -2957,3 +2957,71 @@ window.copyAlumniAndFather = function (name, father) {
     });
   }
 };
+
+/* ── ALUMNI REPLIES INBOX HANDLERS (LEADER) ── */
+window.openAlumniRepliesModal = function () {
+  var container = document.getElementById('alumniRepliesListContainer');
+  if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading alumni replies...</p>';
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns/replies/all', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.data && res.data.length > 0) {
+      var html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+      res.data.forEach(function (reply) {
+        var isPending = reply.review_status === 'Pending Review';
+        var badgeStyle = isPending ? 'background:#FEF3C7;color:#D97706;border:1px solid #FCD34D;' : 'background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;';
+
+        html += '<div style="border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;background:#F8FAFC;">';
+        html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+        html += '    <div>';
+        html += '      <strong style="font-size:0.92rem;color:#1E293B;">' + (reply.alumni_name || 'Alumnus') + '</strong>';
+        html += '      <span style="font-size:0.78rem;color:#64748B;margin-left:8px;">(' + (reply.alumni_email || '') + ')</span>';
+        html += '    </div>';
+        html += '    <span class="badge" style="padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;' + badgeStyle + '">' + reply.review_status + '</span>';
+        html += '  </div>';
+        html += '  <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:0.83rem;color:#334155;white-space:pre-wrap;margin-bottom:10px;">' + (reply.raw_reply_text || '') + '</div>';
+        html += '  <div style="display:flex;justify-content:space-between;align-items:center;">';
+        html += '    <span style="font-size:0.75rem;color:#94A3B8;"><i class="far fa-clock" style="margin-right:4px;"></i>' + new Date(reply.received_at).toLocaleString() + '</span>';
+        if (isPending) {
+          html += '    <button class="btn btn-primary btn-sm" onclick="markReplyAsReviewed(' + reply.reply_id + ')" style="padding:4px 12px;font-size:0.78rem;"><i class="fas fa-check" style="margin-right:4px;"></i> Mark Reviewed</button>';
+        }
+        html += '  </div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      if (container) container.innerHTML = html;
+
+      var badge = document.getElementById('pendingRepliesCountBadge');
+      var pendingCount = res.data.filter(function (r) { return r.review_status === 'Pending Review'; }).length;
+      if (badge) {
+        if (pendingCount > 0) {
+          badge.textContent = pendingCount;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    } else {
+      if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:24px;"><i class="fas fa-inbox" style="font-size:2rem;color:#CBD5E1;display:block;margin-bottom:8px;"></i> No alumni email replies found.</p>';
+    }
+  }).catch(function (err) {
+    if (container) container.innerHTML = '<p style="text-align:center;color:#EF4444;padding:16px;">Failed to load alumni replies.</p>';
+  });
+
+  if (window.openModal) window.openModal('alumniRepliesModal');
+};
+
+window.markReplyAsReviewed = function (replyId) {
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns/replies/' + replyId + '/review', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success) {
+      if (typeof window.showToast === 'function') window.showToast('Reply marked as reviewed!', 'success');
+      window.openAlumniRepliesModal();
+    }
+  }).catch(function () { });
+};

@@ -940,6 +940,14 @@
                     }, 1500);
                     return;
                 }
+                if (page === 'replies') {
+                    if (typeof window.openAlumniRepliesModal === 'function') window.openAlumniRepliesModal();
+                    return;
+                }
+                if (page === 'campaign') {
+                    if (typeof window.openEmailCampaignModal === 'function') window.openEmailCampaignModal();
+                    return;
+                }
 
                 document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
                 item.classList.add('active');
@@ -2028,4 +2036,121 @@ window.copyAlumniAndFather = function (name, father) {
             showToast('Copied: ' + textStr, 'success');
         });
     }
+};
+
+/* ── EMAIL CAMPAIGN HANDLERS (MEMBER) ── */
+window.switchCampaignTab = function (tabName) {
+    var tabRec = document.getElementById('campaignTabRecipients');
+    var tabTpl = document.getElementById('campaignTabTemplate');
+    var btnRec = document.getElementById('tabBtnCampaignRecipients');
+    var btnTpl = document.getElementById('tabBtnCampaignTemplate');
+
+    if (tabName === 'recipients') {
+        if (tabRec) tabRec.style.display = 'block';
+        if (tabTpl) tabTpl.style.display = 'none';
+        if (btnRec) { btnRec.style.color = '#2563EB'; btnRec.style.borderBottom = '2px solid #2563EB'; }
+        if (btnTpl) { btnTpl.style.color = '#64748B'; btnTpl.style.borderBottom = 'none'; }
+    } else {
+        if (tabRec) tabRec.style.display = 'none';
+        if (tabTpl) tabTpl.style.display = 'block';
+        if (btnRec) { btnRec.style.color = '#64748B'; btnRec.style.borderBottom = 'none'; }
+        if (btnTpl) { btnTpl.style.color = '#2563EB'; btnTpl.style.borderBottom = '2px solid #2563EB'; }
+    }
+};
+
+window.previewIndividualAlumniEmail = function (name, email, assignId) {
+    var nameTag = document.getElementById('previewAlumniName');
+    var emailTag = document.getElementById('previewToEmail');
+    var replyToTag = document.getElementById('previewReplyToTag');
+
+    if (nameTag) nameTag.textContent = name || 'Alumnus';
+    if (emailTag) emailTag.textContent = email || 'alumni@mountzion.ac.in';
+    if (replyToTag) replyToTag.textContent = 'alumnirequests+' + (assignId || 'ID') + '@mountzion.ac.in';
+
+    window.switchCampaignTab('template');
+};
+
+window.openEmailCampaignModal = function () {
+    var setupState = document.getElementById('campaignSetupState');
+    var progressState = document.getElementById('campaignProgressState');
+    var launchBtn = document.getElementById('launchCampaignSubmitBtn');
+    var badge = document.getElementById('campaignRecipientBadge');
+    var countTag = document.getElementById('campaignRecipientsCountTag');
+    var tbody = document.getElementById('campaignRecipientsPreviewTableBody');
+
+    if (setupState) setupState.style.display = 'block';
+    if (progressState) progressState.style.display = 'none';
+    if (launchBtn) { launchBtn.style.display = 'inline-flex'; launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign'; }
+    if (badge) badge.textContent = 'Counting assigned records...';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading alumni records...</td></tr>';
+
+    window.switchCampaignTab('recipients');
+
+    var token = localStorage.getItem('token');
+    fetch('/api/v1/email-campaigns/preview-recipients', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function (r) { return r.json(); }).then(function (res) {
+        if (res && res.success && res.data) {
+            var records = (res.data.records && Array.isArray(res.data.records)) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+            var total = res.data.total !== undefined ? res.data.total : records.length;
+            if (badge) badge.textContent = total + ' Alumni Records';
+            if (countTag) countTag.textContent = records.length;
+
+            if (records.length > 0) {
+                var html = '';
+                records.forEach(function (rec) {
+                    var safeName = (rec.name || 'Alumnus').replace(/'/g, "\\'");
+                    var safeEmail = (rec.email || 'No Email').replace(/'/g, "\\'");
+                    var assignId = rec.assignment_id || rec.id || 0;
+                    html += '<tr style="border-bottom:1px solid #F1F5F9;">';
+                    html += '  <td style="padding:8px 12px;font-weight:600;color:#1E293B;">' + (rec.name || '-') + '</td>';
+                    html += '  <td style="padding:8px 12px;color:#64748B;">' + (rec.department || '-') + ' (' + (rec.batch || '-') + ')</td>';
+                    html += '  <td style="padding:8px 12px;color:#2563EB;">' + (rec.email || '<span style="color:#EF4444;">No Email</span>') + '</td>';
+                    html += '  <td style="padding:8px 12px;text-align:right;">';
+                    html += '    <button type="button" class="btn btn-secondary btn-sm" onclick="previewIndividualAlumniEmail(\'' + safeName + '\', \'' + safeEmail + '\', ' + assignId + ')" style="padding:2px 8px;font-size:0.72rem;"><i class="fas fa-eye"></i> Preview</button>';
+                    html += '  </td>';
+                    html += '</tr>';
+                });
+                if (tbody) tbody.innerHTML = html;
+            } else {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">No assigned alumni records found.</td></tr>';
+            }
+        } else {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#EF4444;">Failed to load assigned alumni.</td></tr>';
+        }
+    }).catch(function () {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#EF4444;">Error fetching assigned alumni.</td></tr>';
+    });
+
+    if (window.openModal) window.openModal('emailCampaignModal');
+};
+
+window.submitEmailCampaignLaunch = function () {
+    var launchBtn = document.getElementById('launchCampaignSubmitBtn');
+    if (launchBtn) { launchBtn.disabled = true; launchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Launching...'; }
+
+    var token = localStorage.getItem('token');
+    fetch('/api/v1/email-campaigns/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ campaign_name: 'Member Email Update Campaign ' + new Date().toLocaleDateString() })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+        if (res && res.success && res.data) {
+            _memberShowToast('Email campaign launched successfully!', 'success');
+            var setupState = document.getElementById('campaignSetupState');
+            var progressState = document.getElementById('campaignProgressState');
+            if (setupState) setupState.style.display = 'none';
+            if (progressState) progressState.style.display = 'block';
+            if (launchBtn) launchBtn.style.display = 'none';
+        } else {
+            _memberShowToast(res && res.message || 'Failed to dispatch campaign', 'error');
+            if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
+        }
+    }).catch(function () {
+        _memberShowToast('Network error dispatching campaign', 'error');
+        if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
+    });
 };
