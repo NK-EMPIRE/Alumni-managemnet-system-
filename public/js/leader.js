@@ -926,6 +926,7 @@
           if (desgVal !== '-') desgVal = desgVal.replace(regex, highlightMark);
         }
 
+        var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
         var fatherVal = r.father_name || r.fatherName || r.pi_father_name || '';
         var nameCellHtml = '<div>' +
           '<div style="display:flex;align-items:center;gap:6px;">' +

@@ -55,10 +55,17 @@ const confirmAliases = asyncHandler(async (req, res) => {
   success(res, null, 'Faculty aliases confirmed and saved successfully', 200);
 });
 
+const rollbackImport = asyncHandler(async (req, res) => {
+  const { importId } = req.params;
+  const result = await uploadService.rollbackImport(parseInt(importId, 10));
+  success(res, result, `Excel import rolled back successfully. Removed ${result.deletedCount} records.`);
+});
+
 module.exports = {
   uploadExcel,
   previewExcel,
   getImportHistory,
   downloadTemplate,
-  confirmAliases
+  confirmAliases,
+  rollbackImport
 };
