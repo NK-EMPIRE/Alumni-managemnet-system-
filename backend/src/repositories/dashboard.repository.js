@@ -182,13 +182,14 @@ async function getMemberStats(memberId) {
         SUM(CASE WHEN aa.status = 'Completed' THEN 1 ELSE 0 END) AS completed,
         SUM(CASE WHEN aa.status = 'Pending' THEN 1 ELSE 0 END) AS pending,
         SUM(CASE WHEN aa.status = 'Draft' THEN 1 ELSE 0 END) AS draft,
-        SUM(CASE WHEN CAST(aa.assigned_date AS DATE) = CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS today_updates,
+        SUM(CASE WHEN aa.member_id = @memberId AND (CAST(aa.completed_date AS DATE) = CAST(GETDATE() AS DATE) OR (aa.status = 'Completed' AND CAST(a.updated_at AS DATE) = CAST(GETDATE() AS DATE))) THEN 1 ELSE 0 END) AS today_updates,
         MAX(l.first_name + ' ' + l.last_name) AS leader_name
       FROM Users u
       INNER JOIN TeamMembers tm ON u.user_id = tm.user_id
       INNER JOIN Teams t ON tm.team_id = t.team_id
       INNER JOIN Users l ON t.leader_id = l.user_id
       LEFT JOIN AlumniAssignments aa ON t.team_id = aa.team_id AND aa.member_id = @memberId
+      LEFT JOIN Alumni a ON aa.alumni_id = a.alumni_id
       WHERE u.user_id = @memberId
     `);
   return result.recordset[0];

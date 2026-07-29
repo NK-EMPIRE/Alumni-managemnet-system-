@@ -3,6 +3,44 @@ const { logger } = require('../utils/logger');
 const http = require('http');
 const https = require('https');
 
+async function getEligibleRecipients(leaderId) {
+  const pool = await getPool();
+
+  const leaderRes = await pool.request()
+    .input('leaderId', sql.Int, leaderId)
+    .query('SELECT user_id, team_id, role_id FROM dbo.Users WHERE user_id = @leaderId');
+
+  if (leaderRes.recordset.length === 0) {
+    throw new Error('Leader user not found');
+  }
+
+  const leader = leaderRes.recordset[0];
+  const teamId = leader.team_id;
+
+  if (!teamId) {
+    throw new Error('User is not assigned to any team');
+  }
+
+  const queryStr = `
+    SELECT aa.assignment_id, aa.alumni_id, a.name, a.email, a.department, a.batch
+    FROM dbo.AlumniAssignments aa
+    JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
+    WHERE (
+      aa.member_id IN (
+        SELECT user_id FROM dbo.Users WHERE team_id = @teamId
+      )
+      OR aa.team_id = @teamId
+    )
+    AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
+  `;
+
+  const recipientsRes = await pool.request()
+    .input('teamId', sql.Int, teamId)
+    .query(queryStr);
+
+  return recipientsRes.recordset;
+}
+
 async function createCampaign({ leaderId, assignmentIds }) {
   const pool = await getPool();
 
@@ -22,31 +60,12 @@ async function createCampaign({ leaderId, assignmentIds }) {
     throw new Error('User is not assigned to any team');
   }
 
-  // Fetch recipients
-  let queryStr = `
-    SELECT aa.assignment_id, aa.alumni_id, a.name, a.email
-    FROM dbo.AlumniAssignments aa
-    JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
-    WHERE (
-      aa.member_id IN (
-        SELECT user_id FROM dbo.Users WHERE team_id = @teamId
-      )
-      OR aa.team_id = @teamId
-    )
-    AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
-  `;
-
-  const request = pool.request().input('teamId', sql.Int, teamId);
+  let recipients = await getEligibleRecipients(leaderId);
 
   if (Array.isArray(assignmentIds) && assignmentIds.length > 0) {
-    queryStr += ` AND aa.assignment_id IN (${assignmentIds.map((_, i) => `@aId${i}`).join(',')})`;
-    assignmentIds.forEach((id, i) => {
-      request.input(`aId${i}`, sql.Int, id);
-    });
+    const idSet = new Set(assignmentIds.map(id => Number(id)));
+    recipients = recipients.filter(r => idSet.has(Number(r.assignment_id)));
   }
-
-  const recipientsRes = await request.query(queryStr);
-  const recipients = recipientsRes.recordset;
 
   if (recipients.length === 0) {
     throw new Error('No valid alumni recipients with non-null emails found for this campaign');
@@ -280,6 +299,7 @@ async function reviewReply({ replyId, userId }) {
 }
 
 module.exports = {
+  getEligibleRecipients,
   createCampaign,
   getCampaignStatus,
   logRecipientResult,

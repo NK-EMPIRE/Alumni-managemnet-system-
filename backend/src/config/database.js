@@ -122,6 +122,22 @@ async function getPool() {
       BEGIN
           CREATE INDEX IX_EmailCampaignRecipients_Campaign ON dbo.EmailCampaignRecipients(campaign_id);
       END
+
+      IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = OBJECT_ID('dbo.WorkspaceMessages'))
+      BEGIN
+          CREATE TABLE dbo.WorkspaceMessages (
+              message_id INT IDENTITY PRIMARY KEY,
+              user_id INT NOT NULL REFERENCES dbo.Users(user_id),
+              message_text NVARCHAR(MAX) NOT NULL,
+              attachment_url VARCHAR(500) NULL,
+              created_at DATETIME2 DEFAULT GETUTCDATE()
+          );
+      END
+
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.WorkspaceMessages') AND name = 'IX_WorkspaceMessages_CreatedAt')
+      BEGIN
+          CREATE INDEX IX_WorkspaceMessages_CreatedAt ON dbo.WorkspaceMessages(created_at DESC);
+      END
     `);
   } catch (e) {
     logger.error('Database migration failed:', e);

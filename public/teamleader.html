@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/export_modal.css" />
+  <link rel="stylesheet" href="css/chat.css" />
   <style>
     :root {
       --progress-ring-size: 100px;
@@ -1785,6 +1786,69 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       ALUMNI DISTRIBUTION MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="distributeModalOverlay">
+    <div class="modal" style="max-width:720px;width:95vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-sitemap" style="color:var(--primary);margin-right:8px;"></i>Distribute Alumni Records</h3>
+        <button class="modal-close" onclick="closeModal('distributeModalOverlay')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+          <div>
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Distribution Method</label>
+            <select id="distMethodSelect" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
+              <option value="RoundRobin">Round Robin (Equal Auto-Split)</option>
+              <option value="DepartmentWise">Department-Wise Auto Match</option>
+              <option value="FacultyWise">Faculty-Wise Auto Match</option>
+              <option value="BatchWise">Batch-Wise Custom Split</option>
+            </select>
+          </div>
+          <div id="distBatchContainer" style="display:none;">
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Target Batch</label>
+            <input type="text" id="distBatchInput" class="form-control" placeholder="e.g. 2021" style="height:38px;font-size:0.85rem;">
+          </div>
+        </div>
+
+        <!-- Department Mapping Section for DepartmentWise -->
+        <div id="distDeptMappingSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
+          <h4 style="font-size:0.85rem;font-weight:700;color:#1E293B;margin-bottom:8px;"><i class="fas fa-building" style="color:var(--primary);margin-right:6px;"></i>Department to Faculty Member Mapping</h4>
+          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department alumni are assigned to which faculty member (members are matched by department automatically).</p>
+          <div id="distDeptMappingGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-sm" id="previewDistBtn" style="margin-bottom:16px;"><i class="fas fa-eye"></i> Generate Distribution Preview</button>
+
+        <div id="distLoadingState" style="display:none;text-align:center;padding:20px;color:#64748B;">
+          <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i> Generating distribution preview...
+        </div>
+
+        <div id="distEmptyState" style="display:none;text-align:center;padding:20px;color:#64748B;background:#F8FAFC;border-radius:8px;">
+          <i class="fas fa-exclamation-circle" style="font-size:1.5rem;margin-bottom:8px;color:#F59E0B;display:block;"></i>
+          <span id="distEmptyMsg">No undistributed alumni found for this selection.</span>
+        </div>
+
+        <div id="distPreviewSection" style="display:none;">
+          <h4 style="font-size:0.88rem;font-weight:700;color:#1E293B;margin-bottom:10px;">Preview Allocation</h4>
+          <div id="distPreviewTable" style="max-height:260px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:8px;"></div>
+
+          <div id="distUnmatchedSection" style="display:none;margin-top:14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;">
+            <h5 style="font-size:0.82rem;font-weight:700;color:#991B1B;margin-bottom:6px;"><i class="fas fa-exclamation-triangle"></i> Unmatched Alumni (Manual Assign Required)</h5>
+            <div id="distUnmatchedList" style="max-height:160px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="closeModal('distributeModalOverlay')">Cancel</button>
+        <button class="btn btn-primary" id="confirmDistributeBtn" style="display:none;"><i class="fas fa-check"></i> Confirm Distribution</button>
+      </div>
+    </div>
+  </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/socket.io/socket.io.js"></script>
@@ -1804,5 +1868,6 @@
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
   <script src="js/leader.js"></script>
+  <script src="js/chat.js"></script>
 </body>
 </html>

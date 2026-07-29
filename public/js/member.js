@@ -258,29 +258,89 @@
 
     window._currentModalRecordIndex = -1;
 
+    function getEffectiveAlumniList() {
+        return (filteredAlumniData && filteredAlumniData.length > 0) ? filteredAlumniData : alumniData;
+    }
+
+    function applyPreFilledLocking() {
+        const fieldIds = [
+            'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
+            'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldState', 'fieldCountry',
+            'fieldEmail', 'fieldPhone', 'fieldSecondaryEmail', 'fieldSecondaryPhone',
+            'fieldLinkedin', 'fieldGovtJob'
+        ];
+
+        fieldIds.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            var existingBtn = el.parentNode ? el.parentNode.querySelector('.btn-pencil-unlock') : null;
+            if (existingBtn) existingBtn.remove();
+
+            var val = el.value ? el.value.trim() : '';
+            var isPreFilled = val !== '' && val !== 'No' && val !== 'Select Department' && val !== 'Select Batch';
+
+            if (isPreFilled) {
+                el.readOnly = true;
+                if (el.tagName === 'SELECT') el.disabled = true;
+
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-pencil-unlock';
+                btn.title = 'Click pencil to edit pre-filled data';
+                btn.style.cssText = 'position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#F1F5F9;border:1px solid #CBD5E1;color:#475569;border-radius:4px;cursor:pointer;font-size:0.75rem;padding:3px 6px;z-index:5;';
+                btn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                btn.onclick = function (e) {
+                    e.preventDefault();
+                    el.readOnly = false;
+                    el.disabled = false;
+                    el.focus();
+                    btn.remove();
+                };
+
+                if (el.parentNode) {
+                    if (getComputedStyle(el.parentNode).position === 'static') {
+                        el.parentNode.style.position = 'relative';
+                    }
+                    el.parentNode.appendChild(btn);
+                }
+            } else {
+                el.readOnly = false;
+                el.disabled = false;
+            }
+        });
+    }
+
     function updateModalNavCounter() {
         var prevBtn = document.getElementById('modalNavPrevBtn');
         var nextBtn = document.getElementById('modalNavNextBtn');
         var counterEl = document.getElementById('modalNavCounter');
-        if (!alumniData || alumniData.length === 0 || window._currentModalRecordIndex === -1) {
+        var activeList = getEffectiveAlumniList();
+        if (!activeList || activeList.length === 0 || window._currentModalRecordIndex === -1) {
             if (counterEl) counterEl.textContent = '0 / 0';
             if (prevBtn) prevBtn.disabled = true;
             if (nextBtn) nextBtn.disabled = true;
             return;
         }
-        if (counterEl) counterEl.textContent = (window._currentModalRecordIndex + 1) + ' / ' + alumniData.length;
-        if (prevBtn) prevBtn.disabled = window._currentModalRecordIndex <= 0;
-        if (nextBtn) nextBtn.disabled = window._currentModalRecordIndex >= alumniData.length - 1;
+        var curPos = activeList.findIndex(function (r) { return r.id === window._currentModalRecordId; });
+        if (curPos === -1) curPos = 0;
+        if (counterEl) counterEl.textContent = (curPos + 1) + ' / ' + activeList.length;
+        if (prevBtn) prevBtn.disabled = curPos <= 0;
+        if (nextBtn) nextBtn.disabled = curPos >= activeList.length - 1;
     }
 
     window.navigateModalRecord = function (dir) {
-        if (!alumniData || alumniData.length === 0) return;
-        var newIdx = window._currentModalRecordIndex + dir;
-        if (newIdx < 0 || newIdx >= alumniData.length) return;
-        var targetRecord = alumniData[newIdx];
+        var activeList = getEffectiveAlumniList();
+        if (!activeList || activeList.length === 0) return;
+
+        var curPos = activeList.findIndex(function (r) { return r.id === window._currentModalRecordId; });
+        if (curPos === -1) curPos = 0;
+
+        var newPos = curPos + dir;
+        if (newPos < 0 || newPos >= activeList.length) return;
+        var targetRecord = activeList[newPos];
         if (!targetRecord) return;
 
-        // Visual transition
         var form = document.getElementById('updateForm');
         if (form) {
             form.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
@@ -301,6 +361,7 @@
         const recordIdx = alumniData.findIndex(function (r) { return r.id === targetId; });
         if (recordIdx === -1) return;
         window._currentModalRecordIndex = recordIdx;
+        window._currentModalRecordId = targetId;
         const record = alumniData[recordIdx];
 
         updateModalNavCounter();
@@ -341,6 +402,9 @@
         document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldGovtJob').value = record.govtJob || (record.is_government_job ? 'Yes' : 'No') || 'No';
+
+        // Apply pre-filled field locking with pencil icon
+        applyPreFilledLocking();
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
@@ -460,6 +524,33 @@
         localStorage.removeItem('autosave_member_alumni_' + idx);
     }
 
+    function readFormValues(record) {
+        if (!record) return;
+        var getVal = function (id) {
+            var el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        };
+
+        record.name = getVal('fieldName') || record.name;
+        record.department = getVal('fieldDept') || record.department;
+        record.batch = getVal('fieldBatch') || record.batch;
+        record.father_name = getVal('fieldFatherName') || record.father_name;
+        record.fatherName = record.father_name;
+        record.date_of_birth = getVal('fieldDOB') || record.date_of_birth;
+        record.company = getVal('fieldCompany') || record.company;
+        record.designation = getVal('fieldDesignation') || record.designation;
+        record.city = getVal('fieldCity') || record.city;
+        record.state = getVal('fieldState') || record.state;
+        record.country = getVal('fieldCountry') || record.country;
+        record.email = getVal('fieldEmail') || record.email;
+        record.phone = getVal('fieldPhone') || record.phone;
+        record.secondary_email = getVal('fieldSecondaryEmail') || record.secondary_email;
+        record.secondary_phone = getVal('fieldSecondaryPhone') || record.secondary_phone;
+        record.linkedin_profile = getVal('fieldLinkedin') || record.linkedin_profile;
+        record.linkedin_url = record.linkedin_profile;
+        record.govtJob = getVal('fieldGovtJob') || record.govtJob;
+    }
+
     // Smart Copy-Paste Parser (LinkedIn Profile Parser)
     window.parseProfileHeader = function () {
         var val = document.getElementById('fieldSmartParser').value || '';
@@ -495,6 +586,13 @@
             }
         });
 
+        // Sync values back to record in memory
+        var idx = parseInt(fieldIndex.value, 10);
+        var record = alumniData.find(function (r) { return r.id === idx; });
+        if (record) {
+            readFormValues(record);
+        }
+
         showToast('Parsed profile details auto-filled successfully!', 'success');
         saveAutosave(); // Save progress immediately
     };
@@ -518,9 +616,7 @@
             { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' },
             { id: 'fieldCompany', errorId: 'errorCompany', label: 'Company' },
             { id: 'fieldDesignation', errorId: 'errorDesignation', label: 'Designation' },
-            { id: 'fieldCity', errorId: 'errorCity', label: 'City' },
-            { id: 'fieldEmail', errorId: 'errorEmail', label: 'Email' },
-            { id: 'fieldPhone', errorId: 'errorPhone', label: 'Phone' }
+            { id: 'fieldCity', errorId: 'errorCity', label: 'City' }
         ];
 
         fields.forEach(function (f) {
@@ -959,9 +1055,18 @@
                     }
                     var updatedDateStr = row.updated_date ? new Date(row.updated_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
+                    var fatherVal = row.father_name || row.fatherName || row.pi_father_name || '';
+                    var nameCellContent = '<div>' +
+                        '<div style="display:flex;align-items:center;gap:6px;">' +
+                        '  <span style="font-weight:600;color:#1E293B;">' + (row.name || '-') + '</span>' +
+                        '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + (row.name || '').replace(/'/g, "\\'") + '\', \'' + fatherVal.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+                        '</div>' +
+                        (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
+                        '</div>';
+
                     html += '<tr>' +
                         '<td class="sticky-col" style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; left:0;">' + serial + '</td>' +
-                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600;">' + (row.name || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600;">' + nameCellContent + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.register_no || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.father_name || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.date_of_birth || '-') + '</td>' +
@@ -1914,4 +2019,13 @@ window.markReplyAsReviewed = function (replyId) {
             window.openAlumniRepliesModal();
         }
     }).catch(function () { });
+};
+
+window.copyAlumniAndFather = function (name, father) {
+    var textStr = 'Alumni: ' + name + (father ? ' | Father: ' + father : '');
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textStr).then(function () {
+            showToast('Copied: ' + textStr, 'success');
+        });
+    }
 };

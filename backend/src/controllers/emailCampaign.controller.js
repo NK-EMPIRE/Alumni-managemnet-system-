@@ -86,7 +86,21 @@ async function reviewReply(req, res, next) {
   }
 }
 
+async function previewRecipients(req, res, next) {
+  try {
+    const leaderId = req.user.userId;
+    const records = await emailService.getEligibleRecipients(leaderId);
+    return success(res, { records, total: records.length }, 'Preview recipients fetched successfully');
+  } catch (err) {
+    if (err.statusCode) {
+      return error(res, err.message, err.statusCode);
+    }
+    next(err);
+  }
+}
+
 module.exports = {
+  previewRecipients,
   createCampaign,
   getCampaignStatus,
   logRecipientResult,
