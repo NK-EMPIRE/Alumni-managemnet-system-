@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSO Redirect | Alumni Management System</title>
+
+  <style>
+    :root{
+      font-family: Inter, Arial, sans-serif;
+      color-scheme: light;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(135deg,#eff6ff,#f8fafc);
+    }
+
+    .popup{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+    }
+
+    .popup-content{
+      width:380px;
+      background:#fff;
+      border-radius:15px;
+      padding:35px;
+      text-align:center;
+      box-shadow:0 20px 40px rgba(0,0,0,.25);
+      animation:popup .3s ease;
+    }
+
+    @keyframes popup{
+      from{
+        opacity:0;
+        transform:scale(.8);
+      }
+      to{
+        opacity:1;
+        transform:scale(1);
+      }
+    }
+
+    .icon{
+      font-size:70px;
+      margin-bottom:15px;
+    }
+
+    h2{
+      color:#dc3545;
+      margin-bottom:25px;
+      font-size:34px;
+    }
+
+    button{
+      background:#2563eb;
+      color:#fff;
+      border:none;
+      padding:12px 35px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:16px;
+      transition:.3s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="accessPopup" class="popup">
+    <div class="popup-content">
+
+        <div class="icon">🚫</div>
+
+        <h2>Access Denied</h2>
+
+        <button id="okBtn">OK</button>
+
+    </div>
+</div>
+
+<script src="js/services/api.js"></script>
+
+<script>
+(function(){
+
+    const params=new URLSearchParams(window.location.search);
+    const token=params.get("token") || params.get("jwt") || "";
+
+    function showAccessDenied(){
+        document.getElementById("accessPopup").style.display="flex";
+    }
+
+    function closePopup(){
+        window.location.href="http://localhost:3011/home.html";
+    }
+
+    document.getElementById("okBtn").addEventListener("click",closePopup);
+
+    function showError(){
+        showAccessDenied();
+    }
+
+    async function completeSso(){
+
+        if(!token){
+            showError();
+            return;
+        }
+
+        try{
+
+            const response=await fetch("/api/v1/auth/sso",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({token})
+            });
+
+            const result=await response.json();
+
+            if(!response.ok || !result.success){
+                throw new Error();
+            }
+
+            if(result.data && result.data.token){
+                localStorage.setItem("token",result.data.token);
+                localStorage.setItem("user",JSON.stringify(result.data.user));
+            }
+
+            const redirectPath=
+                result.data && result.data.redirectPath
+                ? result.data.redirectPath
+                : "admin.html";
+
+            window.location.replace(redirectPath);
+
+        }catch(error){
+            showError();
+        }
+    }
+
+    completeSso();
+
+})();
+</script>
+
+</body>
+</html>

@@ -9,6 +9,7 @@ const { loginRules, changePasswordRules, refreshTokenRules } = require('../valid
 const router = Router();
 
 router.post('/login', loginRules, validate, authController.login);
+router.post('/sso', authController.sso);
 router.post('/refresh-token', refreshTokenRules, validate, authController.refreshToken);
 router.post('/change-password', authenticate, changePasswordRules, validate, authController.changePassword);
 router.post('/forgot-password', [body('email').isEmail().normalizeEmail()], validate, authController.forgotPassword);

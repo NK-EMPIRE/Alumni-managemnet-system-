@@ -1,6 +1,7 @@
 const authService = require('../services/auth.service');
 const { success } = require('../utils/response');
 const { asyncHandler } = require('../middleware/errorHandler');
+const { verifySsoToken } = require('../utils/sso');
 
 const login = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
@@ -63,6 +64,12 @@ const updateResetRequestStatus = asyncHandler(async (req, res) => {
   success(res, null, `Reset request status updated to ${status}`);
 });
 
+const sso = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  const result = await verifySsoToken(token);
+  success(res, result, 'SSO login successful');
+});
+
 module.exports = {
   login,
   refreshToken,
@@ -70,5 +77,6 @@ module.exports = {
   forgotPassword,
   resetPasswordWithTemp,
   getResetRequests,
-  updateResetRequestStatus
+  updateResetRequestStatus,
+  sso
 };
