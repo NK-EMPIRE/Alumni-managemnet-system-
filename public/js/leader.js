@@ -926,11 +926,18 @@
           if (desgVal !== '-') desgVal = desgVal.replace(regex, highlightMark);
         }
 
-        var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
+        var fatherVal = r.father_name || r.fatherName || r.pi_father_name || '';
+        var nameCellHtml = '<div>' +
+          '<div style="display:flex;align-items:center;gap:6px;">' +
+          '  <strong style="color:#1E293B;">' + nameVal + '</strong>' +
+          '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + (r.name || '').replace(/'/g, "\\'") + '\', \'' + fatherVal.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+          '</div>' +
+          (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
+          '</div>';
 
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-          '<td><strong>' + nameVal + '</strong></td>' +
+          '<td>' + nameCellHtml + '</td>' +
           '<td>' + deptVal + '</td>' +
           '<td>' + batchVal + '</td>' +
           '<td>' + compVal + '</td>' +
