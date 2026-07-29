@@ -2756,13 +2756,33 @@ function renderAuditPagination(total) {
   var totalPages = Math.max(1, Math.ceil(total / perPage));
   var page = auditState.currentPage;
 
+  var info = document.getElementById('auditPaginationInfo');
+  if (info) {
+    var start = (page - 1) * perPage + 1;
+    var end = Math.min(page * perPage, total);
+    info.textContent = 'Showing ' + start + '-' + end + ' of ' + total + ' records';
+  }
+
   var container = document.getElementById('auditPagination');
   if (!container) return;
   var html = '';
   html += '<button class="pagination-item ' + (page <= 1 ? 'disabled' : '') + '" onclick="goToAuditPage(' + (page - 1) + ')" ' + (page <= 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
-  for (var i = 1; i <= totalPages; i++) {
+
+  var rangeStart = Math.max(1, page - 2);
+  var rangeEnd = Math.min(totalPages, page + 2);
+
+  if (rangeStart > 1) {
+    html += '<button class="pagination-item" onclick="goToAuditPage(1)">1</button>';
+    if (rangeStart > 2) html += '<span style="padding:0 4px;color:var(--text-muted);">...</span>';
+  }
+  for (var i = rangeStart; i <= rangeEnd; i++) {
     html += '<button class="pagination-item ' + (i === page ? 'active' : '') + '" onclick="goToAuditPage(' + i + ')">' + i + '</button>';
   }
+  if (rangeEnd < totalPages) {
+    if (rangeEnd < totalPages - 1) html += '<span style="padding:0 4px;color:var(--text-muted);">...</span>';
+    html += '<button class="pagination-item" onclick="goToAuditPage(' + totalPages + ')">' + totalPages + '</button>';
+  }
+
   html += '<button class="pagination-item ' + (page >= totalPages ? 'disabled' : '') + '" onclick="goToAuditPage(' + (page + 1) + ')" ' + (page >= totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
   container.innerHTML = html;
 }
@@ -2774,6 +2794,12 @@ function goToAuditPage(page) {
   auditState.currentPage = page;
   renderAuditLogTable();
 }
+
+window.changeAuditRowsPerPage = function (val) {
+  auditState.rowsPerPage = parseInt(val);
+  auditState.currentPage = 1;
+  renderAuditLogTable();
+};
 
 /* ────────────────────────────────────────────────────────────
    39. AUDIT LOGS – Filters
@@ -2799,6 +2825,13 @@ function initAuditHandlers() {
       if (dateFrom) dateFrom.value = '';
       if (dateTo) dateTo.value = '';
       applyAuditFilters();
+    });
+  }
+
+  var rowsPerPage = document.getElementById('auditRowsPerPage');
+  if (rowsPerPage) {
+    rowsPerPage.addEventListener('change', function () {
+      window.changeAuditRowsPerPage(this.value);
     });
   }
 }
@@ -2870,6 +2903,12 @@ function applyAuditFilters() {
       } else {
         badge.style.display = 'none';
       }
+    }
+
+    var wrap = document.getElementById('auditFilterBtnWrap');
+    if (wrap) {
+      if (activeCount > 0) wrap.classList.add('has-active-filter');
+      else wrap.classList.remove('has-active-filter');
     }
 
     var fullData;
