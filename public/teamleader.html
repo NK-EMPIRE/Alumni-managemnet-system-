@@ -572,10 +572,6 @@
         <i class="fas fa-cog"></i>
         <span class="sidebar-item-text">Settings</span>
       </a>
-      <a class="sidebar-item" data-page="logout" href="#" style="color:rgba(255,255,255,0.5)">
-        <i class="fas fa-sign-out-alt"></i>
-        <span class="sidebar-item-text">Logout</span>
-      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -586,6 +582,10 @@
           <div class="sidebar-user-role">Team Leader</div>
         </div>
       </div>
+      <a class="sidebar-item" data-page="logout" href="#" onclick="API.logout()" style="color:#EF4444 !important;font-weight:600;margin-top:10px;background:rgba(239,68,68,0.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+        <i class="fas fa-sign-out-alt" style="color:#EF4444;"></i>
+        <span class="sidebar-item-text">Logout</span>
+      </a>
     </div>
   </aside>
 
@@ -1048,7 +1048,9 @@
   </div>
 
   <div class="modal-overlay" id="updateModal">
-    <div class="modal modal-xl" style="max-width:900px;width:95vw;">
+    <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;">
+      <button type="button" class="floating-modal-nav-btn left-nav-btn" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record"><i class="fas fa-chevron-left"></i></button>
+      <button type="button" class="floating-modal-nav-btn right-nav-btn" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record"><i class="fas fa-chevron-right"></i></button>
       <div class="modal-header">
         <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
           <div class="avatar" id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">A</div>

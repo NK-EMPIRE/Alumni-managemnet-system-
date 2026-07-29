@@ -1069,6 +1069,9 @@
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
 
+        // Apply pre-filled data field locking with pencil edit icon
+        if (typeof applyPreFilledLockingLeader === 'function') applyPreFilledLockingLeader();
+
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
         var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
@@ -1517,9 +1520,15 @@
               '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
               '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
               '</div>';
-          } else {
-            val = '-';
-          }
+        } else if (col.key === 'name' || col.key === 'fullName') {
+          var fatherVal = row.father_name || row.fatherName || row.pi_father_name || '';
+          val = '<div>' +
+            '<div style="display:flex;align-items:center;gap:6px;">' +
+            '  <span style="font-weight:600;color:#1E293B;">' + (row.name || row.fullName || '-') + '</span>' +
+            '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + (row.name || row.fullName || '').replace(/'/g, "\\'") + '\', \'' + fatherVal.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+            '</div>' +
+            (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
+            '</div>';
         } else {
           val = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '-';
         }
@@ -2944,4 +2953,13 @@ window.pollCampaignProgress = function (campaignId) {
       }
     }).catch(function () {});
   }, 3000);
+};
+
+window.copyAlumniAndFather = function (name, father) {
+  var textStr = 'Alumni: ' + name + (father ? ' | Father: ' + father : '');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(textStr).then(function () {
+      if (typeof window.showToast === 'function') window.showToast('Copied: ' + textStr, 'success');
+    });
+  }
 };
