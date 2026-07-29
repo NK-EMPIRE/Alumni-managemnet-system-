@@ -1069,8 +1069,57 @@
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
 
-        // Apply pre-filled data field locking with pencil edit icon
-        if (typeof applyPreFilledLockingLeader === 'function') applyPreFilledLockingLeader();
+  function applyPreFilledLockingLeader() {
+    var fieldIds = [
+      'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
+      'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldState', 'fieldCountry',
+      'fieldEmail', 'fieldPhone', 'fieldSecondaryEmail', 'fieldSecondaryPhone',
+      'fieldLinkedin', 'fieldGovtJob'
+    ];
+
+    fieldIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+
+      var existingBtn = el.parentNode ? el.parentNode.querySelector('.btn-pencil-unlock') : null;
+      if (existingBtn) existingBtn.remove();
+
+      var val = el.value ? el.value.trim() : '';
+      var isPreFilled = val !== '' && val !== 'No' && val !== 'Select Department' && val !== 'Select Batch';
+
+      if (isPreFilled) {
+        el.readOnly = true;
+        if (el.tagName === 'SELECT') el.disabled = true;
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-pencil-unlock';
+        btn.title = 'Click pencil to edit pre-filled data';
+        btn.style.cssText = 'position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#F1F5F9;border:1px solid #CBD5E1;color:#475569;border-radius:4px;cursor:pointer;font-size:0.75rem;padding:3px 6px;z-index:5;';
+        btn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+        btn.onclick = function (e) {
+          e.preventDefault();
+          el.readOnly = false;
+          el.disabled = false;
+          el.focus();
+          btn.remove();
+        };
+
+        if (el.parentNode) {
+          if (getComputedStyle(el.parentNode).position === 'static') {
+            el.parentNode.style.position = 'relative';
+          }
+          el.parentNode.appendChild(btn);
+        }
+      } else {
+        el.readOnly = false;
+        el.disabled = false;
+      }
+    });
+  }
+
+  // Apply pre-filled data field locking with pencil edit icon
+  if (typeof applyPreFilledLockingLeader === 'function') applyPreFilledLockingLeader();
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
