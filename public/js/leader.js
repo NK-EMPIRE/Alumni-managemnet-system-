@@ -1520,15 +1520,9 @@
               '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
               '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
               '</div>';
-        } else if (col.key === 'name' || col.key === 'fullName') {
-          var fatherVal = row.father_name || row.fatherName || row.pi_father_name || '';
-          val = '<div>' +
-            '<div style="display:flex;align-items:center;gap:6px;">' +
-            '  <span style="font-weight:600;color:#1E293B;">' + (row.name || row.fullName || '-') + '</span>' +
-            '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + (row.name || row.fullName || '').replace(/'/g, "\\'") + '\', \'' + fatherVal.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
-            '</div>' +
-            (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
-            '</div>';
+          } else {
+            val = '-';
+          }
         } else {
           val = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '-';
         }
