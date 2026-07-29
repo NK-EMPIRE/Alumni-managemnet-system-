@@ -1099,13 +1099,6 @@
           </select>
           <label class="floating-label">Department <span style="color:var(--danger);">*</span></label>
         </div>
-        <div class="form-group">
-          <input class="form-control" type="text" id="tlPassword" value="mzcet@123" placeholder="Password" required>
-          <label class="floating-label">Password <span style="color:var(--danger);">*</span></label>
-          <button class="password-toggle" onclick="togglePassword('tlPassword',this)" type="button">
-            <i class="far fa-eye-slash"></i>
-          </button>
-        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('addTeamLeaderModal')">Cancel</button>
@@ -1155,13 +1148,6 @@
             <option value="" disabled selected hidden></option>
           </select>
           <label class="floating-label">Select Team Leader <span style="color:var(--danger);">*</span></label>
-        </div>
-        <div class="form-group">
-          <input class="form-control" type="text" id="tmPassword" value="mzcet@123" placeholder="Password" required>
-          <label class="floating-label">Password <span style="color:var(--danger);">*</span></label>
-          <button class="password-toggle" onclick="togglePassword('tmPassword',this)" type="button">
-            <i class="far fa-eye-slash"></i>
-          </button>
         </div>
       </div>
       <div class="modal-footer">
@@ -1444,23 +1430,7 @@
               & Country</label>
             <span id="vAlumniStateCountry" style="font-weight:500;">-</span>
           </div>
-          <div>
-            <label
-              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Working
-              Details</label>
-            <span id="vAlumniWorkingDetails" style="font-weight:500;">-</span>
-          </div>
-          <div>
-            <label
-              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Higher
-              Studies</label>
-            <span id="vAlumniHigherStudies" style="font-weight:500;">-</span>
-          </div>
-          <div>
-            <label
-              style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Entrepreneur</label>
-            <span id="vAlumniEntrepreneur" style="font-weight:500;">-</span>
-          </div>
+
           <div>
             <label
               style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;">Government
@@ -1996,7 +1966,6 @@
             <select class="form-control" id="dashFilterStatus" onchange="applyDashboardFilters()">
               <option value="">All Statuses</option>
               <option value="Completed">Completed</option>
-              <option value="In Progress">In Progress</option>
               <option value="Pending">Pending</option>
               <option value="Draft">Draft</option>
               <option value="Reopened">Reopened</option>

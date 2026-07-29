@@ -612,7 +612,8 @@ ul {
 .notification-list,
 .notification-body,
 #notificationDropdown,
-#notificationListContainer {
+#notificationListContainer,
+#notifMenu {
   max-height: 380px !important;
   overflow-y: auto !important;
   scroll-behavior: smooth;

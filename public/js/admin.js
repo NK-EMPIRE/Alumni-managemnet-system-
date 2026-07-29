@@ -358,7 +358,7 @@ function populateTable() {
         dept: a.department || a.dept || '',
         batch: a.batch || '',
         company: a.company || '',
-        leader: a.assignedTo || a.leader || '',
+        leader: a.member_name || a.assignedTo || a.leader || '',
         status: a.assignment_status || 'Pending',
         progress: (function (rec) {
           if (rec.assignment_status === 'Completed') return 100;
@@ -1609,11 +1609,10 @@ function submitAddTeamLeader() {
   var email = document.getElementById('tlEmail').value.trim();
   var phone = document.getElementById('tlPhone').value.trim();
   var dept = document.getElementById('tlDept').value;
-  var pass = document.getElementById('tlPassword').value;
-  API.createUser({ firstName: firstName, lastName: lastName, email: email, phone: phone, password: pass, roleId: 2, department: dept }).then(function (res) {
+  API.createUser({ firstName: firstName, lastName: lastName, email: email, phone: phone, roleId: 2, department: dept }).then(function (res) {
     hideLoading(btn);
     if (res.success) {
-      var tmpPwd = (res.data && res.data.temporaryPassword) || pass || 'mzcet@123';
+      var tmpPwd = (res.data && res.data.temporaryPassword) || 'mzcet@123';
       Toast.success('Success', 'Team Leader added successfully! Password: ' + tmpPwd);
       closeModal('addTeamLeaderModal');
       fetchAllData();
@@ -1642,8 +1641,7 @@ function submitAddTeamMember() {
     leaderId = null;
   }
   var dept = document.getElementById('tmDept').value;
-  var pass = document.getElementById('tmPassword').value;
-  API.createUser({ firstName: firstName, lastName: lastName, email: email, phone: phone, password: pass, roleId: 3, leaderId: leaderId, department: dept }).then(function (res) {
+  API.createUser({ firstName: firstName, lastName: lastName, email: email, phone: phone, roleId: 3, leaderId: leaderId, department: dept }).then(function (res) {
     if (res.success) {
       var createdUserId = res.data.user_id;
       var tmpPwd = res.data && res.data.temporaryPassword;
@@ -1682,7 +1680,7 @@ function submitAddTeamMember() {
         return API.addTeamMember(teamId, { userId: createdUserId });
       }).then(function () {
         hideLoading(btn);
-        var showPwd = tmpPwd || pass || 'mzcet@123';
+        var showPwd = tmpPwd || 'mzcet@123';
         Toast.success('Success', 'Team Member added successfully! Password: ' + showPwd);
         closeModal('addTeamMemberModal');
         fetchAllData();
@@ -1778,10 +1776,6 @@ function validateTLForm() {
   var dept = document.getElementById('tlDept');
   if (!dept.value) { showFieldError(dept, 'Please select a department'); valid = false; }
 
-  var pass = document.getElementById('tlPassword');
-  if (!validateRequired(pass.value)) { showFieldError(pass, 'Password is required'); valid = false; }
-  else if (pass.value.length < 6) { showFieldError(pass, 'Password must be at least 6 characters'); valid = false; }
-
   return valid;
 }
 
@@ -1806,9 +1800,6 @@ function validateTMForm() {
 
   var leader = document.getElementById('tmTeamLeader');
   if (!leader.value) { showFieldError(leader, 'Please select a team leader'); valid = false; }
-
-  var pass = document.getElementById('tmPassword');
-  if (!validateRequired(pass.value)) { showFieldError(pass, 'Password is required'); valid = false; }
   else if (pass.value.length < 6) { showFieldError(pass, 'Password must be at least 6 characters'); valid = false; }
 
   return valid;
@@ -3164,9 +3155,6 @@ function populateViewModal(record) {
   document.getElementById('vAlumniDesignation').innerText = record.designation || '-';
   document.getElementById('vAlumniCity').innerText = record.current_city || record.city || '-';
   document.getElementById('vAlumniStateCountry').innerText = (record.state || '-') + ', ' + (record.country || '-');
-  document.getElementById('vAlumniWorkingDetails').innerText = record.working_details || '-';
-  document.getElementById('vAlumniHigherStudies').innerText = record.higher_studies || record.higherStudies || '-';
-  document.getElementById('vAlumniEntrepreneur').innerText = record.entrepreneur || '-';
   document.getElementById('vAlumniGovtJob').innerText = record.govt_job || record.govtJob || '-';
 
   var avatar = document.getElementById('vAlumniAvatar');
@@ -4346,6 +4334,7 @@ window.openDbHealthModal = function () {
       '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;"><th style="padding:6px;text-align:left;">Field</th><th style="padding:6px;text-align:center;">Missing Count</th><th style="padding:6px;text-align:center;">Action</th></tr></thead><tbody>';
 
     Object.keys(d.missingFields).forEach(function (f) {
+      if (f === 'working_details') return;
       var cnt = d.missingFields[f];
       html += '<tr><td style="padding:6px;border-bottom:1px solid #E2E8F0;text-transform:capitalize;">' + f.replace('_', ' ') + '</td>' +
         '<td style="padding:6px;border-bottom:1px solid #E2E8F0;text-align:center;font-weight:600;' + (cnt > 0 ? 'color:var(--danger);' : 'color:var(--text-secondary);') + '">' + cnt + '</td>' +
