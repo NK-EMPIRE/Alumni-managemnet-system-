@@ -9,9 +9,9 @@ function computeOffset(page, limit) {
   return { page, limit, offset: (page - 1) * limit };
 }
 
-async function getAlumni({ page, limit, search, department, batch, status, leaderId, memberId }) {
+async function getAlumni({ page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField }) {
   const p = computeOffset(page, limit);
-  return alumniRepository.findAll({ page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status, leaderId, memberId });
+  return alumniRepository.findAll({ page: p.page, limit: p.limit, offset: p.offset, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField });
 }
 
 async function getAlumniById(alumniId) {
@@ -295,6 +295,26 @@ async function getFilters() {
   };
 }
 
+async function reopenAlumni(alumniId, currentUser) {
+  const alumni = await alumniRepository.findById(alumniId);
+  if (!alumni) {
+    throw new NotFoundError('Alumni');
+  }
+
+  await alumniRepository.reopenAlumniRecord(alumniId);
+
+  await createAuditLog({
+    userId: currentUser.userId,
+    username: `${currentUser.firstName} ${currentUser.lastName}`,
+    roleName: currentUser.role,
+    action: 'REOPEN_ASSIGNMENT',
+    target: `Alumni#${alumniId}`,
+    description: `Reopened record for ${alumni.name} (${alumni.register_no}) and returned to assignment`
+  });
+
+  return { alumniId, status: 'Draft' };
+}
+
 module.exports = {
   getAlumni,
   getAlumniById,
@@ -306,5 +326,6 @@ module.exports = {
   getStats,
   getFilters,
   saveDraft,
-  submitAndComplete
+  submitAndComplete,
+  reopenAlumni
 };

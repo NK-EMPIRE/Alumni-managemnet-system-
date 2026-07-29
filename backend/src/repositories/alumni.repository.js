@@ -30,7 +30,7 @@ const FIELD_TYPES = {
   secondary_email: sql.NVarChar(150)
 };
 
-async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId }) {
+async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField }) {
   const pool = await getPool();
   const request = pool.request()
     .input('offset', sql.Int, offset)
@@ -40,12 +40,16 @@ async function findAll({ page, limit, offset, search, department, batch, status,
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
     .input('leaderId', sql.Int, leaderId || null)
-    .input('memberId', sql.Int, memberId || null);
+    .input('memberId', sql.Int, memberId || null)
+    .input('dateFrom', sql.NVarChar(30), dateFrom || null)
+    .input('dateTo', sql.NVarChar(30), dateTo || null);
+
+  const dateCol = dateField === 'assigned_date' ? 'aa.assigned_date' : 'a.created_at';
 
   const result = await request.query(`
     WITH AlumniCTE AS (
       SELECT
-        a.alumni_id, a.register_no, a.name, a.gender, a.batch,
+        a.alumni_id, a.register_no, a.name, a.father_name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.experience, a.salary, a.city, a.country,
@@ -79,6 +83,8 @@ async function findAll({ page, limit, offset, search, department, batch, status,
           OR (@status = 'Available' AND aa.status IS NULL)
           OR (aa.status = @status)
         )
+        AND (@dateFrom IS NULL OR ${dateCol} >= CAST(@dateFrom AS DATETIME2))
+        AND (@dateTo IS NULL OR ${dateCol} <= CAST(@dateTo + ' 23:59:59' AS DATETIME2))
     )
     SELECT *, (SELECT COUNT(*) FROM AlumniCTE) AS total_count
     FROM AlumniCTE
@@ -189,73 +195,82 @@ async function update(alumniId, fields) {
 
 async function createProfessionalInfo(data) {
   const pool = await getPool();
-  const result = await pool.request()
-    .input('alumniId', sql.Int, data.alumni_id)
-    .input('company', sql.NVarChar(200), data.company)
-    .input('designation', sql.NVarChar(200), data.designation)
-    .input('currentCity', sql.NVarChar(100), data.current_city)
-    .input('state', sql.NVarChar(100), data.state)
-    .input('country', sql.NVarChar(100), data.country)
-    .input('email', sql.NVarChar(150), data.email)
-    .input('phone', sql.NVarChar(50), data.phone)
-    .input('linkedinUrl', sql.NVarChar(500), data.linkedin_url)
-    .input('higherStudies', sql.NVarChar(200), data.higher_studies)
-    .input('isEntrepreneur', sql.Bit, data.is_entrepreneur)
-    .input('isGovernmentJob', sql.Bit, data.is_government_job)
-    .input('otherOccupation', sql.NVarChar(200), data.other_occupation)
-    .input('remarks', sql.NVarChar(sql.MAX), data.remarks)
-    .input('updatedBy', sql.Int, data.updated_by)
-    .input('fatherName', sql.NVarChar(150), data.father_name || null)
-    .query(`
-      INSERT INTO ProfessionalInformation
-        (alumni_id, company, designation, current_city, state, country,
-         email, phone, linkedin_url, higher_studies, is_entrepreneur,
-         is_government_job, other_occupation, remarks, updated_by, father_name)
-      OUTPUT INSERTED.*
-      VALUES
-        (@alumniId, @company, @designation, @currentCity, @state, @country,
-         @email, @phone, @linkedinUrl, @higherStudies, @isEntrepreneur,
-         @isGovernmentJob, @otherOccupation, @remarks, @updatedBy, @fatherName)
+  const transaction = pool.transaction();
+  try {
+    await transaction.begin();
+
+    const result = await transaction.request()
+      .input('alumniId', sql.Int, data.alumni_id)
+      .input('company', sql.NVarChar(200), data.company)
+      .input('designation', sql.NVarChar(200), data.designation)
+      .input('currentCity', sql.NVarChar(100), data.current_city)
+      .input('state', sql.NVarChar(100), data.state)
+      .input('country', sql.NVarChar(100), data.country)
+      .input('email', sql.NVarChar(150), data.email)
+      .input('phone', sql.NVarChar(50), data.phone)
+      .input('linkedinUrl', sql.NVarChar(500), data.linkedin_url)
+      .input('higherStudies', sql.NVarChar(200), data.higher_studies)
+      .input('isEntrepreneur', sql.Bit, data.is_entrepreneur)
+      .input('isGovernmentJob', sql.Bit, data.is_government_job)
+      .input('otherOccupation', sql.NVarChar(200), data.other_occupation)
+      .input('remarks', sql.NVarChar(sql.MAX), data.remarks)
+      .input('updatedBy', sql.Int, data.updated_by)
+      .input('fatherName', sql.NVarChar(150), data.father_name || null)
+      .query(`
+        INSERT INTO ProfessionalInformation
+          (alumni_id, company, designation, current_city, state, country,
+           email, phone, linkedin_url, higher_studies, is_entrepreneur,
+           is_government_job, other_occupation, remarks, updated_by, father_name)
+        OUTPUT INSERTED.*
+        VALUES
+          (@alumniId, @company, @designation, @currentCity, @state, @country,
+           @email, @phone, @linkedinUrl, @higherStudies, @isEntrepreneur,
+           @isGovernmentJob, @otherOccupation, @remarks, @updatedBy, @fatherName)
+      `);
+
+    const updateReq = transaction.request();
+    updateReq.input('alumniId', sql.Int, data.alumni_id);
+    updateReq.input('company', sql.NVarChar(200), data.company);
+    updateReq.input('designation', sql.NVarChar(200), data.designation);
+    updateReq.input('email', sql.NVarChar(150), data.email);
+    updateReq.input('phone', sql.NVarChar(50), data.phone);
+    updateReq.input('secondaryEmail', sql.NVarChar(150), data.secondary_email || null);
+    updateReq.input('secondaryPhone', sql.NVarChar(50), data.secondary_phone || null);
+    updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
+    updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
+    updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
+    updateReq.input('fatherName', sql.NVarChar(150), data.father_name || null);
+    updateReq.input('address', sql.NVarChar(500), data.address || null);
+    updateReq.input('city', sql.NVarChar(100), data.current_city || null);
+    updateReq.input('state', sql.NVarChar(100), data.state || null);
+    updateReq.input('country', sql.NVarChar(100), data.country || null);
+    await updateReq.query(`
+      UPDATE Alumni
+      SET company = @company,
+          designation = @designation,
+          email = @email,
+          phone = @phone,
+          secondary_email = @secondaryEmail,
+          secondary_phone = @secondaryPhone,
+          working_details = @workingDetails,
+          linkedin_profile = @linkedinProfile,
+          date_of_birth = COALESCE(@dateOfBirth, date_of_birth),
+          father_name = COALESCE(@fatherName, father_name),
+          address = @address,
+          city = @city,
+          state = @state,
+          country = @country,
+          is_updated = 1,
+          updated_date = GETUTCDATE()
+      WHERE alumni_id = @alumniId
     `);
 
-  const updateReq = pool.request();
-  updateReq.input('alumniId', sql.Int, data.alumni_id);
-  updateReq.input('company', sql.NVarChar(200), data.company);
-  updateReq.input('designation', sql.NVarChar(200), data.designation);
-  updateReq.input('email', sql.NVarChar(150), data.email);
-  updateReq.input('phone', sql.NVarChar(50), data.phone);
-  updateReq.input('secondaryEmail', sql.NVarChar(150), data.secondary_email || null);
-  updateReq.input('secondaryPhone', sql.NVarChar(50), data.secondary_phone || null);
-  updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
-  updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
-  updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
-  updateReq.input('fatherName', sql.NVarChar(150), data.father_name || null);
-  updateReq.input('address', sql.NVarChar(500), data.address || null);
-  updateReq.input('city', sql.NVarChar(100), data.current_city || null);
-  updateReq.input('state', sql.NVarChar(100), data.state || null);
-  updateReq.input('country', sql.NVarChar(100), data.country || null);
-  await updateReq.query(`
-    UPDATE Alumni
-    SET company = @company,
-        designation = @designation,
-        email = @email,
-        phone = @phone,
-        secondary_email = @secondaryEmail,
-        secondary_phone = @secondaryPhone,
-        working_details = @workingDetails,
-        linkedin_profile = @linkedinProfile,
-        date_of_birth = COALESCE(@dateOfBirth, date_of_birth),
-        father_name = COALESCE(@fatherName, father_name),
-        address = @address,
-        city = @city,
-        state = @state,
-        country = @country,
-        is_updated = 1,
-        updated_date = GETUTCDATE()
-    WHERE alumni_id = @alumniId
-  `);
-
-  return result.recordset[0];
+    await transaction.commit();
+    return result.recordset[0];
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
 }
 
 async function getProfessionalHistory(alumniId) {
@@ -292,7 +307,7 @@ async function getAssignmentsByMember(memberId, { page, limit, offset, search, d
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at, a.father_name,
+        a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.status,
         aa.assigned_date, aa.completed_date
       FROM AlumniAssignments aa
@@ -333,7 +348,7 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at, a.father_name,
+        a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.member_id, aa.status,
         aa.assigned_date, aa.completed_date,
         ISNULL(u.first_name + ' ' + u.last_name, 'Unassigned') AS assigned_to
@@ -473,6 +488,29 @@ async function getAssignmentHistory({ page, limit, offset }) {
   return { total, rows: result.recordset };
 }
 
+async function reopenAlumniRecord(alumniId) {
+  const pool = await getPool();
+  const transaction = pool.transaction();
+  try {
+    await transaction.begin();
+    await transaction.request()
+      .input('alumniId', sql.Int, alumniId)
+      .query(`
+        UPDATE AlumniAssignments
+        SET status = 'Reopened', completed_date = NULL
+        WHERE alumni_id = @alumniId;
+
+        UPDATE Alumni
+        SET is_updated = 0
+        WHERE alumni_id = @alumniId;
+      `);
+    await transaction.commit();
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
+}
+
 module.exports = {
   findAll,
   findById,
@@ -486,6 +524,7 @@ module.exports = {
   getPendingAssignmentsByTeam,
   updateAssignmentMember,
   updateAssignmentStatus,
+  reopenAlumniRecord,
   getStats,
   getAssignmentHistory
 };

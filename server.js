@@ -13,9 +13,13 @@ const cors = require('cors');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
+app.use(compression());
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.disable('x-powered-by');
 app.use(cors({
@@ -29,22 +33,33 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan('combined', { stream }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d', etag: true }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 2000,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { success: false, message: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
+  message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' }
+});
+app.use('/api/v1/auth/login', loginLimiter);
 
 app.use('/api/setup', setupRoutes);
 app.use('/api/v1', appRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'APIUMS API is running', timestamp: new Date().toISOString(), uptime: process.uptime() });
+  res.json({ success: true, message: 'AMS API is running', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });
 
 app.get('/{*path}', (req, res) => {
@@ -63,9 +78,37 @@ app.use((err, req, res, next) => {
 
 app.use(errorHandler);
 
+const http = require('http');
+const { Server } = require('socket.io');
+const { setIO } = require('./backend/src/helpers/realtime');
+
 const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+setIO(io);
+
+io.on('connection', (socket) => {
+  socket.on('join', ({ role, teamId }) => {
+    if (role === 'ADMIN') {
+      socket.join('admin');
+    }
+    if (teamId) {
+      socket.join(`team:${teamId}`);
+    }
+  });
+});
 
 async function startServer() {
+  if (process.env.NODE_ENV === 'production' && !process.env.N8N_SHARED_SECRET) {
+    logger.error('CRITICAL SECURITY ERROR: N8N_SHARED_SECRET is not defined in production environment. Refusing to boot server.');
+    process.exit(1);
+  }
   try {
     const pool = await connectDB();
     try {
@@ -73,9 +116,9 @@ async function startServer() {
       await runMigrations();
       logger.info('Migrations executed successfully');
     } catch (migErr) {
-      logger.warn('Migration run failed: ' + migErr.message);
+      logger.error('Migration run failed: ' + migErr.message + '. Server will start but some features may not work.');
     }
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       logger.info(`Server running on http://localhost:${PORT}`);
       logger.info(`Frontend: http://localhost:${PORT}`);
       logger.info(`API: http://localhost:${PORT}/api/v1`);

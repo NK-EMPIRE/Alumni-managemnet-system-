@@ -14,6 +14,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -26,6 +27,9 @@
     "mssql": "^12.7.0",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.3",
+    "socket": "^1.1.143",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "winston": "^3.19.0",
     "xlsx": "^0.18.5"
   },

@@ -35,7 +35,7 @@ router.post(
 
 router.post(
   '/reopen/:alumniId',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
   roundRobinController.reopenAssignment
 );
 

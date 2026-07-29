@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Team Member Dashboard - Alumni Professional Details Update Management System">
     <title>Team Member Dashboard - APIUMS | Alumni Professional Information Update Management System</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563EB'/><path d='M50 20 L80 40 L50 60 L20 40 Z' fill='%23FFFFFF'/><path d='M35 53 L35 70 Q50 82 65 70 L65 53' stroke='%23FFFFFF' stroke-width='6' fill='none'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/export_modal.css">
+  <link rel="stylesheet" href="css/chat.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -154,8 +157,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-y: auto;
         }
 
         .topbar {
@@ -526,7 +529,7 @@
             inset: 0;
             background: rgba(15,23,42,0.5);
             backdrop-filter: blur(6px);
-            z-index: 2000;
+            z-index: 100000;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -670,13 +673,53 @@
             min-height: 80px;
             resize: vertical;
         }
-        .btn-outline {
+        .btn-outline, #saveDraftBtn {
             background: transparent;
-            color: var(--primary);
-            border: 1.5px solid var(--primary);
+            color: var(--primary, #2563EB) !important;
+            border: 1.5px solid var(--primary, #2563EB);
+            transition: all 0.2s ease;
         }
-        .btn-outline:hover {
-            background: var(--bg-light);
+        .btn-outline:hover, .btn-outline:focus, .btn-outline:active,
+        #saveDraftBtn:hover, #saveDraftBtn:focus, #saveDraftBtn:active {
+            background: var(--primary, #2563EB) !important;
+            color: #FFFFFF !important;
+            border-color: var(--primary, #2563EB) !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+        .btn-outline:hover *, .btn-outline:focus *, .btn-outline:active *,
+        #saveDraftBtn:hover *, #saveDraftBtn:focus *, #saveDraftBtn:active * {
+            color: #FFFFFF !important;
+        }
+        .btn-undo-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #FFFBEB;
+            color: #D97706;
+            border: 1px solid #FCD34D;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .btn-undo-icon:hover {
+            background: #F59E0B;
+            color: #FFFFFF;
+            border-color: #F59E0B;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            transform: scale(1.08);
+        }
+        body.dark-mode .btn-undo-icon {
+            background: rgba(245, 158, 11, 0.18);
+            color: #FBBF24;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+        body.dark-mode .btn-undo-icon:hover {
+            background: #F59E0B;
+            color: #FFFFFF;
         }
         .submit-row {
             display: flex;
@@ -945,6 +988,53 @@
         }
 
         /* ── DARK MODE OVERRIDES (FIX WHITE ELEMENTS AND TOUCH/FOCUS REFLECTIONS) ── */
+
+        /* Fix inline-styled modal nav pill (← 6/31 →) */
+        body.dark-mode .modal-nav-group {
+            background: #0F172A !important;
+            border-color: #334155 !important;
+        }
+        body.dark-mode #modalNavCounter {
+            color: #CBD5E1 !important;
+        }
+        body.dark-mode #modalTitle {
+            color: #F8FAFC !important;
+        }
+        body.dark-mode #modalSubtitle {
+            color: #94A3B8 !important;
+        }
+        body.dark-mode .modal-header {
+            background-color: #1E293B !important;
+        }
+        body.dark-mode .modal-body,
+        body.dark-mode .modal-footer {
+            background-color: #1E293B !important;
+        }
+
+        /* Fix hardcoded inline background colors */
+        body.dark-mode [style*="background:#F8FAFC"],
+        body.dark-mode [style*="background: #F8FAFC"],
+        body.dark-mode [style*="background:#EEF2F6"],
+        body.dark-mode [style*="background:#F1F5F9"],
+        body.dark-mode [style*="background:#fff"],
+        body.dark-mode [style*="background: #fff"] {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        /* Fix hardcoded inline text colors */
+        body.dark-mode [style*="color:#1E293B"],
+        body.dark-mode [style*="color: #1E293B"],
+        body.dark-mode [style*="color:#475569"],
+        body.dark-mode [style*="color:#0F172A"] {
+            color: #F8FAFC !important;
+        }
+        body.dark-mode [style*="color:#64748B"],
+        body.dark-mode [style*="color: #64748B"] {
+            color: #94A3B8 !important;
+        }
+
         body.dark-mode .table-container {
             background: #1E293B !important;
             border: 1px solid #334155 !important;
@@ -973,7 +1063,8 @@
             border-color: #334155 !important;
         }
 
-        body.dark-mode .filter-select option {
+        body.dark-mode .filter-select option,
+        body.dark-mode .form-select option {
             background-color: #1E293B !important;
             color: #F8FAFC !important;
         }
@@ -982,6 +1073,17 @@
             background-color: #0F172A !important;
             color: #F8FAFC !important;
             border-color: var(--primary) !important;
+        }
+
+        body.dark-mode .table-footer select,
+        body.dark-mode .btn-secondary {
+            background-color: #0F172A !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .btn-secondary:hover {
+            background-color: #1E293B !important;
         }
 
         body.dark-mode .table-footer {
@@ -1094,7 +1196,7 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 20px;">
-        <div class="sidebar-brand" style="display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; background: transparent;">
+      <div class="sidebar-brand" style="display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; background: transparent; cursor:pointer;" onclick="document.querySelector('.nav-item[data-page=dashboard]').click()">
             <div class="sidebar-brand-icon" style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink: 0;">
                 <i class="fas fa-graduation-cap"></i>
             </div>
@@ -1111,15 +1213,14 @@
     <a class="nav-item" data-page="preview">
         <i class="fas fa-file-invoice"></i> <span class="nav-item-text">Preview Sheet</span>
     </a>
+    <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal()">
+        <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
+    </a>
 
     <a class="nav-item" data-page="settings">
         <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
     </a>
-    <div class="nav-section"><span class="nav-section-text">Account</span></div>
-    <a class="nav-item" data-page="logout">
-        <i class="fas fa-sign-out-alt"></i> <span class="nav-item-text">Logout</span>
-    </a>
-    <div class="sidebar-footer" style="margin-top: auto;">
+    <div class="sidebar-footer" style="margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
         <div class="sidebar-user" id="sidebarUser">
             <div class="sidebar-user-avatar" id="sidebarUserAvatar">TM</div>
             <div class="sidebar-user-info">
@@ -1127,16 +1228,39 @@
                 <div class="sidebar-user-role">Team Member</div>
             </div>
         </div>
+        <a class="nav-item nav-item-logout" data-page="logout" onclick="API.logout()" style="color:#EF4444 !important;font-weight:600;margin-top:10px;background:rgba(239,68,68,0.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <i class="fas fa-sign-out-alt" style="color:#EF4444;"></i> <span class="nav-item-text">Logout</span>
+        </a>
     </div>
 </div>
 
 <div class="main-content">
     <div class="topbar">
-        <div class="topbar-left">
+        <div class="topbar-left" style="display:flex;justify-content:space-between;align-items:center;flex:1;">
             <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;">Welcome, <span id="memberName">Rahul</span></h1>
+            <div id="dashboardLiveClockContainer" style="margin-left:auto;margin-right:20px;">
+              <div style="background:var(--bg-white, #fff);border:1px solid var(--border);border-radius:10px;padding:6px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:10px;">
+                <i class="far fa-clock" style="font-size:1.2rem;color:var(--primary);"></i>
+                <div>
+                  <div id="hdrClockDate" style="font-size:0.8rem;font-weight:600;color:var(--text-dark);">-</div>
+                  <div id="hdrClockTime" style="font-size:0.72rem;color:var(--text-secondary);font-weight:500;">-</div>
+                </div>
+              </div>
+            </div>
         </div>
 
-        <div class="topbar-right">
+        <div class="topbar-right" style="display:flex;align-items:center;gap:12px;">
+            <!-- Today's Tasks Modal Button -->
+            <button class="topbar-btn" onclick="openTodayTasksModal()" title="Today's Tasks & Auto Summary" style="background:none;border:none;color:#10B981;cursor:pointer;font-size:1.1rem;position:relative;">
+              <i class="fas fa-tasks"></i>
+              <span id="todayTasksDot" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#EF4444;border-radius:50%;display:none;"></span>
+            </button>
+
+            <!-- Quick Tour / Welcome Tutorial Button -->
+            <button class="topbar-btn" onclick="startIntelligentProductTour()" title="Start Interactive Product Tour" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;">
+              <i class="fas fa-magic"></i>
+            </button>
+
             <div style="position:relative;">
                 <button class="topbar-btn" id="notifBtn">
                     <i class="fas fa-bell"></i>
@@ -1147,39 +1271,7 @@
                         <h4>Notifications</h4>
                         <button id="markAllRead" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
                     </div>
-                    <div id="notifList">
-                        <div class="notif-item">
-                            <div class="notif-icon blue"><i class="fas fa-user-graduate"></i></div>
-                            <div class="notif-text">
-                                <p>New record assigned: Priya Sharma</p>
-                                <span>5 minutes ago</span>
-                            </div>
-                            <span class="notif-dot"></span>
-                        </div>
-                        <div class="notif-item">
-                            <div class="notif-icon green"><i class="fas fa-check-circle"></i></div>
-                            <div class="notif-text">
-                                <p>Ananya Gupta's profile completed</p>
-                                <span>1 hour ago</span>
-                            </div>
-                            <span class="notif-dot"></span>
-                        </div>
-                        <div class="notif-item">
-                            <div class="notif-icon orange"><i class="fas fa-clock"></i></div>
-                            <div class="notif-text">
-                                <p>5 records pending for today</p>
-                                <span>2 hours ago</span>
-                            </div>
-                            <span class="notif-dot"></span>
-                        </div>
-                        <div class="notif-item">
-                            <div class="notif-icon blue"><i class="fas fa-bell"></i></div>
-                            <div class="notif-text">
-                                <p>Reminder: Update records before EOD</p>
-                                <span>3 hours ago</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="notifList"></div>
                 </div>
             </div>
 
@@ -1231,18 +1323,9 @@
                     <h3><i class="fas fa-list" style="margin-right:8px;color:var(--primary);"></i> Alumni Records</h3>
                     <div class="table-actions">
                         <input type="text" class="table-search" id="tableSearch" placeholder="Search records..." style="width: 240px; min-width: 200px;">
-                        <select class="filter-select" id="filterDept" style="width: 160px; min-width: 140px;">
-                            <option value="">All Departments</option>
-                        </select>
-                        <select class="filter-select" id="filterBatch" style="width: 120px; min-width: 110px;">
-                            <option value="">All Batches</option>
-                        </select>
-                        <select class="filter-select" id="filterStatus" style="width: 120px; min-width: 110px;">
-                            <option value="">All Status</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Draft">Draft</option>
-                        </select>
+                        <button class="btn btn-secondary btn-sm" onclick="openFilterModal()" style="height:36px;font-size:0.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dark);cursor:pointer;">
+                            <i class="fas fa-filter" style="color:var(--primary);"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;background:var(--primary);color:#fff;">0</span>
+                        </button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -1253,7 +1336,7 @@
                             <th>Alumni Name</th>
                             <th>Department</th>
                             <th>Batch</th>
-                            <th>Company</th>
+                            <th>Company/Institution</th>
                             <th>Designation</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -1287,27 +1370,19 @@
             </div>
         </div>
 
-        <div class="card" style="background:#fff;padding:20px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;display:flex;flex-direction:column;height:calc(100vh - 200px);">
+        <div class="card spreadsheet-card" style="background:#fff;padding:20px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;display:flex;flex-direction:column;">
             <div class="table-header" style="border-bottom:none;padding-bottom:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:0;">
                 <h3 style="font-size:1.1rem;font-weight:600;color:var(--text-dark);margin:0;"><i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>Spreadsheet View</h3>
-                <div class="table-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
-                    <input type="text" class="table-search" id="previewSearch" placeholder="Search records..." style="width:240px;min-width:200px;" oninput="onPreviewFilterChange()">
-                    <select class="filter-select" id="previewFilterDept" style="width:160px;min-width:140px;" onchange="onPreviewFilterChange()">
-                        <option value="">All Departments</option>
-                    </select>
-                    <select class="filter-select" id="previewFilterBatch" style="width:120px;min-width:110px;" onchange="onPreviewFilterChange()">
-                        <option value="">All Batches</option>
-                    </select>
-                    <select class="filter-select" id="previewFilterStatus" style="width:120px;min-width:110px;" onchange="onPreviewFilterChange()">
-                        <option value="">All Status</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Draft">Draft</option>
-                    </select>
+                    <div class="table-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
+                        <input type="text" class="table-search" id="previewSearch" placeholder="Search records..." style="width:240px;min-width:200px;" oninput="onPreviewFilterChange()">
+                        <button class="btn btn-secondary btn-sm" onclick="openFilterModal()" style="height:36px;font-size:0.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dark);cursor:pointer;">
+                            <i class="fas fa-filter" style="color:var(--primary);"></i> Filters
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;white-space:nowrap;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
                 </div>
             </div>
 
-            <div class="table-container" style="flex:1;overflow:auto;position:relative;border:1px solid var(--border);border-radius:8px;">
+            <div class="table-container" style="overflow-x:auto;position:relative;border:1px solid var(--border);border-radius:8px;">
                 <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;" id="previewSpreadsheetTable">
                     <thead>
                         <tr style="background:var(--bg-light);position:sticky;top:0;z-index:10;border-bottom:2px solid var(--border);">
@@ -1315,19 +1390,19 @@
                             <th style="padding:12px 16px;text-align:left;">Name</th>
                             <th style="padding:12px 16px;text-align:left;">Register No</th>
                             <th style="padding:12px 16px;text-align:left;">Father's Name</th>
+                            <th style="padding:12px 16px;text-align:left;">Date of Birth</th>
                             <th style="padding:12px 16px;text-align:left;">Department</th>
                             <th style="padding:12px 16px;text-align:left;">Batch</th>
                             <th style="padding:12px 16px;text-align:left;">Email</th>
                             <th style="padding:12px 16px;text-align:left;">Phone</th>
-                            <th style="padding:12px 16px;text-align:left;">Company</th>
+                            <th style="padding:12px 16px;text-align:left;">Company/Institution</th>
                             <th style="padding:12px 16px;text-align:left;">Designation</th>
                             <th style="padding:12px 16px;text-align:left;">Experience</th>
                             <th style="padding:12px 16px;text-align:left;">City</th>
                             <th style="padding:12px 16px;text-align:left;">Country</th>
-                            <th style="padding:12px 16px;text-align:left;">LinkedIn Profile</th>
+                            <th style="padding:12px 16px;text-align:left;">LinkedIn/Facebook URL</th>
                             <th style="padding:12px 16px;text-align:left;">Current Status</th>
                             <th style="padding:12px 16px;text-align:left;">Updated Date</th>
-                            <th style="padding:12px 16px;text-align:left;">Working Details</th>
                         </tr>
                     </thead>
                     <tbody id="previewSpreadsheetBody">
@@ -1415,16 +1490,21 @@
 </div>
 
 <div class="modal-overlay" id="updateModal">
-    <div class="modal modal-xl" style="max-width:900px;width:95vw;">
+    <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;">
+        <button type="button" class="floating-modal-nav-btn left-nav-btn" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record"><i class="fas fa-chevron-left"></i></button>
+        <button type="button" class="floating-modal-nav-btn right-nav-btn" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record"><i class="fas fa-chevron-right"></i></button>
         <div class="modal-header">
-            <div class="modal-header-left">
-                <div class="avatar" id="modalAvatar">A</div>
+            <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
+                <div class="avatar" id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">A</div>
                 <div class="info">
-                    <h3 id="modalTitle">Update Profile</h3>
-                    <span id="modalSubtitle">Alumni Professional Details</span>
+                    <h3 id="modalTitle" style="font-size:16px;font-weight:700;color:#1E293B">Update Profile</h3>
+                    <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
                 </div>
             </div>
-            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;background:#F1F5F9;padding:4px 10px;border-radius:12px;border:1px solid #CBD5E1;">1 / 1</span>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
         </div>
         <div class="modal-body">
             <form id="updateForm" novalidate>
@@ -1474,18 +1554,21 @@
                         <div class="error-text" id="errorBatch">Batch is required</div>
                     </div>
                     <div class="form-group">
-                        <label>Company</label>
-                        <input type="text" id="fieldCompany" placeholder="Current company">
+                        <label>Company/Institution <span class="required">*</span></label>
+                        <input type="text" id="fieldCompany" placeholder="Current company/institution">
+                        <div class="error-text" id="errorCompany">Company is required</div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Designation</label>
+                        <label>Designation <span class="required">*</span></label>
                         <input type="text" id="fieldDesignation" placeholder="Current designation">
+                        <div class="error-text" id="errorDesignation">Designation is required</div>
                     </div>
                     <div class="form-group">
-                        <label>Current City</label>
+                        <label>Current City <span class="required">*</span></label>
                         <input type="text" id="fieldCity" placeholder="Current city">
+                        <div class="error-text" id="errorCity">City is required</div>
                     </div>
                 </div>
                 <div class="form-row">
@@ -1511,10 +1594,11 @@
                 <div class="form-row" style="flex-direction: column; gap: 16px;">
                     <div class="form-group" style="width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label style="margin: 0;">Email</label>
+                            <label style="margin: 0;">Email <span class="required">*</span></label>
                             <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                         </div>
                         <input type="email" id="fieldEmail" placeholder="email@example.com">
+                        <div class="error-text" id="errorEmail">Email is required</div>
                     </div>
                     <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; width: 100%;">
                         <label>Secondary Email</label>
@@ -1524,10 +1608,11 @@
                 <div class="form-row" style="flex-direction: column; gap: 16px;">
                     <div class="form-group" style="width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label style="margin: 0;">Phone</label>
+                            <label style="margin: 0;">Phone <span class="required">*</span></label>
                             <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                         </div>
                         <input type="text" id="fieldPhone" placeholder="Phone number">
+                        <div class="error-text" id="errorPhone">Phone is required</div>
                     </div>
                     <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; width: 100%;">
                         <label>Secondary Phone</label>
@@ -1536,36 +1621,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>LinkedIn URL</label>
-                        <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username">
-                    </div>
-                    <div class="form-group">
-                        <label>Working Detail</label>
-                        <textarea id="fieldWorkingDetails" placeholder="Current working details" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Higher Studies</label>
-                        <select id="fieldHigherStudies">
-                            <option value="">Select</option>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group full-width higher-studies-details" id="higherStudiesDetails">
-                    <label>Higher Studies Details</label>
-                    <input type="text" id="fieldHigherDetails" placeholder="University, Course, Year">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Entrepreneur</label>
-                        <select id="fieldEntrepreneur">
-                            <option value="">Select</option>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                        </select>
+                        <label>LinkedIn/Facebook URL</label>
+                        <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username or https://facebook.com/username">
                     </div>
                     <div class="form-group">
                         <label>Government Job</label>
@@ -1574,16 +1631,6 @@
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
                         </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Other Occupation</label>
-                        <input type="text" id="fieldOtherOcc" placeholder="Other occupation if any">
-                    </div>
-                    <div class="form-group">
-                        <label>Remarks</label>
-                        <textarea id="fieldRemarks" placeholder="Additional remarks..."></textarea>
                     </div>
                 </div>
                 <input type="hidden" id="fieldIndex" value="">
@@ -1626,12 +1673,303 @@
     </div>
 </div>
 
+<!-- Filter Modal -->
+<div class="modal-overlay" id="ssFilterModal" onclick="if(event.target===this)closeFilterModal()">
+    <div class="modal" style="max-width:550px;width:90vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Filters</h3>
+        <button class="modal-close" onclick="closeFilterModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Department</label>
+            <select class="form-control form-select" id="filterDept" onchange="applyModalFilters()">
+              <option value="">All Departments</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Batch / Year</label>
+            <select class="form-control form-select" id="filterBatch" onchange="applyModalFilters()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">From Date</label>
+            <input type="date" id="filterDateFrom" class="form-control" onchange="applyModalFilters()">
+          </div>
+          <div>
+            <label class="form-label">To Date</label>
+            <input type="date" id="filterDateTo" class="form-control" onchange="applyModalFilters()">
+          </div>
+          <div style="grid-column:span 2;">
+            <label class="form-label">Status</label>
+            <select class="form-control form-select" id="filterStatus" onchange="applyModalFilters()">
+              <option value="">All Status</option>
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="clearModalFilters()"><i class="fas fa-undo"></i> Clear All</button>
+        <button class="btn btn-primary" onclick="closeFilterModal()"><i class="fas fa-check"></i> Apply Filters</button>
+      </div>
+    </div>
+</div>
+
+<!-- System Welcome Tour & Shortcuts Modal -->
+<div class="modal-overlay" id="welcomeTourModalGuide">
+
+        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt" style="color:var(--warning);margin-right:6px;"></i>Key Features</h5>
+        <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
+          <li><strong>Global Date Filter:</strong> Filter your assigned records using the top-right navbar calendar dropdown.</li>
+          <li><strong>Update & Submit:</strong> Update alumni employment details and click <em>Submit & Next</em> to quickly process your queue.</li>
+          <li><strong>Draft Auto-Save:</strong> Save incomplete entries as drafts to return to them anytime.</li>
+        </ul>
+
+        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard" style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
+        <div class="shortcut-grid">
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>K</kbd>
+            <div class="shortcut-desc">Focus Table Search</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Esc</kbd>
+            <div class="shortcut-desc">Close Active Modal</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>S</kbd>
+            <div class="shortcut-desc">Save / Submit Record</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Alt</kbd> + <kbd>E</kbd>
+            <div class="shortcut-desc">Export Records</div>
+          </div>
+        </div>
+      <div class="modal-footer" style="padding:14px 20px;text-align:right;">
+        <button class="btn btn-primary" onclick="closeModal('welcomeTourModal')">Got it, Let's Start!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EXPORT CUSTOMIZATION & ANIMATION MODAL (MEMBER)
+       ============================================================ -->
+  <div class="modal-overlay" id="exportCustomizationModal">
+    <div class="export-modal-card">
+      <div class="export-modal-header">
+        <h3><i class="fas fa-file-export" style="color:#60A5FA;"></i> Export Alumni Report</h3>
+        <button class="export-modal-close" onclick="closeModal('exportCustomizationModal')">&times;</button>
+      </div>
+
+      <div class="export-stats-banner">
+        <div class="export-stat-box">
+          <div class="count" id="expStatTotal">0</div>
+          <div class="label">Matched Records</div>
+        </div>
+        <div class="export-stat-box">
+          <div class="count" id="expStatCols">0</div>
+          <div class="label">Selected Columns</div>
+        </div>
+        <div class="export-stat-box">
+          <div class="count" id="expStatStatus">ALL</div>
+          <div class="label">Status Filter</div>
+        </div>
+      </div>
+
+      <div style="padding:20px 24px;max-height:70vh;overflow-y:auto;">
+        <!-- Filter Controls inside Export Modal -->
+        <div class="export-section-title">
+          <span><i class="fas fa-filter" style="color:var(--primary);margin-right:6px;"></i> Customize Export Filters</span>
+          <a href="javascript:void(0)" onclick="resetExportModalFilters()" style="font-size:0.8rem;color:#64748B;text-decoration:none;">Reset Filters</a>
+        </div>
+        
+        <div class="export-filter-grid">
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Department</label>
+            <select class="form-control" id="expFilterDept" onchange="onExportFilterChange()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Batch / Year</label>
+            <select class="form-control" id="expFilterBatch" onchange="onExportFilterChange()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Assignment Status</label>
+            <select class="form-control" id="expFilterStatus" onchange="onExportFilterChange()">
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+              <option value="Reopened">Reopened</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Column Selector -->
+        <div class="export-section-title">
+          <span><i class="fas fa-columns" style="color:var(--primary);margin-right:6px;"></i> Select Export Columns</span>
+          <div style="font-size:0.8rem;font-weight:normal;display:flex;gap:12px;">
+            <a href="javascript:void(0)" onclick="selectAllExportCols(true)" style="color:var(--primary);text-decoration:none;">Select All</a>
+            <a href="javascript:void(0)" onclick="selectAllExportCols(false)" style="color:#64748B;text-decoration:none;">Clear All</a>
+          </div>
+        </div>
+        <div class="export-cols-grid" id="exportColsContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn btn-secondary" onclick="closeModal('exportCustomizationModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="startExportDownloadProcess()" style="padding:10px 24px;font-weight:600;">
+          <i class="fas fa-download"></i> Start Export Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Realtime Downloading Overlay Animation -->
+  <div class="export-progress-overlay" id="exportProgressOverlay">
+    <div class="export-progress-card">
+      <div class="export-animated-icon">
+        <i class="fas fa-cloud-download-alt"></i>
+      </div>
+      <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;" id="exportProgressTitle">Generating Export...</h3>
+      <p style="font-size:0.85rem;color:#64748B;margin:0;" id="exportProgressSubtitle">Fetching alumni records from database...</p>
+      
+      <div class="export-progress-bar-bg">
+        <div class="export-progress-bar-fill" id="exportProgressBarFill"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748B;font-weight:600;" id="exportProgressStats">
+        <span id="exportProgressPercent">0%</span>
+        <span id="exportProgressCount">0 / 0 records</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S TASKS MODAL -->
+  <div class="modal-overlay" id="todayTasksModal">
+    <div class="modal" style="max-width:540px;width:92vw;border-radius:16px;overflow:hidden;">
+      <div class="modal-header" style="background:linear-gradient(135deg, #10B981, #059669);color:#fff;padding:18px 24px;">
+        <h3 style="color:#fff;margin:0;font-size:1.15rem;font-weight:700;"><i class="fas fa-check-double" style="margin-right:8px;"></i>Today's Work Summary & Tasks</h3>
+        <button class="modal-close" onclick="closeModal('todayTasksModal')" style="color:#fff;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;">
+        <div id="todayContextBanner" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:500;margin-bottom:16px;line-height:1.5;">
+          <i class="fas fa-lightbulb" style="margin-right:6px;color:#059669;"></i><span id="todayContextText">Loading your daily summary...</span>
+        </div>
+        <h4 style="font-size:0.85rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Action Items Checklist</h4>
+        <div id="todayTasksList" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="text-align:center;padding:20px;color:#94A3B8;">Loading tasks...</div>
+        </div>
+      </div>
+      <div style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.8rem;color:#64748B;" id="todayTaskProgressCount">0 tasks remaining</span>
+        <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')" style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNDO CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="undoConfirmModal" style="display:none;">
+    <div class="modal" style="max-width:440px;width:92vw;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:16px 20px;">
+        <h3 style="color:#B45309;margin:0;font-size:1.1rem;font-weight:700;"><i class="fas fa-undo" style="margin-right:8px;color:#F59E0B;"></i>Confirm Undo Submission</h3>
+        <button class="modal-close" onclick="closeUndoModal()" style="color:#B45309;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <p style="font-size:0.9rem;color:var(--text-dark);margin:0 0 12px;line-height:1.5;">
+          Are you sure you want to undo submission for <strong id="undoTargetName" style="color:#2563EB;">this record</strong>?
+        </p>
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:10px 14px;border-radius:8px;font-size:0.82rem;line-height:1.4;">
+          <i class="fas fa-info-circle" style="margin-right:4px;"></i> This record will automatically revert to <strong>Draft</strong> status so you can continue editing it.
+        </div>
+      </div>
+      <div style="padding:14px 20px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeUndoModal()">Cancel</button>
+        <button class="btn btn-warning btn-sm" id="confirmUndoBtn" onclick="executeUndoSubmission()" style="background:#F59E0B;color:#fff;border:none;font-weight:600;">
+          <i class="fas fa-undo"></i> Undo & Change to Draft
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WELCOME TUTORIAL & DEMO TOUR MODAL -->
+  <div class="modal-overlay" id="welcomeTourModal">
+    <div class="modal" style="max-width:580px;width:92vw;border-radius:18px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);">
+      <div style="background:linear-gradient(135deg, #2563EB, #4F46E5);color:#fff;padding:28px 24px 20px;text-align:center;position:relative;">
+        <button onclick="closeModal('welcomeTourModal')" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
+        <div style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
+          🎓
+        </div>
+        <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to AlumniMS! 👋</h2>
+        <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your interactive guide to system features and recent updates.</p>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+        <div id="tourStepContent" style="font-size:0.92rem;color:#334155;line-height:1.6;min-height:110px;">
+          <!-- Populated dynamically by tour script -->
+        </div>
+        <!-- Motivation Quote Banner -->
+        <div style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;" id="tourMotivationBanner">
+          "Success is the sum of small efforts repeated day in and day out. Work smoothly and have a wonderful day! 😊"
+        </div>
+      </div>
+      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#64748B;cursor:pointer;">
+          <input type="checkbox" id="dontShowTourCheckbox" style="accent-color:#2563EB;" /> Don't show again on login
+        </label>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondary btn-sm" id="tourPrevBtn" onclick="navigateTourStep(-1)" style="display:none;">Back</button>
+          <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)" style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right" style="margin-left:4px;"></i></button>
+        </div>
+      </div>
+  <!-- Alumni Replies Inbox Modal -->
+  <div class="modal-overlay" id="alumniRepliesModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content" style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-inbox" style="font-size:1.1rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Alumni Email Replies Inbox</h3>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Replies received from alumni detail update requests</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('alumniRepliesModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;max-height:60vh;overflow-y:auto;" id="alumniRepliesListContainer">
+        <p style="text-align:center;color:#64748B;padding:20px;">Loading alumni replies...</p>
+      </div>
+      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('alumniRepliesModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+
 <script src="js/app.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/services/api.js"></script>
+<script src="js/dynamic-tour.js"></script>
 <script>
+    window.Toast = window.Toast || {
+      success: function(t, m) { window.showToast(t, m, 'success'); },
+      warning: function(t, m) { window.showToast(t, m, 'warning'); },
+      info: function(t, m) { window.showToast(t, m, 'info'); },
+      danger: function(t, m) { window.showToast(t, m, 'danger'); },
+      error: function(t, m) { window.showToast(t, m, 'danger'); }
+    };
+    var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
 </script>
 <script src="js/member.js"></script>
+<script src="js/chat.js"></script>
 </body>
 </html>

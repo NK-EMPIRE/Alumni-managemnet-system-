@@ -6,9 +6,17 @@ const authorize = require('../middleware/authorize');
 const validate = require('../middleware/validate');
 const { ROLES } = require('../constants');
 
+const searchController = require('../controllers/search.controller');
+
 const router = Router();
 
 router.use(authenticate);
+
+router.get(
+  '/search',
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
+  searchController.searchAlumni
+);
 
 router.get(
   '/',
@@ -72,7 +80,7 @@ router.patch(
   '/:alumniId/draft',
   param('alumniId').isInt().toInt(),
   validate,
-  authorize(ROLES.MEMBER),
+  authorize(ROLES.MEMBER, ROLES.LEADER),
   alumniController.saveDraft
 );
 
@@ -82,6 +90,14 @@ router.patch(
   validate,
   authorize(ROLES.MEMBER, ROLES.LEADER),
   alumniController.submitProfessionalInfo
+);
+
+router.patch(
+  '/:alumniId/reopen',
+  param('alumniId').isInt().toInt(),
+  validate,
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
+  alumniController.reopenAlumni
 );
 
 router.post(

@@ -24,11 +24,11 @@ async function authenticate(req, res, next) {
     const pool = await getPool();
     const result = await pool.request()
       .input('userId', decoded.userId)
-      .query('SELECT user_id FROM Users WHERE user_id = @userId AND is_active = 1');
+      .query('SELECT u.user_id, r.role_name FROM Users u JOIN Roles r ON u.role_id = r.role_id WHERE u.user_id = @userId AND u.is_active = 1');
     if (result.recordset.length === 0) {
       return next(new AuthenticationError('Account is deactivated or not found'));
     }
-    req.user = decoded;
+    req.user = { ...decoded, role: result.recordset[0].role_name };
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {

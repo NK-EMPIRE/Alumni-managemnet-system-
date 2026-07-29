@@ -3,8 +3,8 @@ const { asyncHandler } = require('../middleware/errorHandler');
 const { success, paginated } = require('../utils/response');
 
 const getAlumni = asyncHandler(async (req, res) => {
-  const { page, limit, search, department, batch, status, leaderId, memberId } = req.query;
-  const result = await alumniService.getAlumni({ page, limit, search, department, batch, status, leaderId, memberId });
+  const { page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField } = req.query;
+  const result = await alumniService.getAlumni({ page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField });
   paginated(res, result.data, result.totalCount, result.page, result.limit, 'Alumni retrieved successfully');
 });
 
@@ -75,6 +75,13 @@ const saveDraft = asyncHandler(async (req, res) => {
   success(res, result, 'Draft saved successfully');
 });
 
+const reopenAlumni = asyncHandler(async (req, res) => {
+  const { alumniId } = req.params;
+  const currentUser = req.user;
+  const result = await alumniService.reopenAlumni(alumniId, currentUser);
+  success(res, result, 'Alumni record reopened successfully');
+});
+
 module.exports = {
   getAlumni,
   getAlumniById,
@@ -85,5 +92,6 @@ module.exports = {
   updateAssignmentStatus,
   getStats,
   getFilters,
-  saveDraft
+  saveDraft,
+  reopenAlumni
 };

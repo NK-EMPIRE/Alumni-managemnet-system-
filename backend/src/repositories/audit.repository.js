@@ -2,10 +2,18 @@ const { sql, getPool } = require('../config/database');
 
 async function findAll({ page, limit, offset, action, role, dateFrom, dateTo, target }) {
   const pool = await getPool();
+
+  const columnCheck = await pool.request().query(`
+    SELECT name 
+    FROM sys.columns 
+    WHERE object_id = OBJECT_ID('dbo.AuditLogs') AND name IN ('audit_id', 'log_id')
+  `);
+  const idColumn = columnCheck.recordset.find(c => c.name === 'audit_id') ? 'audit_id' : 'log_id';
+
   let countQuery = 'SELECT COUNT(*) AS total FROM AuditLogs WHERE 1=1';
   let dataQuery = `
     SELECT
-      log_id AS audit_id, user_id, username, role_name, action, target,
+      ${idColumn} AS audit_id, user_id, username, role_name, action, target,
       description, ip_address, user_agent, status, created_at
     FROM AuditLogs WHERE 1=1`;
   const inputs = [];

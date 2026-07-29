@@ -8,7 +8,7 @@ async function findByLoginId(loginId) {
       SELECT
         u.user_id, u.first_name, u.last_name, u.email,
         u.phone, u.password_hash, u.is_active, u.role_id,
-        r.role_name, u.leader_id
+        r.role_name, u.leader_id, u.must_change_password
       FROM Users u
       INNER JOIN Roles r ON u.role_id = r.role_id
       WHERE u.email = @loginId AND u.deleted_at IS NULL
@@ -24,7 +24,7 @@ async function findById(userId) {
       SELECT
         u.user_id, u.first_name, u.last_name, u.email,
         u.phone, u.password_hash, u.role_id, r.role_name, u.leader_id,
-        u.is_active, u.last_login, u.created_at, u.updated_at
+        u.is_active, u.last_login, u.created_at, u.updated_at, u.must_change_password
       FROM Users u
       INNER JOIN Roles r ON u.role_id = r.role_id
       WHERE u.user_id = @userId AND u.deleted_at IS NULL
@@ -37,7 +37,7 @@ async function updatePassword(userId, passwordHash) {
   const result = await pool.request()
     .input('userId', sql.Int, userId)
     .input('passwordHash', sql.NVarChar(255), passwordHash)
-    .query('UPDATE Users SET password_hash = @passwordHash, updated_at = GETUTCDATE() WHERE user_id = @userId');
+    .query('UPDATE Users SET password_hash = @passwordHash, must_change_password = 0, updated_at = GETUTCDATE() WHERE user_id = @userId');
   return result.rowsAffected[0];
 }
 

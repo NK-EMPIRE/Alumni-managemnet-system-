@@ -13,5 +13,7 @@ node_modules
 tmp/
 .tempmediaStorage/
 backend/logs/
-
 .env
+
+scratch/
+backend/logs/application.log

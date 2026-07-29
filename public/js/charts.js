@@ -35,9 +35,25 @@
     function setGlobalChartDefaults() {
         if (typeof Chart === 'undefined') return;
 
+        var isDark = document.body.classList.contains('dark-mode');
+        TEXT_COLOR = isDark ? '#F8FAFC' : '#64748B';
+        GRID_COLOR = isDark ? 'rgba(255, 255, 255, 0.15)' : '#E5E7EB';
+
         Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        Chart.defaults.font.color = TEXT_COLOR;
-        Chart.defaults.plugins.legend.labels.usePointStyle = true;
+        Chart.defaults.color = TEXT_COLOR;
+        if (Chart.defaults.font) Chart.defaults.font.color = TEXT_COLOR;
+        if (Chart.defaults.scale && Chart.defaults.scale.ticks) Chart.defaults.scale.ticks.color = TEXT_COLOR;
+        if (Chart.defaults.scale && Chart.defaults.scale.grid) Chart.defaults.scale.grid.color = GRID_COLOR;
+        if (Chart.defaults.plugins && Chart.defaults.plugins.legend && Chart.defaults.plugins.legend.labels) {
+            Chart.defaults.plugins.legend.labels.color = TEXT_COLOR;
+            Chart.defaults.plugins.legend.labels.usePointStyle = true;
+        }
+    }
+
+    if (typeof window !== 'undefined') {
+        window.addEventListener('themeChanged', function () {
+            setGlobalChartDefaults();
+        });
     }
 
     /**

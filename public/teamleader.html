@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Team Leader Dashboard - Alumni Professional Details Update Management System" />
   <title>Team Leader Dashboard - APIUMS | Alumni Professional Information Update Management System</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563EB'/><path d='M50 20 L80 40 L50 60 L20 40 Z' fill='%23FFFFFF'/><path d='M35 53 L35 70 Q50 82 65 70 L65 53' stroke='%23FFFFFF' stroke-width='6' fill='none'/></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/export_modal.css" />
+  <link rel="stylesheet" href="css/chat.css" />
   <style>
     :root {
       --progress-ring-size: 100px;
@@ -274,10 +277,251 @@
     .leader-badge {
       font-size: 0.65rem;
       background: #DBEAFE;
-      color: #2563EB;
+      color: #1D4ED8 !important;
       padding: 2px 8px;
       border-radius: 12px;
-      font-weight: 500;
+      font-weight: 600;
+    }
+    /* ── DARK MODE OVERRIDES FOR TEAM LEADER SECTION ── */
+    body.dark-mode {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+    }
+
+    /* Fix inline-styled modal nav pill */
+    body.dark-mode .modal-nav-group {
+      background: #0F172A !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode #modalNavCounter {
+      color: #CBD5E1 !important;
+    }
+    body.dark-mode #modalTitle {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #modalSubtitle {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode .modal-header {
+      background-color: #1E293B !important;
+    }
+    body.dark-mode .modal-body,
+    body.dark-mode .modal-footer {
+      background-color: #1E293B !important;
+    }
+    /* Fix hardcoded inline-bg table header rows */
+    body.dark-mode [style*="background:#F8FAFC"],
+    body.dark-mode [style*="background: #F8FAFC"],
+    body.dark-mode [style*="background:#EEF2F6"],
+    body.dark-mode [style*="background:#fff"],
+    body.dark-mode [style*="background: #fff"] {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+    /* Fix hardcoded inline text colors */
+    body.dark-mode [style*="color:#1E293B"],
+    body.dark-mode [style*="color: #1E293B"],
+    body.dark-mode [style*="color:#475569"],
+    body.dark-mode [style*="color:#0F172A"] {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode [style*="color:#64748B"],
+    body.dark-mode [style*="color: #64748B"],
+    body.dark-mode [style*="color:#94A3B8"] {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .leader-badge {
+      background: rgba(37, 99, 235, 0.25) !important;
+      color: #60A5FA !important;
+      border: 1px solid rgba(96, 165, 250, 0.3) !important;
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .stat-card,
+    body.dark-mode .table-card,
+    body.dark-mode .table-container,
+    body.dark-mode .modal-content,
+    body.dark-mode .export-modal-card {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+      box-shadow: none !important;
+    }
+
+    body.dark-mode .table-header h3,
+    body.dark-mode .section-header h2,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode #navbarUserNameHeader,
+    body.dark-mode #hdrClockDate,
+    body.dark-mode .sidebar-brand-text {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #hdrClockTime,
+    body.dark-mode .text-muted,
+    body.dark-mode .pagination-info,
+    body.dark-mode #ssPaginationInfo,
+    body.dark-mode #paginationInfo,
+    body.dark-mode #myAssignmentsPaginationInfo {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode div[style*="background:#fff"],
+    body.dark-mode div[style*="background: #fff"],
+    body.dark-mode div[style*="background:var(--bg-white"],
+    body.dark-mode div[style*="background:#F8FAFC"],
+    body.dark-mode div[style*="background: #F8FAFC"] {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode th,
+    body.dark-mode #memberDetailsTable th {
+      background-color: #0F172A !important;
+      color: #94A3B8 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode td,
+    body.dark-mode #memberDetailsTable td {
+      color: #E2E8F0 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode tr:hover td {
+      background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea,
+    body.dark-mode .form-control,
+    body.dark-mode .filter-select,
+    body.dark-mode #rowsPerPageSelect,
+    body.dark-mode #myAssignmentsRowsPerPageSelect,
+    body.dark-mode #ssRowsPerPageSelect {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode input:focus,
+    body.dark-mode select:focus,
+    body.dark-mode textarea:focus,
+    body.dark-mode .form-control:focus {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode select option,
+    body.dark-mode .form-control option {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .pagination button,
+    body.dark-mode .pagination-item {
+      background: #1E293B !important;
+      color: #CBD5E1 !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .pagination button:hover:not(:disabled),
+    body.dark-mode .pagination-item:hover:not(:disabled) {
+      background: var(--primary, #2563EB) !important;
+      color: #ffffff !important;
+      border-color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode .pagination button.active,
+    body.dark-mode .pagination-item.active {
+      background: var(--primary, #2563EB) !important;
+      color: #ffffff !important;
+      border-color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode .pagination button:disabled,
+    body.dark-mode .pagination-item:disabled {
+      background: #0F172A !important;
+      color: #475569 !important;
+      border-color: #334155 !important;
+      opacity: 0.5 !important;
+    }
+
+    body.dark-mode #myAssignmentsFilteredCount {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode #filterDrawer {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .modal-header {
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode .modal-footer {
+      border-top-color: #334155 !important;
+      background-color: #1E293B !important;
+    }
+
+    body.dark-mode .tabs {
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-item {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .tab-item.active {
+      color: var(--primary, #2563EB) !important;
+    }
+
+    body.dark-mode .btn-secondary,
+    body.dark-mode .btn-outline {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .btn-secondary:hover,
+    body.dark-mode .btn-outline:hover {
+      background-color: #1E293B !important;
+    }
+
+    body.dark-mode #lockMessage {
+      background-color: rgba(239, 68, 68, 0.15) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+      color: #FCA5A5 !important;
+    }
+
+    body.dark-mode #totalPoolCount {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #notifDropdown {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .notification-item.unread {
+      background-color: rgba(37, 99, 235, 0.15) !important;
+    }
+
+    body.dark-mode .notification-item.unread:hover {
+      background-color: rgba(37, 99, 235, 0.25) !important;
     }
   </style>
 </head>
@@ -291,7 +535,7 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-brand">
+      <div class="sidebar-brand" style="cursor:pointer;" onclick="document.querySelector('.sidebar-item[data-page=dashboard]').click()">
         <div class="sidebar-brand-icon">
           <i class="fas fa-graduation-cap"></i>
         </div>
@@ -316,6 +560,10 @@
       </a>
 
       <div class="sidebar-label">Management</div>
+      <a class="sidebar-item" data-page="campaign" onclick="openEmailCampaignModal()" href="#">
+        <i class="fas fa-paper-plane"></i>
+        <span class="sidebar-item-text">Request Details</span>
+      </a>
       <a class="sidebar-item" data-page="reports" href="#">
         <i class="fas fa-file-alt"></i>
         <span class="sidebar-item-text">Alumni</span>
@@ -350,7 +598,20 @@
         <span style="font-size:1.1rem;font-weight:600;color:var(--text-dark);" id="navbarUserNameHeader">Welcome, <span class="navbar-profile-name">Arun Rajan</span></span>
       </div>
 
-      <div class="navbar-right">
+      <div class="navbar-right" style="display:flex;align-items:center;gap:12px;">
+
+
+        <!-- Today's Tasks Modal Button -->
+        <button class="navbar-btn" onclick="openTodayTasksModal()" title="Today's Tasks & Auto Summary" style="background:none;border:none;color:#10B981;cursor:pointer;font-size:1.1rem;position:relative;">
+          <i class="fas fa-tasks"></i>
+          <span id="todayTasksDot" style="position:absolute;top:2px;right:2px;width:8px;height:8px;background:#EF4444;border-radius:50%;display:none;"></span>
+        </button>
+
+        <!-- Quick Tour / Welcome Tutorial Button -->
+        <button class="navbar-btn" onclick="startIntelligentProductTour()" title="Start Interactive Product Tour" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;">
+          <i class="fas fa-magic"></i>
+        </button>
+
         <button class="navbar-btn" id="notifBtn" title="Notifications">
           <i class="fas fa-bell"></i>
           <span class="notification-count" id="notifCount">5</span>
@@ -368,7 +629,7 @@
     </header>
 
     <main class="page-content" id="pageContent">
-      <div class="page-header" id="globalPageHeader">
+      <div class="page-header" id="globalPageHeader" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div class="page-header-left">
           <div class="breadcrumb">
             <a href="#">Home</a>
@@ -377,6 +638,15 @@
           </div>
           <h1>Team Leader Dashboard</h1>
           <p>Welcome back, Arun Rajan! Here's your team's progress overview.</p>
+        </div>
+        <div class="page-header-right" id="dashboardLiveClockContainer">
+          <div style="background:var(--bg-white, #fff);border:1px solid var(--border);border-radius:10px;padding:8px 16px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px;">
+            <i class="far fa-clock" style="font-size:1.4rem;color:var(--primary);"></i>
+            <div>
+              <div id="hdrClockDate" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);">-</div>
+              <div id="hdrClockTime" style="font-size:0.75rem;color:var(--text-secondary);font-weight:500;">-</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -387,12 +657,18 @@
             <h3 style="font-size: 0.95rem; font-weight: 600;"><i class="fas fa-bolt" style="color:#7C3AED;margin-right:8px"></i> Quick Actions</h3>
           </div>
           <div class="card-body" style="padding: 16px 20px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px">
               <div class="quick-action-btn" id="distributeModalBtn" style="padding: 10px 14px">
                 <div class="icon-wrap" style="background:#EDE9FE;color:#7C3AED;width:36px;height:36px;font-size:0.95rem">
                   <i class="fas fa-share-alt"></i>
                 </div>
                 <span style="font-size:0.85rem;font-weight:500">Distribute to Members</span>
+              </div>
+              <div class="quick-action-btn" onclick="openEmailCampaignModal()" style="padding: 10px 14px; cursor: pointer;">
+                <div class="icon-wrap" style="background:#DBEAFE;color:#2563EB;width:36px;height:36px;font-size:0.95rem">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+                <span style="font-size:0.85rem;font-weight:500">Request Details (Email)</span>
               </div>
               <div class="quick-action-btn" id="refreshDataBtn" style="padding: 10px 14px">
                 <div class="icon-wrap" style="background:#D1FAE5;color:#10B981;width:36px;height:36px;font-size:0.95rem">
@@ -417,12 +693,6 @@
               <i class="fas fa-search search-icon"></i>
               <input type="text" id="tableSearch" placeholder="Search members..." style="padding:8px 12px 8px 36px;font-size:0.8rem" />
             </div>
-            <select id="statusFilter" class="form-control form-select" style="width:auto;padding:8px 32px 8px 12px;font-size:0.8rem">
-              <option value="all">All Status</option>
-              <option value="On Track">On Track</option>
-              <option value="Behind">Behind</option>
-              <option value="Critical">Critical</option>
-            </select>
           </div>
         </div>
         <div class="card-body" style="padding:0">
@@ -436,7 +706,6 @@
                   <th style="text-align:center">Completed</th>
                   <th style="text-align:center">Pending</th>
                   <th style="min-width:140px">Progress</th>
-                  <th>Status</th>
                   <th>Last Activity</th>
                   <th style="text-align:center">Action</th>
                 </tr>
@@ -501,18 +770,12 @@
               <i class="fas fa-search search-icon"></i>
               <input type="text" id="myAssignmentsSearch" placeholder="Search my assignments..." style="padding:8px 12px 8px 36px;font-size:0.8rem; height:36px;" />
             </div>
-            <select id="myAssignmentsDeptFilter" class="form-control form-select" style="width:auto; height:36px; padding:6px 32px 6px 12px; font-size:0.8rem; margin:0;">
-              <option value="all">All Depts</option>
-            </select>
-            <select id="myAssignmentsBatchFilter" class="form-control form-select" style="width:auto; height:36px; padding:6px 32px 6px 12px; font-size:0.8rem; margin:0;">
-              <option value="all">All Batches</option>
-            </select>
-            <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:auto; height:36px; padding:6px 32px 6px 12px; font-size:0.8rem; margin:0;">
-              <option value="all">All Status</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-              <option value="Draft">Draft</option>
-            </select>
+            <div class="filter-btn-wrap" id="myAssignmentsFilterBtnWrap">
+              <button class="btn btn-secondary btn-sm" onclick="openModal('myAssignmentsFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="myAssignmentsActiveFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+              </button>
+              <span class="filter-active-dot" title="Filters active"></span>
+            </div>
             <span id="myAssignmentsFilteredCount" class="badge-record-count" style="font-size: 0.85rem; font-weight: 600; background: #EEF2F6; color: #1E293B; padding: 6px 14px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-flex; align-items:center; height:36px;">0 Records</span>
           </div>
         </div>
@@ -525,7 +788,7 @@
                   <th>Alumni Name</th>
                   <th>Department</th>
                   <th>Batch</th>
-                  <th>Company</th>
+                  <th>Company/Institution</th>
                   <th>Designation</th>
                   <th>Status</th>
                   <th style="text-align:center">Action</th>
@@ -561,56 +824,28 @@
         </div>
       </div>
       <div class="card spreadsheet-card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
-        <!-- Spreadsheet Toolbar -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div class="search-bar" style="width:280px;margin-bottom:0;">
-              <i class="fas fa-search search-icon"></i>
-              <input type="text" placeholder="Global search..." id="ssSearch" oninput="debounceSearch()">
+          <!-- Spreadsheet Toolbar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);background:#F8FAFC;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex:1 1 auto;">
+              <div class="search-bar" style="width:220px;margin-bottom:0;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search..." id="ssSearch" oninput="debounceSearch()">
+              </div>
+              <div class="filter-btn-wrap" id="ssFilterBtnWrap">
+                <button class="btn btn-secondary btn-sm" onclick="openModal('ssFilterModal')" style="height:36px;font-size:0.8rem;white-space:nowrap;">
+                  <i class="fas fa-filter" style="color:var(--primary);margin-right:4px;"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;">0</span>
+                </button>
+                <span class="filter-active-dot" title="Filters active"></span>
+              </div>
             </div>
-            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()"
-              style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">All Members</option>
-            </select>
-            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()"
-              style="width:90px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">Depts</option>
-              <option value="CSE">CSE</option>
-              <option value="ECE">ECE</option>
-              <option value="EEE">EEE</option>
-              <option value="ME">ME</option>
-              <option value="CE">CE</option>
-              <option value="IT">IT</option>
-            </select>
-            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()"
-              style="width:120px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">All Batches</option>
-              <option value="2020">2020</option>
-              <option value="2021">2021</option>
-              <option value="2022">2022</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-            </select>
-            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()"
-              style="width:130px;height:36px;font-size:0.8rem;padding:4px 8px;">
-              <option value="">All Statuses</option>
-              <option value="Available">Awaiting Distribution</option>
-              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
-              <option value="Pending">Pending Member</option>
-              <option value="Draft">Draft</option>
-              <option value="Completed">Completed</option>
-            </select>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn" style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;white-space:nowrap;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
+              <button class="btn btn-warning btn-sm" onclick="openCirculateModal()" style="height:36px;color:#fff;white-space:nowrap;" title="Redistribute pending records within team"><i class="fas fa-exchange-alt"></i> Circulate</button>
+              <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;white-space:nowrap;"><i class="fas fa-file-csv"></i> Export CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;white-space:nowrap;"><i class="fas fa-rotate"></i> Refresh</button>
+            </div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="btn btn-secondary btn-sm" onclick="toggleColumnVisibilityMenu()" id="colVisibilityBtn"
-              style="display:none;height:36px;"><i class="fas fa-columns"></i> Columns</button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
-
-            <button class="btn btn-secondary btn-sm" onclick="exportAlumniCSV()" style="height:36px;"><i class="fas fa-file-csv"></i> Export CSV</button>
-            <button class="btn btn-primary btn-sm" onclick="fetchSpreadsheetData()" style="height:36px;"><i
-                class="fas fa-rotate"></i> Refresh</button>
-          </div>
-        </div>
 
         <!-- Column Visibility Dropdown -->
         <div id="colVisibilityMenu" class="dropdown-menu"
@@ -618,7 +853,7 @@
         </div>
 
         <!-- Spreadsheet Table Container -->
-        <div style="flex:1;overflow:auto;max-height:60vh;border-bottom:1px solid var(--border);">
+        <div style="overflow-x:auto;">
           <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;">
             <thead>
               <tr id="ssTableHeadRow">
@@ -822,7 +1057,14 @@
             <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
           </div>
         </div>
-        <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="modal-nav-group" style="display:flex;align-items:center;gap:6px;background:#F1F5F9;padding:4px 8px;border-radius:8px;border:1px solid #CBD5E1;">
+            <button type="button" class="btn btn-sm btn-secondary" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record (Left Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-left"></i></button>
+            <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;">1 / 1</span>
+            <button type="button" class="btn btn-sm btn-secondary" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record (Right Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-right"></i></button>
+          </div>
+          <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>
+        </div>
       </div>
       <div class="modal-body">
         <form id="updateForm" novalidate>
@@ -872,18 +1114,21 @@
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company</label>
-              <input type="text" id="fieldCompany" placeholder="Current company" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company/Institution <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldCompany" placeholder="Current company/institution" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation</label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldDesignation" placeholder="Current designation" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorDesignation" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Designation is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Current City</label>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Current City <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldCity" placeholder="Current city" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
@@ -909,10 +1154,11 @@
           <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email</label>
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email <span class="required" style="color:#EF4444">*</span></label>
                 <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
               </div>
               <input type="email" id="fieldEmail" placeholder="email@example.com" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorEmail" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Email is required</div>
             </div>
             <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; margin-top: 5px;">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Secondary Email</label>
@@ -922,48 +1168,21 @@
           <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone</label>
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone <span class="required" style="color:#EF4444">*</span></label>
                 <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
               </div>
               <input type="text" id="fieldPhone" placeholder="Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorPhone" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Phone is required</div>
             </div>
             <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; margin-top: 5px;">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Secondary Phone</label>
               <input type="text" id="fieldSecondaryPhone" placeholder="Secondary Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
           </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">LinkedIn URL</label>
-              <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-            </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Working Detail</label>
-              <textarea id="fieldWorkingDetails" placeholder="Current working details" rows="2" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC;min-height:80px;resize:vertical;"></textarea>
-            </div>
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Higher Studies</label>
-              <select id="fieldHigherStudies" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-                <option value="">Select</option>
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group full-width higher-studies-details" id="higherStudiesDetails" style="display:none;margin-bottom:16px">
-            <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Higher Studies Details</label>
-            <input type="text" id="fieldHigherDetails" placeholder="University, Course, Year" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Entrepreneur</label>
-              <select id="fieldEntrepreneur" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-                <option value="">Select</option>
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">LinkedIn/Facebook URL</label>
+              <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username or https://facebook.com/username" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Government Job</label>
@@ -974,18 +1193,11 @@
               </select>
             </div>
           </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Other Occupation</label>
-              <input type="text" id="fieldOtherOcc" placeholder="Other occupation if any" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-            </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Remarks</label>
-              <textarea id="fieldRemarks" placeholder="Additional remarks..." style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC;min-height:80px;resize:vertical;"></textarea>
-            </div>
-          </div>
           <input type="hidden" id="fieldIndex" value="">
-          <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px">
+          <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-warning" id="undoSubmitBtn" style="color:#fff;display:none;" onclick="undoAlumniSubmission()">
+              <i class="fas fa-undo"></i> Undo Submit
+            </button>
             <button type="button" class="btn btn-outline" id="saveDraftBtn">
               <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text">Save Draft</span>
@@ -1100,13 +1312,562 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       CIRCULATE / REASSIGN MODAL (Leader)
+       ============================================================ -->
+  <div class="modal-overlay" id="circulateModal">
+    <div class="modal" style="max-width:720px;width:95vw;border-radius:16px;overflow:hidden;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#F59E0B,#EF4444);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-exchange-alt" style="color:#fff;font-size:0.85rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1rem;font-weight:700;color:#1E293B;">Circulate Alumni</h3>
+            <p style="margin:0;font-size:0.75rem;color:#64748B;">Redistribute pending records within your team</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('circulateModal')" style="width:32px;height:32px;border:none;background:#F1F5F9;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:1.1rem;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:0;">
+
+        <!-- Step 1: Workload + source/target -->
+        <div id="circulateStep1" style="padding:20px 24px;">
+          <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:16px;border-radius:10px;border:1px solid var(--border);background:#F8FAFC;">
+            <p style="color:var(--text-secondary);font-size:0.85rem;padding:14px;">Loading team workload...</p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+            <div>
+              <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                <span style="width:18px;height:18px;background:#FEE2E2;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-user-minus" style="color:#EF4444;font-size:0.65rem;"></i></span>
+                Source Member
+              </label>
+              <select class="form-control" id="circulateSourceSelect" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;">
+                <option value="">-- Select Source --</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                <span style="width:18px;height:18px;background:#D1FAE5;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-user-plus" style="color:#10B981;font-size:0.65rem;"></i></span>
+                Target Members
+              </label>
+              <div id="circulateTargetCheckboxes" style="max-height:120px;overflow-y:auto;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;background:#F8FAFC;display:flex;flex-direction:column;gap:6px;font-size:0.85rem;">
+                <span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="flex:1;">
+              <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:0.05em;">Records to Move <span style="font-weight:400;color:#94A3B8;">(blank = all Pending)</span></label>
+              <input class="form-control" type="number" id="circulateCount" min="1" placeholder="e.g. 10" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;max-width:180px;">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="circulatePreview()" style="width:100%;padding:11px;border-radius:10px;font-weight:600;font-size:0.88rem;">
+            <i class="fas fa-eye" style="margin-right:8px;"></i>Preview Redistribution
+          </button>
+        </div>
+
+        <!-- Step 2: Preview + Confirm -->
+        <div id="circulateStep2" style="display:none;padding:20px 24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <strong style="font-size:0.9rem;color:var(--text-primary);">Preview — Records to be Moved</strong>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('circulateStep2').style.display='none';document.getElementById('circulateStep1').style.display='block';" style="padding:6px 14px;border-radius:8px;font-size:0.8rem;">
+              <i class="fas fa-arrow-left" style="margin-right:4px;"></i>Back
+            </button>
+          </div>
+          <div id="circulatePreviewContent" style="max-height:300px;overflow-y:auto;margin-bottom:14px;border:1px solid var(--border);border-radius:10px;background:#F8FAFC;"></div>
+          <button class="btn btn-success" onclick="circulateCommit()" style="width:100%;padding:11px;border-radius:10px;font-weight:600;font-size:0.88rem;">
+            <i class="fas fa-check-circle" style="margin-right:8px;"></i>Confirm Redistribution
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SPREADSHEET FILTER MODAL (Leader & Global)
+       ============================================================ -->
+  <div class="modal-overlay" id="ssFilterModal">
+    <div class="modal" style="max-width:550px;width:90vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Spreadsheet Filters</h3>
+        <button class="modal-close" onclick="closeModal('ssFilterModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label">Team Member</label>
+            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()">
+              <option value="">All Members</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Department</label>
+            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Batch / Year</label>
+            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Status</label>
+            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()">
+              <option value="">All Statuses</option>
+              <option value="Available">Awaiting Distribution</option>
+              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
+              <option value="Pending">Pending Member</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+              <option value="Reopened">Reopened</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Date From</label>
+            <input type="date" id="ssDateFrom" class="form-control" onchange="fetchSpreadsheetData()">
+          </div>
+          <div>
+            <label class="form-label">Date To</label>
+            <input type="date" id="ssDateTo" class="form-control" onchange="fetchSpreadsheetData()">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="resetSpreadsheetFilters()"><i class="fas fa-undo"></i> Clear All</button>
+        <button class="btn btn-primary" onclick="fetchSpreadsheetData();closeModal('ssFilterModal')"><i class="fas fa-check"></i> Apply Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MY ASSIGNMENTS FILTER MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="myAssignmentsFilterModal">
+    <div class="modal" style="max-width:480px;width:90vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Assignment Filters</h3>
+        <button class="modal-close" onclick="closeModal('myAssignmentsFilterModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Department</label>
+            <select id="myAssignmentsDeptFilter" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="renderMyAssignmentsTable(); if(window.updateMyAssignmentsFilterBadge) updateMyAssignmentsFilterBadge();">
+              <option value="all">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Batch / Year</label>
+            <select id="myAssignmentsBatchFilter" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="renderMyAssignmentsTable(); if(window.updateMyAssignmentsFilterBadge) updateMyAssignmentsFilterBadge();">
+              <option value="all">All Batches</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2;">
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Status</label>
+            <select id="myAssignmentsStatusFilter" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="renderMyAssignmentsTable(); if(window.updateMyAssignmentsFilterBadge) updateMyAssignmentsFilterBadge();">
+              <option value="all">All Status</option>
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Date From</label>
+            <input type="date" id="myAssignmentsDateFrom" class="form-control" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="renderMyAssignmentsTable(); if(window.updateMyAssignmentsFilterBadge) updateMyAssignmentsFilterBadge();">
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Date To</label>
+            <input type="date" id="myAssignmentsDateTo" class="form-control" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="renderMyAssignmentsTable(); if(window.updateMyAssignmentsFilterBadge) updateMyAssignmentsFilterBadge();">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="clearMyAssignmentsFilters()"><i class="fas fa-undo"></i> Clear All</button>
+        <button class="btn btn-primary" onclick="closeModal('myAssignmentsFilterModal')"><i class="fas fa-check"></i> Apply Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SYSTEM WELCOME TOUR & SHORTCUTS MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="welcomeTourModalGuide">
+
+        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt" style="color:var(--warning);margin-right:6px;"></i>Key Platform Features</h5>
+        <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
+          <li><strong>Global Date Filter:</strong> Select any custom date range in the top-right navbar calendar icon to filter working datasets across all views.</li>
+          <li><strong>Circulate & Distribute:</strong> Click the <em>Circulate</em> button to instantly rebalance pending records across your team members.</li>
+          <li><strong>Consolidated Filters:</strong> Click the <em>Filters</em> button on the Alumni spreadsheet to filter by Member, Dept, Batch, or Status cleanly in a single modal.</li>
+          <li><strong>Full Screen View:</strong> Expand any spreadsheet into full-screen mode for comfortable data reviewing.</li>
+        </ul>
+
+        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard" style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
+        <div class="shortcut-grid">
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>K</kbd>
+            <div class="shortcut-desc">Focus Global Search</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Esc</kbd>
+            <div class="shortcut-desc">Close Active Modal</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>S</kbd>
+            <div class="shortcut-desc">Save / Submit Record</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Alt</kbd> + <kbd>E</kbd>
+            <div class="shortcut-desc">Export CSV</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Ctrl</kbd> + <kbd>F</kbd>
+            <div class="shortcut-desc">Toggle Filter Modal</div>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Alt</kbd> + <kbd>R</kbd>
+            <div class="shortcut-desc">Refresh Data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EXPORT CUSTOMIZATION & ANIMATION MODAL (LEADER)
+       ============================================================ -->
+  <div class="modal-overlay" id="exportCustomizationModal">
+    <div class="export-modal-card">
+      <div class="export-modal-header">
+        <h3><i class="fas fa-file-export" style="color:#60A5FA;"></i> Export Alumni Report</h3>
+        <button class="export-modal-close" onclick="closeModal('exportCustomizationModal')">&times;</button>
+      </div>
+
+      <div class="export-stats-banner">
+        <div class="export-stat-box">
+          <div class="count" id="expStatTotal">0</div>
+          <div class="label">Matched Records</div>
+        </div>
+        <div class="export-stat-box">
+          <div class="count" id="expStatCols">0</div>
+          <div class="label">Selected Columns</div>
+        </div>
+        <div class="export-stat-box">
+          <div class="count" id="expStatStatus">ALL</div>
+          <div class="label">Status Filter</div>
+        </div>
+      </div>
+
+      <div style="padding:20px 24px;max-height:70vh;overflow-y:auto;">
+        <!-- Filter Controls inside Export Modal -->
+        <div class="export-section-title">
+          <span><i class="fas fa-filter" style="color:var(--primary);margin-right:6px;"></i> Customize Export Filters</span>
+          <a href="javascript:void(0)" onclick="resetExportModalFilters()" style="font-size:0.8rem;color:#64748B;text-decoration:none;">Reset Filters</a>
+        </div>
+        
+        <div class="export-filter-grid">
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Team Member</label>
+            <select class="form-control" id="expFilterMember" onchange="onExportFilterChange()">
+              <option value="">All Members</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Department</label>
+            <select class="form-control" id="expFilterDept" onchange="onExportFilterChange()">
+              <option value="">All Depts</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Batch / Year</label>
+            <select class="form-control" id="expFilterBatch" onchange="onExportFilterChange()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem;">Assignment Status</label>
+            <select class="form-control" id="expFilterStatus" onchange="onExportFilterChange()">
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
+              <option value="Pending">Pending Member</option>
+              <option value="Draft">Draft</option>
+              <option value="Completed">Completed</option>
+              <option value="Reopened">Reopened</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Column Selector -->
+        <div class="export-section-title">
+          <span><i class="fas fa-columns" style="color:var(--primary);margin-right:6px;"></i> Select Export Columns</span>
+          <div style="font-size:0.8rem;font-weight:normal;display:flex;gap:12px;">
+            <a href="javascript:void(0)" onclick="selectAllExportCols(true)" style="color:var(--primary);text-decoration:none;">Select All</a>
+            <a href="javascript:void(0)" onclick="selectAllExportCols(false)" style="color:#64748B;text-decoration:none;">Clear All</a>
+          </div>
+        </div>
+        <div class="export-cols-grid" id="exportColsContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn btn-secondary" onclick="closeModal('exportCustomizationModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="startExportDownloadProcess()" style="padding:10px 24px;font-weight:600;">
+          <i class="fas fa-download"></i> Start Export Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Realtime Downloading Overlay Animation -->
+  <div class="export-progress-overlay" id="exportProgressOverlay">
+    <div class="export-progress-card">
+      <div class="export-animated-icon">
+        <i class="fas fa-cloud-download-alt"></i>
+      </div>
+      <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;" id="exportProgressTitle">Generating Export...</h3>
+      <p style="font-size:0.85rem;color:#64748B;margin:0;" id="exportProgressSubtitle">Fetching alumni records from database...</p>
+      
+      <div class="export-progress-bar-bg">
+        <div class="export-progress-bar-fill" id="exportProgressBarFill"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748B;font-weight:600;" id="exportProgressStats">
+        <span id="exportProgressPercent">0%</span>
+        <span id="exportProgressCount">0 / 0 records</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S TASKS MODAL -->
+  <div class="modal-overlay" id="todayTasksModal">
+    <div class="modal" style="max-width:540px;width:92vw;border-radius:16px;overflow:hidden;">
+      <div class="modal-header" style="background:linear-gradient(135deg, #10B981, #059669);color:#fff;padding:18px 24px;">
+        <h3 style="color:#fff;margin:0;font-size:1.15rem;font-weight:700;"><i class="fas fa-check-double" style="margin-right:8px;"></i>Today's Work Summary & Tasks</h3>
+        <button class="modal-close" onclick="closeModal('todayTasksModal')" style="color:#fff;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;">
+        <div id="todayContextBanner" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:500;margin-bottom:16px;line-height:1.5;">
+          <i class="fas fa-lightbulb" style="margin-right:6px;color:#059669;"></i><span id="todayContextText">Loading your daily summary...</span>
+        </div>
+        <h4 style="font-size:0.85rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Action Items Checklist</h4>
+        <div id="todayTasksList" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="text-align:center;padding:20px;color:#94A3B8;">Loading tasks...</div>
+        </div>
+      </div>
+      <div style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.8rem;color:#64748B;" id="todayTaskProgressCount">0 tasks remaining</span>
+        <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')" style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WELCOME TUTORIAL & DEMO TOUR MODAL -->
+  <div class="modal-overlay" id="welcomeTourModal">
+    <div class="modal" style="max-width:580px;width:92vw;border-radius:18px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);">
+      <div style="background:linear-gradient(135deg, #2563EB, #4F46E5);color:#fff;padding:28px 24px 20px;text-align:center;position:relative;">
+        <button onclick="closeModal('welcomeTourModal')" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
+        <div style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
+          🎓
+        </div>
+        <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to AlumniMS! 👋</h2>
+        <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your interactive guide to system features and recent updates.</p>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+        <div id="tourStepContent" style="font-size:0.92rem;color:#334155;line-height:1.6;min-height:110px;">
+          <!-- Populated dynamically by tour script -->
+        </div>
+        <!-- Motivation Quote Banner -->
+        <div style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;" id="tourMotivationBanner">
+          "Success is the sum of small efforts repeated day in and day out. Work smoothly and have a wonderful day! 😊"
+        </div>
+      </div>
+      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#64748B;cursor:pointer;">
+          <input type="checkbox" id="dontShowTourCheckbox" style="accent-color:#2563EB;" /> Don't show again on login
+        </label>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondary btn-sm" id="tourPrevBtn" onclick="navigateTourStep(-1)" style="display:none;">Back</button>
+          <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)" style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right" style="margin-left:4px;"></i></button>
+        </div>
+      </div>
+  <!-- Email Campaign Preview Modal -->
+  <div class="modal-overlay" id="emailCampaignModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content" style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-paper-plane" style="font-size:1.1rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Request Details (n8n Email Campaign)</h3>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Preview team alumni recipients and personalized email template</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('emailCampaignModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;">
+        <div id="campaignSetupState">
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:0.85rem;font-weight:600;color:#1E40AF;">Target Team Recipients</span>
+              <span class="badge badge-primary" id="campaignRecipientBadge">Loading...</span>
+            </div>
+            <p style="margin:0;font-size:0.78rem;color:#1E3A8A;line-height:1.4;">Automated emails will be queued via n8n with individual trackable Reply-To tags (`alumnirequests+{assignmentId}@mountzion.ac.in`) to capture incoming replies.</p>
+          </div>
+
+          <!-- Section Switcher Tabs -->
+          <div style="display:flex;gap:10px;border-bottom:1px solid #E2E8F0;margin-bottom:14px;padding-bottom:8px;">
+            <button type="button" id="tabBtnCampaignRecipients" onclick="switchCampaignTab('recipients')" style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#2563EB;border-bottom:2px solid #2563EB;padding:4px 8px;cursor:pointer;">
+              <i class="fas fa-users" style="margin-right:4px;"></i> Target Alumni List (<span id="campaignRecipientsCountTag">0</span>)
+            </button>
+            <button type="button" id="tabBtnCampaignTemplate" onclick="switchCampaignTab('template')" style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#64748B;padding:4px 8px;cursor:pointer;">
+              <i class="fas fa-envelope-open-text" style="margin-right:4px;"></i> Email Template Preview
+            </button>
+          </div>
+
+          <!-- Tab 1: Alumni Recipients List -->
+          <div id="campaignTabRecipients" style="display:block;">
+            <div style="max-height:220px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:10px;">
+              <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                <thead>
+                  <tr style="background:#F8FAFC;border-bottom:1px solid #E2E8F0;text-align:left;color:#475569;">
+                    <th style="padding:8px 12px;">Alumnus Name</th>
+                    <th style="padding:8px 12px;">Department</th>
+                    <th style="padding:8px 12px;">Email Address</th>
+                    <th style="padding:8px 12px;text-align:right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="campaignRecipientsPreviewTableBody">
+                  <tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading team alumni records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab 2: Live Email Template Preview -->
+          <div id="campaignTabTemplate" style="display:none;">
+            <div style="margin-bottom:10px;">
+              <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Email Subject</label>
+              <input type="text" readonly value="Request for Professional Information Update - Mount Zion College of Engineering and Technology" style="width:100%;padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:0.82rem;background:#F8FAFC;color:#334155;">
+            </div>
+
+            <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Rendered Email Body Preview</label>
+            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:14px;font-size:0.82rem;color:#334155;line-height:1.5;" id="campaignEmailLivePreviewBox">
+              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:8px;margin-bottom:10px;font-size:0.75rem;color:#64748B;">
+                <span><strong>To:</strong> <span id="previewToEmail" style="color:#2563EB;">alumni@mountzion.ac.in</span></span>
+                <span><strong>Reply-To:</strong> <span id="previewReplyToTag" style="color:#2563EB;">alumnirequests+ID@mountzion.ac.in</span></span>
+              </div>
+              <p style="margin:0 0 8px;">Dear <strong id="previewAlumniName" style="color:#2563EB;">Alumnus</strong>,</p>
+              <p style="margin:0 0 8px;">We hope this email finds you well. Please update your current professional details (Company, Designation, City, Country, and LinkedIn URL) with your alma mater using your student portal.</p>
+              <p style="margin:0;color:#64748B;font-size:0.78rem;">Best regards,<br><strong>Mount Zion Alumni Relations Team</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <div id="campaignProgressState" style="display:none;text-align:center;padding:10px 0;">
+          <h4 style="margin:0 0 10px;font-size:1rem;color:#1E293B;">Campaign Dispatched & Processing</h4>
+          <div style="width:100%;background:#E2E8F0;border-radius:8px;height:12px;overflow:hidden;margin-bottom:14px;">
+            <div id="campaignProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#2563EB,#3B82F6);transition:width 0.4s ease;"></div>
+          </div>
+          <p id="campaignProgressStats" style="font-size:0.85rem;color:#64748B;margin:0;">Sent: 0 / Failed: 0</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('emailCampaignModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="launchCampaignSubmitBtn" onclick="submitEmailCampaignLaunch()">
+          <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ALUMNI DISTRIBUTION MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="distributeModalOverlay">
+    <div class="modal" style="max-width:720px;width:95vw;">
+      <div class="modal-header">
+        <h3><i class="fas fa-sitemap" style="color:var(--primary);margin-right:8px;"></i>Distribute Alumni Records</h3>
+        <button class="modal-close" onclick="closeModal('distributeModalOverlay')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+          <div>
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Distribution Method</label>
+            <select id="distMethodSelect" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
+              <option value="RoundRobin">Round Robin (Equal Auto-Split)</option>
+              <option value="DepartmentWise">Department-Wise Auto Match</option>
+              <option value="FacultyWise">Faculty-Wise Auto Match</option>
+              <option value="BatchWise">Batch-Wise Custom Split</option>
+            </select>
+          </div>
+          <div id="distBatchContainer" style="display:none;">
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Target Batch</label>
+            <input type="text" id="distBatchInput" class="form-control" placeholder="e.g. 2021" style="height:38px;font-size:0.85rem;">
+          </div>
+        </div>
+
+        <!-- Department Mapping Section for DepartmentWise -->
+        <div id="distDeptMappingSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
+          <h4 style="font-size:0.85rem;font-weight:700;color:#1E293B;margin-bottom:8px;"><i class="fas fa-building" style="color:var(--primary);margin-right:6px;"></i>Department to Faculty Member Mapping</h4>
+          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department alumni are assigned to which faculty member (members are matched by department automatically).</p>
+          <div id="distDeptMappingGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-sm" id="previewDistBtn" style="margin-bottom:16px;"><i class="fas fa-eye"></i> Generate Distribution Preview</button>
+
+        <div id="distLoadingState" style="display:none;text-align:center;padding:20px;color:#64748B;">
+          <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i> Generating distribution preview...
+        </div>
+
+        <div id="distEmptyState" style="display:none;text-align:center;padding:20px;color:#64748B;background:#F8FAFC;border-radius:8px;">
+          <i class="fas fa-exclamation-circle" style="font-size:1.5rem;margin-bottom:8px;color:#F59E0B;display:block;"></i>
+          <span id="distEmptyMsg">No undistributed alumni found for this selection.</span>
+        </div>
+
+        <div id="distPreviewSection" style="display:none;">
+          <h4 style="font-size:0.88rem;font-weight:700;color:#1E293B;margin-bottom:10px;">Preview Allocation</h4>
+          <div id="distPreviewTable" style="max-height:260px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:8px;"></div>
+
+          <div id="distUnmatchedSection" style="display:none;margin-top:14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;">
+            <h5 style="font-size:0.82rem;font-weight:700;color:#991B1B;margin-bottom:6px;"><i class="fas fa-exclamation-triangle"></i> Unmatched Alumni (Manual Assign Required)</h5>
+            <div id="distUnmatchedList" style="max-height:160px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+        <button class="btn btn-secondary" onclick="closeModal('distributeModalOverlay')">Cancel</button>
+        <button class="btn btn-primary" id="confirmDistributeBtn" style="display:none;"><i class="fas fa-check"></i> Confirm Distribution</button>
+      </div>
+    </div>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="js/app.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/services/api.js"></script>
+  <script src="js/dynamic-tour.js"></script>
   <script>
+    window.Toast = window.Toast || {
+      success: function(t, m) { window.showToast(t, m, 'success'); },
+      warning: function(t, m) { window.showToast(t, m, 'warning'); },
+      info: function(t, m) { window.showToast(t, m, 'info'); },
+      danger: function(t, m) { window.showToast(t, m, 'danger'); },
+      error: function(t, m) { window.showToast(t, m, 'danger'); }
+    };
+    var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
   <script src="js/leader.js"></script>
+  <script src="js/chat.js"></script>
 </body>
 </html>

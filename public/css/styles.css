@@ -59,6 +59,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-y: auto;
 }
 
 body {
@@ -69,6 +70,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  overflow-y: auto;
   min-height: 100vh;
 }
 
@@ -377,6 +379,10 @@ ul {
 .sidebar-collapsed .submenu {
   padding-left: 0 !important;
 }
+.sidebar-collapsed .submenu {
+  display: none !important;
+}
+
 .sidebar-collapsed .submenu .sidebar-item {
   padding: 10px 0;
   justify-content: center;
@@ -599,6 +605,18 @@ ul {
   align-items: center;
   justify-content: center;
   border: 2px solid var(--bg-white);
+}
+
+.notification-dropdown,
+.notification-menu,
+.notification-list,
+.notification-body,
+#notificationDropdown,
+#notificationListContainer,
+#notifMenu {
+  max-height: 380px !important;
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
 }
 
 .navbar-profile {
@@ -953,17 +971,25 @@ ul {
 }
 
 /* Outline button */
-.btn-outline {
+.btn-outline, #saveDraftBtn {
   background: transparent;
-  color: var(--primary);
-  border: 1.5px solid var(--primary);
+  color: var(--primary, #2563EB) !important;
+  border: 1.5px solid var(--primary, #2563EB);
+  transition: all 0.2s ease;
 }
 
-.btn-outline:hover {
-  background: var(--primary);
-  color: #FFFFFF;
+.btn-outline:hover, .btn-outline:focus, .btn-outline:active,
+#saveDraftBtn:hover, #saveDraftBtn:focus, #saveDraftBtn:active {
+  background: var(--primary, #2563EB) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary, #2563EB) !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.btn-outline:hover *, .btn-outline:focus *, .btn-outline:active *,
+#saveDraftBtn:hover *, #saveDraftBtn:focus *, #saveDraftBtn:active * {
+  color: #FFFFFF !important;
 }
 
 /* Danger button */
@@ -1394,6 +1420,16 @@ textarea.form-control {
   white-space: nowrap;
 }
 
+
+.leader-badge {
+  background: #EEF2FF;
+  color: #4F46E5 !important;
+  border: 1px solid #C7D2FE;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+  gap: 3px !important;
+}
+
 .badge-primary {
   background: var(--primary-light);
   color: var(--primary);
@@ -1536,7 +1572,7 @@ textarea.form-control {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1050;
+  z-index: 100000;
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -3499,6 +3535,38 @@ textarea.form-control {
 */
 
 /* ────────────────────────────────────────────────────────────
+   CIRCULAR RIPPLE THEME TRANSITION ANIMATION
+   ──────────────────────────────────────────────────────────── */
+.theme-ripple-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999999;
+  overflow: hidden;
+}
+
+.theme-ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: themeRippleExpand 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes themeRippleExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
    DARK MODE COMPONENT OVERRIDES
    ──────────────────────────────────────────────────────────── */
 body.dark-mode {
@@ -3521,11 +3589,7 @@ body.dark-mode {
 }
 
 body.dark-mode .top-navbar,
-body.dark-mode .topbar {
-  background: #1E293B !important;
-  border-bottom-color: #334155 !important;
-}
-
+body.dark-mode .topbar,
 body.dark-mode .page-wrapper,
 body.dark-mode .main-content {
   background-color: #0F172A !important;
@@ -3536,18 +3600,69 @@ body.dark-mode .card,
 body.dark-mode .stat-card,
 body.dark-mode .quick-action-btn,
 body.dark-mode .dropdown-menu,
+body.dark-mode .modal,
 body.dark-mode .modal-content,
 body.dark-mode .table-card {
   background-color: #1E293B !important;
   color: #F8FAFC !important;
   border-color: #334155 !important;
-  box-shadow: none !important;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5) !important;
+}
+
+body.dark-mode .modal-body,
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer,
+body.dark-mode #todayTasksModal .modal-body,
+body.dark-mode #todayTasksModal div[style*="background:#F8FAFC"],
+body.dark-mode #welcomeTourModal div[style*="background:#F8FAFC"],
+body.dark-mode #reopenConfirmModal div[style*="background:#F8FAFC"] {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #todayContextBanner {
+  background-color: #064E3B !important;
+  border-color: #059669 !important;
+  color: #A7F3D0 !important;
+}
+
+body.dark-mode #todayContextBanner span,
+body.dark-mode #todayContextBanner i {
+  color: #A7F3D0 !important;
+}
+
+body.dark-mode #todayTasksList > div {
+  background-color: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #tourStepContent {
+  color: #E2E8F0 !important;
+}
+
+body.dark-mode #tourMotivationBanner {
+  background-color: #064E3B !important;
+  color: #A7F3D0 !important;
+  border-left-color: #10B981 !important;
+}
+
+body.dark-mode #welcomeTourModal label,
+body.dark-mode #welcomeTourModal input + span {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode #tourPrevBtn {
+  background-color: #334155 !important;
+  color: #F8FAFC !important;
+  border-color: #475569 !important;
 }
 
 body.dark-mode .card-value,
 body.dark-mode .quick-action-btn span,
 body.dark-mode .modal-header h3,
-body.dark-mode .modal-header h4 {
+body.dark-mode .modal-header h4,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5 {
   color: #F8FAFC !important;
 }
 
@@ -3654,38 +3769,87 @@ body.dark-mode .text-muted {
   color: #94A3B8 !important;
 }
 
+/* ── Search bars & Input groups ── */
+body.dark-mode .search-bar,
+body.dark-mode .table-search,
+body.dark-mode .table-actions input {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .search-bar input {
+  background-color: transparent !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .search-icon {
+  color: #94A3B8 !important;
+}
+
 /* ── Badges ── */
 body.dark-mode .badge {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
+body.dark-mode .badge-record-count {
+  background: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .leader-badge {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(96, 165, 250, 0.3) !important;
+}
+
 /* ── Pagination ── */
+body.dark-mode .pagination button,
 body.dark-mode .pagination-item {
   background: #1E293B !important;
   border-color: #334155 !important;
   color: #CBD5E1 !important;
 }
 
+body.dark-mode .pagination button.active,
 body.dark-mode .pagination-item.active {
   background: #4F46E5 !important;
   color: #fff !important;
   border-color: #4F46E5 !important;
 }
 
+body.dark-mode .pagination button:hover:not(:disabled),
 body.dark-mode .pagination-item:hover:not(:disabled) {
   background: #334155 !important;
 }
 
-/* ── Settings tabs ── */
-body.dark-mode .settings-tab-btn {
+/* ── Settings & Tabs ── */
+body.dark-mode .settings-tab-btn,
+body.dark-mode .tab-item {
   background: #1E293B !important;
   color: #94A3B8 !important;
   border-color: #334155 !important;
 }
 
-body.dark-mode .settings-tab-btn.active {
+body.dark-mode .settings-tab-btn.active,
+body.dark-mode .tab-item.active {
   background: #4F46E5 !important;
   color: #fff !important;
+}
+
+/* ── Tables & Spreadsheet Headers ── */
+body.dark-mode .spreadsheet-table thead,
+body.dark-mode .spreadsheet-table th,
+body.dark-mode #ssTableHeadRow th {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .sticky-col {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
 }
 
 /* ── Avatar / profile initials ── */
@@ -3867,6 +4031,16 @@ body.dark-mode [style*="background: #FFFBEB"] {
   background-color: rgba(245, 158, 11, 0.1) !important;
   background: rgba(245, 158, 11, 0.1) !important;
   color: #FBBF24 !important;
+}
+body.dark-mode [style*="color:#92400E"],
+body.dark-mode [style*="color: #92400E"] {
+  color: #FBBF24 !important;
+}
+body.dark-mode [style*="border:1px solid #FDE68A"],
+body.dark-mode [style*="border: 1px solid #FDE68A"],
+body.dark-mode [style*="border:1px solid #FCD34D"],
+body.dark-mode [style*="border: 1px solid #FCD34D"] {
+  border-color: rgba(245, 158, 11, 0.3) !important;
 }
 body.dark-mode [style*="background:#F0FDF4"],
 body.dark-mode [style*="background: #F0FDF4"] {
@@ -5400,7 +5574,159 @@ body.dark-mode .spreadsheet-fullscreen {
 }
 
 .spreadsheet-fullscreen div[style*="overflow:auto"],
+.spreadsheet-fullscreen div[style*="overflow-x:auto"],
 .spreadsheet-fullscreen .table-container {
   max-height: none !important;
   height: calc(100vh - 140px) !important;
+  overflow: auto !important;
+}
+
+/* Guidelines alert box styling */
+.guidelines-box {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #FFFBEB;
+  border-radius: 8px;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+}
+
+.guidelines-box h5 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #92400E;
+  margin-bottom: 8px;
+}
+
+.guidelines-box ul {
+  font-size: 0.8rem;
+  color: #92400E;
+  list-style: disc;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
+/* Dark mode overrides for guidelines alert box */
+body.dark-mode .guidelines-box {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+body.dark-mode .guidelines-box h5,
+body.dark-mode .guidelines-box ul,
+body.dark-mode .guidelines-box li {
+  color: #FFFFFF !important;
+}
+
+/* ────────────────────────────────────────────────────────────
+   GLOBAL TUTORIAL & SHORTCUTS STYLING
+   ──────────────────────────────────────────────────────────── */
+.welcome-banner {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #BFDBFE;
+  transition: all 0.3s ease;
+}
+
+.welcome-banner h4 {
+  margin: 0 0 6px !important;
+  color: #1E40AF !important;
+}
+
+.welcome-banner p {
+  margin: 0 !important;
+  font-size: 0.88rem;
+  color: #1E3A8A !important;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.shortcut-card {
+  background: #F8FAFC;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  transition: all 0.3s ease;
+}
+
+.shortcut-card kbd {
+  background: #E2E8F0;
+  color: #1E293B !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.shortcut-card .shortcut-desc {
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Dark mode overrides for tutorial & shortcuts */
+body.dark-mode .welcome-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(30, 58, 138, 0.45)) !important;
+  border-color: rgba(96, 165, 250, 0.35) !important;
+}
+
+body.dark-mode .welcome-banner h4 {
+  color: #60A5FA !important;
+}
+
+body.dark-mode .welcome-banner p {
+  color: #93C5FD !important;
+}
+
+body.dark-mode .shortcut-card {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .shortcut-card kbd {
+  background: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .shortcut-card .shortcut-desc {
+  color: #94A3B8 !important;
+}
+
+/* ──────────────────────────────────────────────────
+   FILTER ACTIVE DOT INDICATOR (Global)
+   Shows a pulsing dot on filter buttons when active
+   ────────────────────────────────────────────────── */
+.filter-btn-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.filter-btn-wrap .filter-active-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background: #F59E0B;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: none;
+  z-index: 10;
+  animation: filterDotPulse 1.8s ease-in-out infinite;
+}
+
+.filter-btn-wrap.has-active-filter .filter-active-dot {
+  display: block;
+}
+
+@keyframes filterDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 0 5px rgba(245,158,11,0); transform: scale(1.15); }
 }

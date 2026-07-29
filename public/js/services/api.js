@@ -100,6 +100,9 @@
     getLeaderStats: function (leaderId) {
         return get('/dashboard/leader/' + leaderId + '/stats');
     },
+    getMyTasks: function () {
+        return get('/tasks/my-tasks');
+    },
 
     // Users
     getUsers: function (params) {
@@ -174,6 +177,13 @@
     },
     updateAssignmentStatus: function (assignmentId, data) {
         return patch('/alumni/assignments/' + assignmentId + '/status', data);
+    },
+
+    reopenAlumni: function (id) {
+        return patch('/alumni/' + id + '/reopen', {});
+    },
+    reopenAssignment: function (id, reason) {
+        return post('/assignments/reopen/' + id, { reason: reason || 'Undone by user' });
     },
 
     uploadImport: function (formData) {

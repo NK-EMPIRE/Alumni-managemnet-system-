@@ -353,13 +353,105 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     // Add matched groups to preview
     Object.values(matchedGroups).forEach(g => preview.push(g));
 
-    // Add unmatched group with userId = -1 sentinel so caller knows to show manual assignment
+    // Fallback unmatched alumni if requested (RoundRobin or BatchWise)
+    const fallbackMethod = params.unmatchedFallback; // 'RoundRobin', 'BatchWise', or undefined
     if (unmatched.length > 0) {
+      if (fallbackMethod === 'RoundRobin' && activeUsers.length > 0) {
+        let qIdx = 0;
+        const fallbackMap = {};
+        activeUsers.forEach(u => {
+          fallbackMap[u.user_id] = { userId: u.user_id, userName: u.name, count: 0, alumniList: [], isFallback: true };
+        });
+        for (const alum of unmatched) {
+          const targetU = activeUsers[qIdx % activeUsers.length];
+          fallbackMap[targetU.user_id].alumniList.push(alum);
+          fallbackMap[targetU.user_id].count++;
+          qIdx++;
+        }
+        Object.values(fallbackMap).forEach(g => {
+          if (g.count > 0) {
+            const existingGroup = preview.find(p => p.userId === g.userId);
+            if (existingGroup) {
+              existingGroup.alumniList.push(...g.alumniList);
+              existingGroup.count += g.count;
+            } else {
+              preview.push(g);
+            }
+          }
+        });
+      } else {
+        // Sentinel unmatched group for manual option selection
+        preview.push({
+          userId: -1,
+          userName: 'Unmatched (Faculty Not Assigned)',
+          count: unmatched.length,
+          alumniList: unmatched,
+          isUnmatched: true
+        });
+      }
+    }
+
+  } else if (method === 'DepartmentWise') {
+    const usersResult = await pool.request()
+      .input('teamId', sql.Int, teamId)
+      .query(`
+        SELECT u.user_id, (u.first_name + ' ' + u.last_name) AS name, u.department
+        FROM Users u
+        WHERE u.user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = @teamId
+          UNION
+          SELECT leader_id FROM Teams WHERE team_id = @teamId
+        ) AND u.is_active = 1
+      `);
+
+    const activeUsers = usersResult.recordset;
+    const deptAlumniMap = {};
+    for (const alum of poolAlumni) {
+      const dept = (alum.department || 'Unspecified').toUpperCase().trim();
+      if (!deptAlumniMap[dept]) deptAlumniMap[dept] = [];
+      deptAlumniMap[dept].push(alum);
+    }
+
+    const departmentMapping = params.departmentMapping || {};
+    const memberGroupMap = {};
+    activeUsers.forEach(u => {
+      memberGroupMap[u.user_id] = {
+        userId: u.user_id,
+        userName: u.name,
+        userDepartment: u.department || 'N/A',
+        count: 0,
+        alumniList: []
+      };
+    });
+
+    const unmatchedAlumni = [];
+
+    Object.keys(deptAlumniMap).forEach(dept => {
+      const targetUserId = departmentMapping[dept];
+      if (targetUserId && memberGroupMap[targetUserId]) {
+        memberGroupMap[targetUserId].alumniList.push(...deptAlumniMap[dept]);
+        memberGroupMap[targetUserId].count += deptAlumniMap[dept].length;
+      } else {
+        const autoMatchUser = activeUsers.find(u => u.department && u.department.toUpperCase().trim() === dept);
+        if (autoMatchUser) {
+          memberGroupMap[autoMatchUser.user_id].alumniList.push(...deptAlumniMap[autoMatchUser.user_id]);
+          memberGroupMap[autoMatchUser.user_id].count += deptAlumniMap[dept].length;
+        } else {
+          unmatchedAlumni.push(...deptAlumniMap[dept]);
+        }
+      }
+    });
+
+    Object.values(memberGroupMap).forEach(g => {
+      if (g.count > 0) preview.push(g);
+    });
+
+    if (unmatchedAlumni.length > 0) {
       preview.push({
         userId: -1,
-        userName: 'Unmatched (Manual Assignment Required)',
-        count: unmatched.length,
-        alumniList: unmatched,
+        userName: 'Unmatched (No Department Faculty Assigned)',
+        count: unmatchedAlumni.length,
+        alumniList: unmatchedAlumni,
         isUnmatched: true
       });
     }
@@ -396,6 +488,11 @@ async function leaderDistribute(currentUser, params) {
           .query(`
             IF EXISTS (SELECT 1 FROM AlumniAssignments WHERE alumni_id = @alumniId AND team_id = @teamId)
             BEGIN
+              INSERT INTO dbo.AssignmentAuditLog (alumni_id, old_member_id, new_member_id, changed_by)
+              SELECT alumni_id, member_id, @memberId, @assignedBy
+              FROM dbo.AlumniAssignments
+              WHERE alumni_id = @alumniId AND team_id = @teamId;
+
               UPDATE AlumniAssignments
               SET member_id = @memberId, status = 'Pending', assignment_type = 'LEADER_DISTRIBUTION'
               WHERE alumni_id = @alumniId AND team_id = @teamId AND status = 'ASSIGNED_TO_LEADER';
@@ -475,6 +572,9 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   }
 
   const assignment = assignResult.recordset[0];
+  if (currentUser.role === 'MEMBER' && assignment.member_id && Number(assignment.member_id) !== Number(currentUser.userId)) {
+    throw new AppError('You are not authorized to undo this record.', 403);
+  }
   if (assignment.status !== 'Completed') {
     throw new AppError('Only completed records can be reopened.', 400);
   }
@@ -483,10 +583,10 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   await transaction.begin();
 
   try {
-    // Update the assignment record status to Pending (keeping it assigned to the member)
+    // Update the assignment record status to Reopened (keeping it assigned to the member/leader)
     await transaction.request()
       .input('alumniId', sql.Int, alumniId)
-      .query("UPDATE AlumniAssignments SET status = 'Pending', completed_date = NULL WHERE alumni_id = @alumniId");
+      .query("UPDATE AlumniAssignments SET status = 'Reopened', completed_date = NULL WHERE alumni_id = @alumniId");
 
     await transaction.commit();
   } catch (err) {

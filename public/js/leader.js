@@ -63,16 +63,17 @@
     if (!badge) return;
     var icon = badge.querySelector('.lock-icon');
     var text = badge.querySelector('.lock-text');
+    var isDark = document.body.classList.contains('dark-mode');
     if (isDistributionLocked) {
-      badge.style.background = '#FEF2F2';
-      badge.style.borderColor = '#FECACA';
+      badge.style.background = isDark ? 'rgba(239, 68, 68, 0.2)' : '#FEF2F2';
+      badge.style.borderColor = isDark ? 'rgba(239, 68, 68, 0.4)' : '#FECACA';
       if (icon) { icon.className = 'fas fa-lock lock-icon'; icon.style.color = '#EF4444'; }
-      if (text) { text.textContent = 'Distribution: Locked'; text.style.color = '#991B1B'; }
+      if (text) { text.textContent = 'Distribution: Locked'; text.style.color = isDark ? '#FCA5A5' : '#991B1B'; }
     } else {
-      badge.style.background = '#F0FDF4';
-      badge.style.borderColor = '#BBF7D0';
+      badge.style.background = isDark ? 'rgba(16, 185, 129, 0.2)' : '#F0FDF4';
+      badge.style.borderColor = isDark ? 'rgba(16, 185, 129, 0.4)' : '#BBF7D0';
       if (icon) { icon.className = 'fas fa-lock-open lock-icon'; icon.style.color = '#10B981'; }
-      if (text) { text.textContent = 'Distribution: Open'; text.style.color = '#166534'; }
+      if (text) { text.textContent = 'Distribution: Open'; text.style.color = isDark ? '#6EE7B7' : '#166534'; }
     }
   }
 
@@ -117,12 +118,10 @@
 
   function populateTeamTable() {
     var searchVal = (document.getElementById('tableSearch').value || '').toLowerCase().trim();
-    var statusVal = document.getElementById('statusFilter').value;
 
     filteredMembers = teamMembers.filter(function (m) {
       var matchSearch = m.name.toLowerCase().indexOf(searchVal) !== -1;
-      var matchStatus = statusVal === 'all' || m.status === statusVal;
-      return matchSearch && matchStatus;
+      return matchSearch;
     });
 
     filteredMembers.sort(function (a, b) {
@@ -143,7 +142,6 @@
     } else {
       var rows = '';
       pageData.forEach(function (m, idx) {
-        var statusClass = m.status === 'On Track' ? 'badge-success' : m.status === 'Behind' ? 'badge-warning' : 'badge-danger';
         var barClass = m.progress >= 75 ? 'green' : m.progress >= 50 ? '' : 'red';
         var sno = start + idx + 1;
         var displayName = m.name;
@@ -164,7 +162,6 @@
           '<td style="text-align:center;font-weight:600;color:#10B981">' + m.completed + '</td>' +
           '<td style="text-align:center;font-weight:600;color:' + (m.pending > 20 ? '#EF4444' : '#F59E0B') + '">' + m.pending + '</td>' +
           '<td><div style="display:flex;align-items:center;gap:10px"><div class="progress" style="flex:1"><div class="progress-bar ' + barClass + '" style="width:' + m.progress + '%"></div></div><span style="font-size:0.75rem;font-weight:600;color:#64748B;min-width:36px;text-align:right">' + m.progress + '%</span></div></td>' +
-          '<td><span class="badge ' + statusClass + '">' + m.status + '</span></td>' +
           '<td style="font-size:0.8rem;color:#64748B">' + m.lastActivity + '</td>' +
           '<td style="text-align:center"><button class="btn btn-sm btn-outline view-detail-btn" data-id="' + m.id + '"><i class="fas fa-eye"></i> View</button></td>' +
           '</tr>';
@@ -294,9 +291,9 @@
 
     var html = '';
     var unreadCount = 0;
-    
-    var completedList = updatedRecords.filter(function(r) { return r.status === 'Completed'; });
-    var draftList = updatedRecords.filter(function(r) { return r.status === 'Draft'; });
+
+    var completedList = updatedRecords.filter(function (r) { return r.status === 'Completed'; });
+    var draftList = updatedRecords.filter(function (r) { return r.status === 'Draft'; });
 
     if (completedList.length > 0) {
       unreadCount++;
@@ -429,6 +426,10 @@
 
   function initCharts() {
     if (typeof Chart === 'undefined') return;
+    var isDark = document.body.classList.contains('dark-mode');
+    var tickColor = isDark ? '#F8FAFC' : '#475569';
+    var gridColor = isDark ? 'rgba(255, 255, 255, 0.15)' : '#E2E8F0';
+
     var memberCanvas = document.getElementById('memberProgressChart');
     if (!memberCanvas) return;
     var memberCtx = memberCanvas.getContext('2d');
@@ -463,8 +464,23 @@
           }
         },
         scales: {
-          y: { beginAtZero: true, max: 100, grid: { color: '#F1F5F9' }, ticks: { callback: function (val) { return val + '%'; } } },
-          x: { grid: { display: false } }
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: {
+              color: tickColor,
+              font: { family: 'Poppins', size: 11, weight: '500' },
+              callback: function (val) { return val + '%'; }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: tickColor,
+              font: { family: 'Poppins', size: 11, weight: '500' }
+            }
+          }
         }
       }
     });
@@ -491,7 +507,12 @@
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { padding: 16, usePointStyle: true, font: { family: 'Poppins', size: 11 } }
+            labels: {
+              padding: 16,
+              usePointStyle: true,
+              color: tickColor,
+              font: { family: 'Poppins', size: 11, weight: '500' }
+            }
           },
           tooltip: {
             callbacks: {
@@ -507,6 +528,11 @@
     });
   }
 
+  window.addEventListener('themeChanged', function () {
+    if (typeof initCharts === 'function') initCharts();
+    if (typeof updateLockBadge === 'function') updateLockBadge();
+  });
+
   function setupSidebar() {
     var body = document.body;
 
@@ -520,11 +546,18 @@
           setTimeout(function () { window.location.href = 'index.html?logout=success'; }, 1500);
           return;
         }
+        if (page === 'campaign' || page === 'email-campaign') {
+          if (typeof window.openEmailCampaignModal === 'function') {
+            window.openEmailCampaignModal();
+          }
+          return;
+        }
         document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });
         this.classList.add('active');
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'instant' });
 
         var globalHeader = document.getElementById('globalPageHeader');
         if (globalHeader) {
@@ -601,10 +634,6 @@
 
   function setupSearchAndFilter() {
     document.getElementById('tableSearch').addEventListener('input', function () {
-      currentPage = 1;
-      populateTeamTable();
-    });
-    document.getElementById('statusFilter').addEventListener('change', function () {
       currentPage = 1;
       populateTeamTable();
     });
@@ -736,7 +765,7 @@
   function populateMyAssignmentsFilters() {
     var depts = {};
     var batches = {};
-    
+
     myAssignmentsData.forEach(function (r) {
       if (r.department) {
         var d = String(r.department).trim();
@@ -796,6 +825,24 @@
     var statusVal = document.getElementById('myAssignmentsStatusFilter').value;
     var deptValFilter = document.getElementById('myAssignmentsDeptFilter') ? document.getElementById('myAssignmentsDeptFilter').value : 'all';
     var batchValFilter = document.getElementById('myAssignmentsBatchFilter') ? document.getElementById('myAssignmentsBatchFilter').value : 'all';
+    var dateFromVal = document.getElementById('myAssignmentsDateFrom') ? document.getElementById('myAssignmentsDateFrom').value : '';
+    var dateToVal = document.getElementById('myAssignmentsDateTo') ? document.getElementById('myAssignmentsDateTo').value : '';
+
+    // Update filter dot indicator
+    var hasFilter = !!(searchVal || (statusVal && statusVal !== 'all') || (deptValFilter && deptValFilter !== 'all') || (batchValFilter && batchValFilter !== 'all') || dateFromVal || dateToVal);
+    var myFilterWrap = document.getElementById('myAssignmentsFilterBtnWrap');
+    if (myFilterWrap) {
+      if (hasFilter) myFilterWrap.classList.add('has-active-filter');
+      else myFilterWrap.classList.remove('has-active-filter');
+    }
+    // Update badge count
+    var myFilterCount = [statusVal !== 'all' ? statusVal : '', deptValFilter !== 'all' ? deptValFilter : '', batchValFilter !== 'all' ? batchValFilter : '', dateFromVal, dateToVal].filter(Boolean).length;
+    var myBadge = document.getElementById('myAssignmentsActiveFilterBadge');
+    if (myBadge) {
+      myBadge.textContent = myFilterCount;
+      myBadge.style.display = myFilterCount > 0 ? 'inline-block' : 'none';
+    }
+
 
     myFilteredAssignments = myAssignmentsData.filter(function (r) {
       var matchSearch = !searchVal ||
@@ -807,7 +854,17 @@
       var matchStatus = statusVal === 'all' || (r.status || 'Pending') === statusVal;
       var matchDept = deptValFilter === 'all' || String(r.department) === deptValFilter;
       var matchBatch = batchValFilter === 'all' || String(r.batch) === batchValFilter;
-      return matchSearch && matchStatus && matchDept && matchBatch;
+
+      var matchDateFrom = true;
+      var matchDateTo = true;
+      var recordDate = r.assigned_date || r.created_at || r.updatedAt || r.updated_date;
+      if (recordDate) {
+        var rTime = new Date(recordDate).getTime();
+        if (dateFromVal) matchDateFrom = rTime >= new Date(dateFromVal + 'T00:00:00').getTime();
+        if (dateToVal) matchDateTo = rTime <= new Date(dateToVal + 'T23:59:59').getTime();
+      }
+
+      return matchSearch && matchStatus && matchDept && matchBatch && matchDateFrom && matchDateTo;
     });
 
     var countEl = document.getElementById('myAssignmentsFilteredCount');
@@ -831,7 +888,8 @@
         var status = r.status || 'Pending';
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
-        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
+        var isReopened = status === 'Reopened';
+        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : (isReopened ? 'badge-danger' : 'badge-warning'));
 
         var nameVal = r.name || '-';
         var deptVal = r.department || '-';
@@ -850,6 +908,8 @@
           if (desgVal !== '-') desgVal = desgVal.replace(regex, highlightMark);
         }
 
+        var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
+
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
           '<td><strong>' + nameVal + '</strong></td>' +
@@ -858,7 +918,7 @@
           '<td>' + compVal + '</td>' +
           '<td>' + desgVal + '</td>' +
           '<td><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
-          '<td style="text-align:center"><button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button></td>' +
+          '<td style="text-align:center">' + actionBtns + '</td>' +
           '</tr>';
       });
       tbody.innerHTML = html;
@@ -867,6 +927,13 @@
         btn.addEventListener('click', function () {
           var id = this.getAttribute('data-id');
           openUpdateModal(id);
+        });
+      });
+
+      tbody.querySelectorAll('.reopen-alumni-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = this.getAttribute('data-id');
+          window.reopenAlumniRecord(id);
         });
       });
     }
@@ -894,6 +961,44 @@
 
   // --- UPDATE MODAL MANAGEMENT (For Leader Assignments Update) ---
   var currentSelectedAlumniId = null;
+  window._currentLeaderRecordIndex = -1;
+
+  function updateLeaderModalNavCounter() {
+    var prevBtn = document.getElementById('modalNavPrevBtn');
+    var nextBtn = document.getElementById('modalNavNextBtn');
+    var counterEl = document.getElementById('modalNavCounter');
+    if (!myFilteredAssignments || myFilteredAssignments.length === 0 || window._currentLeaderRecordIndex === -1) {
+      if (counterEl) counterEl.textContent = '0 / 0';
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+      return;
+    }
+    if (counterEl) counterEl.textContent = (window._currentLeaderRecordIndex + 1) + ' / ' + myFilteredAssignments.length;
+    if (prevBtn) prevBtn.disabled = window._currentLeaderRecordIndex <= 0;
+    if (nextBtn) nextBtn.disabled = window._currentLeaderRecordIndex >= myFilteredAssignments.length - 1;
+  }
+
+  window.navigateModalRecord = function (dir) {
+    if (!myFilteredAssignments || myFilteredAssignments.length === 0) return;
+    var newIdx = window._currentLeaderRecordIndex + dir;
+    if (newIdx < 0 || newIdx >= myFilteredAssignments.length) return;
+    var targetRecord = myFilteredAssignments[newIdx];
+    if (!targetRecord) return;
+
+    var form = document.getElementById('updateForm');
+    if (form) {
+      form.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+      form.style.opacity = '0.3';
+      form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
+      setTimeout(function () {
+        openUpdateModal(targetRecord.alumni_id);
+        form.style.opacity = '1';
+        form.style.transform = 'translateX(0)';
+      }, 150);
+    } else {
+      openUpdateModal(targetRecord.alumni_id);
+    }
+  };
 
   function ensureOptionExists(selectEl, val) {
     if (!val) return;
@@ -908,6 +1013,12 @@
 
   function openUpdateModal(alumniId) {
     currentSelectedAlumniId = alumniId;
+    var targetId = parseInt(alumniId, 10);
+    if (myFilteredAssignments && myFilteredAssignments.length > 0) {
+      window._currentLeaderRecordIndex = myFilteredAssignments.findIndex(function (r) { return r.alumni_id === targetId; });
+      updateLeaderModalNavCounter();
+    }
+
     var overlay = document.getElementById('updateModal');
 
     // Clear old errors
@@ -925,11 +1036,15 @@
         var status = record.assignment_status || 'Pending';
         var isCompleted = status === 'Completed';
         var isDraft = status === 'Draft';
-        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : 'badge-warning');
-        var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : 'fa-clock');
+        var isReopened = status === 'Reopened';
+        var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : (isReopened ? 'badge-danger' : 'badge-warning'));
+        var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-redo-alt' : 'fa-clock'));
 
         var statusBadge = document.getElementById('modalStatusBadge');
         statusBadge.className = 'status-badge ' + badgeClass;
+        if (isReopened) {
+          statusBadge.style.cssText = 'background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
+        }
         statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
 
         var deptEl = document.getElementById('fieldDept');
@@ -952,13 +1067,7 @@
         document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
         document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
-        document.getElementById('fieldWorkingDetails').value = record.working_details || '';
-        document.getElementById('fieldHigherStudies').value = record.higher_studies || '';
-        document.getElementById('fieldHigherDetails').value = record.higher_studies_details || '';
-        document.getElementById('fieldEntrepreneur').value = record.is_entrepreneur ? 'Yes' : 'No';
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
-        document.getElementById('fieldOtherOcc').value = record.other_occupation || '';
-        document.getElementById('fieldRemarks').value = record.remarks || '';
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
@@ -981,14 +1090,14 @@
           if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
-        if (record.higher_studies === 'Yes') {
-          document.getElementById('higherStudiesDetails').style.display = 'block';
-        } else {
-          document.getElementById('higherStudiesDetails').style.display = 'none';
+        var undoBtn = document.getElementById('undoSubmitBtn');
+        if (undoBtn) {
+          undoBtn.style.display = isCompleted ? 'inline-flex' : 'none';
         }
 
-        document.getElementById('fieldSmartParser').value = '';
-        loadAutosave(alumniId);
+        var smartParser = document.getElementById('fieldSmartParser');
+        if (smartParser) smartParser.value = '';
+        if (typeof loadAutosave === 'function') loadAutosave(alumniId);
 
         overlay.classList.add('show');
       }
@@ -1012,26 +1121,23 @@
       secondary_email: document.getElementById('fieldSecondaryEmail').value.trim(),
       secondary_phone: document.getElementById('fieldSecondaryPhone').value.trim(),
       linkedin_url: document.getElementById('fieldLinkedin').value.trim(),
-      working_details: document.getElementById('fieldWorkingDetails').value.trim(),
-      higher_studies: document.getElementById('fieldHigherStudies').value,
-      higher_studies_details: document.getElementById('fieldHigherDetails').value.trim(),
-      is_entrepreneur: document.getElementById('fieldEntrepreneur').value === 'Yes',
       is_government_job: document.getElementById('fieldGovtJob').value === 'Yes',
-      other_occupation: document.getElementById('fieldOtherOcc').value.trim(),
-      remarks: document.getElementById('fieldRemarks').value.trim()
     };
   }
 
   function validateForm() {
     var isValid = true;
-    var required = ['fieldName', 'fieldDept', 'fieldBatch'];
+    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldEmail', 'fieldPhone'];
     required.forEach(function (id) {
       var el = document.getElementById(id);
-      if (!el.value || el.value.trim() === '') {
-        el.classList.add('error');
+      var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
+      if (!el || !el.value || el.value.trim() === '') {
+        if (el) el.classList.add('error');
+        if (err) err.style.display = 'block';
         isValid = false;
       } else {
-        el.classList.remove('error');
+        if (el) el.classList.remove('error');
+        if (err) err.style.display = 'none';
       }
     });
     return isValid;
@@ -1061,13 +1167,7 @@
       email: document.getElementById('fieldEmail').value,
       phone: document.getElementById('fieldPhone').value,
       linkedin_profile: document.getElementById('fieldLinkedin').value,
-      working_details: document.getElementById('fieldWorkingDetails').value,
-      higherStudies: document.getElementById('fieldHigherStudies').value,
-      higherDetails: document.getElementById('fieldHigherDetails').value,
-      entrepreneur: document.getElementById('fieldEntrepreneur').value,
       govtJob: document.getElementById('fieldGovtJob').value,
-      otherOcc: document.getElementById('fieldOtherOcc').value,
-      remarks: document.getElementById('fieldRemarks').value,
       timestamp: Date.now()
     };
     localStorage.setItem('autosave_leader_alumni_' + currentSelectedAlumniId, JSON.stringify(data));
@@ -1091,15 +1191,7 @@
           document.getElementById('fieldEmail').value = data.email || '';
           document.getElementById('fieldPhone').value = data.phone || '';
           document.getElementById('fieldLinkedin').value = data.linkedin_profile || '';
-          document.getElementById('fieldWorkingDetails').value = data.working_details || '';
-          document.getElementById('fieldHigherStudies').value = data.higherStudies || 'No';
-          document.getElementById('fieldHigherDetails').value = data.higherDetails || '';
-          document.getElementById('fieldEntrepreneur').value = data.entrepreneur || 'No';
           document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
-          document.getElementById('fieldOtherOcc').value = data.otherOcc || '';
-          document.getElementById('fieldRemarks').value = data.remarks || '';
-
-          document.getElementById('higherStudiesDetails').style.display = data.higherStudies === 'Yes' ? 'block' : 'none';
           showToast('Info', 'Loaded unsaved changes from auto-save draft.', 'info');
         }
       } catch (e) {
@@ -1144,22 +1236,11 @@
       }
     });
 
-    if (val.length > 10) {
-      document.getElementById('fieldWorkingDetails').value = val.substring(0, 500);
-    }
-
     showToast('Success', 'Parsed profile details auto-filled successfully!', 'success');
     saveAutosave();
   };
 
   function setupUpdateModalEvents() {
-    var select = document.getElementById('fieldHigherStudies');
-    if (select) {
-      select.addEventListener('change', function () {
-        document.getElementById('higherStudiesDetails').style.display = this.value === 'Yes' ? 'block' : 'none';
-      });
-    }
-
     var form = document.getElementById('updateForm');
     if (form) {
       form.querySelectorAll('input, select, textarea').forEach(function (inputEl) {
@@ -1249,6 +1330,7 @@
 
       if (e.key === 'Escape') {
         modal.classList.remove('show');
+        document.body.style.overflow = '';
       }
 
       // Ctrl + S: Save Draft
@@ -1278,13 +1360,20 @@
   var ssColumns = [
     { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
     { key: 'name', label: 'Name', visible: true, width: 160 },
+    { key: 'father_name', label: 'Father Name', visible: true, width: 150 },
+    { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 120 },
+    { key: 'gender', label: 'Gender', visible: true, width: 80 },
     { key: 'department', label: 'Department', visible: true, width: 100 },
     { key: 'batch', label: 'Batch', visible: true, width: 80 },
-    { key: 'email', label: 'Email', visible: true, width: 180 },
-    { key: 'phone', label: 'Phone', visible: true, width: 120 },
-    { key: 'company', label: 'Company', visible: true, width: 150 },
+    { key: 'email', label: 'Primary Email', visible: true, width: 180 },
+    { key: 'secondary_email', label: 'Secondary Email', visible: true, width: 180 },
+    { key: 'phone', label: 'Primary Phone', visible: true, width: 120 },
+    { key: 'secondary_phone', label: 'Secondary Phone', visible: true, width: 120 },
+    { key: 'company', label: 'Company/Institution', visible: true, width: 150 },
     { key: 'designation', label: 'Designation', visible: true, width: 150 },
+    { key: 'experience', label: 'Experience', visible: true, width: 100 },
     { key: 'city', label: 'City', visible: true, width: 120 },
+    { key: 'state', label: 'State', visible: true, width: 120 },
     { key: 'country', label: 'Country', visible: true, width: 120 },
     { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
     { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
@@ -1309,6 +1398,9 @@
     var batch = document.getElementById('ssFilterBatch').value;
     var status = document.getElementById('ssFilterStatus').value;
 
+    var dateFrom = document.getElementById('ssDateFrom') ? document.getElementById('ssDateFrom').value : null;
+    var dateTo = document.getElementById('ssDateTo') ? document.getElementById('ssDateTo').value : null;
+
     var params = {
       page: ssPage,
       limit: ssLimit,
@@ -1317,6 +1409,8 @@
       batch: batch || undefined,
       status: status || undefined,
       memberId: memberId || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
       onlyMe: false
     };
 
@@ -1330,6 +1424,7 @@
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
         var pagination = (res.data && res.data.pagination) ? res.data.pagination : null;
         ssTotal = (pagination && pagination.total) ? pagination.total : records.length;
+        populateSpreadsheetFilters(records);
         renderSpreadsheetTable(records);
         renderSpreadsheetPagination();
       } else {
@@ -1340,6 +1435,26 @@
       showToast('An error occurred fetching records', 'error');
     });
   };
+
+  function populateSpreadsheetFilters(records) {
+    var deptMap = {}, batchMap = {};
+    records.forEach(function (r) {
+      if (r.department) deptMap[r.department] = true;
+      if (r.batch) batchMap[r.batch] = true;
+    });
+    var ssDept = document.getElementById('ssFilterDept');
+    var ssBatch = document.getElementById('ssFilterBatch');
+    if (ssDept) {
+      var html = '<option value="">All Depts</option>';
+      Object.keys(deptMap).sort().forEach(function (d) { html += '<option value="' + d + '">' + d + '</option>'; });
+      ssDept.innerHTML = html;
+    }
+    if (ssBatch) {
+      var html = '<option value="">All Batches</option>';
+      Object.keys(batchMap).sort().forEach(function (b) { html += '<option value="' + b + '">' + b + '</option>'; });
+      ssBatch.innerHTML = html;
+    }
+  }
 
   window.renderSpreadsheetTable = function (data) {
     var headRow = document.getElementById('ssTableHeadRow');
@@ -1377,7 +1492,7 @@
         if (!col.visible) return;
         var val = '';
         if (col.key === 'assignment_status') {
-          var status = row.assignment_status || 'Pending';
+          var status = row.status || 'Pending';
           var badgeClass = status === 'Completed' ? 'badge-success' : (status === 'Draft' ? 'badge-info' : 'badge-warning');
           val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
         } else if (col.key === 'member_name') {
@@ -1394,8 +1509,12 @@
           var link = row.linkedin_profile || row.linkedin_url || '';
           if (link) {
             var href = link.startsWith('http') ? link : 'https://' + link;
+            var isFb = href.toLowerCase().indexOf('facebook.com') !== -1 || href.toLowerCase().indexOf('fb.com') !== -1;
+            var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
+            var iconColor = isFb ? '#1877F2' : '#0A66C2';
+            var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
             val = '<div style="display:flex;align-items:center;gap:10px;">' +
-              '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:#0A66C2;font-size:1.15rem;text-decoration:none;" title="Open LinkedIn Profile"><i class="fab fa-linkedin"></i></a>' +
+              '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
               '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
               '</div>';
           } else {
@@ -1501,56 +1620,289 @@
     }
   };
 
-  window.exportAlumniCSV = function () {
-    var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
-    var dept = document.getElementById('ssFilterDept').value;
-    var batch = document.getElementById('ssFilterBatch').value;
-    var status = document.getElementById('ssFilterStatus').value;
+  /* ────────────────────────────────────────────────────────────
+     INTERACTIVE EXPORT ENGINE & CUSTOMIZATION MODAL (LEADER)
+     ──────────────────────────────────────────────────────────── */
+  var _exportSelectedCols = {};
 
-    var params = {
+  window.handleExport = function () {
+    openExportCustomizationModal();
+  };
+
+  window.exportAlumniCSV = function () {
+    openExportCustomizationModal();
+  };
+
+  window.openExportCustomizationModal = function () {
+    ssColumns.forEach(function (col) {
+      if (_exportSelectedCols[col.key] === undefined) {
+        _exportSelectedCols[col.key] = true;
+      }
+    });
+
+    populateExportModalFilterOptions();
+    syncSpreadsheetFiltersToExportModal();
+    renderExportColumnChips();
+    onExportFilterChange();
+
+    openModal('exportCustomizationModal');
+  };
+
+  window.populateExportModalFilterOptions = function () {
+    var memberSel = document.getElementById('expFilterMember');
+    var deptSel = document.getElementById('expFilterDept');
+    var batchSel = document.getElementById('expFilterBatch');
+
+    var srcMember = document.getElementById('ssFilterMember');
+    var srcDept = document.getElementById('ssFilterDept');
+    var srcBatch = document.getElementById('ssFilterBatch');
+
+    if (memberSel && srcMember && memberSel.options.length <= 1) {
+      memberSel.innerHTML = srcMember.innerHTML;
+    }
+    if (deptSel && srcDept && deptSel.options.length <= 1) {
+      deptSel.innerHTML = srcDept.innerHTML;
+    }
+    if (batchSel && srcBatch && batchSel.options.length <= 1) {
+      batchSel.innerHTML = srcBatch.innerHTML;
+    }
+  };
+
+  window.syncSpreadsheetFiltersToExportModal = function () {
+    var srcMember = document.getElementById('ssFilterMember');
+    var srcDept = document.getElementById('ssFilterDept');
+    var srcBatch = document.getElementById('ssFilterBatch');
+    var srcStatus = document.getElementById('ssFilterStatus');
+    var srcSearch = document.getElementById('ssSearch');
+
+    var expMember = document.getElementById('expFilterMember');
+    var expDept = document.getElementById('expFilterDept');
+    var expBatch = document.getElementById('expFilterBatch');
+    var expStatus = document.getElementById('expFilterStatus');
+    var expSearch = document.getElementById('expFilterSearch');
+
+    if (expMember && srcMember) expMember.value = srcMember.value;
+    if (expDept && srcDept) expDept.value = srcDept.value;
+    if (expBatch && srcBatch) expBatch.value = srcBatch.value;
+    if (expStatus && srcStatus) expStatus.value = srcStatus.value;
+    if (expSearch && srcSearch) expSearch.value = srcSearch.value;
+  };
+
+  window.resetExportModalFilters = function () {
+    var expMember = document.getElementById('expFilterMember');
+    var expDept = document.getElementById('expFilterDept');
+    var expBatch = document.getElementById('expFilterBatch');
+    var expStatus = document.getElementById('expFilterStatus');
+    var expSearch = document.getElementById('expFilterSearch');
+
+    if (expMember) expMember.value = '';
+    if (expDept) expDept.value = '';
+    if (expBatch) expBatch.value = '';
+    if (expStatus) expStatus.value = '';
+    if (expSearch) expSearch.value = '';
+
+    onExportFilterChange();
+  };
+
+  var _exportFilterDebounce = null;
+  window.onExportFilterChange = function () {
+    updateExportStatsBanner();
+
+    if (_exportFilterDebounce) clearTimeout(_exportFilterDebounce);
+    _exportFilterDebounce = setTimeout(function () {
+      var params = buildExportParams();
+      params.limit = 1;
+
+      API.getAssignedAlumni(params).then(function (res) {
+        if (res && res.success && res.data && res.data.pagination) {
+          var total = res.data.pagination.total;
+          var totalEl = document.getElementById('expStatTotal');
+          if (totalEl) totalEl.innerText = total;
+        }
+      }).catch(function (err) {
+        console.warn('Export count error:', err);
+      });
+    }, 250);
+  };
+
+  window.buildExportParams = function () {
+    var expMember = document.getElementById('expFilterMember');
+    var expDept = document.getElementById('expFilterDept');
+    var expBatch = document.getElementById('expFilterBatch');
+    var expStatus = document.getElementById('expFilterStatus');
+    var expSearch = document.getElementById('expFilterSearch');
+
+    return {
       page: 1,
-      limit: 50000,
-      search: ssSearchQuery || undefined,
-      department: dept || undefined,
-      batch: batch || undefined,
-      status: status || undefined,
-      memberId: memberId || undefined,
+      limit: 100000,
+      search: expSearch && expSearch.value.trim() ? expSearch.value.trim() : undefined,
+      department: expDept && expDept.value ? expDept.value : undefined,
+      batch: expBatch && expBatch.value ? expBatch.value : undefined,
+      status: expStatus && expStatus.value ? expStatus.value : undefined,
+      memberId: expMember && expMember.value ? expMember.value : undefined,
       onlyMe: false
     };
+  };
+
+  window.renderExportColumnChips = function () {
+    var container = document.getElementById('exportColsContainer');
+    if (!container) return;
+
+    var html = '';
+    ssColumns.forEach(function (col) {
+      var checked = _exportSelectedCols[col.key] ? 'checked' : '';
+      html += '<label class="export-col-chip">' +
+        '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
+        '<span>' + col.label + '</span>' +
+        '</label>';
+    });
+    container.innerHTML = html;
+  };
+
+  window.toggleExportCol = function (key, isChecked) {
+    _exportSelectedCols[key] = isChecked;
+    updateExportStatsBanner();
+  };
+
+  window.selectAllExportCols = function (selectState) {
+    ssColumns.forEach(function (col) {
+      _exportSelectedCols[col.key] = selectState;
+    });
+    renderExportColumnChips();
+    updateExportStatsBanner();
+  };
+
+  window.updateExportStatsBanner = function () {
+    var colsEl = document.getElementById('expStatCols');
+    var statusEl = document.getElementById('expStatStatus');
+
+    var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
+    if (colsEl) colsEl.innerText = selectedCount + ' / ' + ssColumns.length;
+
+    var expStatus = document.getElementById('expFilterStatus');
+    var statusVal = expStatus ? expStatus.value : '';
+    if (statusEl) statusEl.innerText = statusVal ? statusVal.toUpperCase() : 'ALL';
+  };
+
+  window.startExportDownloadProcess = function () {
+    var selectedKeys = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; });
+    if (selectedKeys.length === 0) {
+      showToast('Please select at least one column to export.', 'warning');
+      return;
+    }
+
+    closeModal('exportCustomizationModal');
+
+    var overlay = document.getElementById('exportProgressOverlay');
+    var fill = document.getElementById('exportProgressBarFill');
+    var title = document.getElementById('exportProgressTitle');
+    var sub = document.getElementById('exportProgressSubtitle');
+    var percentEl = document.getElementById('exportProgressPercent');
+    var countEl = document.getElementById('exportProgressCount');
+
+    if (overlay) overlay.classList.add('show');
+    if (fill) fill.style.width = '10%';
+    if (title) title.innerText = 'Querying Database...';
+    if (sub) sub.innerText = 'Fetching team alumni records matching selected filters...';
+    if (percentEl) percentEl.innerText = '10%';
+
+    var params = buildExportParams();
 
     API.getAssignedAlumni(params).then(function (res) {
       if (res && res.success) {
-        var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
-        var csvContent = 'data:text/csv;charset=utf-8,';
-        var headers = ssColumns.map(function (c) { return c.label; });
-        csvContent += headers.join(',') + '\r\n';
+        var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+        if (data.length === 0) {
+          if (overlay) overlay.classList.remove('show');
+          showToast('No alumni records found matching selected export filters.', 'warning');
+          return;
+        }
 
-        records.forEach(function (row) {
-          var line = ssColumns.map(function (col) {
-            var cellVal = '';
-            if (col.key === 'member_name') {
-              cellVal = row.member_name || row.teamMember || row.assigned_to || '';
-            } else if (col.key === 'updated_date') {
-              cellVal = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
-            } else {
-              cellVal = row[col.key] || row[col.key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] || '';
-            }
-            var cleanVal = String(cellVal).replace(/"/g, '""');
-            return '"' + cleanVal + '"';
+        if (countEl) countEl.innerText = '0 / ' + data.length + ' records';
+
+        var progress = 15;
+        var interval = setInterval(function () {
+          progress += 25;
+          if (progress >= 90) {
+            clearInterval(interval);
+            progress = 90;
+          }
+          if (fill) fill.style.width = progress + '%';
+          if (percentEl) percentEl.innerText = progress + '%';
+          if (countEl) countEl.innerText = Math.floor((progress / 100) * data.length) + ' / ' + data.length + ' records';
+          if (title) title.innerText = 'Formatting Excel Data...';
+          if (sub) sub.innerText = 'Generating CSV with selected fields...';
+        }, 100);
+
+        setTimeout(function () {
+          clearInterval(interval);
+          if (fill) fill.style.width = '100%';
+          if (percentEl) percentEl.innerText = '100%';
+          if (countEl) countEl.innerText = data.length + ' / ' + data.length + ' records';
+          if (title) title.innerText = 'Export Ready!';
+          if (sub) sub.innerText = 'Downloading file to your computer...';
+
+          var activeCols = ssColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
+          var csv = '\uFEFF';
+          var headers = activeCols.map(function (c) { return c.label; });
+          csv += headers.join(',') + '\r\n';
+
+          data.forEach(function (row) {
+            var line = activeCols.map(function (col) {
+              var val = row[col.key];
+              if (col.key === 'member_name') {
+                val = row.member_name || row.teamMember || row.assigned_to || '';
+              } else if (col.key === 'updated_date') {
+                val = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
+              }
+              if (col.key === 'date_of_birth' || col.key === 'dob') {
+                val = row.date_of_birth || row.dob || val || '';
+              }
+              if (val === null || val === undefined) val = '';
+
+              if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {
+                if (String(val).includes('T')) {
+                  var d = new Date(val);
+                  if (!isNaN(d.getTime())) {
+                    var day = String(d.getDate()).padStart(2, '0');
+                    var month = String(d.getMonth() + 1).padStart(2, '0');
+                    var year = d.getFullYear();
+                    val = day + '/' + month + '/' + year;
+                  }
+                }
+              }
+
+              var strVal = String(val);
+              if ((col.key === 'phone' || col.key === 'secondary_phone' || col.key === 'register_no') && strVal.trim()) {
+                return '"\t' + strVal.replace(/"/g, '""') + '"';
+              }
+              return '"' + strVal.replace(/"/g, '""') + '"';
+            });
+            csv += line.join(',') + '\r\n';
           });
-          csvContent += line.join(',') + '\r\n';
-        });
 
-        var encodedUri = encodeURI(csvContent);
-        var link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', 'Team_Report_Export.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+          var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          var link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'Team_Alumni_Export_' + new Date().toISOString().slice(0, 10) + '.csv';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+
+          setTimeout(function () {
+            if (overlay) overlay.classList.remove('show');
+            showToast('Exported ' + data.length + ' records with ' + activeCols.length + ' selected columns!', 'success');
+          }, 600);
+        }, 700);
+
       } else {
-        showToast('Export failed', 'error');
+        if (overlay) overlay.classList.remove('show');
+        showToast('Failed to retrieve alumni records for export.', 'error');
       }
+    }).catch(function (err) {
+      console.error('Export error:', err);
+      if (overlay) overlay.classList.remove('show');
+      showToast('An error occurred during export: ' + (err.message || 'Network error'), 'error');
     });
   };
 
@@ -1588,19 +1940,14 @@
   }
 
   function loadTeamReport() {
-    // Populate filter dropdown with members
-    API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).then(function (res) {
-      if (res && res.success && Array.isArray(res.data.records)) {
-        var dropdown = document.getElementById('ssFilterMember');
-        if (dropdown) {
-          var html = '<option value="">All Members</option>';
-          res.data.records.forEach(function (m) {
-            html += '<option value="' + m.user_id + '">' + m.first_name + ' ' + m.last_name + '</option>';
-          });
-          dropdown.innerHTML = html;
-        }
-      }
-    });
+    var dropdown = document.getElementById('ssFilterMember');
+    if (dropdown) {
+      var html = '<option value="">All Members</option>';
+      teamMembers.forEach(function (m) {
+        html += '<option value="' + m.id + '">' + m.name + '</option>';
+      });
+      dropdown.innerHTML = html;
+    }
 
     fetchSpreadsheetData();
   }
@@ -1710,7 +2057,7 @@
               completed: m.completed || 0,
               pending: (m.assigned || 0) - (m.completed || 0),
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
-              status: m.status || (m.progress >= 75 ? 'On Track' : m.progress >= 50 ? 'Behind' : 'Critical'),
+              status: m.status || (m.progress >= 75 ? 'On Track' : 'Behind'),
               lastActivity: m.lastActivity || '-',
               isLeader: m.isLeader || false
             };
@@ -1787,12 +2134,58 @@
       });
     }
 
-    var methodSelect = document.getElementById('distMethodSelect');
-    if (methodSelect) {
-      methodSelect.addEventListener('change', function () {
-        var isBatch = this.value === 'BatchWise';
-        document.getElementById('distBatchRow').style.display = isBatch ? 'flex' : 'none';
+     window.onDistMethodChange = function () {
+      var select = document.getElementById('distMethodSelect');
+      if (!select) return;
+      var method = select.value;
+      var batchContainer = document.getElementById('distBatchContainer');
+      var deptMappingSection = document.getElementById('distDeptMappingSection');
+
+      if (batchContainer) batchContainer.style.display = method === 'BatchWise' ? 'block' : 'none';
+      if (deptMappingSection) {
+        if (method === 'DepartmentWise') {
+          deptMappingSection.style.display = 'block';
+          renderDistDeptMappingGrid();
+        } else {
+          deptMappingSection.style.display = 'none';
+        }
+      }
+    };
+
+    function renderDistDeptMappingGrid() {
+      var grid = document.getElementById('distDeptMappingGrid');
+      if (!grid) return;
+
+      var depts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
+      var html = '';
+
+      depts.forEach(function (dept) {
+        var matchedUser = teamMembers.find(function (m) {
+          return m.department && m.department.toUpperCase().trim() === dept;
+        });
+        var selectedUserId = matchedUser ? matchedUser.id : '';
+
+        var optionsHtml = '<option value="">-- Select Member --</option>';
+        teamMembers.forEach(function (m) {
+          var sel = (parseInt(m.id, 10) === parseInt(selectedUserId, 10)) ? 'selected' : '';
+          var deptTag = m.department ? ' (' + m.department + ')' : '';
+          optionsHtml += '<option value="' + m.id + '" ' + sel + '>' + m.name + deptTag + '</option>';
+        });
+
+        html += '<div>' +
+          '<label class="form-label" style="font-size:0.78rem;font-weight:600;color:#334155;margin-bottom:4px;display:block;">Dept: ' + dept + '</label>' +
+          '<select class="form-control dist-dept-map-select" data-dept="' + dept + '" style="height:34px;font-size:0.8rem;">' +
+          optionsHtml +
+          '</select>' +
+          '</div>';
       });
+
+      grid.innerHTML = html;
+    }
+
+    var distSelect = document.getElementById('distMethodSelect');
+    if (distSelect) {
+      distSelect.addEventListener('change', window.onDistMethodChange);
     }
 
     var previewBtn = document.getElementById('previewDistBtn');
@@ -1807,8 +2200,18 @@
         var body = { teamId: _teamId, method: method };
         if (method === 'BatchWise' && batch) body.batch = batch;
         if (method === 'RoundRobin') {
-          // Use all active member IDs
           body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
+        }
+        if (method === 'DepartmentWise') {
+          var mapping = {};
+          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
+            var deptName = selectEl.getAttribute('data-dept');
+            var val = selectEl.value;
+            if (deptName && val) {
+              mapping[deptName] = parseInt(val, 10);
+            }
+          });
+          body.departmentMapping = mapping;
         }
         document.getElementById('distLoadingState').style.display = 'block';
         document.getElementById('distPreviewSection').style.display = 'none';
@@ -1857,6 +2260,17 @@
         var body = { teamId: _teamId, method: method, manualAssignments: manualAssignments };
         if (method === 'BatchWise' && batch) body.batch = batch;
         if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
+        if (method === 'DepartmentWise') {
+          var mapping = {};
+          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
+            var deptName = selectEl.getAttribute('data-dept');
+            var val = selectEl.value;
+            if (deptName && val) {
+              mapping[deptName] = parseInt(val, 10);
+            }
+          });
+          body.departmentMapping = mapping;
+        }
 
         confirmBtn.disabled = true;
         confirmBtn.textContent = 'Distributing...';
@@ -1960,17 +2374,22 @@
     });
 
     // Bind my assignments sub-filters
-    document.getElementById('myAssignmentsSearch').addEventListener('input', renderMyAssignmentsTable);
-    document.getElementById('myAssignmentsStatusFilter').addEventListener('change', renderMyAssignmentsTable);
+    var mySearch = document.getElementById('myAssignmentsSearch');
+    if (mySearch) mySearch.addEventListener('input', renderMyAssignmentsTable);
+    var myStatusF = document.getElementById('myAssignmentsStatusFilter');
+    if (myStatusF) myStatusF.addEventListener('change', renderMyAssignmentsTable);
     var myDeptF = document.getElementById('myAssignmentsDeptFilter');
     if (myDeptF) myDeptF.addEventListener('change', renderMyAssignmentsTable);
     var myBatchF = document.getElementById('myAssignmentsBatchFilter');
     if (myBatchF) myBatchF.addEventListener('change', renderMyAssignmentsTable);
 
     // Bind report sub-filters
-    document.getElementById('reportSearch').addEventListener('input', renderTeamReportTable);
-    document.getElementById('reportUserFilter').addEventListener('change', renderTeamReportTable);
-    document.getElementById('reportStatusFilter').addEventListener('change', renderTeamReportTable);
+    var repSearch = document.getElementById('reportSearch');
+    if (repSearch) repSearch.addEventListener('input', renderTeamReportTable);
+    var repUserF = document.getElementById('reportUserFilter');
+    if (repUserF) repUserF.addEventListener('change', renderTeamReportTable);
+    var repStatusF = document.getElementById('reportStatusFilter');
+    if (repStatusF) repStatusF.addEventListener('change', renderTeamReportTable);
 
     // Bind rows per page dropdown listeners
     var rppSelect = document.getElementById('rowsPerPageSelect');
@@ -2000,13 +2419,48 @@
 
     setTimeout(function () {
       document.getElementById('loadingScreen').classList.add('hide');
-      document.body.style.overflow = 'visible';
+      document.body.style.overflow = '';
     }, 800);
 
     document.querySelectorAll('.stat-card').forEach(function (card, idx) {
       card.style.animationDelay = (idx * 0.08) + 's';
     });
   }
+
+  window.openSettingsPage = function () {
+    var item = document.querySelector('.sidebar-item[data-page="settings"]');
+    if (item) item.click();
+  };
+
+  window.updateMyAssignmentsFilterBadge = function () {
+    var deptVal = document.getElementById('myAssignmentsDeptFilter') ? document.getElementById('myAssignmentsDeptFilter').value : 'all';
+    var batchVal = document.getElementById('myAssignmentsBatchFilter') ? document.getElementById('myAssignmentsBatchFilter').value : 'all';
+    var statusVal = document.getElementById('myAssignmentsStatusFilter') ? document.getElementById('myAssignmentsStatusFilter').value : 'all';
+    var dateFromVal = document.getElementById('myAssignmentsDateFrom') ? document.getElementById('myAssignmentsDateFrom').value : '';
+    var dateToVal = document.getElementById('myAssignmentsDateTo') ? document.getElementById('myAssignmentsDateTo').value : '';
+    var activeCount = 0;
+    if (deptVal !== 'all') activeCount++;
+    if (batchVal !== 'all') activeCount++;
+    if (statusVal !== 'all') activeCount++;
+    if (dateFromVal) activeCount++;
+    if (dateToVal) activeCount++;
+    var badge = document.getElementById('myAssignmentsActiveFilterBadge');
+    if (badge) {
+      badge.textContent = activeCount;
+      badge.style.display = activeCount > 0 ? 'inline-block' : 'none';
+    }
+  };
+
+  window.clearMyAssignmentsFilters = function () {
+    if (document.getElementById('myAssignmentsDeptFilter')) document.getElementById('myAssignmentsDeptFilter').value = 'all';
+    if (document.getElementById('myAssignmentsBatchFilter')) document.getElementById('myAssignmentsBatchFilter').value = 'all';
+    if (document.getElementById('myAssignmentsStatusFilter')) document.getElementById('myAssignmentsStatusFilter').value = 'all';
+    if (document.getElementById('myAssignmentsDateFrom')) document.getElementById('myAssignmentsDateFrom').value = '';
+    if (document.getElementById('myAssignmentsDateTo')) document.getElementById('myAssignmentsDateTo').value = '';
+    window.updateMyAssignmentsFilterBadge();
+    if (typeof renderMyAssignmentsTable === 'function') renderMyAssignmentsTable();
+    if (typeof closeModal === 'function') closeModal('myAssignmentsFilterModal');
+  };
 
   window.switchSettingsTab = function (tabName, btn) {
     var tabsContainer = btn.closest('.card-body');
@@ -2134,18 +2588,7 @@
       });
   };
 
-  // Auto refresh dashboard data every 20 seconds silently in the background
-  setInterval(function () {
-    // Only refresh if no modals are open to avoid disrupting typing or interactions
-    var openModals = document.querySelectorAll('.modal.show, .drawer.show, .modal-backdrop');
-    var isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
-    if (openModals.length === 0 && !isInputFocused) {
-      if (typeof fetchLeaderData === 'function') fetchLeaderData();
-      if (typeof fetchSpreadsheetData === 'function' && document.getElementById('section-myAssignments') && document.getElementById('section-myAssignments').style.display !== 'none') {
-        fetchSpreadsheetData();
-      }
-    }
-  }, 20000);
+  // Auto refresh dashboard data disabled by user request
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -2153,3 +2596,352 @@
     init();
   }
 })();
+
+// ============================================================
+// FEATURE 1 — CIRCULATE / REDISTRIBUTE (Leader)
+// ============================================================
+
+var _circulatePreviewData = null;
+
+window.openCirculateModal = function () {
+  _circulatePreviewData = null;
+  document.getElementById('circulateStep1').style.display = 'block';
+  document.getElementById('circulateStep2').style.display = 'none';
+  document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;">Loading...</p>';
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reassign/team-load', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (!res || !res.success) {
+      document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Failed to load team data.</p>';
+      return;
+    }
+    var data = res.data;
+
+    var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
+      '<thead><tr style="background:#F1F5F9;">' +
+      '<th style="padding:8px;text-align:left;border-bottom:2px solid #E2E8F0;">Member</th>' +
+      '<th style="padding:8px;text-align:center;border-bottom:2px solid #E2E8F0;">Pending</th>' +
+      '<th style="padding:8px;text-align:center;border-bottom:2px solid #E2E8F0;">Completed</th>' +
+      '</tr></thead><tbody>';
+    data.members.forEach(function (m) {
+      tbl += '<tr><td style="padding:8px;border-bottom:1px solid #E2E8F0;">' + m.name + ' <small style="color:#94A3B8;">(' + m.role + ')</small></td>' +
+        '<td style="padding:8px;text-align:center;border-bottom:1px solid #E2E8F0;color:var(--warning);font-weight:600;">' + m.pending_count + '</td>' +
+        '<td style="padding:8px;text-align:center;border-bottom:1px solid #E2E8F0;color:var(--success);">' + m.completed_count + '</td></tr>';
+    });
+    tbl += '</tbody></table>';
+    document.getElementById('circulateWorkloadTable').innerHTML = tbl;
+
+    var sourceSel = document.getElementById('circulateSourceSelect');
+    var targetBox = document.getElementById('circulateTargetCheckboxes');
+    sourceSel.innerHTML = '<option value="">-- Select Source --</option>';
+
+    data.members.forEach(function (m) {
+      var o1 = document.createElement('option');
+      o1.value = m.user_id;
+      o1.text = m.name + ' (' + m.pending_count + ' pending)';
+      sourceSel.appendChild(o1);
+    });
+
+    var renderCheckboxes = function () {
+      var srcId = parseInt(sourceSel.value, 10);
+      targetBox.innerHTML = '';
+      if (!srcId) {
+        targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        return;
+      }
+      data.members.forEach(function (m) {
+        if (m.user_id !== srcId) {
+          var label = document.createElement('label');
+          label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;color:var(--text-dark);';
+          label.innerHTML = '<input type="checkbox" class="circulate-target-cb" value="' + m.user_id + '" style="accent-color:var(--primary);width:16px;height:16px;"> ' + m.name + ' <small style="color:#64748B;">(' + m.pending_count + ' pending)</small>';
+          targetBox.appendChild(label);
+        }
+      });
+    };
+
+    sourceSel.onchange = renderCheckboxes;
+    renderCheckboxes();
+  }).catch(function (err) {
+    document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Network error.</p>';
+  });
+
+  openModal('circulateModal');
+};
+
+window.circulatePreview = function () {
+  var sourceMemberId = parseInt(document.getElementById('circulateSourceSelect').value, 10);
+  if (!sourceMemberId) { Toast.warning('Circulate', 'Please select a source member.'); return; }
+
+  var cbs = document.querySelectorAll('.circulate-target-cb:checked');
+  var targetMemberIds = Array.from(cbs).map(function (cb) { return parseInt(cb.value, 10); });
+  if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
+  var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reassign/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Preview failed.'); return; }
+    _circulatePreviewData = res.data;
+
+    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records from <strong>' + res.data.sourceName + '</strong>:</p>';
+    res.data.preview.forEach(function (group) {
+      html += '<div style="margin-bottom:14px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;padding:8px 12px;border-radius:8px;margin-bottom:6px;">' +
+        '<strong style="color:#1E40AF;">' + group.targetName + '</strong>' +
+        '<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.75rem;">' + group.count + ' records</span></div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;">' +
+        '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th></tr></thead><tbody>';
+      group.alumni.forEach(function (a) {
+        html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td></tr>';
+      });
+      html += '</tbody></table></div>';
+    });
+    document.getElementById('circulatePreviewContent').innerHTML = html;
+    document.getElementById('circulateStep1').style.display = 'none';
+    document.getElementById('circulateStep2').style.display = 'block';
+  }).catch(function (err) { Toast.error('Circulate', 'Network error.'); });
+};
+
+window.circulateCommit = function () {
+  if (!_circulatePreviewData) { Toast.error('Circulate', 'No preview data.'); return; }
+  var allocations = {};
+  _circulatePreviewData.preview.forEach(function (group) {
+    allocations[group.targetMemberId] = group.alumni.map(function (a) { return a.assignment_id; });
+  });
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reassign/commit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ sourceMemberId: _circulatePreviewData.sourceMemberId, allocations: allocations })
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Commit failed.'); return; }
+    Toast.success('Circulate', res.message || (res.data.moved + ' alumni redistributed!'));
+    closeModal('circulateModal');
+    if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+  }).catch(function (err) { Toast.error('Circulate', 'Network error.'); });
+};
+
+// Real-time sync listener (Feature 5)
+if (typeof io !== 'undefined') {
+  try {
+    var socket = io();
+    var user = API.getCurrentUser ? API.getCurrentUser() : null;
+    socket.emit('join', { role: 'LEADER', teamId: user ? user.team_id : null });
+    socket.on('assignmentsUpdated', function () {
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchDashboardStats === 'function') fetchDashboardStats();
+    });
+  } catch (e) {
+    console.warn('Socket.io connection failed:', e);
+  }
+}
+
+window.reopenAlumniRecord = function (alumniId) {
+  if (!confirm('Are you sure you want to reopen this record back to Pending status for modifications?')) return;
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reopen/' + alumniId, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success) {
+      Toast.success('Reopen Record', res.message || 'Record reopened successfully.');
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchLeaderData === 'function') fetchLeaderData();
+    } else {
+      Toast.error('Reopen Record', res && res.message || 'Failed to reopen record.');
+    }
+  }).catch(function () {
+    Toast.error('Reopen Record', 'Network error reopening record.');
+  });
+};
+
+window.undoAlumniSubmission = function () {
+  if (!currentSelectedAlumniId) return;
+  if (!confirm('Are you sure you want to undo submission and set status back to Pending?')) return;
+
+  var undoBtn = document.getElementById('undoSubmitBtn');
+  if (undoBtn) { undoBtn.disabled = true; undoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...'; }
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/assignments/reopen/' + currentSelectedAlumniId, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success) {
+      Toast.success('Undo Submission', res.message || 'Submission undone successfully.');
+      var overlay = document.getElementById('updateModal');
+      if (overlay) overlay.classList.remove('show');
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof fetchLeaderData === 'function') fetchLeaderData();
+    } else {
+      Toast.error('Undo Submission', res && res.message || 'Failed to undo submission.');
+    }
+  }).catch(function () {
+    Toast.error('Undo Submission', 'Network error undoing submission.');
+  }).finally(function () {
+    if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
+  });
+};
+
+/* ── EMAIL CAMPAIGN (n8n AUTOMATION) HANDLERS ── */
+var _activeCampaignPollInterval = null;
+
+window.switchCampaignTab = function (tab) {
+  var recipientsTab = document.getElementById('campaignTabRecipients');
+  var templateTab = document.getElementById('campaignTabTemplate');
+  var btnRecipients = document.getElementById('tabBtnCampaignRecipients');
+  var btnTemplate = document.getElementById('tabBtnCampaignTemplate');
+
+  if (tab === 'recipients') {
+    if (recipientsTab) recipientsTab.style.display = 'block';
+    if (templateTab) templateTab.style.display = 'none';
+    if (btnRecipients) { btnRecipients.style.color = '#2563EB'; btnRecipients.style.borderBottom = '2px solid #2563EB'; }
+    if (btnTemplate) { btnTemplate.style.color = '#64748B'; btnTemplate.style.borderBottom = 'none'; }
+  } else {
+    if (recipientsTab) recipientsTab.style.display = 'none';
+    if (templateTab) templateTab.style.display = 'block';
+    if (btnRecipients) { btnRecipients.style.color = '#64748B'; btnRecipients.style.borderBottom = 'none'; }
+    if (btnTemplate) { btnTemplate.style.color = '#2563EB'; btnTemplate.style.borderBottom = '2px solid #2563EB'; }
+  }
+};
+
+window.previewIndividualAlumniEmail = function (name, email, assignmentId) {
+  var nameEl = document.getElementById('previewAlumniName');
+  var emailEl = document.getElementById('previewToEmail');
+  var tagEl = document.getElementById('previewReplyToTag');
+
+  if (nameEl) nameEl.textContent = name || 'Alumnus';
+  if (emailEl) emailEl.textContent = email || 'alumni@mountzion.ac.in';
+  if (tagEl) tagEl.textContent = 'alumnirequests+' + (assignmentId || 'ID') + '@mountzion.ac.in';
+
+  window.switchCampaignTab('template');
+};
+
+window.openEmailCampaignModal = function () {
+  var setupState = document.getElementById('campaignSetupState');
+  var progressState = document.getElementById('campaignProgressState');
+  var launchBtn = document.getElementById('launchCampaignSubmitBtn');
+  var badge = document.getElementById('campaignRecipientBadge');
+  var countTag = document.getElementById('campaignRecipientsCountTag');
+  var tbody = document.getElementById('campaignRecipientsPreviewTableBody');
+
+  if (setupState) setupState.style.display = 'block';
+  if (progressState) progressState.style.display = 'none';
+  if (launchBtn) { launchBtn.style.display = 'inline-flex'; launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign'; }
+  if (badge) badge.textContent = 'Counting team records...';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading team alumni records...</td></tr>';
+
+  window.switchCampaignTab('recipients');
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns/preview-recipients', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success && res.data) {
+      var records = (res.data.records && Array.isArray(res.data.records)) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
+      var total = res.data.total !== undefined ? res.data.total : records.length;
+      if (badge) badge.textContent = total + ' Alumni Records';
+      if (countTag) countTag.textContent = records.length;
+
+      if (records.length > 0) {
+        var html = '';
+        records.forEach(function (rec) {
+          var safeName = (rec.name || 'Alumnus').replace(/'/g, "\\'");
+          var safeEmail = (rec.email || 'No Email').replace(/'/g, "\\'");
+          var assignId = rec.assignment_id || rec.id || 0;
+          html += '<tr style="border-bottom:1px solid #F1F5F9;">';
+          html += '  <td style="padding:8px 12px;font-weight:600;color:#1E293B;">' + (rec.name || '-') + '</td>';
+          html += '  <td style="padding:8px 12px;color:#64748B;">' + (rec.department || '-') + ' (' + (rec.batch || '-') + ')</td>';
+          html += '  <td style="padding:8px 12px;color:#2563EB;">' + (rec.email || '<span style="color:#EF4444;">No Email</span>') + '</td>';
+          html += '  <td style="padding:8px 12px;text-align:right;">';
+          html += '    <button type="button" class="btn btn-secondary btn-sm" onclick="previewIndividualAlumniEmail(\'' + safeName + '\', \'' + safeEmail + '\', ' + assignId + ')" style="padding:2px 8px;font-size:0.72rem;"><i class="fas fa-eye"></i> Preview</button>';
+          html += '  </td>';
+          html += '</tr>';
+        });
+        if (tbody) tbody.innerHTML = html;
+
+        // Auto render first record preview
+        var first = records[0];
+        window.previewIndividualAlumniEmail(first.name, first.email, first.assignment_id || first.id || 0);
+        window.switchCampaignTab('recipients');
+      } else {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">No team alumni records found.</td></tr>';
+      }
+    } else {
+      if (badge) badge.textContent = 'Team Assignments Ready';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">Unable to load recipients list.</td></tr>';
+    }
+  }).catch(function () {
+    if (badge) badge.textContent = 'Team Assignments Ready';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;">Unable to load recipients list.</td></tr>';
+  });
+
+  if (window.openModal) window.openModal('emailCampaignModal');
+};
+
+window.submitEmailCampaignLaunch = function () {
+  var launchBtn = document.getElementById('launchCampaignSubmitBtn');
+  if (launchBtn) { launchBtn.disabled = true; launchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dispatching to n8n...'; }
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({})
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success) {
+      Toast.success('Campaign Dispatched', 'n8n email automation campaign has been queued.');
+      var setupState = document.getElementById('campaignSetupState');
+      var progressState = document.getElementById('campaignProgressState');
+      if (setupState) setupState.style.display = 'none';
+      if (progressState) progressState.style.display = 'block';
+      if (launchBtn) launchBtn.style.display = 'none';
+
+      var campaignId = res.data.campaignId;
+      window.pollCampaignProgress(campaignId);
+    } else {
+      Toast.error('Campaign Failed', res && res.message || 'Failed to dispatch campaign');
+      if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
+    }
+  }).catch(function () {
+    Toast.error('Campaign Failed', 'Network error dispatching campaign');
+    if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
+  });
+};
+
+window.pollCampaignProgress = function (campaignId) {
+  if (_activeCampaignPollInterval) clearInterval(_activeCampaignPollInterval);
+
+  var token = localStorage.getItem('token');
+  var progressBar = document.getElementById('campaignProgressBar');
+  var progressStats = document.getElementById('campaignProgressStats');
+
+  _activeCampaignPollInterval = setInterval(function () {
+    fetch('/api/v1/email-campaigns/' + campaignId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res && res.data) {
+        var c = res.data;
+        var total = c.total_recipients || 1;
+        var processed = (c.sent_count || 0) + (c.failed_count || 0);
+        var pct = Math.min(100, Math.round((processed / total) * 100));
+
+        if (progressBar) progressBar.style.width = pct + '%';
+        if (progressStats) progressStats.textContent = 'Sent: ' + (c.sent_count || 0) + ' / Failed: ' + (c.failed_count || 0) + ' (Total: ' + total + ')';
+
+        if (c.status === 'Completed' || c.status === 'Failed' || processed >= total) {
+          clearInterval(_activeCampaignPollInterval);
+          Toast.success('Campaign Completed', 'All emails have been processed via n8n automation.');
+        }
+      }
+    }).catch(function () {});
+  }, 3000);
+};

@@ -133,7 +133,12 @@ async function updateAlumniFields(alumniId, fields) {
   
   const setClauses = [];
   Object.keys(fields).forEach((key, index) => {
-    request.input(`val_${index}`, sql.NVarChar(sql.MAX), fields[key]);
+    const rawVal = fields[key];
+    if (typeof rawVal === 'number' || key === 'resolved_faculty_user_id') {
+      request.input(`val_${index}`, sql.Int, rawVal ? parseInt(rawVal, 10) : null);
+    } else {
+      request.input(`val_${index}`, sql.NVarChar(sql.MAX), rawVal !== null && rawVal !== undefined ? String(rawVal) : null);
+    }
     setClauses.push(`${key} = @val_${index}`);
   });
 
