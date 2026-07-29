@@ -2134,12 +2134,58 @@
       });
     }
 
-    var methodSelect = document.getElementById('distMethodSelect');
-    if (methodSelect) {
-      methodSelect.addEventListener('change', function () {
-        var isBatch = this.value === 'BatchWise';
-        document.getElementById('distBatchRow').style.display = isBatch ? 'flex' : 'none';
+     window.onDistMethodChange = function () {
+      var select = document.getElementById('distMethodSelect');
+      if (!select) return;
+      var method = select.value;
+      var batchContainer = document.getElementById('distBatchContainer');
+      var deptMappingSection = document.getElementById('distDeptMappingSection');
+
+      if (batchContainer) batchContainer.style.display = method === 'BatchWise' ? 'block' : 'none';
+      if (deptMappingSection) {
+        if (method === 'DepartmentWise') {
+          deptMappingSection.style.display = 'block';
+          renderDistDeptMappingGrid();
+        } else {
+          deptMappingSection.style.display = 'none';
+        }
+      }
+    };
+
+    function renderDistDeptMappingGrid() {
+      var grid = document.getElementById('distDeptMappingGrid');
+      if (!grid) return;
+
+      var depts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
+      var html = '';
+
+      depts.forEach(function (dept) {
+        var matchedUser = teamMembers.find(function (m) {
+          return m.department && m.department.toUpperCase().trim() === dept;
+        });
+        var selectedUserId = matchedUser ? matchedUser.id : '';
+
+        var optionsHtml = '<option value="">-- Select Member --</option>';
+        teamMembers.forEach(function (m) {
+          var sel = (parseInt(m.id, 10) === parseInt(selectedUserId, 10)) ? 'selected' : '';
+          var deptTag = m.department ? ' (' + m.department + ')' : '';
+          optionsHtml += '<option value="' + m.id + '" ' + sel + '>' + m.name + deptTag + '</option>';
+        });
+
+        html += '<div>' +
+          '<label class="form-label" style="font-size:0.78rem;font-weight:600;color:#334155;margin-bottom:4px;display:block;">Dept: ' + dept + '</label>' +
+          '<select class="form-control dist-dept-map-select" data-dept="' + dept + '" style="height:34px;font-size:0.8rem;">' +
+          optionsHtml +
+          '</select>' +
+          '</div>';
       });
+
+      grid.innerHTML = html;
+    }
+
+    var distSelect = document.getElementById('distMethodSelect');
+    if (distSelect) {
+      distSelect.addEventListener('change', window.onDistMethodChange);
     }
 
     var previewBtn = document.getElementById('previewDistBtn');
@@ -2154,8 +2200,18 @@
         var body = { teamId: _teamId, method: method };
         if (method === 'BatchWise' && batch) body.batch = batch;
         if (method === 'RoundRobin') {
-          // Use all active member IDs
           body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
+        }
+        if (method === 'DepartmentWise') {
+          var mapping = {};
+          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
+            var deptName = selectEl.getAttribute('data-dept');
+            var val = selectEl.value;
+            if (deptName && val) {
+              mapping[deptName] = parseInt(val, 10);
+            }
+          });
+          body.departmentMapping = mapping;
         }
         document.getElementById('distLoadingState').style.display = 'block';
         document.getElementById('distPreviewSection').style.display = 'none';
@@ -2204,6 +2260,17 @@
         var body = { teamId: _teamId, method: method, manualAssignments: manualAssignments };
         if (method === 'BatchWise' && batch) body.batch = batch;
         if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
+        if (method === 'DepartmentWise') {
+          var mapping = {};
+          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
+            var deptName = selectEl.getAttribute('data-dept');
+            var val = selectEl.value;
+            if (deptName && val) {
+              mapping[deptName] = parseInt(val, 10);
+            }
+          });
+          body.departmentMapping = mapping;
+        }
 
         confirmBtn.disabled = true;
         confirmBtn.textContent = 'Distributing...';
