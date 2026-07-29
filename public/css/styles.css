@@ -5759,10 +5759,10 @@ body.dark-mode .shortcut-card .shortcut-desc {
   transform: translateY(-50%) scale(1.15);
 }
 .floating-modal-nav-btn.left-nav-btn {
-  left: -64px;
+  left: -78px;
 }
 .floating-modal-nav-btn.right-nav-btn {
-  right: -64px;
+  right: -78px;
 }
 @media (max-width: 1080px) {
   .floating-modal-nav-btn.left-nav-btn { left: 10px; }

@@ -434,7 +434,7 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
       } else {
         const autoMatchUser = activeUsers.find(u => u.department && u.department.toUpperCase().trim() === dept);
         if (autoMatchUser) {
-          memberGroupMap[autoMatchUser.user_id].alumniList.push(...deptAlumniMap[autoMatchUser.user_id]);
+          memberGroupMap[autoMatchUser.user_id].alumniList.push(...deptAlumniMap[dept]);
           memberGroupMap[autoMatchUser.user_id].count += deptAlumniMap[dept].length;
         } else {
           unmatchedAlumni.push(...deptAlumniMap[dept]);
