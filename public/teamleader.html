@@ -1419,25 +1419,25 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div>
             <label class="form-label">Team Member</label>
-            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterMember">
               <option value="">All Members</option>
             </select>
           </div>
           <div>
             <label class="form-label">Department</label>
-            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterDept">
               <option value="">All Depts</option>
             </select>
           </div>
           <div>
             <label class="form-label">Batch / Year</label>
-            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterBatch">
               <option value="">All Batches</option>
             </select>
           </div>
           <div>
             <label class="form-label">Status</label>
-            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterStatus">
               <option value="">All Statuses</option>
               <option value="Available">Awaiting Distribution</option>
               <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
@@ -1449,11 +1449,11 @@
           </div>
           <div>
             <label class="form-label">Date From</label>
-            <input type="date" id="ssDateFrom" class="form-control" onchange="fetchSpreadsheetData()">
+            <input type="date" id="ssDateFrom" class="form-control">
           </div>
           <div>
             <label class="form-label">Date To</label>
-            <input type="date" id="ssDateTo" class="form-control" onchange="fetchSpreadsheetData()">
+            <input type="date" id="ssDateTo" class="form-control">
           </div>
         </div>
       </div>
@@ -1856,7 +1856,7 @@
         <!-- Department Mapping Section for DepartmentWise -->
         <div id="distDeptMappingSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
           <h4 style="font-size:0.85rem;font-weight:700;color:#1E293B;margin-bottom:8px;"><i class="fas fa-building" style="color:var(--primary);margin-right:6px;"></i>Department to Faculty Member Mapping</h4>
-          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department alumni are assigned to which faculty member (members are matched by department automatically).</p>
+          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department(s) should be distributed to each member. You can select multiple departments per member by holding Ctrl (or Cmd on Mac).</p>
           <div id="distDeptMappingGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <!-- Populated dynamically by JS -->
           </div>
