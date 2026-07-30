@@ -1800,7 +1800,6 @@ function validateTMForm() {
 
   var leader = document.getElementById('tmTeamLeader');
   if (!leader.value) { showFieldError(leader, 'Please select a team leader'); valid = false; }
-  else if (pass.value.length < 6) { showFieldError(pass, 'Password must be at least 6 characters'); valid = false; }
 
   return valid;
 }
