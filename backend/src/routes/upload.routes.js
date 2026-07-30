@@ -42,4 +42,10 @@ router.post(
   uploadController.confirmAliases
 );
 
+router.post(
+  '/rollback/:importId',
+  authorize(ROLES.ADMIN),
+  uploadController.rollbackImport
+);
+
 module.exports = router;

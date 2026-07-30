@@ -1213,10 +1213,9 @@
     <a class="nav-item" data-page="preview">
         <i class="fas fa-file-invoice"></i> <span class="nav-item-text">Preview Sheet</span>
     </a>
-    <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal()">
+    <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal(); return false;" href="#">
         <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
     </a>
-
     <a class="nav-item" data-page="settings">
         <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
     </a>
@@ -1489,8 +1488,8 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="updateModal">
-    <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;">
+<div class="modal-overlay" id="updateModal" style="overflow-x:visible;">
+    <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;overflow:visible;">
         <button type="button" class="floating-modal-nav-btn left-nav-btn" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record"><i class="fas fa-chevron-left"></i></button>
         <button type="button" class="floating-modal-nav-btn right-nav-btn" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record"><i class="fas fa-chevron-right"></i></button>
         <div class="modal-header">
@@ -1953,6 +1952,97 @@
     </div>
   </div>
 
+  <!-- Email Campaign Preview Modal -->
+  <div class="modal-overlay" id="emailCampaignModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content" style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-paper-plane" style="font-size:1.1rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Request Details (n8n Email Campaign)</h3>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Preview assigned alumni recipients and personalized email template</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('emailCampaignModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;">
+        <div id="campaignSetupState">
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:0.85rem;font-weight:600;color:#1E40AF;">Target Assigned Recipients</span>
+              <span class="badge badge-primary" id="campaignRecipientBadge">Loading...</span>
+            </div>
+            <p style="margin:0;font-size:0.78rem;color:#1E3A8A;line-height:1.4;">Automated emails will be queued via n8n with individual trackable Reply-To tags (`alumnirequests+{assignmentId}@mountzion.ac.in`) to capture incoming replies.</p>
+          </div>
+
+          <!-- Section Switcher Tabs -->
+          <div style="display:flex;gap:10px;border-bottom:1px solid #E2E8F0;margin-bottom:14px;padding-bottom:8px;">
+            <button type="button" id="tabBtnCampaignRecipients" onclick="switchCampaignTab('recipients')" style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#2563EB;border-bottom:2px solid #2563EB;padding:4px 8px;cursor:pointer;">
+              <i class="fas fa-users" style="margin-right:4px;"></i> Target Alumni List (<span id="campaignRecipientsCountTag">0</span>)
+            </button>
+            <button type="button" id="tabBtnCampaignTemplate" onclick="switchCampaignTab('template')" style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#64748B;padding:4px 8px;cursor:pointer;">
+              <i class="fas fa-envelope-open-text" style="margin-right:4px;"></i> Email Template Preview
+            </button>
+          </div>
+
+          <!-- Tab 1: Alumni Recipients List -->
+          <div id="campaignTabRecipients" style="display:block;">
+            <div style="max-height:220px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:10px;">
+              <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                <thead>
+                  <tr style="background:#F8FAFC;border-bottom:1px solid #E2E8F0;text-align:left;color:#475569;">
+                    <th style="padding:8px 12px;">Alumnus Name</th>
+                    <th style="padding:8px 12px;">Department</th>
+                    <th style="padding:8px 12px;">Email Address</th>
+                    <th style="padding:8px 12px;text-align:right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="campaignRecipientsPreviewTableBody">
+                  <tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading alumni records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab 2: Live Email Template Preview -->
+          <div id="campaignTabTemplate" style="display:none;">
+            <div style="margin-bottom:10px;">
+              <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Email Subject</label>
+              <input type="text" readonly value="Request for Professional Information Update - Mount Zion College of Engineering and Technology" style="width:100%;padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:0.82rem;background:#F8FAFC;color:#334155;">
+            </div>
+
+            <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Rendered Email Body Preview</label>
+            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:14px;font-size:0.82rem;color:#334155;line-height:1.5;" id="campaignEmailLivePreviewBox">
+              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:8px;margin-bottom:10px;font-size:0.75rem;color:#64748B;">
+                <span><strong>To:</strong> <span id="previewToEmail" style="color:#2563EB;">alumni@mountzion.ac.in</span></span>
+                <span><strong>Reply-To:</strong> <span id="previewReplyToTag" style="color:#2563EB;">alumnirequests+ID@mountzion.ac.in</span></span>
+              </div>
+              <p style="margin:0 0 8px;">Dear <strong id="previewAlumniName" style="color:#2563EB;">Alumnus</strong>,</p>
+              <p style="margin:0 0 8px;">We hope this email finds you well. Please update your current professional details (Company, Designation, City, Country, and LinkedIn URL) with your alma mater using your student portal.</p>
+              <p style="margin:0;color:#64748B;font-size:0.78rem;">Best regards,<br><strong>Mount Zion Alumni Relations Team</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <div id="campaignProgressState" style="display:none;text-align:center;padding:10px 0;">
+          <h4 style="margin:0 0 10px;font-size:1rem;color:#1E293B;">Campaign Dispatched & Processing</h4>
+          <div style="width:100%;background:#E2E8F0;border-radius:8px;height:12px;overflow:hidden;margin-bottom:14px;">
+            <div id="campaignProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#2563EB,#3B82F6);transition:width 0.4s ease;"></div>
+          </div>
+          <p id="campaignProgressStats" style="font-size:0.85rem;color:#64748B;margin:0;">Sent: 0 / Failed: 0</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('emailCampaignModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="launchCampaignSubmitBtn" onclick="submitEmailCampaignLaunch()">
+          <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign
+        </button>
+      </div>
+    </div>
+  </div>
+
 
 <script src="js/app.js"></script>
 <script src="js/charts.js"></script>
@@ -1969,7 +2059,7 @@
     var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
 </script>
-<script src="js/member.js"></script>
+<script src="js/member.js?v=1.0.2"></script>
 <script src="js/chat.js"></script>
 </body>
 </html>

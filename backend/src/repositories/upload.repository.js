@@ -44,8 +44,18 @@ async function getImportHistory({ page, limit, offset }) {
   return { total, rows: result.recordset };
 }
 
-async function batchInsertAlumni(records) {
+async function batchInsertAlumni(records, importId = null) {
   const pool = await getPool();
+
+  await pool.request().query(`
+    IF NOT EXISTS (
+      SELECT * FROM sys.columns 
+      WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'import_id'
+    )
+    BEGIN
+      ALTER TABLE dbo.Alumni ADD import_id INT NULL;
+    END
+  `);
 
   // Create a new mssql Table object matching the Alumni table schema
   const table = new sql.Table('Alumni');
@@ -74,6 +84,7 @@ async function batchInsertAlumni(records) {
   table.columns.add('faculty_assigned', sql.NVarChar(150), { nullable: true });
   table.columns.add('resolved_faculty_user_id', sql.Int, { nullable: true });
   table.columns.add('father_name', sql.NVarChar(150), { nullable: true });
+  table.columns.add('import_id', sql.Int, { nullable: true });
 
   const { logger } = require('../utils/logger');
 
@@ -83,7 +94,6 @@ async function batchInsertAlumni(records) {
       logger.warn('Skipping batch insert record due to missing or invalid registerNo: ' + JSON.stringify(record));
       continue;
     }
-    // Helper: truncate string safely to avoid BCP column-length overflow
     const trunc = (val, max) => val ? String(val).trim().slice(0, max) : null;
 
     table.rows.add(
@@ -109,7 +119,8 @@ async function batchInsertAlumni(records) {
       trunc(record.secondaryEmail || record.secondary_email, 150) || null,
       trunc(record.facultyAssigned, 150) || null,
       record.facultyId || null,
-      trunc(record.fatherName || record.father_name, 150) || null
+      trunc(record.fatherName || record.father_name, 150) || null,
+      importId || null
     );
   }
 
@@ -184,6 +195,27 @@ async function saveFacultyAlias(facultyId, aliasName) {
   }
 }
 
+async function rollbackImportLog(importId) {
+  const pool = await getPool();
+
+  await pool.request()
+    .input('importId', sql.Int, importId)
+    .query(`
+      DELETE FROM AlumniAssignments 
+      WHERE alumni_id IN (SELECT alumni_id FROM Alumni WHERE import_id = @importId)
+    `);
+
+  const deleteRes = await pool.request()
+    .input('importId', sql.Int, importId)
+    .query(`DELETE FROM Alumni WHERE import_id = @importId`);
+
+  await pool.request()
+    .input('importId', sql.Int, importId)
+    .query(`UPDATE ImportHistory SET status = 'ROLLED_BACK' WHERE import_id = @importId`);
+
+  return deleteRes.rowsAffected[0] || 0;
+}
+
 module.exports = {
   createImportLog,
   getImportHistory,
@@ -191,5 +223,6 @@ module.exports = {
   findByRegisterNo,
   updateAlumniFields,
   getFacultiesAndAliases,
-  saveFacultyAlias
+  saveFacultyAlias,
+  rollbackImportLog
 };

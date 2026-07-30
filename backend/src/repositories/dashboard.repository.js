@@ -160,10 +160,10 @@ async function getTeamMemberStats(teamId) {
 
       SELECT
         u.user_id, u.first_name, u.last_name, u.email,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id)) AS total_assigned,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND status = 'Completed') AS completed,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND (status = 'Pending' OR status = 'ASSIGNED_TO_LEADER')) AS pending,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND status = 'Draft') AS draft,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id) AS total_assigned,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Completed') AS completed,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Pending') AS pending,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Draft') AS draft,
         1 AS is_leader
       FROM Teams t
       INNER JOIN Users u ON t.leader_id = u.user_id
@@ -182,7 +182,7 @@ async function getMemberStats(memberId) {
         SUM(CASE WHEN aa.status = 'Completed' THEN 1 ELSE 0 END) AS completed,
         SUM(CASE WHEN aa.status = 'Pending' THEN 1 ELSE 0 END) AS pending,
         SUM(CASE WHEN aa.status = 'Draft' THEN 1 ELSE 0 END) AS draft,
-        SUM(CASE WHEN aa.member_id = @memberId AND (CAST(aa.completed_date AS DATE) = CAST(GETDATE() AS DATE) OR (aa.status = 'Completed' AND CAST(a.updated_at AS DATE) = CAST(GETDATE() AS DATE))) THEN 1 ELSE 0 END) AS today_updates,
+        SUM(CASE WHEN aa.member_id = @memberId AND (CAST(aa.completed_date AS DATE) = CAST(GETDATE() AS DATE) OR (aa.status = 'Completed' AND CAST(a.updated_date AS DATE) = CAST(GETDATE() AS DATE))) THEN 1 ELSE 0 END) AS today_updates,
         MAX(l.first_name + ' ' + l.last_name) AS leader_name
       FROM Users u
       INNER JOIN TeamMembers tm ON u.user_id = tm.user_id

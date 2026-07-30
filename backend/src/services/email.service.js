@@ -6,19 +6,31 @@ const https = require('https');
 async function getEligibleRecipients(leaderId) {
   const pool = await getPool();
 
-  const leaderRes = await pool.request()
+  const teamRes = await pool.request()
     .input('leaderId', sql.Int, leaderId)
-    .query('SELECT user_id, team_id, role_id FROM dbo.Users WHERE user_id = @leaderId');
+    .query('SELECT team_id FROM dbo.Teams WHERE leader_id = @leaderId AND is_active = 1');
 
-  if (leaderRes.recordset.length === 0) {
-    throw new Error('Leader user not found');
+  let teamId = null;
+  if (teamRes.recordset.length > 0) {
+    teamId = teamRes.recordset[0].team_id;
+  } else {
+    const tmRes = await pool.request()
+      .input('leaderId', sql.Int, leaderId)
+      .query('SELECT team_id FROM dbo.TeamMembers WHERE user_id = @leaderId');
+    if (tmRes.recordset.length > 0) {
+      teamId = tmRes.recordset[0].team_id;
+    }
   }
 
-  const leader = leaderRes.recordset[0];
-  const teamId = leader.team_id;
-
   if (!teamId) {
-    throw new Error('User is not assigned to any team');
+    const adminRes = await pool.request()
+      .query(`
+        SELECT aa.assignment_id, aa.alumni_id, a.name, a.email, a.department, a.batch
+        FROM dbo.AlumniAssignments aa
+        JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
+        WHERE a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
+      `);
+    return adminRes.recordset;
   }
 
   const queryStr = `
@@ -26,16 +38,18 @@ async function getEligibleRecipients(leaderId) {
     FROM dbo.AlumniAssignments aa
     JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
     WHERE (
-      aa.member_id IN (
-        SELECT user_id FROM dbo.Users WHERE team_id = @teamId
+      aa.team_id = @teamId
+      OR aa.member_id = @leaderId
+      OR aa.member_id IN (
+        SELECT user_id FROM dbo.TeamMembers WHERE team_id = @teamId
       )
-      OR aa.team_id = @teamId
     )
     AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
   `;
 
   const recipientsRes = await pool.request()
     .input('teamId', sql.Int, teamId)
+    .input('leaderId', sql.Int, leaderId)
     .query(queryStr);
 
   return recipientsRes.recordset;
@@ -44,21 +58,12 @@ async function getEligibleRecipients(leaderId) {
 async function createCampaign({ leaderId, assignmentIds }) {
   const pool = await getPool();
 
-  // Get leader info
-  const leaderRes = await pool.request()
+  // Get team info
+  const teamRes = await pool.request()
     .input('leaderId', sql.Int, leaderId)
-    .query('SELECT user_id, team_id, role_id FROM dbo.Users WHERE user_id = @leaderId');
+    .query('SELECT team_id FROM dbo.Teams WHERE leader_id = @leaderId AND is_active = 1');
 
-  if (leaderRes.recordset.length === 0) {
-    throw new Error('Leader user not found');
-  }
-
-  const leader = leaderRes.recordset[0];
-  const teamId = leader.team_id;
-
-  if (!teamId) {
-    throw new Error('User is not assigned to any team');
-  }
+  let teamId = teamRes.recordset.length > 0 ? teamRes.recordset[0].team_id : 1;
 
   let recipients = await getEligibleRecipients(leaderId);
 
@@ -271,8 +276,12 @@ async function getReplies({ userId, role }) {
     request.input('userId', sql.Int, userId);
   } else if (userRole === 'LEADER') {
     query += ` WHERE (
-      aa.member_id IN (SELECT user_id FROM dbo.Users WHERE team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId))
-      OR aa.team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId)
+      aa.member_id IN (
+        SELECT user_id FROM dbo.TeamMembers WHERE team_id IN (SELECT team_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1)
+        UNION
+        SELECT leader_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1
+      )
+      OR aa.team_id IN (SELECT team_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1)
     )`;
     request.input('userId', sql.Int, userId);
   }

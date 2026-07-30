@@ -4,9 +4,18 @@ const { success } = require('../utils/response');
 
 const getTeamLoad = asyncHandler(async (req, res) => {
   const result = await reassignService.getTeamLoad(req.user, {
-    leaderId: req.query.leaderId
+    leaderId: req.query.leaderId,
+    department: req.query.department
   });
   success(res, result, 'Team workload retrieved successfully');
+});
+
+const getSourceMemberDepartments = asyncHandler(async (req, res) => {
+  const result = await reassignService.getSourceMemberDepartments(req.user, {
+    leaderId: req.query.leaderId,
+    sourceMemberId: parseInt(req.query.sourceMemberId, 10)
+  });
+  success(res, result, 'Source member departments retrieved successfully');
 });
 
 const previewReassign = asyncHandler(async (req, res) => {
@@ -19,4 +28,4 @@ const commitReassign = asyncHandler(async (req, res) => {
   success(res, result, `${result.moved} alumni reassigned successfully`);
 });
 
-module.exports = { getTeamLoad, previewReassign, commitReassign };
+module.exports = { getTeamLoad, getSourceMemberDepartments, previewReassign, commitReassign };

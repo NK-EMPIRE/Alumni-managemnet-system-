@@ -158,16 +158,12 @@ async function processExcelImport(filePath, originalName, currentUser) {
     }
   }
 
-  if (newRows.length > 0) {
-    await uploadRepository.batchInsertAlumni(newRows);
-  }
-
   const finalStatus = errors.length > 0 ? 'Partial' : 'Completed';
   const durationSec = parseFloat(((Date.now() - startTime) / 1000).toFixed(2));
   
   const pendingAliasReview = Object.values(pendingAliasReviewMap);
 
-  await uploadRepository.createImportLog({
+  const importLog = await uploadRepository.createImportLog({
     fileName: filePath.split('\\').pop().split('/').pop(),
     originalName: originalName || null,
     totalRows,
@@ -179,8 +175,12 @@ async function processExcelImport(filePath, originalName, currentUser) {
     errorDetails: errors,
     importedBy: currentUser.userId,
     status: finalStatus,
-    durationSec: durationSec
+    durationSec
   });
+
+  if (newRows.length > 0) {
+    await uploadRepository.batchInsertAlumni(newRows, importLog.import_id);
+  }
 
   logger.auditLog('EXCEL_IMPORTED', {
     fileName: filePath.split('\\').pop().split('/').pop(),
@@ -322,9 +322,24 @@ async function confirmAlias(leaderId, excelName) {
   return uploadRepository.saveFacultyAlias(leaderId, excelName.toLowerCase());
 }
 
+async function rollbackImport(importId, currentUser = null) {
+  const deletedCount = await uploadRepository.rollbackImportLog(importId);
+
+  logger.info(`Excel import batch #${importId} rolled back successfully. ${deletedCount} records removed.`);
+
+  logger.auditLog('EXCEL_IMPORT_ROLLED_BACK', {
+    importId,
+    deletedCount,
+    rolledBackBy: currentUser ? currentUser.userId : null
+  });
+
+  return { importId, deletedCount };
+}
+
 module.exports = {
   processExcelImport,
   getExcelPreview,
   getImportHistory,
-  confirmAlias
+  confirmAlias,
+  rollbackImport
 };

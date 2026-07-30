@@ -560,7 +560,7 @@
       </a>
 
       <div class="sidebar-label">Management</div>
-      <a class="sidebar-item" data-page="campaign" onclick="openEmailCampaignModal()" href="#">
+      <a class="sidebar-item" data-page="campaign" onclick="openEmailCampaignModal(); return false;" href="#">
         <i class="fas fa-paper-plane"></i>
         <span class="sidebar-item-text">Request Details</span>
       </a>
@@ -572,10 +572,6 @@
         <i class="fas fa-cog"></i>
         <span class="sidebar-item-text">Settings</span>
       </a>
-      <a class="sidebar-item" data-page="logout" href="#" style="color:rgba(255,255,255,0.5)">
-        <i class="fas fa-sign-out-alt"></i>
-        <span class="sidebar-item-text">Logout</span>
-      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -586,6 +582,10 @@
           <div class="sidebar-user-role">Team Leader</div>
         </div>
       </div>
+      <a class="sidebar-item" data-page="logout" href="#" onclick="API.logout()" style="color:#EF4444 !important;font-weight:600;margin-top:10px;background:rgba(239,68,68,0.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+        <i class="fas fa-sign-out-alt" style="color:#EF4444;"></i>
+        <span class="sidebar-item-text">Logout</span>
+      </a>
     </div>
   </aside>
 
@@ -1047,8 +1047,10 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="updateModal">
-    <div class="modal modal-xl" style="max-width:900px;width:95vw;">
+  <div class="modal-overlay" id="updateModal" style="overflow-x:visible;">
+    <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;overflow:visible;">
+      <button type="button" class="floating-modal-nav-btn left-nav-btn" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record"><i class="fas fa-chevron-left"></i></button>
+      <button type="button" class="floating-modal-nav-btn right-nav-btn" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record"><i class="fas fa-chevron-right"></i></button>
       <div class="modal-header">
         <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
           <div class="avatar" id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">A</div>
@@ -1058,11 +1060,7 @@
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <div class="modal-nav-group" style="display:flex;align-items:center;gap:6px;background:#F1F5F9;padding:4px 8px;border-radius:8px;border:1px solid #CBD5E1;">
-            <button type="button" class="btn btn-sm btn-secondary" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record (Left Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-left"></i></button>
-            <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;">1 / 1</span>
-            <button type="button" class="btn btn-sm btn-secondary" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record (Right Arrow)" style="padding:4px 10px;"><i class="fas fa-arrow-right"></i></button>
-          </div>
+          <span id="modalNavCounter" style="font-size:13px;font-weight:600;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:6px;border:1px solid #CBD5E1;">1 / 1</span>
           <button class="modal-close" id="modalClose" data-close="updateModal"><i class="fas fa-times"></i></button>
         </div>
       </div>
@@ -1154,7 +1152,7 @@
           <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email <span class="required" style="color:#EF4444">*</span></label>
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Email</label>
                 <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
               </div>
               <input type="email" id="fieldEmail" placeholder="email@example.com" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
@@ -1168,7 +1166,7 @@
           <div class="form-row" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone <span class="required" style="color:#EF4444">*</span></label>
+                <label style="font-size:12px;font-weight:600;color:#64748B;margin:0;">Phone</label>
                 <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
               </div>
               <input type="text" id="fieldPhone" placeholder="Phone number" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
@@ -1246,11 +1244,13 @@
         <!-- Method Select -->
         <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <label style="font-size:0.85rem;font-weight:600;color:#374151">Distribution Method:</label>
-          <select id="distMethodSelect" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;color:#1E293B">
+          <select id="distMethodSelect" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;color:#1E293B" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
+            <option value="DepartmentWise">Department-Wise (Auto-match by Department)</option>
             <option value="FacultyWise">Faculty-Wise (Auto-match by Faculty)</option>
             <option value="RoundRobin">Round Robin (Equal Split)</option>
             <option value="BatchWise">Batch-Wise (Manual Count)</option>
           </select>
+
           <button class="btn btn-secondary" id="previewDistBtn" style="padding:6px 16px;font-size:0.85rem"><i class="fas fa-eye"></i> Preview</button>
         </div>
 
@@ -1267,13 +1267,24 @@
           <h3 style="font-size:0.9rem;font-weight:600;color:#1E293B;margin-bottom:10px"><i class="fas fa-table" style="margin-right:6px;color:#2563EB"></i>Distribution Preview</h3>
           <div id="distPreviewTable"></div>
 
-          <!-- Unmatched alumni section (FacultyWise only) -->
+          <!-- Unmatched alumni section -->
           <div id="distUnmatchedSection" style="display:none;margin-top:16px">
             <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:12px 16px;margin-bottom:12px">
               <strong style="color:#92400E;font-size:0.85rem"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Unmatched Alumni</strong>
-              <p style="color:#78350F;font-size:0.8rem;margin:4px 0 0">The following alumni could not be auto-matched. Please assign them manually before confirming.</p>
+              <p style="color:#78350F;font-size:0.8rem;margin:4px 0 0">These alumni could not be auto-matched. Choose a fallback method below.</p>
             </div>
-            <div id="distUnmatchedList"></div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+              <label style="font-size:0.82rem;font-weight:600;color:#374151">Fallback Method:</label>
+              <select id="distUnmatchedFallbackSelect" style="padding:4px 10px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.82rem;">
+                <option value="RoundRobin">Round Robin</option>
+                <option value="DepartmentWise">Department-Wise</option>
+              </select>
+            </div>
+            <div id="distFallbackDeptSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:10px;">
+              <h5 style="font-size:0.82rem;font-weight:700;color:#1E293B;margin:0 0 8px;">Department Mapping for Fallback</h5>
+              <div id="distFallbackDeptGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+            </div>
+            <div id="distUnmatchedList" style="max-height:160px;overflow-y:auto;font-size:0.82rem;color:#1E293B;"></div>
           </div>
         </div>
 
@@ -1333,6 +1344,15 @@
 
         <!-- Step 1: Workload + source/target -->
         <div id="circulateStep1" style="padding:20px 24px;">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
+              <span style="width:18px;height:18px;background:#E0E7FF;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-building" style="color:#4F46E5;font-size:0.65rem;"></i></span>
+              Filter Alumni by Department
+            </label>
+            <select class="form-control" id="circulateDeptFilter" onchange="onCirculateDeptChange()" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;width:100%;">
+              <option value="all">All Departments</option>
+            </select>
+          </div>
           <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:16px;border-radius:10px;border:1px solid var(--border);background:#F8FAFC;">
             <p style="color:var(--text-secondary);font-size:0.85rem;padding:14px;">Loading team workload...</p>
           </div>
@@ -1399,25 +1419,25 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div>
             <label class="form-label">Team Member</label>
-            <select class="form-control" id="ssFilterMember" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterMember">
               <option value="">All Members</option>
             </select>
           </div>
           <div>
             <label class="form-label">Department</label>
-            <select class="form-control" id="ssFilterDept" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterDept">
               <option value="">All Depts</option>
             </select>
           </div>
           <div>
             <label class="form-label">Batch / Year</label>
-            <select class="form-control" id="ssFilterBatch" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterBatch">
               <option value="">All Batches</option>
             </select>
           </div>
           <div>
             <label class="form-label">Status</label>
-            <select class="form-control" id="ssFilterStatus" onchange="fetchSpreadsheetData()">
+            <select class="form-control" id="ssFilterStatus">
               <option value="">All Statuses</option>
               <option value="Available">Awaiting Distribution</option>
               <option value="ASSIGNED_TO_LEADER">Assigned to Leader</option>
@@ -1429,11 +1449,11 @@
           </div>
           <div>
             <label class="form-label">Date From</label>
-            <input type="date" id="ssDateFrom" class="form-control" onchange="fetchSpreadsheetData()">
+            <input type="date" id="ssDateFrom" class="form-control">
           </div>
           <div>
             <label class="form-label">Date To</label>
-            <input type="date" id="ssDateTo" class="form-control" onchange="fetchSpreadsheetData()">
+            <input type="date" id="ssDateTo" class="form-control">
           </div>
         </div>
       </div>
@@ -1783,6 +1803,27 @@
           <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign
         </button>
       </div>
+  <!-- Alumni Replies Inbox Modal -->
+  <div class="modal-overlay" id="alumniRepliesModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content" style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-inbox" style="font-size:1.1rem;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Alumni Email Replies Inbox</h3>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Replies received from alumni detail update requests</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('alumniRepliesModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;max-height:60vh;overflow-y:auto;" id="alumniRepliesListContainer">
+        <p style="text-align:center;color:#64748B;padding:20px;">Loading alumni replies...</p>
+      </div>
+      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('alumniRepliesModal')">Close</button>
+      </div>
     </div>
   </div>
 
@@ -1815,7 +1856,7 @@
         <!-- Department Mapping Section for DepartmentWise -->
         <div id="distDeptMappingSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
           <h4 style="font-size:0.85rem;font-weight:700;color:#1E293B;margin-bottom:8px;"><i class="fas fa-building" style="color:var(--primary);margin-right:6px;"></i>Department to Faculty Member Mapping</h4>
-          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department alumni are assigned to which faculty member (members are matched by department automatically).</p>
+          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department(s) should be distributed to each member. You can select multiple departments per member by holding Ctrl (or Cmd on Mac).</p>
           <div id="distDeptMappingGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <!-- Populated dynamically by JS -->
           </div>
@@ -1837,8 +1878,20 @@
           <div id="distPreviewTable" style="max-height:260px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:8px;"></div>
 
           <div id="distUnmatchedSection" style="display:none;margin-top:14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;">
-            <h5 style="font-size:0.82rem;font-weight:700;color:#991B1B;margin-bottom:6px;"><i class="fas fa-exclamation-triangle"></i> Unmatched Alumni (Manual Assign Required)</h5>
-            <div id="distUnmatchedList" style="max-height:160px;overflow-y:auto;"></div>
+            <h5 style="font-size:0.82rem;font-weight:700;color:#991B1B;margin-bottom:6px;"><i class="fas fa-exclamation-triangle"></i> Unmatched Alumni</h5>
+            <p style="font-size:0.78rem;color:#991B1B;margin-bottom:10px;">Choose a fallback method below for these unmatched alumni.</p>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+              <label style="font-size:0.82rem;font-weight:600;color:#374151">Fallback Method:</label>
+              <select id="distUnmatchedFallbackSelect" style="padding:4px 10px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.82rem;">
+                <option value="RoundRobin">Round Robin</option>
+                <option value="DepartmentWise">Department-Wise</option>
+              </select>
+            </div>
+            <div id="distFallbackDeptSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;margin-bottom:10px;">
+              <h5 style="font-size:0.8rem;font-weight:700;color:#1E293B;margin:0 0 8px;">Department Mapping for Fallback</h5>
+              <div id="distFallbackDeptGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+            </div>
+            <div id="distUnmatchedList" style="max-height:160px;overflow-y:auto;font-size:0.82rem;color:#1E293B;"></div>
           </div>
         </div>
       </div>
@@ -1867,7 +1920,7 @@
     var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
-  <script src="js/leader.js"></script>
+  <script src="js/leader.js?v=1.0.2"></script>
   <script src="js/chat.js"></script>
 </body>
 </html>

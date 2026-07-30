@@ -62,10 +62,26 @@ async function createUser(userData, currentUser) {
   });
 
   try {
-    await sendPasswordResetEmail(userData.email, plainPassword);
+    const { sendLeaderWelcomeEmail, sendMemberWelcomeEmail } = require('../helpers/email');
+    const fullName = `${userData.firstName} ${userData.lastName}`.trim();
+    
+    // Role 2 = Leader, Role 3 = Member (or string)
+    const isLeader = userData.roleId == 2 || (userData.roleName && userData.roleName.toUpperCase() === 'LEADER');
+    if (isLeader) {
+      await sendLeaderWelcomeEmail({ name: fullName, email: userData.email, plainPassword });
+    } else {
+      let leaderName = null;
+      if (userData.leaderId) {
+        try {
+          const leaderUser = await userRepository.findById(userData.leaderId);
+          if (leaderUser) leaderName = `${leaderUser.first_name} ${leaderUser.last_name}`;
+        } catch (e) {}
+      }
+      await sendMemberWelcomeEmail({ name: fullName, email: userData.email, plainPassword, leaderName });
+    }
   } catch (err) {
     const { logger } = require('../utils/logger');
-    logger.error('Failed to send password reset email', { email: userData.email, error: err.message });
+    logger.error('Failed to send welcome email', { email: userData.email, error: err.message });
   }
 
   const { password_hash, ...userWithoutPassword } = created;

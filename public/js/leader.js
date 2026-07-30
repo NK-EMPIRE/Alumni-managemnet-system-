@@ -28,6 +28,24 @@
 
   var isDistributionLocked = false;
 
+  window.openModal = function (modalId) {
+    var modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  window.closeModal = function (modalId) {
+    var modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  };
+
   function getInitials(name) {
     return name.split(' ').map(function (w) { return w[0]; }).join('').toUpperCase();
   }
@@ -94,7 +112,7 @@
   function populateOverviewCards() {
     var container = document.getElementById('overviewCards');
     var leaderMember = teamMembers.find(function (m) { return m.isLeader; });
-    var assignedValue = leaderMember ? leaderMember.assigned : Math.max(0, totalAlumni - totalUndistributed - teamMembers.reduce(function (s, m) { return s + m.assigned; }, 0));
+    var assignedValue = leaderMember ? leaderMember.assigned : 0;
     var cards = [
       { icon: 'fa-user-graduate', color: 'blue', value: assignedValue, label: 'Assigned Alumni', change: '', changeDir: 'up' },
       { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '', changeDir: 'up' },
@@ -909,10 +927,18 @@
         }
 
         var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
+        var fatherVal = r.father_name || r.fatherName || r.pi_father_name || '';
+        var nameCellHtml = '<div>' +
+          '<div style="display:flex;align-items:center;gap:6px;">' +
+          '  <strong style="color:#1E293B;">' + nameVal + '</strong>' +
+          '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + (r.name || '').replace(/'/g, "\\'") + '\', \'' + fatherVal.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+          '</div>' +
+          (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
+          '</div>';
 
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B">' + sno + '</td>' +
-          '<td><strong>' + nameVal + '</strong></td>' +
+          '<td>' + nameCellHtml + '</td>' +
           '<td>' + deptVal + '</td>' +
           '<td>' + batchVal + '</td>' +
           '<td>' + compVal + '</td>' +
@@ -1068,6 +1094,88 @@
         document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
+
+  function applyPreFilledLockingLeader() {
+    var fieldIds = [
+      'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
+      'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldState', 'fieldCountry',
+      'fieldEmail', 'fieldPhone', 'fieldSecondaryEmail', 'fieldSecondaryPhone',
+      'fieldLinkedin', 'fieldGovtJob'
+    ];
+
+    fieldIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+
+      var parent = el.parentNode;
+      if (!parent) return;
+
+      var existingWrapper = parent.querySelector('.field-lock-action-wrapper');
+      if (existingWrapper) existingWrapper.remove();
+
+      var val = el.value ? el.value.trim() : '';
+      var isPreFilled = val !== '' && val !== 'No' && val !== 'Select Department' && val !== 'Select Batch';
+
+      if (isPreFilled) {
+        el.readOnly = true;
+        if (el.tagName === 'SELECT') el.disabled = true;
+
+        var actionWrapper = document.createElement('div');
+        actionWrapper.className = 'field-lock-action-wrapper';
+        actionWrapper.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:6px;z-index:10;';
+
+        var pencilBtn = document.createElement('button');
+        pencilBtn.type = 'button';
+        pencilBtn.className = 'btn-pencil-edit';
+        pencilBtn.title = 'Click pencil to edit this field';
+        pencilBtn.style.cssText = 'background:#F1F5F9;border:1px solid #CBD5E1;color:#475569;border-radius:6px;cursor:pointer;font-size:0.78rem;padding:4px 8px;transition:all 0.2s ease;display:inline-flex;align-items:center;justify-content:center;';
+        pencilBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+
+        var saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'btn-field-save';
+        saveBtn.title = 'Save this field';
+        saveBtn.style.cssText = 'display:none;background:#10B981;border:none;color:#FFFFFF;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;padding:4px 10px;transition:all 0.2s ease;box-shadow:0 2px 6px rgba(16,185,129,0.3);align-items:center;gap:4px;';
+        saveBtn.innerHTML = '<i class="fas fa-check"></i> Save';
+
+        pencilBtn.onclick = function (e) {
+          e.preventDefault();
+          el.readOnly = false;
+          el.disabled = false;
+          el.focus();
+          el.style.borderColor = '#3B82F6';
+          pencilBtn.style.display = 'none';
+          saveBtn.style.display = 'inline-flex';
+          saveBtn.style.animation = 'popIn 0.25s ease';
+        };
+
+        saveBtn.onclick = function (e) {
+          e.preventDefault();
+          el.readOnly = true;
+          if (el.tagName === 'SELECT') el.disabled = true;
+          el.style.borderColor = '';
+          saveBtn.style.display = 'none';
+          pencilBtn.style.display = 'inline-flex';
+
+          if (typeof window.showToast === 'function') window.showToast('Field updated and saved!', 'success');
+        };
+
+        actionWrapper.appendChild(pencilBtn);
+        actionWrapper.appendChild(saveBtn);
+
+        if (getComputedStyle(parent).position === 'static') {
+          parent.style.position = 'relative';
+        }
+        parent.appendChild(actionWrapper);
+      } else {
+        el.readOnly = false;
+        el.disabled = false;
+      }
+    });
+  }
+
+  // Apply pre-filled data field locking with pencil edit icon
+  if (typeof applyPreFilledLockingLeader === 'function') applyPreFilledLockingLeader();
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
@@ -2059,7 +2167,7 @@
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
               status: m.status || (m.progress >= 75 ? 'On Track' : 'Behind'),
               lastActivity: m.lastActivity || '-',
-              isLeader: m.isLeader || false
+              isLeader: isLeader
             };
           });
         }
@@ -2088,14 +2196,13 @@
 
   // --- DISTRIBUTE MODAL LOGIC ---
   var _distPreviewData = null;
-  var _distUnmatchedAssignments = {}; // alumniId -> memberId (manual overrides)
+
 
   function setupDistributeModal() {
     var distributeBtn = document.getElementById('distributeModalBtn');
     if (distributeBtn) {
       distributeBtn.addEventListener('click', function () {
         _distPreviewData = null;
-        _distUnmatchedAssignments = {};
         document.getElementById('distPreviewSection').style.display = 'none';
         document.getElementById('distEmptyState').style.display = 'block';
         document.getElementById('distLoadingState').style.display = 'none';
@@ -2150,36 +2257,71 @@
           deptMappingSection.style.display = 'none';
         }
       }
+
     };
 
     function renderDistDeptMappingGrid() {
       var grid = document.getElementById('distDeptMappingGrid');
       if (!grid) return;
 
-      var depts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
+      var deptSet = {};
+      if (_apiAssignedAlumni) {
+        var recs = Array.isArray(_apiAssignedAlumni.records) ? _apiAssignedAlumni.records : (Array.isArray(_apiAssignedAlumni) ? _apiAssignedAlumni : []);
+        recs.forEach(function (a) {
+          if (a.department) {
+            var d = String(a.department).trim().toUpperCase();
+            if (d && d !== '-') deptSet[d] = true;
+          }
+        });
+      }
+      var defaultDepts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT', 'CIVIL', 'AIDS', 'AIML'];
+      defaultDepts.forEach(function (d) { deptSet[d] = true; });
+      var depts = Object.keys(deptSet).sort();
       var html = '';
 
-      depts.forEach(function (dept) {
-        var matchedUser = teamMembers.find(function (m) {
-          return m.department && m.department.toUpperCase().trim() === dept;
+      teamMembers.forEach(function (m) {
+        var memberDept = (m.department || '').toUpperCase().trim();
+        var checkboxesHtml = '';
+        depts.forEach(function (dept) {
+          var checked = (memberDept === dept) ? 'checked' : '';
+          checkboxesHtml += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;margin-right:12px;margin-bottom:6px;cursor:pointer;color:#334155;">' +
+            '<input type="checkbox" class="dist-dept-check" data-member="' + m.id + '" value="' + dept + '" ' + checked + '> ' +
+            dept +
+            '</label>';
         });
-        var selectedUserId = matchedUser ? matchedUser.id : '';
 
+        html += '<div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;margin-bottom:8px;">' +
+          '<div style="font-weight:600;font-size:0.82rem;color:#1E293B;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">' +
+            '<span><i class="fas ' + (m.isLeader ? 'fa-user-shield' : 'fa-user') + '" style="color:#2563EB;margin-right:6px;"></i>' +
+            m.name + (m.isLeader ? ' <span style="font-size:0.72rem;background:#DBEAFE;color:#1E40AF;padding:2px 6px;border-radius:4px;margin-left:4px;">Team Leader</span>' : '') + '</span>' +
+          '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;align-items:center;">' +
+            checkboxesHtml +
+          '</div>' +
+          '</div>';
+      });
+
+      grid.innerHTML = html;
+      grid.style.display = 'block';
+    }
+
+    function renderDistFallbackDeptGrid() {
+      var grid = document.getElementById('distFallbackDeptGrid');
+      if (!grid) return;
+      var depts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
+      var html = '';
+      depts.forEach(function (dept) {
         var optionsHtml = '<option value="">-- Select Member --</option>';
         teamMembers.forEach(function (m) {
-          var sel = (parseInt(m.id, 10) === parseInt(selectedUserId, 10)) ? 'selected' : '';
-          var deptTag = m.department ? ' (' + m.department + ')' : '';
-          optionsHtml += '<option value="' + m.id + '" ' + sel + '>' + m.name + deptTag + '</option>';
+          optionsHtml += '<option value="' + m.id + '">' + m.name + (m.department ? ' (' + m.department + ')' : '') + '</option>';
         });
-
         html += '<div>' +
-          '<label class="form-label" style="font-size:0.78rem;font-weight:600;color:#334155;margin-bottom:4px;display:block;">Dept: ' + dept + '</label>' +
-          '<select class="form-control dist-dept-map-select" data-dept="' + dept + '" style="height:34px;font-size:0.8rem;">' +
+          '<label class="form-label" style="font-size:0.78rem;font-weight:600;color:#334155;margin-bottom:4px;display:block;">' + dept + '</label>' +
+          '<select class="form-control dist-fallback-dept-select" data-dept="' + dept + '" style="height:34px;font-size:0.8rem;">' +
           optionsHtml +
           '</select>' +
           '</div>';
       });
-
       grid.innerHTML = html;
     }
 
@@ -2204,11 +2346,11 @@
         }
         if (method === 'DepartmentWise') {
           var mapping = {};
-          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
-            var deptName = selectEl.getAttribute('data-dept');
-            var val = selectEl.value;
-            if (deptName && val) {
-              mapping[deptName] = parseInt(val, 10);
+          document.querySelectorAll('.dist-dept-check:checked').forEach(function (cb) {
+            var memberId = parseInt(cb.getAttribute('data-member'), 10);
+            var deptName = cb.value;
+            if (deptName && memberId) {
+              mapping[deptName] = memberId;
             }
           });
           body.departmentMapping = mapping;
@@ -2217,7 +2359,6 @@
         document.getElementById('distPreviewSection').style.display = 'none';
         document.getElementById('distEmptyState').style.display = 'none';
         document.getElementById('confirmDistributeBtn').style.display = 'none';
-        _distUnmatchedAssignments = {};
 
         API.leaderPreview(body).then(function (res) {
           document.getElementById('distLoadingState').style.display = 'none';
@@ -2242,34 +2383,34 @@
     if (confirmBtn) {
       confirmBtn.addEventListener('click', function () {
         if (!_distPreviewData) return;
-        var hasUnmatched = _distPreviewData.some(function (g) { return g.userId === -1 || g.isUnmatched; });
-        if (hasUnmatched) {
-          var unmatchedGroup = _distPreviewData.find(function (g) { return g.userId === -1 || g.isUnmatched; });
-          var unmatchedAlumni = unmatchedGroup ? unmatchedGroup.alumniList : [];
-          var unresolved = unmatchedAlumni.filter(function (a) { return !_distUnmatchedAssignments[a.alumni_id]; });
-          if (unresolved.length > 0) {
-            showToast('Warning', unresolved.length + ' unmatched alumni still need manual member assignment.', 'warning');
-            return;
-          }
-        }
         var method = document.getElementById('distMethodSelect').value;
         var batch = document.getElementById('distBatchInput').value.trim() || undefined;
-        var manualAssignments = Object.keys(_distUnmatchedAssignments).map(function (alumniId) {
-          return { alumniId: parseInt(alumniId), memberId: _distUnmatchedAssignments[alumniId] };
-        });
-        var body = { teamId: _teamId, method: method, manualAssignments: manualAssignments };
+        var body = { teamId: _teamId, method: method, manualAssignments: [] };
         if (method === 'BatchWise' && batch) body.batch = batch;
         if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
         if (method === 'DepartmentWise') {
           var mapping = {};
-          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
-            var deptName = selectEl.getAttribute('data-dept');
-            var val = selectEl.value;
-            if (deptName && val) {
-              mapping[deptName] = parseInt(val, 10);
+          document.querySelectorAll('.dist-dept-check:checked').forEach(function (cb) {
+            var memberId = parseInt(cb.getAttribute('data-member'), 10);
+            var deptName = cb.value;
+            if (deptName && memberId) {
+              mapping[deptName] = memberId;
             }
           });
           body.departmentMapping = mapping;
+        }
+        var fbSelect = document.getElementById('distUnmatchedFallbackSelect');
+        if (fbSelect && fbSelect.value) {
+          body.unmatchedFallback = fbSelect.value;
+          if (fbSelect.value === 'DepartmentWise') {
+            var fbMapping = {};
+            document.querySelectorAll('.dist-fallback-dept-select').forEach(function (sel) {
+              var dept = sel.getAttribute('data-dept');
+              var val = sel.value;
+              if (dept && val) fbMapping[dept] = parseInt(val, 10);
+            });
+            body.fallbackDepartmentMapping = fbMapping;
+          }
         }
 
         confirmBtn.disabled = true;
@@ -2321,28 +2462,27 @@
       document.getElementById('distUnmatchedSection').style.display = 'block';
       var uHtml = '';
       unmatchedGroup.alumniList.forEach(function (a) {
-        var optionsHtml = '<option value="">-- Select Member --</option>';
-        teamMembers.forEach(function (m) {
-          optionsHtml += '<option value="' + m.id + '">' + m.name + '</option>';
-        });
-        uHtml += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9">' +
-          '<span style="flex:1;font-size:0.82rem;color:#1E293B"><strong>' + a.name + '</strong> (' + (a.register_no || '-') + ')' +
-          (a.originalFaculty ? ' <em style="color:#94A3B8;font-size:0.75rem">faculty: ' + a.originalFaculty + '</em>' : '') + '</span>' +
-          '<select class="unmatched-member-select" data-alumni-id="' + a.alumni_id + '" style="padding:4px 8px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.8rem">' +
-          optionsHtml + '</select>' +
+        uHtml += '<div style="padding:4px 0;border-bottom:1px solid #F1F5F9">' +
+          '<strong>' + a.name + '</strong> (' + (a.register_no || '-') + ')' +
+          (a.originalFaculty ? ' <em style="color:#94A3B8;font-size:0.75rem">faculty: ' + a.originalFaculty + '</em>' : '') +
           '</div>';
       });
       document.getElementById('distUnmatchedList').innerHTML = uHtml;
-      document.querySelectorAll('.unmatched-member-select').forEach(function (sel) {
-        sel.addEventListener('change', function () {
-          var alumniId = this.getAttribute('data-alumni-id');
-          if (this.value) {
-            _distUnmatchedAssignments[alumniId] = parseInt(this.value);
-          } else {
-            delete _distUnmatchedAssignments[alumniId];
+      var fbSelect = document.getElementById('distUnmatchedFallbackSelect');
+      if (fbSelect) {
+        fbSelect.onchange = function () {
+          var deptSection = document.getElementById('distFallbackDeptSection');
+          if (deptSection) {
+            deptSection.style.display = this.value === 'DepartmentWise' ? 'block' : 'none';
+            if (this.value === 'DepartmentWise' && typeof renderDistFallbackDeptGrid === 'function') {
+              renderDistFallbackDeptGrid();
+            }
           }
-        });
-      });
+        };
+        fbSelect.value = 'RoundRobin';
+        var deptSection = document.getElementById('distFallbackDeptSection');
+        if (deptSection) deptSection.style.display = 'none';
+      }
     } else {
       document.getElementById('distUnmatchedSection').style.display = 'none';
     }
@@ -2603,21 +2743,41 @@
 
 var _circulatePreviewData = null;
 
-window.openCirculateModal = function () {
+window.onCirculateDeptChange = function () {
+  var dept = document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all';
+  window.openCirculateModal(dept);
+};
+
+window.openCirculateModal = function (selectedDept) {
   _circulatePreviewData = null;
   document.getElementById('circulateStep1').style.display = 'block';
   document.getElementById('circulateStep2').style.display = 'none';
-  document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;">Loading...</p>';
+  document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;padding:12px;">Loading...</p>';
 
+  var currentDept = selectedDept || (document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all');
   var token = localStorage.getItem('token');
-  fetch('/api/v1/assignments/reassign/team-load', {
+  var queryUrl = '/api/v1/assignments/reassign/team-load' + (currentDept && currentDept !== 'all' ? '?department=' + encodeURIComponent(currentDept) : '');
+
+  fetch(queryUrl, {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) {
-      document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Failed to load team data.</p>';
+      document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);padding:12px;">Failed to load team data.</p>';
       return;
     }
     var data = res.data;
+
+    // Populate Dept filter options if returning departments list
+    var deptFilterEl = document.getElementById('circulateDeptFilter');
+    if (deptFilterEl && data.departments) {
+      var prevVal = currentDept;
+      var opts = '<option value="all">All Departments</option>';
+      data.departments.forEach(function (d) {
+        opts += '<option value="' + d + '"' + (d === prevVal ? ' selected' : '') + '>' + d + '</option>';
+      });
+      deptFilterEl.innerHTML = opts;
+      deptFilterEl.value = prevVal;
+    }
 
     var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
       '<thead><tr style="background:#F1F5F9;">' +
@@ -2644,13 +2804,31 @@ window.openCirculateModal = function () {
       sourceSel.appendChild(o1);
     });
 
-    var renderCheckboxes = function () {
+    var onSourceSelect = function () {
       var srcId = parseInt(sourceSel.value, 10);
       targetBox.innerHTML = '';
       if (!srcId) {
         targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        var deptFilterEl = document.getElementById('circulateDeptFilter');
+        if (deptFilterEl) deptFilterEl.innerHTML = '<option value="all">All Departments</option>';
         return;
       }
+
+      // Fetch source member's specific department breakdown
+      var token = localStorage.getItem('token');
+      fetch('/api/v1/assignments/reassign/source-departments?sourceMemberId=' + srcId, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        var deptFilterEl = document.getElementById('circulateDeptFilter');
+        if (deptFilterEl && res.success && res.data.departments) {
+          var opts = '<option value="all">All Departments (All Backlog)</option>';
+          res.data.departments.forEach(function (d) {
+            opts += '<option value="' + d.department + '">' + d.department + ' (' + d.count + ' pending)</option>';
+          });
+          deptFilterEl.innerHTML = opts;
+        }
+      }).catch(function (e) {});
+
       data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
           var label = document.createElement('label');
@@ -2661,10 +2839,10 @@ window.openCirculateModal = function () {
       });
     };
 
-    sourceSel.onchange = renderCheckboxes;
+    sourceSel.onchange = onSourceSelect;
     renderCheckboxes();
   }).catch(function (err) {
-    document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Network error.</p>';
+    document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);padding:12px;">Network error.</p>';
   });
 
   openModal('circulateModal');
@@ -2678,26 +2856,29 @@ window.circulatePreview = function () {
   var targetMemberIds = Array.from(cbs).map(function (cb) { return parseInt(cb.value, 10); });
   if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
   var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
+  var deptFilter = document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all';
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
+    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, department: deptFilter })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Preview failed.'); return; }
     _circulatePreviewData = res.data;
 
-    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records from <strong>' + res.data.sourceName + '</strong>:</p>';
+    var deptSubtext = (deptFilter && deptFilter !== 'all') ? ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + deptFilter + ']</span>' : '';
+
+    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records' + deptSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
     res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:14px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;padding:8px 12px;border-radius:8px;margin-bottom:6px;">' +
         '<strong style="color:#1E40AF;">' + group.targetName + '</strong>' +
         '<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.75rem;">' + group.count + ' records</span></div>' +
         '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;">' +
-        '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th></tr></thead><tbody>';
+        '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th><th style="padding:5px 8px;text-align:left;">Department</th></tr></thead><tbody>';
       group.alumni.forEach(function (a) {
-        html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td></tr>';
+        html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td><td style="padding:4px 8px;color:#64748B;">' + (a.department || '-') + '</td></tr>';
       });
       html += '</tbody></table></div>';
     });
@@ -2944,4 +3125,81 @@ window.pollCampaignProgress = function (campaignId) {
       }
     }).catch(function () {});
   }, 3000);
+};
+
+window.copyAlumniAndFather = function (name, father) {
+  var textStr = 'Alumni: ' + name + (father ? ' | Father: ' + father : '');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(textStr).then(function () {
+      if (typeof window.showToast === 'function') window.showToast('Copied: ' + textStr, 'success');
+    });
+  }
+};
+
+/* ── ALUMNI REPLIES INBOX HANDLERS (LEADER) ── */
+window.openAlumniRepliesModal = function () {
+  var container = document.getElementById('alumniRepliesListContainer');
+  if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading alumni replies...</p>';
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns/replies/all', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.data && res.data.length > 0) {
+      var html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+      res.data.forEach(function (reply) {
+        var isPending = reply.review_status === 'Pending Review';
+        var badgeStyle = isPending ? 'background:#FEF3C7;color:#D97706;border:1px solid #FCD34D;' : 'background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;';
+
+        html += '<div style="border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;background:#F8FAFC;">';
+        html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+        html += '    <div>';
+        html += '      <strong style="font-size:0.92rem;color:#1E293B;">' + (reply.alumni_name || 'Alumnus') + '</strong>';
+        html += '      <span style="font-size:0.78rem;color:#64748B;margin-left:8px;">(' + (reply.alumni_email || '') + ')</span>';
+        html += '    </div>';
+        html += '    <span class="badge" style="padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;' + badgeStyle + '">' + reply.review_status + '</span>';
+        html += '  </div>';
+        html += '  <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:0.83rem;color:#334155;white-space:pre-wrap;margin-bottom:10px;">' + (reply.raw_reply_text || '') + '</div>';
+        html += '  <div style="display:flex;justify-content:space-between;align-items:center;">';
+        html += '    <span style="font-size:0.75rem;color:#94A3B8;"><i class="far fa-clock" style="margin-right:4px;"></i>' + new Date(reply.received_at).toLocaleString() + '</span>';
+        if (isPending) {
+          html += '    <button class="btn btn-primary btn-sm" onclick="markReplyAsReviewed(' + reply.reply_id + ')" style="padding:4px 12px;font-size:0.78rem;"><i class="fas fa-check" style="margin-right:4px;"></i> Mark Reviewed</button>';
+        }
+        html += '  </div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      if (container) container.innerHTML = html;
+
+      var badge = document.getElementById('pendingRepliesCountBadge');
+      var pendingCount = res.data.filter(function (r) { return r.review_status === 'Pending Review'; }).length;
+      if (badge) {
+        if (pendingCount > 0) {
+          badge.textContent = pendingCount;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    } else {
+      if (container) container.innerHTML = '<p style="text-align:center;color:#64748B;padding:24px;"><i class="fas fa-inbox" style="font-size:2rem;color:#CBD5E1;display:block;margin-bottom:8px;"></i> No alumni email replies found.</p>';
+    }
+  }).catch(function (err) {
+    if (container) container.innerHTML = '<p style="text-align:center;color:#EF4444;padding:16px;">Failed to load alumni replies.</p>';
+  });
+
+  if (window.openModal) window.openModal('alumniRepliesModal');
+};
+
+window.markReplyAsReviewed = function (replyId) {
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/email-campaigns/replies/' + replyId + '/review', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.success) {
+      if (typeof window.showToast === 'function') window.showToast('Reply marked as reviewed!', 'success');
+      window.openAlumniRepliesModal();
+    }
+  }).catch(function () { });
 };

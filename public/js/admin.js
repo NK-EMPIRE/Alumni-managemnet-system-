@@ -1800,7 +1800,6 @@ function validateTMForm() {
 
   var leader = document.getElementById('tmTeamLeader');
   if (!leader.value) { showFieldError(leader, 'Please select a team leader'); valid = false; }
-  else if (pass.value.length < 6) { showFieldError(pass, 'Password must be at least 6 characters'); valid = false; }
 
   return valid;
 }
@@ -2577,6 +2576,7 @@ function populateImportHistory() {
   if (_apiDataLoaded && _apiImportHistory && _apiImportHistory.records) {
     data = _apiImportHistory.records.map(function (h) {
       return {
+        id: h.import_id || h.importId || h.id,
         file: h.original_name || h.file_name || h.file || h.fileName || '-',
         imported: h.imported || h.recordsImported || 0,
         merged: h.merged || 0,
@@ -2589,7 +2589,6 @@ function populateImportHistory() {
         duration: h.duration_sec !== undefined && h.duration_sec !== null ? parseFloat(h.duration_sec).toFixed(1) + 's' : '-'
       };
     });
-    // Reverse array to show oldest first and new imports next
     data.reverse();
   } else {
     data = [];
@@ -2599,7 +2598,17 @@ function populateImportHistory() {
   data.forEach(function (item, i) {
     var statusBadge = item.status === 'Completed'
       ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Completed</span>'
-      : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Failed</span>';
+      : (item.status === 'ROLLED_BACK'
+        ? '<span class="badge badge-secondary" style="background:#64748B;color:#fff;"><i class="fas fa-undo"></i> Rolled Back</span>'
+        : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Failed</span>');
+
+    var rollbackBtn = '';
+    if (item.status === 'ROLLED_BACK') {
+      rollbackBtn = '<span style="font-size:0.75rem;color:#94A3B8;">Rolled Back</span>';
+    } else {
+      rollbackBtn = '<button class="btn btn-sm btn-danger" onclick="confirmRollbackImport(' + item.id + ', \'' + (item.file || '').replace(/'/g, "\\'") + '\')" style="padding:4px 10px;font-size:0.75rem;border-radius:6px;background:#EF4444;color:#fff;border:none;" title="Rollback this Excel import"><i class="fas fa-undo"></i> Rollback</button>';
+    }
+
     var formattedDate = item.date;
     if (item.date && item.date !== '-' && item.date.indexOf('T') > -1) {
       try {
@@ -2618,7 +2627,6 @@ function populateImportHistory() {
     var errBtn = '';
     if (item.errors > 0) {
       var errData = item.errorDetails;
-      var errMsg = errData ? (typeof errData === 'string' ? errData : JSON.stringify(errData, null, 2)) : 'No error details available. Check server logs.';
       var errIndex = i;
       errBtn = ' <button class="btn btn-sm btn-ghost" onclick="showImportErrors(' + errIndex + ')"><i class="fas fa-info-circle"></i></button>';
     }
@@ -2627,10 +2635,65 @@ function populateImportHistory() {
     html += '<td>' + formattedDate + '</td>';
     html += '<td>' + item.duration + '</td>';
     html += '<td>' + statusBadge + '</td>';
+    html += '<td style="text-align:center;">' + rollbackBtn + '</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
 }
+
+window.confirmRollbackImport = function (importId, fileName) {
+  if (!importId) {
+    if (typeof showToast === 'function') showToast('Error', 'Invalid import ID for rollback.', 'danger');
+    return;
+  }
+
+  var modalHtml = '<div class="modal-overlay show" id="rollbackConfirmModal" style="z-index:99999;display:flex;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.65);backdrop-filter:blur(4px);">' +
+    '<div class="modal modal-md" style="max-width:480px;background:#fff;border-radius:12px;padding:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">' +
+    '  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">' +
+    '    <div style="width:40px;height:40px;border-radius:50%;background:#FEE2E2;color:#EF4444;display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="fas fa-exclamation-triangle"></i></div>' +
+    '    <h3 style="font-size:1.1rem;font-weight:700;color:#1E293B;margin:0;">Confirm Import Rollback</h3>' +
+    '  </div>' +
+    '  <p style="font-size:0.9rem;color:#475569;margin-bottom:20px;line-height:1.5;">Are you sure you want to rollback the Excel import <strong>"' + fileName + '"</strong>?<br><br><span style="color:#DC2626;font-weight:600;">Warning:</span> All alumni records imported in this file will be permanently removed from the database.</p>' +
+    '  <div style="display:flex;justify-content:flex-end;gap:12px;">' +
+    '    <button class="btn btn-secondary" onclick="document.getElementById(\'rollbackConfirmModal\').remove()">Cancel</button>' +
+    '    <button class="btn btn-danger" id="execRollbackBtn" onclick="executeRollbackImport(' + importId + ')" style="background:#EF4444;color:#fff;border:none;"><i class="fas fa-undo"></i> Yes, Rollback Import</button>' +
+    '  </div>' +
+    '</div>' +
+    '</div>';
+
+  var existing = document.getElementById('rollbackConfirmModal');
+  if (existing) existing.remove();
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.executeRollbackImport = function (importId) {
+  var btn = document.getElementById('execRollbackBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rolling back...'; }
+
+  var token = localStorage.getItem('token');
+  fetch('/api/v1/upload/rollback/' + importId, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    var modal = document.getElementById('rollbackConfirmModal');
+    if (modal) modal.remove();
+
+    if (res && res.success) {
+      if (typeof showToast === 'function') showToast('Success', res.message || 'Import rolled back successfully.', 'success');
+      if (typeof fetchDashboardData === 'function') fetchDashboardData();
+      else window.location.reload();
+    } else {
+      if (typeof showToast === 'function') showToast('Error', (res && res.message) || 'Failed to rollback import.', 'danger');
+    }
+  }).catch(function (err) {
+    var modal = document.getElementById('rollbackConfirmModal');
+    if (modal) modal.remove();
+    if (typeof showToast === 'function') showToast('Error', err.message || 'Failed to rollback import.', 'danger');
+  });
+};
 
 function showImportErrors(index) {
   var item = _importErrorDetails[index];
@@ -4139,14 +4202,22 @@ window.openReassignModal = function () {
   openModal('reassignModal');
 };
 
-window.reassignLoadTeam = function () {
+window.onReassignDeptChange = function () {
+  var dept = document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all';
+  window.reassignLoadTeam(dept);
+};
+
+window.reassignLoadTeam = function (selectedDept) {
   var sel = document.getElementById('reassignLeaderSelect');
   var leaderId = parseInt(sel.value, 10);
   if (!leaderId) { Toast.warning('Reassign', 'Please select a leader.'); return; }
   _reassignLeaderId = leaderId;
 
+  var currentDept = selectedDept || (document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all');
+  var queryUrl = '/api/v1/assignments/reassign/team-load?leaderId=' + leaderId + (currentDept && currentDept !== 'all' ? '&department=' + encodeURIComponent(currentDept) : '');
+
   var token = localStorage.getItem('token');
-  fetch('/api/v1/assignments/reassign/team-load?leaderId=' + leaderId, {
+  fetch(queryUrl, {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Reassign', res && res.message || 'Failed to load team.'); return; }
@@ -4154,6 +4225,18 @@ window.reassignLoadTeam = function () {
     _reassignTeamId = data.team.team_id;
 
     document.getElementById('reassignTeamName').textContent = data.team.team_name;
+
+    // Populate Department Filter options
+    var deptFilterEl = document.getElementById('reassignDeptFilter');
+    if (deptFilterEl && data.departments) {
+      var prevVal = currentDept;
+      var opts = '<option value="all">All Departments</option>';
+      data.departments.forEach(function (d) {
+        opts += '<option value="' + d + '"' + (d === prevVal ? ' selected' : '') + '>' + d + '</option>';
+      });
+      deptFilterEl.innerHTML = opts;
+      deptFilterEl.value = prevVal;
+    }
 
     // Build workload table
     var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
@@ -4186,13 +4269,31 @@ window.reassignLoadTeam = function () {
       sourceSel.appendChild(opt1);
     });
 
-    var renderCheckboxes = function () {
+    var onSourceSelect = function () {
       var srcId = parseInt(sourceSel.value, 10);
       targetBox.innerHTML = '';
       if (!srcId) {
         targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        var deptFilterEl = document.getElementById('reassignDeptFilter');
+        if (deptFilterEl) deptFilterEl.innerHTML = '<option value="all">All Departments</option>';
         return;
       }
+
+      // Fetch source member's specific department breakdown
+      var token = localStorage.getItem('token');
+      fetch('/api/v1/assignments/reassign/source-departments?sourceMemberId=' + srcId + (_reassignLeaderId ? '&leaderId=' + _reassignLeaderId : ''), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        var deptFilterEl = document.getElementById('reassignDeptFilter');
+        if (deptFilterEl && res.success && res.data.departments) {
+          var opts = '<option value="all">All Departments (All Backlog)</option>';
+          res.data.departments.forEach(function (d) {
+            opts += '<option value="' + d.department + '">' + d.department + ' (' + d.count + ' pending)</option>';
+          });
+          deptFilterEl.innerHTML = opts;
+        }
+      }).catch(function (e) {});
+
       data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
           var label = document.createElement('label');
@@ -4203,7 +4304,7 @@ window.reassignLoadTeam = function () {
       });
     };
 
-    sourceSel.onchange = renderCheckboxes;
+    sourceSel.onchange = onSourceSelect;
     renderCheckboxes();
 
     document.getElementById('reassignStep1').style.display = 'none';
@@ -4222,18 +4323,21 @@ window.reassignPreview = function () {
   if (targetMemberIds.length === 0) { Toast.warning('Reassign', 'Please select at least one target member.'); return; }
 
   var count = parseInt(document.getElementById('reassignCount').value, 10) || null;
+  var deptFilter = document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all';
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ leaderId: _reassignLeaderId, sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
+    body: JSON.stringify({ leaderId: _reassignLeaderId, sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, department: deptFilter })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Reassign', res && res.message || 'Preview failed.'); return; }
     _reassignPreviewData = res.data;
 
+    var deptSubtext = (deptFilter && deptFilter !== 'all') ? ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + deptFilter + ']</span>' : '';
+
     var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">' +
-      'Moving <strong>' + res.data.totalMoving + '</strong> Pending alumni from <strong>' + res.data.sourceName + '</strong>:</p>';
+      'Moving <strong>' + res.data.totalMoving + '</strong> Pending alumni' + deptSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
 
     res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:16px;">' +

@@ -208,6 +208,15 @@ async function updateResetRequestStatus(requestId, status, adminUser) {
       .query(`UPDATE ResetRequests SET status = 'Accepted', updated_at = SYSUTCDATETIME() WHERE request_id = @requestId`);
       
     logger.auditLog('Password reset request accepted by admin', { email: req.email, adminId: adminUser.userId });
+
+    // Send Mount Zion College Password Reset Approved Email
+    try {
+      const { sendPasswordResetApprovedEmail } = require('../helpers/email');
+      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      await sendPasswordResetApprovedEmail({ email: req.email, name: fullName, tempPassword: defaultPassword });
+    } catch (err) {
+      logger.error('Failed to send password reset approved email', { email: req.email, error: err.message });
+    }
   } else {
     // Update request status to Declined
     await pool.request()
