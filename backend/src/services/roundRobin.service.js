@@ -130,7 +130,7 @@ async function adminAssign(currentUser, { department, batch, leaderId, count }) 
 /**
  * Generate preview of Leader distribution.
  */
-async function leaderPreview(currentUser, { teamId, method, batch, allocations, selectedMemberIds }) {
+async function leaderPreview(currentUser, { teamId, method, batch, allocations, selectedMemberIds, departmentMapping, unmatchedFallback, fallbackDepartmentMapping }) {
   if (!teamId || !method) {
     throw new AppError('Team ID and Method are required.', 400);
   }
@@ -353,42 +353,15 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     // Add matched groups to preview
     Object.values(matchedGroups).forEach(g => preview.push(g));
 
-    // Fallback unmatched alumni if requested (RoundRobin or BatchWise)
-    const fallbackMethod = params.unmatchedFallback; // 'RoundRobin', 'BatchWise', or undefined
+    // Show unmatched alumni — fallback applied only at confirm time
     if (unmatched.length > 0) {
-      if (fallbackMethod === 'RoundRobin' && activeUsers.length > 0) {
-        let qIdx = 0;
-        const fallbackMap = {};
-        activeUsers.forEach(u => {
-          fallbackMap[u.user_id] = { userId: u.user_id, userName: u.name, count: 0, alumniList: [], isFallback: true };
-        });
-        for (const alum of unmatched) {
-          const targetU = activeUsers[qIdx % activeUsers.length];
-          fallbackMap[targetU.user_id].alumniList.push(alum);
-          fallbackMap[targetU.user_id].count++;
-          qIdx++;
-        }
-        Object.values(fallbackMap).forEach(g => {
-          if (g.count > 0) {
-            const existingGroup = preview.find(p => p.userId === g.userId);
-            if (existingGroup) {
-              existingGroup.alumniList.push(...g.alumniList);
-              existingGroup.count += g.count;
-            } else {
-              preview.push(g);
-            }
-          }
-        });
-      } else {
-        // Sentinel unmatched group for manual option selection
-        preview.push({
-          userId: -1,
-          userName: 'Unmatched (Faculty Not Assigned)',
-          count: unmatched.length,
-          alumniList: unmatched,
-          isUnmatched: true
-        });
-      }
+      preview.push({
+        userId: -1,
+        userName: 'Unmatched (Faculty Not Assigned)',
+        count: unmatched.length,
+        alumniList: unmatched,
+        isUnmatched: true
+      });
     }
 
   } else if (method === 'DepartmentWise') {
@@ -412,7 +385,7 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
       deptAlumniMap[dept].push(alum);
     }
 
-    const departmentMapping = params.departmentMapping || {};
+    const deptMapping = departmentMapping || {};
     const memberGroupMap = {};
     activeUsers.forEach(u => {
       memberGroupMap[u.user_id] = {
@@ -427,7 +400,7 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
     const unmatchedAlumni = [];
 
     Object.keys(deptAlumniMap).forEach(dept => {
-      const targetUserId = departmentMapping[dept];
+      const targetUserId = deptMapping[dept];
       if (targetUserId && memberGroupMap[targetUserId]) {
         memberGroupMap[targetUserId].alumniList.push(...deptAlumniMap[dept]);
         memberGroupMap[targetUserId].count += deptAlumniMap[dept].length;
@@ -442,10 +415,6 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
       }
     });
 
-    Object.values(memberGroupMap).forEach(g => {
-      if (g.count > 0) preview.push(g);
-    });
-
     if (unmatchedAlumni.length > 0) {
       preview.push({
         userId: -1,
@@ -455,6 +424,10 @@ async function leaderPreview(currentUser, { teamId, method, batch, allocations, 
         isUnmatched: true
       });
     }
+
+    Object.values(memberGroupMap).forEach(g => {
+      if (g.count > 0) preview.push(g);
+    });
 
   } else {
     throw new AppError(`Unknown distribution method: ${method}`, 400);
@@ -471,6 +444,69 @@ async function leaderDistribute(currentUser, params) {
   const preview = await leaderPreview(currentUser, params);
   const manualAssignments = params.manualAssignments || [];
 
+  // Apply fallback distribution for unmatched alumni
+  const unmatchedGroup = preview.find(g => g.userId === -1 || g.isUnmatched);
+  const fallbackMethod = params.unmatchedFallback;
+  if (unmatchedGroup && unmatchedGroup.alumniList.length > 0 && fallbackMethod) {
+    const matchedMembers = preview.filter(g => g.userId !== -1 && !g.isUnmatched);
+    const allUserIds = matchedMembers.map(g => g.userId);
+    const userNames = {};
+    matchedMembers.forEach(g => { userNames[g.userId] = g.userName; });
+
+    // Get active users from the team for fallback
+    const usersResult = await pool.request()
+      .input('teamId', sql.Int, params.teamId)
+      .query(`
+        SELECT u.user_id, u.first_name + ' ' + u.last_name AS name, u.department
+        FROM Users u
+        WHERE u.user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = @teamId
+          UNION
+          SELECT leader_id FROM Teams WHERE team_id = @teamId
+        ) AND u.is_active = 1
+      `);
+    const activeUsers = usersResult.recordset;
+
+    if (fallbackMethod === 'DepartmentWise') {
+      const fbDeptMapping = params.fallbackDepartmentMapping || {};
+      const fbGroups = {};
+      activeUsers.forEach(u => {
+        fbGroups[u.user_id] = { userId: u.user_id, userName: u.name, count: 0, alumniList: [] };
+      });
+      for (const alum of unmatchedGroup.alumniList) {
+        const dept = (alum.department || '').toUpperCase().trim();
+        const targetUserId = fbDeptMapping[dept];
+        if (targetUserId && fbGroups[targetUserId]) {
+          fbGroups[targetUserId].alumniList.push(alum);
+          fbGroups[targetUserId].count++;
+        } else {
+          const firstKey = Object.keys(fbGroups)[0];
+          fbGroups[firstKey].alumniList.push(alum);
+          fbGroups[firstKey].count++;
+        }
+      }
+      Object.values(fbGroups).forEach(g => {
+        if (g.count > 0) preview.push(g);
+      });
+    } else {
+      // Default: RoundRobin
+      let qIdx = 0;
+      const rrGroups = {};
+      activeUsers.forEach(u => {
+        rrGroups[u.user_id] = { userId: u.user_id, userName: u.name, count: 0, alumniList: [] };
+      });
+      for (const alum of unmatchedGroup.alumniList) {
+        const target = activeUsers[qIdx % activeUsers.length];
+        rrGroups[target.user_id].alumniList.push(alum);
+        rrGroups[target.user_id].count++;
+        qIdx++;
+      }
+      Object.values(rrGroups).forEach(g => {
+        if (g.count > 0) preview.push(g);
+      });
+    }
+  }
+
   const transaction = pool.transaction();
   await transaction.begin();
 
@@ -478,7 +514,7 @@ async function leaderDistribute(currentUser, params) {
     let totalUpdated = 0;
 
     for (const group of preview) {
-      if (group.userId === -1) continue; // skip unmatched sentinel
+      if (group.userId === -1 || group.isUnmatched) continue;
       for (const alumni of group.alumniList) {
         await transaction.request()
           .input('alumniId', sql.Int, alumni.alumni_id)
