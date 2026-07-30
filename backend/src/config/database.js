@@ -70,6 +70,39 @@ async function getPool() {
         ALTER TABLE dbo.AlumniAssignments ADD CONSTRAINT CK_AlumniAssignments_status 
           CHECK (status IN ('Available', 'ASSIGNED_TO_LEADER', 'DISTRIBUTED', 'Pending', 'Draft', 'Completed', 'Reopened'));
       END
+      IF NOT EXISTS (
+        SELECT * FROM sys.columns 
+        WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'team_id'
+      )
+      BEGIN
+        ALTER TABLE dbo.AlumniAssignments ADD team_id INT NULL;
+        ALTER TABLE dbo.AlumniAssignments ADD CONSTRAINT FK_AA_Team2 FOREIGN KEY (team_id) REFERENCES dbo.Teams(team_id);
+      END
+
+      IF NOT EXISTS (
+        SELECT * FROM sys.columns 
+        WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'assigned_by'
+      )
+      BEGIN
+        ALTER TABLE dbo.AlumniAssignments ADD assigned_by INT NULL CONSTRAINT FK_AA_AssignedBy2 FOREIGN KEY (assigned_by) REFERENCES dbo.Users(user_id);
+      END
+
+      IF NOT EXISTS (
+        SELECT * FROM sys.columns 
+        WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'assignment_type'
+      )
+      BEGIN
+        ALTER TABLE dbo.AlumniAssignments ADD assignment_type VARCHAR(50) NULL;
+      END
+
+      IF NOT EXISTS (
+        SELECT * FROM sys.columns 
+        WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'reassignment_reason'
+      )
+      BEGIN
+        ALTER TABLE dbo.AlumniAssignments ADD reassignment_reason VARCHAR(500) NULL;
+      END
+
       IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = OBJECT_ID('dbo.EmailCampaigns'))
       BEGIN
           CREATE TABLE dbo.EmailCampaigns (

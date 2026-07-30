@@ -2196,14 +2196,13 @@
 
   // --- DISTRIBUTE MODAL LOGIC ---
   var _distPreviewData = null;
-  var _distUnmatchedAssignments = {}; // alumniId -> memberId (manual overrides)
+
 
   function setupDistributeModal() {
     var distributeBtn = document.getElementById('distributeModalBtn');
     if (distributeBtn) {
       distributeBtn.addEventListener('click', function () {
         _distPreviewData = null;
-        _distUnmatchedAssignments = {};
         document.getElementById('distPreviewSection').style.display = 'none';
         document.getElementById('distEmptyState').style.display = 'block';
         document.getElementById('distLoadingState').style.display = 'none';
@@ -2258,6 +2257,7 @@
           deptMappingSection.style.display = 'none';
         }
       }
+
     };
 
     function renderDistDeptMappingGrid() {
@@ -2288,6 +2288,26 @@
           '</div>';
       });
 
+      grid.innerHTML = html;
+    }
+
+    function renderDistFallbackDeptGrid() {
+      var grid = document.getElementById('distFallbackDeptGrid');
+      if (!grid) return;
+      var depts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
+      var html = '';
+      depts.forEach(function (dept) {
+        var optionsHtml = '<option value="">-- Select Member --</option>';
+        teamMembers.forEach(function (m) {
+          optionsHtml += '<option value="' + m.id + '">' + m.name + (m.department ? ' (' + m.department + ')' : '') + '</option>';
+        });
+        html += '<div>' +
+          '<label class="form-label" style="font-size:0.78rem;font-weight:600;color:#334155;margin-bottom:4px;display:block;">' + dept + '</label>' +
+          '<select class="form-control dist-fallback-dept-select" data-dept="' + dept + '" style="height:34px;font-size:0.8rem;">' +
+          optionsHtml +
+          '</select>' +
+          '</div>';
+      });
       grid.innerHTML = html;
     }
 
@@ -2325,7 +2345,6 @@
         document.getElementById('distPreviewSection').style.display = 'none';
         document.getElementById('distEmptyState').style.display = 'none';
         document.getElementById('confirmDistributeBtn').style.display = 'none';
-        _distUnmatchedAssignments = {};
 
         API.leaderPreview(body).then(function (res) {
           document.getElementById('distLoadingState').style.display = 'none';
@@ -2350,22 +2369,9 @@
     if (confirmBtn) {
       confirmBtn.addEventListener('click', function () {
         if (!_distPreviewData) return;
-        var hasUnmatched = _distPreviewData.some(function (g) { return g.userId === -1 || g.isUnmatched; });
-        if (hasUnmatched) {
-          var unmatchedGroup = _distPreviewData.find(function (g) { return g.userId === -1 || g.isUnmatched; });
-          var unmatchedAlumni = unmatchedGroup ? unmatchedGroup.alumniList : [];
-          var unresolved = unmatchedAlumni.filter(function (a) { return !_distUnmatchedAssignments[a.alumni_id]; });
-          if (unresolved.length > 0) {
-            showToast('Warning', unresolved.length + ' unmatched alumni still need manual member assignment.', 'warning');
-            return;
-          }
-        }
         var method = document.getElementById('distMethodSelect').value;
         var batch = document.getElementById('distBatchInput').value.trim() || undefined;
-        var manualAssignments = Object.keys(_distUnmatchedAssignments).map(function (alumniId) {
-          return { alumniId: parseInt(alumniId), memberId: _distUnmatchedAssignments[alumniId] };
-        });
-        var body = { teamId: _teamId, method: method, manualAssignments: manualAssignments };
+        var body = { teamId: _teamId, method: method, manualAssignments: [] };
         if (method === 'BatchWise' && batch) body.batch = batch;
         if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
         if (method === 'DepartmentWise') {
@@ -2378,6 +2384,19 @@
             }
           });
           body.departmentMapping = mapping;
+        }
+        var fbSelect = document.getElementById('distUnmatchedFallbackSelect');
+        if (fbSelect && fbSelect.value) {
+          body.unmatchedFallback = fbSelect.value;
+          if (fbSelect.value === 'DepartmentWise') {
+            var fbMapping = {};
+            document.querySelectorAll('.dist-fallback-dept-select').forEach(function (sel) {
+              var dept = sel.getAttribute('data-dept');
+              var val = sel.value;
+              if (dept && val) fbMapping[dept] = parseInt(val, 10);
+            });
+            body.fallbackDepartmentMapping = fbMapping;
+          }
         }
 
         confirmBtn.disabled = true;
@@ -2429,28 +2448,27 @@
       document.getElementById('distUnmatchedSection').style.display = 'block';
       var uHtml = '';
       unmatchedGroup.alumniList.forEach(function (a) {
-        var optionsHtml = '<option value="">-- Select Member --</option>';
-        teamMembers.forEach(function (m) {
-          optionsHtml += '<option value="' + m.id + '">' + m.name + '</option>';
-        });
-        uHtml += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9">' +
-          '<span style="flex:1;font-size:0.82rem;color:#1E293B"><strong>' + a.name + '</strong> (' + (a.register_no || '-') + ')' +
-          (a.originalFaculty ? ' <em style="color:#94A3B8;font-size:0.75rem">faculty: ' + a.originalFaculty + '</em>' : '') + '</span>' +
-          '<select class="unmatched-member-select" data-alumni-id="' + a.alumni_id + '" style="padding:4px 8px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.8rem">' +
-          optionsHtml + '</select>' +
+        uHtml += '<div style="padding:4px 0;border-bottom:1px solid #F1F5F9">' +
+          '<strong>' + a.name + '</strong> (' + (a.register_no || '-') + ')' +
+          (a.originalFaculty ? ' <em style="color:#94A3B8;font-size:0.75rem">faculty: ' + a.originalFaculty + '</em>' : '') +
           '</div>';
       });
       document.getElementById('distUnmatchedList').innerHTML = uHtml;
-      document.querySelectorAll('.unmatched-member-select').forEach(function (sel) {
-        sel.addEventListener('change', function () {
-          var alumniId = this.getAttribute('data-alumni-id');
-          if (this.value) {
-            _distUnmatchedAssignments[alumniId] = parseInt(this.value);
-          } else {
-            delete _distUnmatchedAssignments[alumniId];
+      var fbSelect = document.getElementById('distUnmatchedFallbackSelect');
+      if (fbSelect) {
+        fbSelect.onchange = function () {
+          var deptSection = document.getElementById('distFallbackDeptSection');
+          if (deptSection) {
+            deptSection.style.display = this.value === 'DepartmentWise' ? 'block' : 'none';
+            if (this.value === 'DepartmentWise' && typeof renderDistFallbackDeptGrid === 'function') {
+              renderDistFallbackDeptGrid();
+            }
           }
-        });
-      });
+        };
+        fbSelect.value = 'RoundRobin';
+        var deptSection = document.getElementById('distFallbackDeptSection');
+        if (deptSection) deptSection.style.display = 'none';
+      }
     } else {
       document.getElementById('distUnmatchedSection').style.display = 'none';
     }
