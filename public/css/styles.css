@@ -15,11 +15,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 /* ────────────────────────────────────────────────────────────
-   2. TAILWIND DIRECTIVES
+   2. TAILWIND DIRECTIVES (Disabled for Vanilla CSS compatibility)
    ──────────────────────────────────────────────────────────── */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* ────────────────────────────────────────────────────────────
    3. CSS CUSTOM PROPERTIES (DESIGN SYSTEM)
