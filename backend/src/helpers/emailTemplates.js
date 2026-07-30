@@ -3,13 +3,22 @@
  * Official Email Templates Engine (Nodemailer)
  */
 
-const BASE_URL = process.env.AMS_BASE_URL || 'http://localhost:3000';
-const LOGO_URL = 'https://mountzion.ac.in/wp-content/uploads/2021/04/mzcet-logo.png';
+function getBaseUrl() {
+  return process.env.AMS_BASE_URL || process.env.APP_URL || 'http://alumni.mzcet.in:2026';
+}
+
+function getLogoUrl() {
+  if (process.env.EMAIL_LOGO_URL && process.env.EMAIL_LOGO_URL.trim() !== '') {
+    return process.env.EMAIL_LOGO_URL.trim();
+  }
+  return `${getBaseUrl()}/assets/images/mzcet-logo.png`;
+}
 
 /**
  * Base HTML Layout Template
  */
 function buildBaseEmail({ preheader, title, subtitle, contentHtml, ctaUrl, ctaText }) {
+  const logoSrc = getLogoUrl();
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +51,7 @@ function buildBaseEmail({ preheader, title, subtitle, contentHtml, ctaUrl, ctaTe
   <div class="container">
     <!-- College Header -->
     <div class="header">
-      <img class="logo" src="${LOGO_URL}" alt="Mount Zion College Logo" onerror="this.style.display='none'">
+      <img class="logo" src="${logoSrc}" alt="Mount Zion College Logo">
       <div><span class="badge">An Autonomous Institution</span></div>
       <h1 class="header-title">${title}</h1>
       <p class="header-subtitle">${subtitle || 'Mount Zion College of Engineering and Technology — Alumni Management System'}</p>
@@ -76,7 +85,7 @@ function buildBaseEmail({ preheader, title, subtitle, contentHtml, ctaUrl, ctaTe
  * 1. Leader Welcome Email Template
  */
 function getLeaderWelcomeEmail({ name, email, plainPassword, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const contentHtml = `
     <div class="greeting">Welcome aboard, ${name}! 👋</div>
     <p>You have been registered as a <strong>Team Leader</strong> in the <strong>Mount Zion Alumni Management System (AMS)</strong>.</p>
@@ -108,7 +117,7 @@ function getLeaderWelcomeEmail({ name, email, plainPassword, portalUrl }) {
  * 2. Member Welcome Email Template
  */
 function getMemberWelcomeEmail({ name, email, plainPassword, leaderName, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const contentHtml = `
     <div class="greeting">Welcome to the Team, ${name}! 🎉</div>
     <p>You have been welcomed to the <strong>Mount Zion Alumni Management System (AMS)</strong> as a <strong>Team Member</strong>.</p>
@@ -141,7 +150,7 @@ function getMemberWelcomeEmail({ name, email, plainPassword, leaderName, portalU
  * 3. Alumni Assigned to Leader Notification Email
  */
 function getAlumniAssignedToLeaderEmail({ leaderName, totalCount, method, batch, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const contentHtml = `
     <div class="greeting">Hello ${leaderName},</div>
     <p>The Administrator has assigned <strong>${totalCount} new alumni records</strong> to your team in AMS.</p>
@@ -172,7 +181,7 @@ function getAlumniAssignedToLeaderEmail({ leaderName, totalCount, method, batch,
  * 4. Alumni Distributed to Member Notification Email
  */
 function getAlumniDistributedToMemberEmail({ memberName, leaderName, count, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const contentHtml = `
     <div class="greeting">Hello ${memberName},</div>
     <p>Your Team Leader <strong>${leaderName}</strong> has assigned <strong>${count} alumni records</strong> to your task queue.</p>
@@ -199,7 +208,7 @@ function getAlumniDistributedToMemberEmail({ memberName, leaderName, count, port
  * 5. Alumni Redistributed / Circulated Email
  */
 function getAlumniRedistributedEmail({ memberName, sourceName, count, departmentFilter, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const deptText = (departmentFilter && departmentFilter !== 'all') ? ` (${departmentFilter})` : '';
   const contentHtml = `
     <div class="greeting">Hello ${memberName},</div>
@@ -228,7 +237,7 @@ function getAlumniRedistributedEmail({ memberName, sourceName, count, department
  * 6. Password Reset Approved Email
  */
 function getPasswordResetApprovedEmail({ name, email, tempPassword, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const passwordToDisplay = tempPassword || 'mzcet@123';
   const contentHtml = `
     <div class="greeting">Hello ${name},</div>
@@ -259,7 +268,7 @@ function getPasswordResetApprovedEmail({ name, email, tempPassword, portalUrl })
  * 7. Alumni Record Reopened Email
  */
 function getAlumniRecordReopenedEmail({ recipientName, alumniName, registerNo, department, reopenedBy, portalUrl }) {
-  const loginUrl = portalUrl || BASE_URL;
+  const loginUrl = portalUrl || getBaseUrl();
   const contentHtml = `
     <div class="greeting">Hello ${recipientName},</div>
     <p>An alumni record has been <strong>reopened</strong> for re-verification by <strong>${reopenedBy || 'Leader/Admin'}</strong>.</p>
