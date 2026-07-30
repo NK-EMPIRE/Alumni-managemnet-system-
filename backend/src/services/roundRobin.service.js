@@ -383,12 +383,18 @@ async function leaderPreview(currentUser, params = {}) {
     const activeUsers = usersResult.recordset;
     const deptAlumniMap = {};
     for (const alum of poolAlumni) {
-      const dept = (alum.department || 'Unspecified').toUpperCase().trim();
-      if (!deptAlumniMap[dept]) deptAlumniMap[dept] = [];
-      deptAlumniMap[dept].push(alum);
+      const dept = (alum.department || 'Unspecified').trim();
+      const deptKey = dept.toUpperCase();
+      if (!deptAlumniMap[deptKey]) deptAlumniMap[deptKey] = { rawName: dept, alumni: [] };
+      deptAlumniMap[deptKey].alumni.push(alum);
     }
 
     const deptMapping = departmentMapping || {};
+    const normalizedMapping = {};
+    Object.keys(deptMapping).forEach(k => {
+      if (deptMapping[k]) normalizedMapping[k.toUpperCase().trim()] = parseInt(deptMapping[k], 10);
+    });
+
     const memberGroupMap = {};
     activeUsers.forEach(u => {
       memberGroupMap[u.user_id] = {
@@ -402,18 +408,40 @@ async function leaderPreview(currentUser, params = {}) {
 
     const unmatchedAlumni = [];
 
-    Object.keys(deptAlumniMap).forEach(dept => {
-      const targetUserId = deptMapping[dept];
+    Object.keys(deptAlumniMap).forEach(deptKey => {
+      const groupData = deptAlumniMap[deptKey];
+      const targetUserId = normalizedMapping[deptKey];
+
       if (targetUserId && memberGroupMap[targetUserId]) {
-        memberGroupMap[targetUserId].alumniList.push(...deptAlumniMap[dept]);
-        memberGroupMap[targetUserId].count += deptAlumniMap[dept].length;
+        memberGroupMap[targetUserId].alumniList.push(...groupData.alumni);
+        memberGroupMap[targetUserId].count += groupData.alumni.length;
       } else {
-        const autoMatchUser = activeUsers.find(u => u.department && u.department.toUpperCase().trim() === dept);
-        if (autoMatchUser) {
-          memberGroupMap[autoMatchUser.user_id].alumniList.push(...deptAlumniMap[dept]);
-          memberGroupMap[autoMatchUser.user_id].count += deptAlumniMap[dept].length;
+        // Explicit fallback for unmapped departments
+        if (unmatchedFallback === 'RoundRobin' && activeUsers.length > 0) {
+          let q = 0;
+          groupData.alumni.forEach(alum => {
+            const u = activeUsers[q % activeUsers.length];
+            memberGroupMap[u.user_id].alumniList.push(alum);
+            memberGroupMap[u.user_id].count++;
+            q++;
+          });
+        } else if (unmatchedFallback === 'AssignToLeader' && currentUser && currentUser.userId) {
+          const leaderId = currentUser.userId;
+          if (memberGroupMap[leaderId]) {
+            memberGroupMap[leaderId].alumniList.push(...groupData.alumni);
+            memberGroupMap[leaderId].count += groupData.alumni.length;
+          } else {
+            unmatchedAlumni.push(...groupData.alumni);
+          }
         } else {
-          unmatchedAlumni.push(...deptAlumniMap[dept]);
+          // Default: try exact string match if fallback not specified, otherwise keep unmatched
+          const autoMatchUser = activeUsers.find(u => u.department && u.department.toUpperCase().trim() === deptKey);
+          if (autoMatchUser && !unmatchedFallback) {
+            memberGroupMap[autoMatchUser.user_id].alumniList.push(...groupData.alumni);
+            memberGroupMap[autoMatchUser.user_id].count += groupData.alumni.length;
+          } else {
+            unmatchedAlumni.push(...groupData.alumni);
+          }
         }
       }
     });
@@ -421,7 +449,7 @@ async function leaderPreview(currentUser, params = {}) {
     if (unmatchedAlumni.length > 0) {
       preview.push({
         userId: -1,
-        userName: 'Unmatched (No Department Faculty Assigned)',
+        userName: 'Unmatched / Unassigned Departments',
         count: unmatchedAlumni.length,
         alumniList: unmatchedAlumni,
         isUnmatched: true
