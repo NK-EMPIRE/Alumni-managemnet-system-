@@ -2264,42 +2264,66 @@
       var grid = document.getElementById('distDeptMappingGrid');
       if (!grid) return;
 
-      var deptSet = {};
+      var deptCounts = {};
       if (_apiAssignedAlumni) {
         var recs = Array.isArray(_apiAssignedAlumni.records) ? _apiAssignedAlumni.records : (Array.isArray(_apiAssignedAlumni) ? _apiAssignedAlumni : []);
         recs.forEach(function (a) {
-          if (a.department) {
-            var d = String(a.department).trim().toUpperCase();
-            if (d && d !== '-') deptSet[d] = true;
+          var d = (a.department || 'Unspecified').trim();
+          if (d && d !== '-') {
+            deptCounts[d] = (deptCounts[d] || 0) + 1;
           }
         });
       }
-      var defaultDepts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT', 'CIVIL', 'AIDS', 'AIML'];
-      defaultDepts.forEach(function (d) { deptSet[d] = true; });
-      var depts = Object.keys(deptSet).sort();
-      var html = '';
 
-      teamMembers.forEach(function (m) {
-        var memberDept = (m.department || '').toUpperCase().trim();
-        var checkboxesHtml = '';
-        depts.forEach(function (dept) {
-          var checked = (memberDept === dept) ? 'checked' : '';
-          checkboxesHtml += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;margin-right:12px;margin-bottom:6px;cursor:pointer;color:#334155;">' +
-            '<input type="checkbox" class="dist-dept-check" data-member="' + m.id + '" value="' + dept + '" ' + checked + '> ' +
-            dept +
-            '</label>';
+      var depts = Object.keys(deptCounts).sort();
+      if (depts.length === 0) {
+        var defaultDepts = ['CSE', 'ECE', 'EEE', 'ME', 'CIVIL', 'IT', 'AIDS', 'AIML'];
+        defaultDepts.forEach(function (d) { deptCounts[d] = 0; });
+        depts = defaultDepts;
+      }
+
+      var html = '<div style="display:grid;grid-template-columns:1fr;gap:8px;">';
+
+      depts.forEach(function (dept) {
+        var count = deptCounts[dept] || 0;
+        var deptUpper = dept.toUpperCase().trim();
+        var memberOptions = '<option value="">-- Leave Unassigned / Fallback --</option>';
+
+        teamMembers.forEach(function (m) {
+          var memberDeptUpper = (m.department || '').toUpperCase().trim();
+          var isDefaultMatch = (memberDeptUpper && (memberDeptUpper === deptUpper || deptUpper.indexOf(memberDeptUpper) !== -1 || memberDeptUpper.indexOf(deptUpper) !== -1));
+          var selected = isDefaultMatch ? 'selected' : '';
+          var roleTag = m.isLeader ? ' (Leader)' : '';
+          memberOptions += '<option value="' + m.id + '" ' + selected + '>' + m.name + roleTag + (m.department ? ' - ' + m.department : '') + '</option>';
         });
 
-        html += '<div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;margin-bottom:8px;">' +
-          '<div style="font-weight:600;font-size:0.82rem;color:#1E293B;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">' +
-            '<span><i class="fas ' + (m.isLeader ? 'fa-user-shield' : 'fa-user') + '" style="color:#2563EB;margin-right:6px;"></i>' +
-            m.name + (m.isLeader ? ' <span style="font-size:0.72rem;background:#DBEAFE;color:#1E40AF;padding:2px 6px;border-radius:4px;margin-left:4px;">Team Leader</span>' : '') + '</span>' +
+        html += '<div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:0.84rem;color:#1E293B;"><i class="fas fa-graduation-cap" style="color:#2563EB;margin-right:6px;"></i>' + dept + '</div>' +
+            '<div style="font-size:0.75rem;color:#2563EB;font-weight:600;margin-top:2px;">' + (count > 0 ? (count + ' Pending Alumni Records') : 'Available Department') + '</div>' +
           '</div>' +
-          '<div style="display:flex;flex-wrap:wrap;align-items:center;">' +
-            checkboxesHtml +
+          '<div style="min-width:230px;">' +
+            '<select class="dist-dept-target-select form-control" data-dept="' + dept + '" style="height:36px;font-size:0.82rem;border-color:#94A3B8;">' +
+              memberOptions +
+            '</select>' +
           '</div>' +
           '</div>';
       });
+
+      html += '</div>';
+
+      // Strategy for unassigned departments
+      html += '<div style="margin-top:14px;padding-top:10px;border-top:1px dashed #CBD5E1;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+        '<div>' +
+          '<label style="font-size:0.8rem;font-weight:700;color:#334155;display:block;">Unassigned Departments Strategy</label>' +
+          '<span style="font-size:0.72rem;color:#64748B;">How to handle departments not manually assigned above</span>' +
+        '</div>' +
+        '<select id="distDeptUnassignedFallback" class="form-control" style="width:230px;height:36px;font-size:0.8rem;">' +
+          '<option value="KeepUnassigned">Keep Unassigned (In Backlog)</option>' +
+          '<option value="RoundRobin">Auto Round-Robin to Members</option>' +
+          '<option value="AssignToLeader">Assign to Me (Team Leader)</option>' +
+        '</select>' +
+        '</div>';
 
       grid.innerHTML = html;
       grid.style.display = 'block';
@@ -2346,14 +2370,16 @@
         }
         if (method === 'DepartmentWise') {
           var mapping = {};
-          document.querySelectorAll('.dist-dept-check:checked').forEach(function (cb) {
-            var memberId = parseInt(cb.getAttribute('data-member'), 10);
-            var deptName = cb.value;
-            if (deptName && memberId) {
-              mapping[deptName] = memberId;
+          document.querySelectorAll('.dist-dept-target-select').forEach(function (select) {
+            var targetUserId = select.value;
+            var deptName = select.getAttribute('data-dept');
+            if (deptName && targetUserId) {
+              mapping[deptName] = parseInt(targetUserId, 10);
             }
           });
           body.departmentMapping = mapping;
+          var fbSelect = document.getElementById('distDeptUnassignedFallback');
+          if (fbSelect) body.unmatchedFallback = fbSelect.value;
         }
         document.getElementById('distLoadingState').style.display = 'block';
         document.getElementById('distPreviewSection').style.display = 'none';

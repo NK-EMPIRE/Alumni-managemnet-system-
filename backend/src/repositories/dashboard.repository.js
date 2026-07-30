@@ -110,8 +110,8 @@ async function getLeaderStats(leaderId) {
         SUM(CASE WHEN aa.status = 'Completed' THEN 1 ELSE 0 END) AS completed,
         SUM(CASE WHEN aa.status = 'Pending' THEN 1 ELSE 0 END) AS pending,
         SUM(CASE WHEN aa.status = 'Draft' THEN 1 ELSE 0 END) AS draft,
-        SUM(CASE WHEN aa.status = 'ASSIGNED_TO_LEADER' THEN 1 ELSE 0 END) AS undistributed_count,
-        SUM(CASE WHEN aa.status NOT IN ('ASSIGNED_TO_LEADER') THEN 1 ELSE 0 END) AS distributed_count,
+        SUM(CASE WHEN aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL THEN 1 ELSE 0 END) AS undistributed_count,
+        SUM(CASE WHEN aa.member_id IS NOT NULL THEN 1 ELSE 0 END) AS distributed_count,
         (SELECT COUNT(*) FROM TeamMembers tm INNER JOIN Teams t2 ON tm.team_id = t2.team_id WHERE t2.leader_id = @leaderId) AS member_count
       FROM Teams t
       INNER JOIN AlumniAssignments aa ON t.team_id = aa.team_id
