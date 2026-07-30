@@ -1842,7 +1842,7 @@
             <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Distribution Method</label>
             <select id="distMethodSelect" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
               <option value="RoundRobin">Round Robin (Equal Auto-Split)</option>
-              <option value="DepartmentWise">Department-Wise Auto Match</option>
+              <option value="DepartmentWise">Department-Wise Manual Assignment</option>
               <option value="FacultyWise">Faculty-Wise Auto Match</option>
               <option value="BatchWise">Batch-Wise Custom Split</option>
             </select>
@@ -1855,9 +1855,9 @@
 
         <!-- Department Mapping Section for DepartmentWise -->
         <div id="distDeptMappingSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
-          <h4 style="font-size:0.85rem;font-weight:700;color:#1E293B;margin-bottom:8px;"><i class="fas fa-building" style="color:var(--primary);margin-right:6px;"></i>Department to Faculty Member Mapping</h4>
-          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Choose which department(s) should be distributed to each member. You can select multiple departments per member by holding Ctrl (or Cmd on Mac).</p>
-          <div id="distDeptMappingGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <h4 style="font-size:0.85rem;font-weight:700;color:#1E293B;margin-bottom:6px;"><i class="fas fa-building" style="color:var(--primary);margin-right:6px;"></i>Manual Department-to-Member Assignment</h4>
+          <p style="font-size:0.75rem;color:#64748B;margin-bottom:12px;">Manually select which team member is assigned to manage each department's alumni records. You can also configure the strategy for unassigned departments below.</p>
+          <div id="distDeptMappingGrid">
             <!-- Populated dynamically by JS -->
           </div>
         </div>
@@ -1920,7 +1920,8 @@
     var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
-  <script src="js/leader.js?v=1.0.2"></script>
+  <script src="js/leader.js"></script>
   <script src="js/chat.js"></script>
+  <script src="js/notifications.js"></script>
 </body>
 </html>

@@ -27,37 +27,57 @@ function buildBaseEmail({ preheader, title, subtitle, contentHtml, ctaUrl, ctaTe
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #F8FAFC; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; }
-    .header { background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); padding: 28px 24px; text-align: center; color: #ffffff; }
-    .logo { height: 75px; max-width: 220px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-    .badge { display: inline-block; background-color: rgba(255, 255, 255, 0.2); color: #F8FAFC; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
-    .header-title { font-size: 20px; font-weight: 700; margin: 0 0 4px 0; color: #ffffff; }
-    .header-subtitle { font-size: 13px; color: #DBEAFE; margin: 0; font-weight: 400; }
-    .body { padding: 32px 28px; color: #334155; line-height: 1.6; }
-    .greeting { font-size: 18px; font-weight: 700; color: #1E293B; margin-bottom: 16px; }
-    .card { background-color: #F1F5F9; border-left: 4px solid #2563EB; border-radius: 8px; padding: 18px; margin: 20px 0; }
-    .cred-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #CBD5E1; }
-    .cred-label { font-size: 13px; font-weight: 600; color: #64748B; }
-    .cred-value { font-size: 14px; font-weight: 700; color: #1E293B; font-family: monospace; }
-    .cta-container { text-align: center; margin: 30px 0 10px 0; }
-    .cta-btn { display: inline-block; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #ffffff !important; font-size: 14px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35); }
-    .footer { background-color: #0F172A; padding: 24px; text-align: center; color: #94A3B8; font-size: 12px; line-height: 1.5; }
+    body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #F1F5F9; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 760px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); border: 1px solid #E2E8F0; }
+    .header { background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); padding: 36px 32px 30px 32px; text-align: center; color: #ffffff; position: relative; }
+    
+    /* White Circle Badge Behind Logo */
+    .logo-circle-wrapper { width: 90px; height: 90px; background-color: #ffffff; border-radius: 50%; margin: 0 auto 16px auto; padding: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.16); box-sizing: border-box; text-align: center; }
+    .logo-img { width: 70px; height: 70px; max-width: 70px; max-height: 70px; object-fit: contain; display: inline-block; vertical-align: middle; }
+
+    .badge { display: inline-block; background-color: rgba(255, 255, 255, 0.18); backdrop-filter: blur(4px); color: #F8FAFC; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.25); }
+    .header-title { font-size: 23px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff; letter-spacing: -0.01em; }
+    .header-subtitle { font-size: 14px; color: #E0E7FF; margin: 0; font-weight: 400; opacity: 0.95; }
+
+    .body { padding: 40px 44px; color: #334155; line-height: 1.65; font-size: 15px; }
+    .greeting { font-size: 20px; font-weight: 700; color: #0F172A; margin-bottom: 18px; }
+    .card { background-color: #F8FAFC; border: 1px solid #E2E8F0; border-left: 5px solid #2563EB; border-radius: 10px; padding: 22px 24px; margin: 24px 0; }
+    
+    .cta-container { text-align: center; margin: 36px 0 12px 0; }
+    .cta-btn { display: inline-block; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #ffffff !important; font-size: 15px; font-weight: 700; text-decoration: none; padding: 15px 36px; border-radius: 10px; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); transition: all 0.2s ease; }
+    
+    .footer { background-color: #0F172A; padding: 28px 32px; text-align: center; color: #94A3B8; font-size: 13px; line-height: 1.6; }
     .footer-link { color: #60A5FA; text-decoration: none; font-weight: 600; }
+    
+    @media only screen and (max-width: 600px) {
+      .body { padding: 24px 20px !important; }
+      .header { padding: 28px 16px !important; }
+      .header-title { font-size: 19px !important; }
+    }
   </style>
 </head>
 <body>
   <div style="display:none;font-size:1px;color:#333;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">${preheader || title}</div>
   <div class="container">
-    <!-- College Header -->
+    <!-- Wide College Header -->
     <div class="header">
-      <img class="logo" src="${logoSrc}" alt="Mount Zion College Logo">
+      <!-- White Circle Behind Logo (Larger Size + Link Wrapped to Prevent Download Overlay) -->
+      <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto 16px auto;">
+        <tr>
+          <td align="center" valign="middle" style="width:115px;height:115px;background-color:#ffffff;border-radius:50%;text-align:center;vertical-align:middle;box-shadow:0 8px 22px rgba(0,0,0,0.2);padding:10px;">
+            <a href="${getBaseUrl()}" target="_blank" style="text-decoration:none;display:inline-block;border:none;outline:none;">
+              <img src="${logoSrc}" alt="Mount Zion Logo" width="92" height="92" style="width:92px;height:92px;max-width:92px;max-height:92px;object-fit:contain;display:block;margin:0 auto;border:0;outline:none;" />
+            </a>
+          </td>
+        </tr>
+      </table>
+
       <div><span class="badge">An Autonomous Institution</span></div>
       <h1 class="header-title">${title}</h1>
       <p class="header-subtitle">${subtitle || 'Mount Zion College of Engineering and Technology — Alumni Management System'}</p>
     </div>
 
-    <!-- Main Content -->
+    <!-- Wide Main Content -->
     <div class="body">
       ${contentHtml}
 
@@ -68,12 +88,12 @@ function buildBaseEmail({ preheader, title, subtitle, contentHtml, ctaUrl, ctaTe
       ` : ''}
     </div>
 
-    <!-- Official Footer -->
+    <!-- Official Wide Footer -->
     <div class="footer">
-      <p style="margin:0 0 6px 0;font-weight:700;color:#F8FAFC;">Mount Zion College of Engineering and Technology</p>
+      <p style="margin:0 0 6px 0;font-weight:700;color:#F8FAFC;font-size:14px;">Mount Zion College of Engineering and Technology</p>
       <p style="margin:0 0 12px 0;">Pudukkottai, Tamil Nadu - 622507 | Affiliated to Anna University</p>
       <p style="margin:0;">Need assistance? Contact <a href="mailto:alumnims@mountzion.ac.in" class="footer-link">alumnims@mountzion.ac.in</a></p>
-      <p style="margin:12px 0 0 0;font-size:11px;color:#64748B;">&copy; ${new Date().getFullYear()} Alumni Management System (AMS). All rights reserved.</p>
+      <p style="margin:14px 0 0 0;font-size:11px;color:#64748B;">&copy; ${new Date().getFullYear()} Alumni Management System (AMS). All rights reserved.</p>
     </div>
   </div>
 </body>

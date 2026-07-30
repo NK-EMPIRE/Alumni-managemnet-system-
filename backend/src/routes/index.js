@@ -18,6 +18,8 @@ const healthRoutes = require('./health.routes');
 const taskRoutes = require('./task.routes');
 const emailCampaignRoutes = require('./emailCampaign.routes');
 const chatRoutes = require('./chat.routes');
+const notificationRoutes = require('./notification.routes');
+
 
 const router = Router();
 
@@ -51,5 +53,6 @@ router.use('/health', healthRoutes);
 router.use('/tasks', taskRoutes);
 router.use('/email-campaigns', emailCampaignRoutes);
 router.use('/chat', chatRoutes);
+router.use('/notifications', notificationRoutes);
 
 module.exports = router;
