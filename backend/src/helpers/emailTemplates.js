@@ -61,11 +61,13 @@ function buildBaseEmail({ preheader, title, subtitle, contentHtml, ctaUrl, ctaTe
   <div class="container">
     <!-- Wide College Header -->
     <div class="header">
-      <!-- White Circle Behind Logo -->
-      <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto 14px auto;">
+      <!-- White Circle Behind Logo (Larger Size + Link Wrapped to Prevent Download Overlay) -->
+      <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto 16px auto;">
         <tr>
-          <td align="center" valign="middle" style="width:90px;height:90px;background-color:#ffffff;border-radius:50%;text-align:center;vertical-align:middle;box-shadow:0 6px 18px rgba(0,0,0,0.18);">
-            <img src="${logoSrc}" alt="Mount Zion Logo" style="width:70px;height:70px;max-width:70px;max-height:70px;object-fit:contain;display:block;margin:0 auto;" />
+          <td align="center" valign="middle" style="width:115px;height:115px;background-color:#ffffff;border-radius:50%;text-align:center;vertical-align:middle;box-shadow:0 8px 22px rgba(0,0,0,0.2);padding:10px;">
+            <a href="${getBaseUrl()}" target="_blank" style="text-decoration:none;display:inline-block;border:none;outline:none;">
+              <img src="${logoSrc}" alt="Mount Zion Logo" width="92" height="92" style="width:92px;height:92px;max-width:92px;max-height:92px;object-fit:contain;display:block;margin:0 auto;border:0;outline:none;" />
+            </a>
           </td>
         </tr>
       </table>
