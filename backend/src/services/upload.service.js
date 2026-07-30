@@ -322,8 +322,17 @@ async function confirmAlias(leaderId, excelName) {
   return uploadRepository.saveFacultyAlias(leaderId, excelName.toLowerCase());
 }
 
-async function rollbackImport(importId) {
+async function rollbackImport(importId, currentUser = null) {
   const deletedCount = await uploadRepository.rollbackImportLog(importId);
+
+  logger.info(`Excel import batch #${importId} rolled back successfully. ${deletedCount} records removed.`);
+
+  logger.auditLog('EXCEL_IMPORT_ROLLED_BACK', {
+    importId,
+    deletedCount,
+    rolledBackBy: currentUser ? currentUser.userId : null
+  });
+
   return { importId, deletedCount };
 }
 

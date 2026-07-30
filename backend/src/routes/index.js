@@ -42,6 +42,7 @@ router.use('/alumni', alumniRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/import', uploadRoutes);
 router.use('/assignments', assignmentRoutes);
 router.use('/assignments/reassign', reassignRoutes);
 router.use('/audit-logs', auditRoutes);

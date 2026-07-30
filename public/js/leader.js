@@ -2711,21 +2711,41 @@
 
 var _circulatePreviewData = null;
 
-window.openCirculateModal = function () {
+window.onCirculateDeptChange = function () {
+  var dept = document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all';
+  window.openCirculateModal(dept);
+};
+
+window.openCirculateModal = function (selectedDept) {
   _circulatePreviewData = null;
   document.getElementById('circulateStep1').style.display = 'block';
   document.getElementById('circulateStep2').style.display = 'none';
-  document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;">Loading...</p>';
+  document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;padding:12px;">Loading...</p>';
 
+  var currentDept = selectedDept || (document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all');
   var token = localStorage.getItem('token');
-  fetch('/api/v1/assignments/reassign/team-load', {
+  var queryUrl = '/api/v1/assignments/reassign/team-load' + (currentDept && currentDept !== 'all' ? '?department=' + encodeURIComponent(currentDept) : '');
+
+  fetch(queryUrl, {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) {
-      document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Failed to load team data.</p>';
+      document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);padding:12px;">Failed to load team data.</p>';
       return;
     }
     var data = res.data;
+
+    // Populate Dept filter options if returning departments list
+    var deptFilterEl = document.getElementById('circulateDeptFilter');
+    if (deptFilterEl && data.departments) {
+      var prevVal = currentDept;
+      var opts = '<option value="all">All Departments</option>';
+      data.departments.forEach(function (d) {
+        opts += '<option value="' + d + '"' + (d === prevVal ? ' selected' : '') + '>' + d + '</option>';
+      });
+      deptFilterEl.innerHTML = opts;
+      deptFilterEl.value = prevVal;
+    }
 
     var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
       '<thead><tr style="background:#F1F5F9;">' +
@@ -2752,13 +2772,31 @@ window.openCirculateModal = function () {
       sourceSel.appendChild(o1);
     });
 
-    var renderCheckboxes = function () {
+    var onSourceSelect = function () {
       var srcId = parseInt(sourceSel.value, 10);
       targetBox.innerHTML = '';
       if (!srcId) {
         targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        var deptFilterEl = document.getElementById('circulateDeptFilter');
+        if (deptFilterEl) deptFilterEl.innerHTML = '<option value="all">All Departments</option>';
         return;
       }
+
+      // Fetch source member's specific department breakdown
+      var token = localStorage.getItem('token');
+      fetch('/api/v1/assignments/reassign/source-departments?sourceMemberId=' + srcId, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        var deptFilterEl = document.getElementById('circulateDeptFilter');
+        if (deptFilterEl && res.success && res.data.departments) {
+          var opts = '<option value="all">All Departments (All Backlog)</option>';
+          res.data.departments.forEach(function (d) {
+            opts += '<option value="' + d.department + '">' + d.department + ' (' + d.count + ' pending)</option>';
+          });
+          deptFilterEl.innerHTML = opts;
+        }
+      }).catch(function (e) {});
+
       data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
           var label = document.createElement('label');
@@ -2769,10 +2807,10 @@ window.openCirculateModal = function () {
       });
     };
 
-    sourceSel.onchange = renderCheckboxes;
+    sourceSel.onchange = onSourceSelect;
     renderCheckboxes();
   }).catch(function (err) {
-    document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);">Network error.</p>';
+    document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);padding:12px;">Network error.</p>';
   });
 
   openModal('circulateModal');
@@ -2786,26 +2824,29 @@ window.circulatePreview = function () {
   var targetMemberIds = Array.from(cbs).map(function (cb) { return parseInt(cb.value, 10); });
   if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
   var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
+  var deptFilter = document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all';
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
+    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, department: deptFilter })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Preview failed.'); return; }
     _circulatePreviewData = res.data;
 
-    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records from <strong>' + res.data.sourceName + '</strong>:</p>';
+    var deptSubtext = (deptFilter && deptFilter !== 'all') ? ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + deptFilter + ']</span>' : '';
+
+    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records' + deptSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
     res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:14px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;padding:8px 12px;border-radius:8px;margin-bottom:6px;">' +
         '<strong style="color:#1E40AF;">' + group.targetName + '</strong>' +
         '<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.75rem;">' + group.count + ' records</span></div>' +
         '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#F8FAFC;">' +
-        '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th></tr></thead><tbody>';
+        '<th style="padding:5px 8px;text-align:left;">Name</th><th style="padding:5px 8px;text-align:left;">Reg No</th><th style="padding:5px 8px;text-align:left;">Department</th></tr></thead><tbody>';
       group.alumni.forEach(function (a) {
-        html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td></tr>';
+        html += '<tr><td style="padding:4px 8px;">' + a.name + '</td><td style="padding:4px 8px;color:#94A3B8;">' + a.register_no + '</td><td style="padding:4px 8px;color:#64748B;">' + (a.department || '-') + '</td></tr>';
       });
       html += '</tbody></table></div>';
     });
