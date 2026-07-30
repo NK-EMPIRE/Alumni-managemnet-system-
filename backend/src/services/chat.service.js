@@ -1,4 +1,5 @@
 const { getPool, sql } = require('../config/database');
+const notificationService = require('./notification.service');
 
 let _columnChecked = false;
 async function ensureChannelColumn(pool) {
@@ -86,7 +87,15 @@ async function sendMessage({ userId, messageText, attachmentUrl, channelType = '
       WHERE m.message_id = @messageId
     `);
 
-  return detailRes.recordset[0];
+  const savedMessage = detailRes.recordset[0];
+
+  // Fire-and-forget: detect LinkedIn URLs in global messages and create notifications.
+  // Never awaited — a detection error must never break the send response.
+  if (channel === 'global') {
+    notificationService.detectAndNotify(messageText.trim(), userId, newId);
+  }
+
+  return savedMessage;
 }
 
 module.exports = {

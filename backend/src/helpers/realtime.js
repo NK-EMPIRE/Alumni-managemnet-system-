@@ -12,4 +12,13 @@ function notifyAssignmentsUpdated(teamId, action = 'reassign') {
   }
 }
 
-module.exports = { setIO, notifyAssignmentsUpdated };
+/**
+ * Emit a real-time event to a specific user's socket room.
+ * Each logged-in client joins 'user:<userId>' on connection.
+ */
+function notifyUser(userId, eventName, payload) {
+  if (!ioInstance) return;
+  ioInstance.to(`user:${userId}`).emit(eventName, payload);
+}
+
+module.exports = { setIO, notifyAssignmentsUpdated, notifyUser };

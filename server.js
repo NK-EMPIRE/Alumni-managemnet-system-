@@ -94,12 +94,20 @@ const io = new Server(server, {
 setIO(io);
 
 io.on('connection', (socket) => {
+  // Join team/admin rooms for assignments
   socket.on('join', ({ role, teamId }) => {
     if (role === 'ADMIN') {
       socket.join('admin');
     }
     if (teamId) {
       socket.join(`team:${teamId}`);
+    }
+  });
+
+  // Join personal room for targeted notifications
+  socket.on('joinUser', ({ userId }) => {
+    if (userId) {
+      socket.join(`user:${userId}`);
     }
   });
 });
