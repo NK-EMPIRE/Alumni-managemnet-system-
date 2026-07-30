@@ -130,7 +130,8 @@ async function adminAssign(currentUser, { department, batch, leaderId, count }) 
 /**
  * Generate preview of Leader distribution.
  */
-async function leaderPreview(currentUser, { teamId, method, batch, allocations, selectedMemberIds }) {
+async function leaderPreview(currentUser, params = {}) {
+  const { teamId, method, batch, allocations, selectedMemberIds } = params;
   if (!teamId || !method) {
     throw new AppError('Team ID and Method are required.', 400);
   }
