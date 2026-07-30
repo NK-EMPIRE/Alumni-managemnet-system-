@@ -112,7 +112,7 @@
   function populateOverviewCards() {
     var container = document.getElementById('overviewCards');
     var leaderMember = teamMembers.find(function (m) { return m.isLeader; });
-    var assignedValue = leaderMember ? leaderMember.assigned : Math.max(0, totalAlumni - totalUndistributed - teamMembers.reduce(function (s, m) { return s + m.assigned; }, 0));
+    var assignedValue = leaderMember ? leaderMember.assigned : 0;
     var cards = [
       { icon: 'fa-user-graduate', color: 'blue', value: assignedValue, label: 'Assigned Alumni', change: '', changeDir: 'up' },
       { icon: 'fa-check-circle', color: 'green', value: totalCompleted, label: 'Completed', change: '', changeDir: 'up' },
@@ -2167,7 +2167,7 @@
               progress: m.progress || ((m.assigned || 0) > 0 ? Math.round(((m.completed || 0) / m.assigned) * 100) : 0),
               status: m.status || (m.progress >= 75 ? 'On Track' : 'Behind'),
               lastActivity: m.lastActivity || '-',
-              isLeader: m.isLeader || false
+              isLeader: isLeader
             };
           });
         }
@@ -2264,31 +2264,45 @@
       var grid = document.getElementById('distDeptMappingGrid');
       if (!grid) return;
 
-      var depts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT'];
+      var deptSet = {};
+      if (_apiAssignedAlumni) {
+        var recs = Array.isArray(_apiAssignedAlumni.records) ? _apiAssignedAlumni.records : (Array.isArray(_apiAssignedAlumni) ? _apiAssignedAlumni : []);
+        recs.forEach(function (a) {
+          if (a.department) {
+            var d = String(a.department).trim().toUpperCase();
+            if (d && d !== '-') deptSet[d] = true;
+          }
+        });
+      }
+      var defaultDepts = ['CSE', 'ECE', 'EEE', 'ME', 'CE', 'IT', 'CIVIL', 'AIDS', 'AIML'];
+      defaultDepts.forEach(function (d) { deptSet[d] = true; });
+      var depts = Object.keys(deptSet).sort();
       var html = '';
 
-      depts.forEach(function (dept) {
-        var matchedUser = teamMembers.find(function (m) {
-          return m.department && m.department.toUpperCase().trim() === dept;
-        });
-        var selectedUserId = matchedUser ? matchedUser.id : '';
-
-        var optionsHtml = '<option value="">-- Select Member --</option>';
-        teamMembers.forEach(function (m) {
-          var sel = (parseInt(m.id, 10) === parseInt(selectedUserId, 10)) ? 'selected' : '';
-          var deptTag = m.department ? ' (' + m.department + ')' : '';
-          optionsHtml += '<option value="' + m.id + '" ' + sel + '>' + m.name + deptTag + '</option>';
+      teamMembers.forEach(function (m) {
+        var memberDept = (m.department || '').toUpperCase().trim();
+        var checkboxesHtml = '';
+        depts.forEach(function (dept) {
+          var checked = (memberDept === dept) ? 'checked' : '';
+          checkboxesHtml += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;margin-right:12px;margin-bottom:6px;cursor:pointer;color:#334155;">' +
+            '<input type="checkbox" class="dist-dept-check" data-member="' + m.id + '" value="' + dept + '" ' + checked + '> ' +
+            dept +
+            '</label>';
         });
 
-        html += '<div>' +
-          '<label class="form-label" style="font-size:0.78rem;font-weight:600;color:#334155;margin-bottom:4px;display:block;">Dept: ' + dept + '</label>' +
-          '<select class="form-control dist-dept-map-select" data-dept="' + dept + '" style="height:34px;font-size:0.8rem;">' +
-          optionsHtml +
-          '</select>' +
+        html += '<div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;margin-bottom:8px;">' +
+          '<div style="font-weight:600;font-size:0.82rem;color:#1E293B;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">' +
+            '<span><i class="fas ' + (m.isLeader ? 'fa-user-shield' : 'fa-user') + '" style="color:#2563EB;margin-right:6px;"></i>' +
+            m.name + (m.isLeader ? ' <span style="font-size:0.72rem;background:#DBEAFE;color:#1E40AF;padding:2px 6px;border-radius:4px;margin-left:4px;">Team Leader</span>' : '') + '</span>' +
+          '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;align-items:center;">' +
+            checkboxesHtml +
+          '</div>' +
           '</div>';
       });
 
       grid.innerHTML = html;
+      grid.style.display = 'block';
     }
 
     function renderDistFallbackDeptGrid() {
@@ -2332,11 +2346,11 @@
         }
         if (method === 'DepartmentWise') {
           var mapping = {};
-          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
-            var deptName = selectEl.getAttribute('data-dept');
-            var val = selectEl.value;
-            if (deptName && val) {
-              mapping[deptName] = parseInt(val, 10);
+          document.querySelectorAll('.dist-dept-check:checked').forEach(function (cb) {
+            var memberId = parseInt(cb.getAttribute('data-member'), 10);
+            var deptName = cb.value;
+            if (deptName && memberId) {
+              mapping[deptName] = memberId;
             }
           });
           body.departmentMapping = mapping;
@@ -2376,11 +2390,11 @@
         if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
         if (method === 'DepartmentWise') {
           var mapping = {};
-          document.querySelectorAll('.dist-dept-map-select').forEach(function (selectEl) {
-            var deptName = selectEl.getAttribute('data-dept');
-            var val = selectEl.value;
-            if (deptName && val) {
-              mapping[deptName] = parseInt(val, 10);
+          document.querySelectorAll('.dist-dept-check:checked').forEach(function (cb) {
+            var memberId = parseInt(cb.getAttribute('data-member'), 10);
+            var deptName = cb.value;
+            if (deptName && memberId) {
+              mapping[deptName] = memberId;
             }
           });
           body.departmentMapping = mapping;

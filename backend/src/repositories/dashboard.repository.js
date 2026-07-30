@@ -160,10 +160,10 @@ async function getTeamMemberStats(teamId) {
 
       SELECT
         u.user_id, u.first_name, u.last_name, u.email,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id)) AS total_assigned,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND status = 'Completed') AS completed,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND (status = 'Pending' OR status = 'ASSIGNED_TO_LEADER')) AS pending,
-        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND (member_id IS NULL OR member_id = t.leader_id) AND status = 'Draft') AS draft,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id) AS total_assigned,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Completed') AS completed,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Pending') AS pending,
+        (SELECT COUNT(*) FROM AlumniAssignments WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Draft') AS draft,
         1 AS is_leader
       FROM Teams t
       INNER JOIN Users u ON t.leader_id = u.user_id
