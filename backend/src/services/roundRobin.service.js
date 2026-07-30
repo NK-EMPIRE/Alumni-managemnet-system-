@@ -151,22 +151,12 @@ async function leaderPreview(currentUser, params = {}) {
   }
 
   // Get undistributed alumni: either assigned to this team or unassigned but resolved to a member/leader of this team
+  // Get undistributed alumni: strictly alumni assigned by Admin to this team awaiting distribution
   let undistributedQuery = `
     SELECT DISTINCT a.alumni_id, a.name, a.register_no, a.batch, a.department, a.faculty_assigned, a.resolved_faculty_user_id
     FROM Alumni a
-    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
-    WHERE (
-      (aa.team_id = @teamId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
-      OR
-      (
-        a.resolved_faculty_user_id IN (
-          SELECT user_id FROM TeamMembers WHERE team_id = @teamId
-          UNION
-          SELECT leader_id FROM Teams WHERE team_id = @teamId
-        )
-        AND aa.assignment_id IS NULL
-      )
-    )
+    INNER JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+    WHERE aa.team_id = @teamId AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL
   `;
   const undistReq = pool.request().input('teamId', sql.Int, teamId);
 
@@ -738,21 +728,12 @@ async function getUndistributedAlumni(leaderId, { page, limit, offset, search, b
   const countQuery = `
     SELECT COUNT(DISTINCT a.alumni_id) AS total
     FROM Alumni a
-    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
-    WHERE (
-      (aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1) AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
-      OR
-      (
-        a.resolved_faculty_user_id IN (
-          SELECT user_id FROM TeamMembers WHERE team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
-          UNION
-          SELECT leader_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1
-        )
-        AND aa.assignment_id IS NULL
-      )
-    )
-    AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
-    AND (@batch IS NULL OR a.batch = @batch)
+    INNER JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+    WHERE aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
+      AND aa.status = 'ASSIGNED_TO_LEADER'
+      AND aa.member_id IS NULL
+      AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
+      AND (@batch IS NULL OR a.batch = @batch)
   `;
 
   const countResult = await request.query(countQuery);
@@ -760,24 +741,15 @@ async function getUndistributedAlumni(leaderId, { page, limit, offset, search, b
 
   const dataQuery = `
     SELECT DISTINCT a.alumni_id, a.name, a.register_no, a.department, a.batch, 
-      COALESCE(aa.assigned_date, GETUTCDATE()) AS assigned_date,
-      COALESCE(aa.status, 'ASSIGNED_TO_LEADER') AS status
+      aa.assigned_date AS assigned_date,
+      aa.status AS status
     FROM Alumni a
-    LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
-    WHERE (
-      (aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1) AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
-      OR
-      (
-        a.resolved_faculty_user_id IN (
-          SELECT user_id FROM TeamMembers WHERE team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
-          UNION
-          SELECT leader_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1
-        )
-        AND aa.assignment_id IS NULL
-      )
-    )
-    AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
-    AND (@batch IS NULL OR a.batch = @batch)
+    INNER JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+    WHERE aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
+      AND aa.status = 'ASSIGNED_TO_LEADER'
+      AND aa.member_id IS NULL
+      AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search)
+      AND (@batch IS NULL OR a.batch = @batch)
     ORDER BY assigned_date DESC
     OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
   `;
@@ -806,19 +778,10 @@ async function getUndistributedCount(leaderId) {
     .query(`
       SELECT COUNT(DISTINCT a.alumni_id) AS count
       FROM Alumni a
-      LEFT JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
-      WHERE (
-        (aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1) AND aa.status = 'ASSIGNED_TO_LEADER' AND aa.member_id IS NULL)
-        OR
-        (
-          a.resolved_faculty_user_id IN (
-            SELECT user_id FROM TeamMembers WHERE team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
-            UNION
-            SELECT leader_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1
-          )
-          AND aa.assignment_id IS NULL
-        )
-      )
+      INNER JOIN AlumniAssignments aa ON a.alumni_id = aa.alumni_id
+      WHERE aa.team_id = (SELECT team_id FROM Teams WHERE leader_id = @leaderId AND is_active = 1)
+        AND aa.status = 'ASSIGNED_TO_LEADER'
+        AND aa.member_id IS NULL
     `);
   return result.recordset[0].count;
 }
