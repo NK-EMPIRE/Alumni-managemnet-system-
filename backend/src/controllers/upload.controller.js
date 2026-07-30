@@ -57,7 +57,8 @@ const confirmAliases = asyncHandler(async (req, res) => {
 
 const rollbackImport = asyncHandler(async (req, res) => {
   const { importId } = req.params;
-  const result = await uploadService.rollbackImport(parseInt(importId, 10));
+  const currentUser = req.user;
+  const result = await uploadService.rollbackImport(parseInt(importId, 10), currentUser);
   success(res, result, `Excel import rolled back successfully. Removed ${result.deletedCount} records.`);
 });
 

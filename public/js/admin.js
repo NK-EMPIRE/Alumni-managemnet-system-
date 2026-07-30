@@ -2672,7 +2672,7 @@ window.executeRollbackImport = function (importId) {
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rolling back...'; }
 
   var token = localStorage.getItem('token');
-  fetch('/api/v1/import/rollback/' + importId, {
+  fetch('/api/v1/upload/rollback/' + importId, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -2692,7 +2692,7 @@ window.executeRollbackImport = function (importId) {
   }).catch(function (err) {
     var modal = document.getElementById('rollbackConfirmModal');
     if (modal) modal.remove();
-    if (typeof showToast === 'function') showToast('Error', 'Failed to rollback import.', 'danger');
+    if (typeof showToast === 'function') showToast('Error', err.message || 'Failed to rollback import.', 'danger');
   });
 };
 
