@@ -305,4 +305,27 @@ async function commitReassign(currentUser, { leaderId, sourceMemberId, allocatio
   return { moved: totalMoved, teamId: team.team_id };
 }
 
-module.exports = { getTeamLoad, previewReassign, commitReassign };
+async function getSourceMemberDepartments(currentUser, { leaderId, sourceMemberId }) {
+  const pool = await getPool();
+  const { team } = await getTeamLoad(currentUser, { leaderId });
+
+  const deptRes = await pool.request()
+    .input('sourceMemberId', sql.Int, sourceMemberId)
+    .input('teamId', sql.Int, team.team_id)
+    .query(`
+      SELECT 
+        ISNULL(NULLIF(LTRIM(RTRIM(a.department)), ''), 'Unspecified') AS department,
+        COUNT(aa.assignment_id) AS count
+      FROM AlumniAssignments aa
+      INNER JOIN Alumni a ON a.alumni_id = aa.alumni_id
+      WHERE aa.member_id = @sourceMemberId
+        AND aa.team_id = @teamId
+        AND aa.status = 'Pending'
+      GROUP BY LTRIM(RTRIM(a.department))
+      ORDER BY count DESC
+    `);
+
+  return { sourceMemberId, departments: deptRes.recordset };
+}
+
+module.exports = { getTeamLoad, getSourceMemberDepartments, previewReassign, commitReassign };

@@ -15,6 +15,13 @@ router.get(
   reassignController.getTeamLoad
 );
 
+// GET /api/v1/assignments/reassign/source-departments?sourceMemberId=X&leaderId=Y
+router.get(
+  '/source-departments',
+  authorize(ROLES.ADMIN, ROLES.LEADER),
+  reassignController.getSourceMemberDepartments
+);
+
 // POST /api/v1/assignments/reassign/preview
 router.post(
   '/preview',

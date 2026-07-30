@@ -4270,13 +4270,31 @@ window.reassignLoadTeam = function (selectedDept) {
       sourceSel.appendChild(opt1);
     });
 
-    var renderCheckboxes = function () {
+    var onSourceSelect = function () {
       var srcId = parseInt(sourceSel.value, 10);
       targetBox.innerHTML = '';
       if (!srcId) {
         targetBox.innerHTML = '<span style="color:#94A3B8;font-size:0.8rem;">Select source first...</span>';
+        var deptFilterEl = document.getElementById('reassignDeptFilter');
+        if (deptFilterEl) deptFilterEl.innerHTML = '<option value="all">All Departments</option>';
         return;
       }
+
+      // Fetch source member's specific department breakdown
+      var token = localStorage.getItem('token');
+      fetch('/api/v1/assignments/reassign/source-departments?sourceMemberId=' + srcId + (_reassignLeaderId ? '&leaderId=' + _reassignLeaderId : ''), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        var deptFilterEl = document.getElementById('reassignDeptFilter');
+        if (deptFilterEl && res.success && res.data.departments) {
+          var opts = '<option value="all">All Departments (All Backlog)</option>';
+          res.data.departments.forEach(function (d) {
+            opts += '<option value="' + d.department + '">' + d.department + ' (' + d.count + ' pending)</option>';
+          });
+          deptFilterEl.innerHTML = opts;
+        }
+      }).catch(function (e) {});
+
       data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
           var label = document.createElement('label');
@@ -4287,7 +4305,7 @@ window.reassignLoadTeam = function (selectedDept) {
       });
     };
 
-    sourceSel.onchange = renderCheckboxes;
+    sourceSel.onchange = onSourceSelect;
     renderCheckboxes();
 
     document.getElementById('reassignStep1').style.display = 'none';
