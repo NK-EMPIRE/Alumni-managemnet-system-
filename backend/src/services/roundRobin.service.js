@@ -109,13 +109,15 @@ async function adminAssign(currentUser, { department, batch, leaderId, count }) 
 
   // Non-blocking Email Notification
   try {
+    const { sendAlumniAssignedToLeaderEmail } = require('../helpers/email');
     if (leader.email) {
-      sendAssignmentNotificationEmail(
-        leader.email,
-        `${leader.first_name} ${leader.last_name}`,
-        availableAlumni.length,
-        `${currentUser.firstName} ${currentUser.lastName}`
-      ).catch(() => {});
+      sendAlumniAssignedToLeaderEmail({
+        email: leader.email,
+        leaderName: `${leader.first_name} ${leader.last_name}`,
+        totalCount: availableAlumni.length,
+        method: allDepts ? 'All Departments' : department,
+        batch
+      }).catch(() => {});
     }
   } catch (e) {}
 
@@ -130,7 +132,8 @@ async function adminAssign(currentUser, { department, batch, leaderId, count }) 
 /**
  * Generate preview of Leader distribution.
  */
-async function leaderPreview(currentUser, { teamId, method, batch, allocations, selectedMemberIds, departmentMapping, unmatchedFallback, fallbackDepartmentMapping }) {
+async function leaderPreview(currentUser, params = {}) {
+  const { teamId, method, batch, allocations, selectedMemberIds, departmentMapping, unmatchedFallback, fallbackDepartmentMapping } = params;
   if (!teamId || !method) {
     throw new AppError('Team ID and Method are required.', 400);
   }
@@ -577,6 +580,32 @@ async function leaderDistribute(currentUser, params) {
       description: `Distributed ${totalUpdated} alumni using ${params.method} method`
     });
 
+    // Send email notifications to assigned members
+    try {
+      const { sendAlumniDistributedToMemberEmail } = require('../helpers/email');
+      const userMap = {};
+      preview.forEach(g => {
+        if (g.userId > 0 && g.count > 0) userMap[g.userId] = (userMap[g.userId] || 0) + g.count;
+      });
+
+      for (const [targetUserId, count] of Object.entries(userMap)) {
+        pool.request()
+          .input('uid', sql.Int, parseInt(targetUserId, 10))
+          .query('SELECT first_name, last_name, email FROM Users WHERE user_id = @uid')
+          .then(r => {
+            if (r.recordset.length > 0 && r.recordset[0].email) {
+              const u = r.recordset[0];
+              sendAlumniDistributedToMemberEmail({
+                email: u.email,
+                memberName: `${u.first_name} ${u.last_name}`,
+                leaderName: `${currentUser.firstName} ${currentUser.lastName}`,
+                count
+              }).catch(() => {});
+            }
+          }).catch(() => {});
+      }
+    } catch (e) {}
+
     return {
       success: true,
       message: `Successfully distributed ${totalUpdated} alumni to team members.`,
@@ -625,6 +654,26 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
       .query("UPDATE AlumniAssignments SET status = 'Reopened', completed_date = NULL WHERE alumni_id = @alumniId");
 
     await transaction.commit();
+
+    // Send email notification to assigned member/leader
+    try {
+      const { sendAlumniRecordReopenedEmail } = require('../helpers/email');
+      const assignedUserId = assignment.member_id || currentUser.userId;
+      const userRes = await pool.request()
+        .input('uid', sql.Int, assignedUserId)
+        .query('SELECT first_name, last_name, email FROM Users WHERE user_id = @uid');
+      if (userRes.recordset.length > 0 && userRes.recordset[0].email) {
+        const u = userRes.recordset[0];
+        sendAlumniRecordReopenedEmail({
+          email: u.email,
+          recipientName: `${u.first_name} ${u.last_name}`,
+          alumniName: assignment.name,
+          registerNo: assignment.register_no,
+          department: assignment.department,
+          reopenedBy: `${currentUser.firstName} ${currentUser.lastName}`
+        }).catch(() => {});
+      }
+    } catch (e) {}
   } catch (err) {
     await transaction.rollback();
     throw new AppError('Failed to reopen completed record: ' + err.message, 500);

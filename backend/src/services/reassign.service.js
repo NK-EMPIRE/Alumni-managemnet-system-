@@ -297,6 +297,35 @@ async function commitReassign(currentUser, { leaderId, sourceMemberId, allocatio
     });
   }
 
+  // Send email notifications to receiving target members
+  try {
+    const { sendAlumniRedistributedEmail } = require('../helpers/email');
+    const sourceUserRes = await pool.request()
+      .input('sid', sql.Int, parseInt(sourceMemberId, 10))
+      .query('SELECT first_name, last_name FROM Users WHERE user_id = @sid');
+    const sourceName = sourceUserRes.recordset.length > 0 ? `${sourceUserRes.recordset[0].first_name} ${sourceUserRes.recordset[0].last_name}` : 'Team Member';
+
+    for (const [targetId, assignIds] of Object.entries(allocations)) {
+      const validIds = (assignIds || []).map(id => parseInt(id, 10)).filter(n => !isNaN(n));
+      if (validIds.length === 0) continue;
+
+      const targetUserRes = await pool.request()
+        .input('tid', sql.Int, parseInt(targetId, 10))
+        .query('SELECT first_name, last_name, email FROM Users WHERE user_id = @tid');
+
+      if (targetUserRes.recordset.length > 0 && targetUserRes.recordset[0].email) {
+        const targetUser = targetUserRes.recordset[0];
+        sendAlumniRedistributedEmail({
+          email: targetUser.email,
+          memberName: `${targetUser.first_name} ${targetUser.last_name}`,
+          sourceName,
+          count: validIds.length,
+          departmentFilter: department
+        }).catch(() => {});
+      }
+    }
+  } catch (e) {}
+
   // Trigger real-time sync across connected clients
   try {
     notifyAssignmentsUpdated(team.team_id, 'reassign');

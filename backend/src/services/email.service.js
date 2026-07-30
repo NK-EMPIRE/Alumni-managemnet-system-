@@ -276,8 +276,12 @@ async function getReplies({ userId, role }) {
     request.input('userId', sql.Int, userId);
   } else if (userRole === 'LEADER') {
     query += ` WHERE (
-      aa.member_id IN (SELECT user_id FROM dbo.Users WHERE team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId))
-      OR aa.team_id = (SELECT team_id FROM dbo.Users WHERE user_id = @userId)
+      aa.member_id IN (
+        SELECT user_id FROM dbo.TeamMembers WHERE team_id IN (SELECT team_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1)
+        UNION
+        SELECT leader_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1
+      )
+      OR aa.team_id IN (SELECT team_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1)
     )`;
     request.input('userId', sql.Int, userId);
   }
