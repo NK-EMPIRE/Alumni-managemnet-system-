@@ -1332,6 +1332,15 @@
 
         <!-- Step 1: Workload + source/target -->
         <div id="circulateStep1" style="padding:20px 24px;">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
+              <span style="width:18px;height:18px;background:#E0E7FF;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-building" style="color:#4F46E5;font-size:0.65rem;"></i></span>
+              Filter Alumni by Department
+            </label>
+            <select class="form-control" id="circulateDeptFilter" onchange="onCirculateDeptChange()" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;width:100%;">
+              <option value="all">All Departments</option>
+            </select>
+          </div>
           <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:16px;border-radius:10px;border:1px solid var(--border);background:#F8FAFC;">
             <p style="color:var(--text-secondary);font-size:0.85rem;padding:14px;">Loading team workload...</p>
           </div>

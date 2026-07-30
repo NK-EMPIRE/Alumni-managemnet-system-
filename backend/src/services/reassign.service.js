@@ -8,7 +8,7 @@ const { AppError, NotFoundError } = require('../middleware/errorHandler');
  * Admin: pass leaderId query param.
  * Leader: uses req.user automatically.
  */
-async function getTeamLoad(currentUser, { leaderId }) {
+async function getTeamLoad(currentUser, { leaderId, department }) {
   const pool = await getPool();
 
   let resolvedLeaderId;
@@ -31,10 +31,27 @@ async function getTeamLoad(currentUser, { leaderId }) {
   }
   const team = teamRes.recordset[0];
 
-  // Get all active members + leader of this team with counts
-  const loadRes = await pool.request()
+  // Get distinct departments in team assignments
+  const deptRes = await pool.request()
     .input('teamId', sql.Int, team.team_id)
     .query(`
+      SELECT DISTINCT LTRIM(RTRIM(a.department)) AS dept
+      FROM AlumniAssignments aa
+      INNER JOIN Alumni a ON a.alumni_id = aa.alumni_id
+      WHERE aa.team_id = @teamId AND a.department IS NOT NULL AND LTRIM(RTRIM(a.department)) <> ''
+      ORDER BY dept ASC
+    `);
+  const departments = deptRes.recordset.map(r => r.dept).filter(Boolean);
+
+  // Filter load counts by department if specified
+  const deptFilterSql = (department && department !== 'all') ? ` AND UPPER(LTRIM(RTRIM(a.department))) = UPPER(LTRIM(RTRIM(@deptFilter)))` : '';
+
+  const loadReq = pool.request().input('teamId', sql.Int, team.team_id);
+  if (department && department !== 'all') {
+    loadReq.input('deptFilter', sql.NVarChar(100), department.trim());
+  }
+
+  const loadRes = await loadReq.query(`
       SELECT
         u.user_id,
         u.first_name + ' ' + u.last_name AS name,
@@ -45,6 +62,7 @@ async function getTeamLoad(currentUser, { leaderId }) {
       FROM Users u
       INNER JOIN Roles r ON u.role_id = r.role_id
       LEFT JOIN AlumniAssignments aa ON aa.member_id = u.user_id AND aa.team_id = @teamId
+      LEFT JOIN Alumni a ON a.alumni_id = aa.alumni_id ${deptFilterSql}
       WHERE u.user_id IN (
         SELECT user_id FROM TeamMembers WHERE team_id = @teamId
         UNION
@@ -55,17 +73,17 @@ async function getTeamLoad(currentUser, { leaderId }) {
       ORDER BY pending_count DESC
     `);
 
-  return { team, members: loadRes.recordset };
+  return { team, departments, members: loadRes.recordset };
 }
 
 /**
  * Preview: which Pending alumni records will move from source → targets.
  * Does NOT write anything to the DB.
  */
-async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMemberIds, count, allocations }) {
+async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMemberIds, count, allocations, department }) {
   const pool = await getPool();
 
-  const { team } = await getTeamLoad(currentUser, { leaderId });
+  const { team } = await getTeamLoad(currentUser, { leaderId, department });
 
   // Validate sourceMemberId is in the team
   const memberCheck = await pool.request()
@@ -114,18 +132,25 @@ async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMe
 
   // Fetch pending alumni for source member — take `count` rows, or all if count not specified
   const fetchLimit = count ? parseInt(count, 10) : 10000;
-  const pendingRes = await pool.request()
+  const deptFilterSql = (department && department !== 'all') ? ` AND UPPER(LTRIM(RTRIM(a.department))) = UPPER(LTRIM(RTRIM(@deptFilter)))` : '';
+
+  const pendingReq = pool.request()
     .input('sourceMemberId', sql.Int, sourceMemberId)
     .input('teamId', sql.Int, team.team_id)
-    .input('limit', sql.Int, fetchLimit)
-    .query(`
+    .input('limit', sql.Int, fetchLimit);
+
+  if (department && department !== 'all') {
+    pendingReq.input('deptFilter', sql.NVarChar(100), department.trim());
+  }
+
+  const pendingRes = await pendingReq.query(`
       SELECT TOP (@limit)
-        aa.assignment_id, aa.alumni_id, a.name, a.register_no, aa.status AS current_status
+        aa.assignment_id, aa.alumni_id, a.name, a.register_no, a.department, aa.status AS current_status
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON a.alumni_id = aa.alumni_id
       WHERE aa.member_id = @sourceMemberId
         AND aa.team_id = @teamId
-        AND aa.status = 'Pending'
+        AND aa.status = 'Pending' ${deptFilterSql}
       ORDER BY aa.assigned_date ASC
     `);
 

@@ -4203,14 +4203,22 @@ window.openReassignModal = function () {
   openModal('reassignModal');
 };
 
-window.reassignLoadTeam = function () {
+window.onReassignDeptChange = function () {
+  var dept = document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all';
+  window.reassignLoadTeam(dept);
+};
+
+window.reassignLoadTeam = function (selectedDept) {
   var sel = document.getElementById('reassignLeaderSelect');
   var leaderId = parseInt(sel.value, 10);
   if (!leaderId) { Toast.warning('Reassign', 'Please select a leader.'); return; }
   _reassignLeaderId = leaderId;
 
+  var currentDept = selectedDept || (document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all');
+  var queryUrl = '/api/v1/assignments/reassign/team-load?leaderId=' + leaderId + (currentDept && currentDept !== 'all' ? '&department=' + encodeURIComponent(currentDept) : '');
+
   var token = localStorage.getItem('token');
-  fetch('/api/v1/assignments/reassign/team-load?leaderId=' + leaderId, {
+  fetch(queryUrl, {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Reassign', res && res.message || 'Failed to load team.'); return; }
@@ -4218,6 +4226,18 @@ window.reassignLoadTeam = function () {
     _reassignTeamId = data.team.team_id;
 
     document.getElementById('reassignTeamName').textContent = data.team.team_name;
+
+    // Populate Department Filter options
+    var deptFilterEl = document.getElementById('reassignDeptFilter');
+    if (deptFilterEl && data.departments) {
+      var prevVal = currentDept;
+      var opts = '<option value="all">All Departments</option>';
+      data.departments.forEach(function (d) {
+        opts += '<option value="' + d + '"' + (d === prevVal ? ' selected' : '') + '>' + d + '</option>';
+      });
+      deptFilterEl.innerHTML = opts;
+      deptFilterEl.value = prevVal;
+    }
 
     // Build workload table
     var tbl = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">' +
@@ -4286,18 +4306,21 @@ window.reassignPreview = function () {
   if (targetMemberIds.length === 0) { Toast.warning('Reassign', 'Please select at least one target member.'); return; }
 
   var count = parseInt(document.getElementById('reassignCount').value, 10) || null;
+  var deptFilter = document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all';
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ leaderId: _reassignLeaderId, sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count })
+    body: JSON.stringify({ leaderId: _reassignLeaderId, sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, department: deptFilter })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Reassign', res && res.message || 'Preview failed.'); return; }
     _reassignPreviewData = res.data;
 
+    var deptSubtext = (deptFilter && deptFilter !== 'all') ? ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + deptFilter + ']</span>' : '';
+
     var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">' +
-      'Moving <strong>' + res.data.totalMoving + '</strong> Pending alumni from <strong>' + res.data.sourceName + '</strong>:</p>';
+      'Moving <strong>' + res.data.totalMoving + '</strong> Pending alumni' + deptSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
 
     res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:16px;">' +

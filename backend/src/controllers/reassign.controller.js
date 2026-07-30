@@ -4,7 +4,8 @@ const { success } = require('../utils/response');
 
 const getTeamLoad = asyncHandler(async (req, res) => {
   const result = await reassignService.getTeamLoad(req.user, {
-    leaderId: req.query.leaderId
+    leaderId: req.query.leaderId,
+    department: req.query.department
   });
   success(res, result, 'Team workload retrieved successfully');
 });
