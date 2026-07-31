@@ -2165,7 +2165,7 @@ window.previewIndividualAlumniEmail = function (name, email, assignId) {
 
     if (nameTag) nameTag.textContent = name || 'Alumnus';
     if (emailTag) emailTag.textContent = email || 'alumni@mountzion.ac.in';
-    if (replyToTag) replyToTag.textContent = 'alumnirequests+' + (assignId || 'ID') + '@mountzion.ac.in';
+    if (replyToTag) replyToTag.textContent = 'alumnims+' + (assignId || 'ID') + '@mountzion.ac.in';
 
     window.switchCampaignTab('template');
 };
@@ -2230,7 +2230,7 @@ window.submitEmailCampaignLaunch = function () {
     if (launchBtn) { launchBtn.disabled = true; launchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Launching...'; }
 
     var token = localStorage.getItem('token');
-    fetch('/api/v1/email-campaigns/create', {
+    fetch('/api/v1/email-campaigns', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

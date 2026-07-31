@@ -39,7 +39,7 @@ Leader clicks "Request Details"
                                     Watches shared mailbox
                                     New mail arrives → parse To: header
                                     Extract assignmentId from
-                                    plus-address (alumnirequests+
+                                    plus-address (alumnims+
                                     {assignmentId}@mountzion.ac.in)
                                           │
                                     HTTP node → POST callback
@@ -166,7 +166,7 @@ see Security section.
    actual rate limit is before hardcoding a number).
 3. **Loop body**: for each recipient in the batch —
    - **Set node**: build personalized subject/HTML body, and the
-     `Reply-To` header as `alumnirequests+{{assignmentId}}@mountzion.ac.in`
+     `Reply-To` header as `alumnims+{{assignmentId}}@mountzion.ac.in`
      (or whatever your actual shared mailbox domain is).
    - **Send Email (SMTP) node**.
    - **HTTP Request node** → `POST {AMS_BASE_URL}/api/v1/email-campaigns/{{campaignId}}/log`
@@ -182,7 +182,7 @@ see Security section.
 ### Workflow 2 — Reply Watcher (always-on, IMAP trigger)
 
 1. **Email Trigger (IMAP) node** — polls the shared mailbox
-   (`alumnirequests@mountzion.ac.in`) on an interval (e.g. every 2 minutes).
+   (`alumnims@mountzion.ac.in`) on an interval (e.g. every 2 minutes).
 2. **Function/Code node** — parse the `To`/`Delivered-To` header for the
    `+assignmentId` tag. If no valid tag is found (someone replied from a
    forwarded/altered thread), route to a fallback branch: notify an admin

@@ -76,15 +76,29 @@ async function createCampaign({ leaderId, assignmentIds }) {
     throw new Error('No valid alumni recipients with non-null emails found for this campaign');
   }
 
-  // Check if campaign currently in progress
+  // Check if campaign currently in progress (auto-recover stale ones that n8n never picked up)
   const activeCheck = await pool.request()
     .input('teamId', sql.Int, teamId)
-    .query("SELECT campaign_id FROM dbo.EmailCampaigns WHERE team_id = @teamId AND status = 'InProgress'");
+    .query(`
+      SELECT campaign_id, sent_count, failed_count, created_at
+      FROM dbo.EmailCampaigns
+      WHERE team_id = @teamId AND status = 'InProgress'
+    `);
 
-  if (activeCheck.recordset.length > 0) {
-    const err = new Error('A campaign is currently InProgress for your team. Please wait for it to complete.');
-    err.statusCode = 409;
-    throw err;
+  for (const row of activeCheck.recordset) {
+    const processed = (row.sent_count || 0) + (row.failed_count || 0);
+    const createdTime = row.created_at instanceof Date ? row.created_at.getTime() : new Date(row.created_at).getTime();
+    const stuck = processed === 0 && (Date.now() - createdTime) > 30 * 60 * 1000;
+    if (stuck) {
+      await pool.request()
+        .input('campaignId', sql.Int, row.campaign_id)
+        .query("UPDATE dbo.EmailCampaigns SET status = 'Failed', completed_at = GETUTCDATE() WHERE campaign_id = @campaignId AND status = 'InProgress'");
+      logger.warn(`Stale campaign #${row.campaign_id} marked as Failed (no emails were processed by n8n).`);
+    } else {
+      const err = new Error('A campaign is currently InProgress for your team. Please wait for it to complete.');
+      err.statusCode = 409;
+      throw err;
+    }
   }
 
   // Create EmailCampaigns row
@@ -122,41 +136,37 @@ async function createCampaign({ leaderId, assignmentIds }) {
     });
   }
 
-  // Fire n8n webhook asynchronously if configured
+  // Fire n8n webhook and verify it was accepted before reporting success
   const n8nWebhookUrl = process.env.N8N_CAMPAIGN_WEBHOOK_URL;
   const sharedSecret = process.env.N8N_SHARED_SECRET;
 
-  if (n8nWebhookUrl) {
-    try {
-      const amsBaseUrl = process.env.AMS_BASE_URL || 'http://localhost:3000';
-      const payload = JSON.stringify({
-        campaignId,
-        amsBaseUrl,
-        recipients: recipientPayloads
-      });
-
-      const urlObj = new URL(n8nWebhookUrl);
-      const reqLib = urlObj.protocol === 'https:' ? https : http;
-
-      const req = reqLib.request(n8nWebhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Automation-Secret': sharedSecret
-        }
-      });
-
-      req.on('error', (e) => {
-        logger.error('Failed to dispatch webhook to n8n:', e);
-      });
-
-      req.write(payload);
-      req.end();
-    } catch (e) {
-      logger.error('Invalid N8N_CAMPAIGN_WEBHOOK_URL:', e);
-    }
-  } else {
+  if (!n8nWebhookUrl) {
     logger.warn('N8N_CAMPAIGN_WEBHOOK_URL not configured. Campaign created in database but n8n trigger skipped.');
+    await markCampaignFailed(pool, campaignId);
+    const err = new Error('N8N_CAMPAIGN_WEBHOOK_URL is not configured on the server. Cannot trigger the n8n email automation.');
+    err.statusCode = 500;
+    throw err;
+  }
+
+  let accepted = false;
+  try {
+    const amsBaseUrl = process.env.AMS_BASE_URL || 'http://localhost:3000';
+    const payload = JSON.stringify({
+      campaignId,
+      amsBaseUrl,
+      recipients: recipientPayloads
+    });
+
+    accepted = await dispatchN8nWebhook(n8nWebhookUrl, sharedSecret, payload);
+  } catch (e) {
+    logger.error('Failed to dispatch webhook to n8n:', e);
+  }
+
+  if (!accepted) {
+    await markCampaignFailed(pool, campaignId);
+    const err = new Error('n8n automation did not accept the campaign (webhook not registered or workflow not active). No emails were queued. Please activate the "AMS Email Campaign Sender" workflow in n8n and try again.');
+    err.statusCode = 502;
+    throw err;
   }
 
   return { campaignId, totalRecipients: recipients.length, status: 'InProgress' };
@@ -305,6 +315,52 @@ async function reviewReply({ replyId, userId }) {
     `);
 
   return { success: true };
+}
+
+function markCampaignFailed(pool, campaignId) {
+  return pool.request()
+    .input('campaignId', sql.Int, campaignId)
+    .query("UPDATE dbo.EmailCampaigns SET status = 'Failed', completed_at = GETUTCDATE() WHERE campaign_id = @campaignId AND status = 'InProgress'");
+}
+
+function dispatchN8nWebhook(url, sharedSecret, payload) {
+  return new Promise((resolve, reject) => {
+    let urlObj;
+    try {
+      urlObj = new URL(url);
+    } catch (e) {
+      return reject(e);
+    }
+
+    const reqLib = urlObj.protocol === 'https:' ? https : http;
+    const req = reqLib.request(urlObj, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+        'X-Automation-Secret': sharedSecret
+      },
+      timeout: 15000
+    });
+
+    req.on('timeout', () => req.destroy(new Error('n8n webhook request timed out')));
+    req.on('error', reject);
+
+    req.on('response', (res) => {
+      let body = '';
+      res.on('data', (chunk) => { body += chunk; });
+      res.on('end', () => {
+        const ok = res.statusCode >= 200 && res.statusCode < 300;
+        if (!ok) {
+          logger.error(`n8n webhook rejected campaign: HTTP ${res.statusCode} - ${body.slice(0, 400)}`);
+        }
+        resolve(ok);
+      });
+    });
+
+    req.write(payload);
+    req.end();
+  });
 }
 
 module.exports = {

@@ -3024,7 +3024,7 @@ window.previewIndividualAlumniEmail = function (name, email, assignmentId) {
 
   if (nameEl) nameEl.textContent = name || 'Alumnus';
   if (emailEl) emailEl.textContent = email || 'alumni@mountzion.ac.in';
-  if (tagEl) tagEl.textContent = 'alumnirequests+' + (assignmentId || 'ID') + '@mountzion.ac.in';
+  if (tagEl) tagEl.textContent = 'alumnims+' + (assignmentId || 'ID') + '@mountzion.ac.in';
 
   window.switchCampaignTab('template');
 };
