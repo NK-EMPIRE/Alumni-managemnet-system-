@@ -27,9 +27,11 @@ def main():
         print(json.dumps({"success": False, "error": f"File not found: {file_path}"}))
         sys.exit(1)
 
-    # Load faculty list & aliases from stdin if provided, otherwise default to empty
+    # Load faculty list, aliases & selected sheets from stdin if provided
     faculty_list = []
     alias_map = {}
+    target_sheets = []
+    inspect_sheets_mode = "--inspect-sheets" in sys.argv
     
     try:
         # Read from standard input (non-blocking style check)
@@ -39,6 +41,7 @@ def main():
                 parsed_input = json.loads(input_data)
                 faculty_list = parsed_input.get("faculties", [])
                 aliases_list = parsed_input.get("aliases", [])
+                target_sheets = parsed_input.get("sheets", [])
                 # Map alias string (normalized) -> faculty_id
                 for item in aliases_list:
                     alias_name = str(item.get("alias_name", "")).strip().lower()
@@ -48,12 +51,28 @@ def main():
         # Gracefully handle reading/parsing empty stdin
         pass
 
+    if len(sys.argv) > 2 and sys.argv[2] and not sys.argv[2].startswith("--"):
+        try:
+            target_sheets = json.loads(sys.argv[2])
+        except Exception:
+            target_sheets = [s.strip() for s in sys.argv[2].split(",") if s.strip()]
+
     try:
         analyzer = WorkbookAnalyzer(file_path)
-        valid_sheets = analyzer.get_valid_sheets()
+        valid_sheets = analyzer.get_valid_sheets(target_sheets=target_sheets if not inspect_sheets_mode else None)
     except Exception as e:
         print(json.dumps({"success": False, "error": f"Failed to read workbook: {str(e)}"}))
         sys.exit(1)
+
+    if inspect_sheets_mode:
+        sheets_info = []
+        for s_name, df in valid_sheets.items():
+            sheets_info.append({
+                "name": s_name,
+                "totalRows": len(df)
+            })
+        print(json.dumps({"success": True, "sheets": sheets_info}))
+        sys.exit(0)
 
     mapper = ColumnMapper()
     detector = HeaderDetector(mapper.get_all_synonyms())

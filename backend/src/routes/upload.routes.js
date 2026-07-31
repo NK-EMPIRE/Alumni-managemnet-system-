@@ -24,6 +24,13 @@ router.post(
   uploadController.previewExcel
 );
 
+router.post(
+  '/sheets',
+  authorize(ROLES.ADMIN, ROLES.LEADER),
+  upload.single('file'),
+  uploadController.inspectSheets
+);
+
 router.get(
   '/history',
   authorize(ROLES.ADMIN, ROLES.LEADER),

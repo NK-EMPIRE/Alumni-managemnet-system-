@@ -4,7 +4,7 @@ const path = require('path');
 const { logger } = require('../utils/logger');
 const { AppError } = require('../middleware/errorHandler');
 
-function runPythonImporter(filePath, stdinData = "") {
+function runPythonImporter(filePath, stdinData = "", extraArgs = []) {
   return new Promise((resolve, reject) => {
     // Try environment python, process.env.PYTHON_PATH, or fallback list
     const pythonPath = process.env.PYTHON_PATH || (process.platform === 'win32' ? 'python' : 'python3');
@@ -12,7 +12,7 @@ function runPythonImporter(filePath, stdinData = "") {
     
     let child;
     try {
-      child = spawn(pythonPath, [scriptPath, filePath]);
+      child = spawn(pythonPath, [scriptPath, filePath, ...extraArgs]);
     } catch (err) {
       return reject(new AppError(`Failed to start Python process: ${err.message}. Ensure Python is installed and added to PATH.`, 500));
     }
@@ -62,19 +62,27 @@ function runPythonImporter(filePath, stdinData = "") {
   });
 }
 
-async function getFacultyAndAliasStdin() {
+async function getFacultyAndAliasStdin(selectedSheets = []) {
   try {
     const data = await uploadRepository.getFacultiesAndAliases();
+    if (selectedSheets && Array.isArray(selectedSheets) && selectedSheets.length > 0) {
+      data.sheets = selectedSheets;
+    }
     return JSON.stringify(data);
   } catch (err) {
     logger.warn('Failed to load faculty metadata for import engine: ' + err.message);
-    return '{}';
+    return JSON.stringify({ sheets: selectedSheets });
   }
 }
 
-async function processExcelImport(filePath, originalName, currentUser) {
+async function getExcelSheets(filePath) {
+  const result = await runPythonImporter(filePath, "", ['--inspect-sheets']);
+  return { sheets: result.sheets || [] };
+}
+
+async function processExcelImport(filePath, originalName, currentUser, selectedSheets = []) {
   const startTime = Date.now();
-  const stdinData = await getFacultyAndAliasStdin();
+  const stdinData = await getFacultyAndAliasStdin(selectedSheets);
   const importerResult = await runPythonImporter(filePath, stdinData);
   const { summary, records, errors, unmappedColumns } = importerResult;
 
@@ -209,8 +217,8 @@ async function processExcelImport(filePath, originalName, currentUser) {
   };
 }
 
-async function getExcelPreview(filePath) {
-  const stdinData = await getFacultyAndAliasStdin();
+async function getExcelPreview(filePath, selectedSheets = []) {
+  const stdinData = await getFacultyAndAliasStdin(selectedSheets);
   const importerResult = await runPythonImporter(filePath, stdinData);
   const { records, errors } = importerResult;
 
@@ -223,6 +231,7 @@ async function getExcelPreview(filePath) {
       name: err.name || '-',
       department: err.department || '-',
       batch: err.batch || '-',
+      dateOfBirth: err.dateOfBirth || '-',
       action: 'Skip',
       reason: err.errorDescription
     });
@@ -268,6 +277,7 @@ async function getExcelPreview(filePath) {
           name: row.name || existing.name || '-',
           department: row.department || existing.department || '-',
           batch: row.batch || existing.batch || '-',
+          dateOfBirth: row.dateOfBirth || existing.date_of_birth || '-',
           action: 'Update',
           reason: 'Updates: ' + Object.keys(fieldsToUpdate).join(', ')
         });
@@ -278,6 +288,7 @@ async function getExcelPreview(filePath) {
           name: row.name || existing.name || '-',
           department: row.department || existing.department || '-',
           batch: row.batch || existing.batch || '-',
+          dateOfBirth: row.dateOfBirth || existing.date_of_birth || '-',
           action: 'Skip',
           reason: 'No new or different values'
         });
@@ -290,6 +301,7 @@ async function getExcelPreview(filePath) {
           name: row.name || '-',
           department: row.department || '-',
           batch: row.batch || '-',
+          dateOfBirth: row.dateOfBirth || '-',
           action: 'Skip',
           reason: 'Missing Name/Dept/Batch for new record'
         });
@@ -300,6 +312,7 @@ async function getExcelPreview(filePath) {
           name: row.name,
           department: row.department,
           batch: row.batch,
+          dateOfBirth: row.dateOfBirth || '-',
           action: 'Insert',
           reason: 'New alumni record'
         });
@@ -339,6 +352,7 @@ async function rollbackImport(importId, currentUser = null) {
 module.exports = {
   processExcelImport,
   getExcelPreview,
+  getExcelSheets,
   getImportHistory,
   confirmAlias,
   rollbackImport

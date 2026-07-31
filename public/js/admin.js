@@ -2275,6 +2275,153 @@ function initImportHandlers() {
     });
   }
 
+  window.closeSheetImportModal = function () {
+    var overlay = document.getElementById('importSheetModalOverlay');
+    if (overlay) overlay.style.display = 'none';
+  };
+
+  var activeSheetModalData = null;
+
+  function loadSheetPreviewGrid(file, selectedSheets) {
+    var tbody = document.getElementById('importSheetModalTableBody');
+    var badge = document.getElementById('sheetPreviewRowsBadge');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#64748B;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Generating preview for selected sheets...</td></tr>';
+    if (badge) badge.textContent = 'Loading...';
+
+    var formData = new FormData();
+    formData.append('file', file);
+    if (selectedSheets && selectedSheets.length > 0) {
+      formData.append('sheets', JSON.stringify(selectedSheets));
+    }
+
+    API.uploadPreview(formData).then(function (res) {
+      var rows = (res.success && Array.isArray(res.data)) ? res.data : [];
+      if (badge) badge.textContent = rows.length + ' Rows';
+
+      if (rows.length === 0) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#EF4444;">No rows found in selected sheet(s).</td></tr>';
+        return;
+      }
+
+      var html = '';
+      rows.forEach(function (row, idx) {
+        var badgeClass = row.action === 'Insert' ? 'badge-success' : row.action === 'Update' ? 'badge-primary' : 'badge-danger';
+        var regNo = row.registerNo || row.register_no || '<span style="color:#EF4444;font-style:italic;">[Missing]</span>';
+        var name = row.name || '<span style="color:#EF4444;font-style:italic;">[Missing]</span>';
+        var dept = row.department || row.dept || '<span style="color:#EF4444;font-style:italic;">[Missing]</span>';
+        var batch = row.batch || '<span style="color:#EF4444;font-style:italic;">[Missing]</span>';
+        var dob = row.dateOfBirth || row.date_of_birth || '-';
+        var sheetName = row.sheet || '-';
+
+        html += '<tr>' +
+          '<td style="padding:8px 10px;font-weight:600;color:#64748B;">' + (idx + 1) + '</td>' +
+          '<td style="padding:8px 10px;font-weight:600;color:#2563EB;">' + sheetName + '</td>' +
+          '<td style="padding:8px 10px;">' + regNo + '</td>' +
+          '<td style="padding:8px 10px;"><strong>' + name + '</strong></td>' +
+          '<td style="padding:8px 10px;">' + dept + '</td>' +
+          '<td style="padding:8px 10px;">' + batch + '</td>' +
+          '<td style="padding:8px 10px;color:#475569;font-family:monospace;">' + dob + '</td>' +
+          '<td style="padding:8px 10px;"><span class="badge ' + badgeClass + '">' + row.action + '</span></td>' +
+          '<td style="padding:8px 10px;color:#64748B;">' + (row.reason || '-') + '</td>' +
+          '</tr>';
+      });
+
+      if (tbody) tbody.innerHTML = html;
+    }).catch(function (err) {
+      if (badge) badge.textContent = '0 Rows';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#EF4444;">Failed to generate preview: ' + (err.message || 'Error') + '</td></tr>';
+    });
+  }
+
+  function openSheetImportModalForFile(file) {
+    activeSheetModalData = { file: file, selectedSheets: [] };
+    var overlay = document.getElementById('importSheetModalOverlay');
+    var headerEl = document.getElementById('importFileDetailsHeader');
+    var container = document.getElementById('sheetSelectionContainer');
+
+    if (headerEl) {
+      headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
+        '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong> <span style="color:#64748B;font-size:0.8rem;">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span></div>' +
+        '<div style="font-size:0.8rem;color:#475569;"><i class="fas fa-spinner fa-spin"></i> Inspecting workbook sheets...</div>' +
+        '</div>';
+    }
+
+    if (container) {
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;color:#64748B;"><span class="spinner spinner-sm"></span> Loading available sheets...</div>';
+    }
+
+    if (overlay) overlay.style.display = 'flex';
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    API.inspectSheets(formData).then(function (res) {
+      var sheets = (res.success && res.data && Array.isArray(res.data.sheets)) ? res.data.sheets : [];
+      if (headerEl) {
+        headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
+          '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong> <span style="color:#64748B;font-size:0.8rem;">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span></div>' +
+          '<div style="font-size:0.82rem;font-weight:700;color:#1E3A8A;"><i class="fas fa-layer-group"></i> ' + sheets.length + ' Sheet(s) Found</div>' +
+          '</div>';
+      }
+
+      if (sheets.length === 0) {
+        if (container) container.innerHTML = '<div style="grid-column:1/-1;color:#EF4444;text-align:center;">No valid sheets found in workbook.</div>';
+        return;
+      }
+
+      var html = '';
+      sheets.forEach(function (sh, i) {
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.84rem;color:#1E293B;">' +
+          '<input type="checkbox" class="modal-sheet-cb" value="' + sh.name + '" checked style="width:16px;height:16px;accent-color:#2563EB;">' +
+          '<span>' + sh.name + '</span>' +
+          '<span style="margin-left:auto;font-size:0.75rem;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:10px;">' + sh.totalRows + ' rows</span>' +
+          '</label>';
+      });
+
+      if (container) container.innerHTML = html;
+
+      // Collect initially checked sheets
+      var checkedSheets = sheets.map(function (s) { return s.name; });
+      activeSheetModalData.selectedSheets = checkedSheets;
+
+      // Event listener for sheet checkboxes
+      document.querySelectorAll('.modal-sheet-cb').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var sel = [];
+          document.querySelectorAll('.modal-sheet-cb:checked').forEach(function (c) { sel.push(c.value); });
+          activeSheetModalData.selectedSheets = sel;
+          loadSheetPreviewGrid(file, sel);
+        });
+      });
+
+      // Select All / Deselect All links
+      var selectAllLink = document.getElementById('selectAllSheetsLink');
+      var deselectAllLink = document.getElementById('deselectAllSheetsLink');
+
+      if (selectAllLink) {
+        selectAllLink.onclick = function () {
+          document.querySelectorAll('.modal-sheet-cb').forEach(function (c) { c.checked = true; });
+          var sel = sheets.map(function (s) { return s.name; });
+          activeSheetModalData.selectedSheets = sel;
+          loadSheetPreviewGrid(file, sel);
+        };
+      }
+
+      if (deselectAllLink) {
+        deselectAllLink.onclick = function () {
+          document.querySelectorAll('.modal-sheet-cb').forEach(function (c) { c.checked = false; });
+          activeSheetModalData.selectedSheets = [];
+          loadSheetPreviewGrid(file, []);
+        };
+      }
+
+      // Initial grid preview load
+      loadSheetPreviewGrid(file, checkedSheets);
+    }).catch(function (err) {
+      if (container) container.innerHTML = '<div style="grid-column:1/-1;color:#EF4444;text-align:center;">Failed to inspect sheets: ' + (err.message || 'Error') + '</div>';
+    });
+  }
+
   /* File selection handler */
   fileInput.addEventListener('change', function () {
     if (fileInput.files && fileInput.files.length > 0) {
@@ -2286,60 +2433,8 @@ function initImportHandlers() {
         }).join('');
       }
 
-      var previewBody = document.getElementById('importPreviewBody');
-      var previewContainer = document.getElementById('importPreviewContainer');
-      if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;"><span class="spinner spinner-sm"></span> Loading Preview...</td></tr>';
-      if (previewContainer) previewContainer.style.display = 'block';
-
-      // Parallel preview calls
-      var previewPromises = selectedImportFiles.map(function (file) {
-        var formData = new FormData();
-        formData.append('file', file);
-        return API.uploadPreview(formData).then(function (res) {
-          return res.success && res.data ? res.data : [];
-        }).catch(function () { return []; });
-      });
-
-      Promise.all(previewPromises).then(function (results) {
-        var combinedData = [];
-        results.forEach(function (rows) {
-          combinedData = combinedData.concat(rows);
-        });
-
-        if (combinedData.length > 0) {
-          var html = '';
-          combinedData.forEach(function (row, idx) {
-            var badgeClass = row.action === 'Insert' ? 'badge-success' : row.action === 'Update' ? 'badge-primary' : 'badge-danger';
-            var regNo = row.registerNo || row.register_no || '<span style="color:#EF4444;font-style:italic;">[Missing Reg No]</span>';
-            var name = row.name || '<span style="color:#EF4444;font-style:italic;">[Missing Name]</span>';
-            var dept = row.department || row.dept || '<span style="color:#EF4444;font-style:italic;">[Missing Dept]</span>';
-            var batch = row.batch || '<span style="color:#EF4444;font-style:italic;">[Missing Batch]</span>';
-
-            html += '<tr>' +
-              '<td style="padding:10px 12px;font-weight:600;color:#64748B;">' + (idx + 1) + '</td>' +
-              '<td style="padding:10px 12px;">' + regNo + '</td>' +
-              '<td style="padding:10px 12px;"><strong>' + name + '</strong></td>' +
-              '<td style="padding:10px 12px;">' + dept + '</td>' +
-              '<td style="padding:10px 12px;">' + batch + '</td>' +
-              '<td style="padding:10px 12px;"><span class="badge ' + badgeClass + '">' + row.action + '</span></td>' +
-              '<td style="padding:10px 12px;color:#64748B;">' + (row.reason || '-') + '</td>' +
-              '</tr>';
-          });
-          if (previewBody) previewBody.innerHTML = html;
-          var statusEl = document.getElementById('importPreviewStatus');
-          if (statusEl) {
-            statusEl.style.display = 'block';
-            statusEl.textContent = 'Showing ' + combinedData.length + ' rows in selected files (scroll to view).';
-          }
-          importBtn.disabled = false;
-        } else {
-          if (previewBody) previewBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#EF4444;padding:20px;">No valid rows to preview.</td></tr>';
-          var statusEl = document.getElementById('importPreviewStatus');
-          if (statusEl) statusEl.style.display = 'none';
-          importBtn.disabled = true;
-        }
-      });
-
+      // Open sheet selection modal for primary selected file
+      openSheetImportModalForFile(selectedImportFiles[0]);
     } else {
       selectedImportFiles = [];
       if (fileNameEl) { fileNameEl.style.display = 'none'; }
@@ -2348,6 +2443,104 @@ function initImportHandlers() {
       importBtn.disabled = true;
     }
   });
+
+  // Modal confirm button click handler
+  var confirmSheetBtn = document.getElementById('confirmSheetImportBtn');
+  if (confirmSheetBtn) {
+    confirmSheetBtn.addEventListener('click', function () {
+      if (!activeSheetModalData || !activeSheetModalData.file) return;
+
+      var file = activeSheetModalData.file;
+      var selectedSheets = activeSheetModalData.selectedSheets || [];
+
+      if (selectedSheets.length === 0) {
+        Toast.warning('No Sheets Selected', 'Please check at least one sheet to import.');
+        return;
+      }
+
+      confirmSheetBtn.disabled = true;
+      confirmSheetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing Selected Sheets...';
+
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('sheets', JSON.stringify(selectedSheets));
+
+      var startTime = performance.now();
+
+      API.uploadImport(formData).then(function (res) {
+        var duration = ((performance.now() - startTime) / 1000).toFixed(2);
+        confirmSheetBtn.disabled = false;
+        confirmSheetBtn.innerHTML = '<i class="fas fa-upload"></i> Import Selected Sheets';
+        closeSheetImportModal();
+
+        var iconEl = document.getElementById('importResultIcon');
+        var titleEl = document.getElementById('importResultTitle');
+        var detailsEl = document.getElementById('importResultDetails');
+        var durationEl = document.getElementById('importDurationSec');
+
+        if (durationEl) durationEl.textContent = duration;
+
+        if (res.success) {
+          var s = res.data && (res.data.summary || res.data) ? (res.data.summary || res.data) : {};
+          var totalRows = s.totalRows || s.total_rows || s.totalRecords || 0;
+          var totalImported = s.imported || 0;
+          var totalMerged = s.merged || 0;
+          var totalSkipped = s.skipped || 0;
+          var totalDuplicates = s.duplicates || 0;
+          var totalErrors = s.errors || 0;
+
+          if (iconEl) {
+            iconEl.style.background = '#ECFDF5';
+            iconEl.style.color = '#10B981';
+            iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
+          }
+          if (titleEl) titleEl.textContent = 'Import Finished Successfully';
+
+          var detailsHtml =
+            '<strong>Imported Sheets:</strong> ' + selectedSheets.join(', ') + '<br>' +
+            '<strong>Total Rows Processed:</strong> ' + totalRows + '<br>' +
+            '<strong>Imported:</strong> ' + totalImported + '<br>' +
+            '<strong>Merged/Updated:</strong> ' + totalMerged + '<br>' +
+            '<strong>Skipped:</strong> ' + totalSkipped + '<br>' +
+            '<strong>Duplicates:</strong> ' + totalDuplicates + '<br>' +
+            '<strong>Errors:</strong> ' + totalErrors;
+
+          if (res.data && res.data.pendingAliasReview && res.data.pendingAliasReview.length > 0) {
+            detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #F3F4F6; border-radius: 6px; text-align: left;">' +
+              '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Memory of Faculty to Confirm:</h4>';
+
+            res.data.pendingAliasReview.forEach(function (item, idx) {
+              detailsHtml += '<div style="display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;">' +
+                '<input type="checkbox" class="alias-review-cb" id="alias_review_' + idx + '" checked data-excel-name="' + item.excelName + '" data-leader-id="' + item.suggestedLeaderId + '" style="margin-right: 8px;">' +
+                '<label for="alias_review_' + idx + '">Save memory "<strong>' + item.excelName + '</strong>" for Faculty <strong>' + item.suggestedLeaderName + '</strong></label>' +
+                '</div>';
+            });
+
+            detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Memories</button></div>';
+          }
+
+          if (detailsEl) detailsEl.innerHTML = detailsHtml;
+          Toast.success('Import Completed', 'Imported ' + totalImported + ' records from ' + selectedSheets.length + ' sheet(s) in ' + duration + 's');
+          if (typeof fetchAllData === 'function') fetchAllData();
+        } else {
+          if (iconEl) {
+            iconEl.style.background = '#FEF2F2';
+            iconEl.style.color = '#EF4444';
+            iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
+          }
+          if (titleEl) titleEl.textContent = 'Import Failed';
+          if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + (res.message || 'Import failed');
+          Toast.danger('Import Failed', res.message || 'Import failed');
+        }
+
+        openModal('importResultModal');
+      }).catch(function (err) {
+        confirmSheetBtn.disabled = false;
+        confirmSheetBtn.innerHTML = '<i class="fas fa-upload"></i> Import Selected Sheets';
+        Toast.danger('Import Failed', err.message || 'Failed to import selected sheets.');
+      });
+    });
+  }
 
   /* Import button click */
   importBtn.addEventListener('click', function () {

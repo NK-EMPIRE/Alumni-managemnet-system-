@@ -210,6 +210,18 @@
             return res.json();
         });
     },
+    inspectSheets: function (formData) {
+        return fetch(BASE_URL + '/upload/sheets', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + getToken() },
+            body: formData
+        }).then(function (res) {
+            if (!res.ok) {
+                return res.json().then(function (err) { throw new Error(err.message || 'Sheet inspection failed'); });
+            }
+            return res.json();
+        });
+    },
     getImportHistory: function (params) {
         return get('/upload/history', params);
     },
