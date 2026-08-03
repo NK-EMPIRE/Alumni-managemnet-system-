@@ -2,15 +2,36 @@ const uploadService = require('../services/upload.service');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { success, paginated } = require('../utils/response');
 
+function parseSheetsParam(param) {
+  if (!param) return [];
+  if (Array.isArray(param)) return param;
+  if (typeof param === 'string') {
+    try {
+      const parsed = JSON.parse(param);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {
+      return param.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 const uploadExcel = asyncHandler(async (req, res) => {
   const currentUser = req.user;
-  const result = await uploadService.processExcelImport(req.file.path, req.file.originalname, currentUser);
+  const selectedSheets = parseSheetsParam(req.body.sheets);
+  const result = await uploadService.processExcelImport(req.file.path, req.file.originalname, currentUser, selectedSheets);
   success(res, result, 'File uploaded and processed successfully', 201);
 });
 
 const previewExcel = asyncHandler(async (req, res) => {
-  const result = await uploadService.getExcelPreview(req.file.path);
+  const selectedSheets = parseSheetsParam(req.body.sheets || req.query.sheets);
+  const result = await uploadService.getExcelPreview(req.file.path, selectedSheets);
   success(res, result, 'Excel preview generated successfully', 200);
+});
+
+const inspectSheets = asyncHandler(async (req, res) => {
+  const result = await uploadService.getExcelSheets(req.file.path);
+  success(res, result, 'Excel sheets inspected successfully', 200);
 });
 
 const getImportHistory = asyncHandler(async (req, res) => {
@@ -65,6 +86,7 @@ const rollbackImport = asyncHandler(async (req, res) => {
 module.exports = {
   uploadExcel,
   previewExcel,
+  inspectSheets,
   getImportHistory,
   downloadTemplate,
   confirmAliases,

@@ -107,7 +107,6 @@
         onclick="toggleSubmenu(this);navigateTo('teamLeaders', this)">
         <i class="fas fa-user-tie"></i>
         <span class="sidebar-item-text">Team Leaders</span>
-        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
         <a class="sidebar-item sub-item" data-section="addTeamLeader" onclick="openModal('addTeamLeaderModal')">
@@ -119,7 +118,6 @@
         onclick="toggleSubmenu(this);navigateTo('teamMembers', this)">
         <i class="fas fa-users"></i>
         <span class="sidebar-item-text">Team Members</span>
-        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
         <a class="sidebar-item sub-item" data-section="addTeamMember" onclick="openModal('addTeamMemberModal')">
@@ -135,7 +133,6 @@
         onclick="toggleSubmenu(this);navigateTo('viewAlumni', this)">
         <i class="fas fa-user-graduate"></i>
         <span class="sidebar-item-text">Alumni</span>
-        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
         <a class="sidebar-item sub-item" data-section="assignAlumni" onclick="navigateTo('assignAlumni', this)">
@@ -424,7 +421,7 @@
                   <option value="5">5</option>
                   <option value="10">10</option>
                   <option value="25">25</option>
-                  <option value="50">50</option>
+                  <option value="50" selected>50</option>
                   <option value="100">100</option>
                   <option value="250">250</option>
                   <option value="500">500</option>
@@ -569,7 +566,7 @@
                 style="width:auto;padding:4px 8px;font-size:0.8rem;height:30px;">
                 <option value="10">10</option>
                 <option value="25">25</option>
-                <option value="50">50</option>
+                <option value="50" selected>50</option>
                 <option value="100">100</option>
                 <option value="250">250</option>
                 <option value="500">500</option>
@@ -941,6 +938,16 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Import History Pagination -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:12px;">
+            <div style="font-size:0.85rem;color:var(--text-secondary);" id="importHistoryPaginationInfo">
+              Showing 0 of 0 imports
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;" id="importHistoryPaginationControls">
+              <!-- Rendered dynamically by JS -->
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1000,9 +1007,9 @@
               <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
               <select class="form-control" id="auditRowsPerPage" style="width:auto;padding:4px 8px;font-size:0.8rem;">
                 <option value="5">5</option>
-                <option value="10" selected>10</option>
+                <option value="10">10</option>
                 <option value="25">25</option>
-                <option value="50">50</option>
+                <option value="50" selected>50</option>
                 <option value="100">100</option>
                 <option value="250">250</option>
                 <option value="500">500</option>
@@ -2175,6 +2182,70 @@
           <button class="btn btn-primary btn-sm" id="auditFilterBtn" onclick="applyAuditFiltersModal()"><i class="fas fa-check"></i> Apply Filters</button>
         </div>
       </div>
+    </div><!-- END auditFilterModal -->
+
+    <!-- ============================================================
+         EXCEL MULTI-SHEET IMPORT & PREVIEW MODAL
+         ============================================================ -->
+    <div id="importSheetModalOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+      <div style="background:#ffffff;border-radius:16px;max-width:1200px;width:95vw;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+        <div style="padding:20px 24px;background:linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);color:#ffffff;display:flex;align-items:center;justify-content:space-between;">
+          <h3 style="margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-file-excel" style="font-size:1.3rem;"></i> Select Sheets &amp; Import Preview
+          </h3>
+          <button onclick="closeSheetImportModal()" style="background:transparent;border:none;color:#ffffff;font-size:1.4rem;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+
+        <div style="padding:24px;overflow-y:auto;flex:1;color:#334155;font-size:0.88rem;">
+          <div id="importFileDetailsHeader" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:18px;">
+            <!-- File info populated dynamically -->
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <h4 style="margin:0;font-size:0.92rem;font-weight:700;color:#1E293B;"><i class="fas fa-layer-group" style="color:#2563EB;margin-right:6px;"></i> Available Sheets for Import</h4>
+              <div style="font-size:0.8rem;display:flex;gap:12px;">
+                <a href="javascript:void(0)" id="selectAllSheetsLink" style="color:#2563EB;font-weight:600;text-decoration:none;">Select All</a>
+                <span style="color:#CBD5E1;">|</span>
+                <a href="javascript:void(0)" id="deselectAllSheetsLink" style="color:#64748B;font-weight:600;text-decoration:none;">Deselect All</a>
+              </div>
+            </div>
+            <div id="sheetSelectionContainer" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));gap:10px;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;padding:14px;">
+              <!-- Sheet Checkboxes rendered here -->
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <h4 style="margin:0;font-size:0.92rem;font-weight:700;color:#1E293B;"><i class="fas fa-list-check" style="color:#2563EB;margin-right:6px;"></i> Import Action Preview Grid</h4>
+              <span id="sheetPreviewRowsBadge" style="font-size:0.75rem;background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:12px;font-weight:700;">0 Rows</span>
+            </div>
+            <div style="max-height:300px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:10px;">
+              <table class="table" style="width:100%;font-size:0.82rem;border-collapse:collapse;">
+                <thead>
+                  <tr style="background:#F1F5F9;position:sticky;top:0;z-index:2;">
+                    <th style="padding:10px 12px;text-align:left;">S.No</th>
+                    <th style="padding:10px 12px;text-align:left;">Sheet</th>
+                    <th style="padding:10px 12px;text-align:left;">Reg No</th>
+                    <th style="padding:10px 12px;text-align:left;">Name</th>
+                    <th style="padding:10px 12px;text-align:left;">Dept</th>
+                    <th style="padding:10px 12px;text-align:left;">Batch</th>
+                    <th style="padding:10px 12px;text-align:left;">Date of Birth</th>
+                    <th style="padding:10px 12px;text-align:left;">Action</th>
+                    <th style="padding:10px 12px;text-align:left;">Reason/Details</th>
+                  </tr>
+                </thead>
+                <tbody id="importSheetModalTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;">
+          <button class="btn btn-secondary" onclick="closeSheetImportModal()">Cancel</button>
+          <button class="btn btn-primary" id="confirmSheetImportBtn"><i class="fas fa-upload"></i> Import Selected Sheets</button>
+        </div>
+      </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -2192,7 +2263,7 @@
       if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
     </script>
     <script src="js/dynamic-tour.js"></script>
-    <script src="js/admin.js?v=1.0.2"></script>
+    <script src="js/admin.js?v=2.0.0"></script>
     <script src="js/chat.js"></script>
     <script src="js/notifications.js"></script>
 </body>

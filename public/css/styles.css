@@ -2577,16 +2577,12 @@ textarea.form-control {
 /* ────────────────────────────────────────────────────────────
    31. PAGE TRANSITIONS / FADE-IN
    ──────────────────────────────────────────────────────────── */
-.fade-in {
-  animation: fadeIn 0.4s ease forwards;
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.4s ease forwards;
-}
-
+.fade-in,
+.fade-in-up,
 .fade-in-down {
-  animation: fadeInDown 0.4s ease forwards;
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 @keyframes fadeIn {

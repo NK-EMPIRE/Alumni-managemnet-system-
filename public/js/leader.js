@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   var totalAlumni = 0;
@@ -18,7 +18,7 @@
   // No dummy notifications — real data loaded from API activities
 
   var currentPage = 1;
-  var pageSize = 5;
+  var pageSize = 50;
   var filteredMembers = [];
   var memberProgressChart = null;
   var completionChart = null;

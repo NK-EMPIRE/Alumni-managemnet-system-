@@ -1,10 +1,10 @@
-(function () {
+﻿(function () {
     'use strict';
 
     let alumniData = [];
     let filteredData = [];
     let currentPage = 1;
-    let rowsPerPage = 10;
+    let rowsPerPage = 50;
     let todayUpdateCount = 0;
     let sessionTimeout = null;
     let _apiMemberData = null;
