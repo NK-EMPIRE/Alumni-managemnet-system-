@@ -17,3 +17,5 @@ backend/logs/
 
 scratch/
 backend/logs/application.log
+/log
+/pycache
