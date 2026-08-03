@@ -2183,14 +2183,16 @@
           <button class="btn btn-primary btn-sm" id="auditFilterBtn" onclick="applyAuditFiltersModal()"><i class="fas fa-check"></i> Apply Filters</button>
         </div>
       </div>
+    </div><!-- END auditFilterModal -->
+
     <!-- ============================================================
          EXCEL MULTI-SHEET IMPORT & PREVIEW MODAL
          ============================================================ -->
-    <div class="modal" id="importSheetModalOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-      <div style="background:#ffffff;border-radius:16px;max-width:880px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+    <div id="importSheetModalOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+      <div style="background:#ffffff;border-radius:16px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
         <div style="padding:20px 24px;background:linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);color:#ffffff;display:flex;align-items:center;justify-content:space-between;">
           <h3 style="margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:10px;">
-            <i class="fas fa-file-excel" style="font-size:1.3rem;"></i> Select Sheets & Import Preview
+            <i class="fas fa-file-excel" style="font-size:1.3rem;"></i> Select Sheets &amp; Import Preview
           </h3>
           <button onclick="closeSheetImportModal()" style="background:transparent;border:none;color:#ffffff;font-size:1.4rem;cursor:pointer;line-height:1;">&times;</button>
         </div>

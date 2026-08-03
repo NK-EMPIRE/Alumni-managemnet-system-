@@ -2236,9 +2236,8 @@ function initImportHandlers() {
 
   if (!fileInput || !importBtn) return;
 
-  /* Click upload zone or browse button triggers file input */
+  /* Drag & Drop and click handlers */
   if (uploadZone) {
-    uploadZone.addEventListener('click', function () { fileInput.click(); });
 
     uploadZone.addEventListener('dragover', function (e) {
       e.preventDefault();
@@ -2303,7 +2302,9 @@ function initImportHandlers() {
 
   window.closeSheetImportModal = function () {
     var overlay = document.getElementById('importSheetModalOverlay');
-    if (overlay) overlay.style.display = 'none';
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
   };
 
   function showUploadZoneLoading(file) {
@@ -2346,8 +2347,16 @@ function initImportHandlers() {
       var pagination = {};
 
       if (res && res.data) {
-        rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
-        pagination = res.pagination || {};
+        // paginated() returns: { success, data: { records: [...], pagination: {...} } }
+        if (res.data.records && Array.isArray(res.data.records)) {
+          rows = res.data.records;
+          pagination = res.data.pagination || {};
+        } else if (Array.isArray(res.data)) {
+          rows = res.data;
+        } else if (res.data.rows && Array.isArray(res.data.rows)) {
+          rows = res.data.rows;
+          pagination = res.pagination || {};
+        }
       } else if (Array.isArray(res)) {
         rows = res;
       }
@@ -2494,8 +2503,10 @@ function initImportHandlers() {
     var headerEl = document.getElementById('importFileDetailsHeader');
     var container = document.getElementById('sheetSelectionContainer');
 
-    // Show modal overlay immediately
-    if (overlay) overlay.style.display = 'flex';
+    // Show modal overlay immediately with flex so centering works
+    if (overlay) {
+      overlay.style.display = 'flex';
+    }
 
     if (headerEl) {
       headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
