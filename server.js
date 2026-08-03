@@ -33,7 +33,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan('combined', { stream }));
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d', etag: true }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: true,
+  setHeaders: function (res, pathStr) {
+    if (pathStr.endsWith('.js') || pathStr.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,

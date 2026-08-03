@@ -19,3 +19,4 @@ scratch/
 backend/logs/application.log
 /log
 /pycache
+backend\logs

@@ -61,6 +61,10 @@
 
   window.showToast = function (title, message, type) {
     type = type || 'info';
+
+    // Completely remove green popup notifications and routine info popups
+    if (type === 'success' || type === 'info') return;
+
     var container = document.getElementById('toastContainer');
     if (!container) {
       container = document.createElement('div');

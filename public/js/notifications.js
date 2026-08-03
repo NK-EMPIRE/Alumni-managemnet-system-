@@ -71,10 +71,10 @@
       width: '52px', height: '52px', borderRadius: '50%',
       background: 'linear-gradient(135deg,#1e293b,#0f172a)',
       color: '#fff', border: '2px solid #334155',
-      fontSize: '22px', boxShadow: '0 6px 20px rgba(0,0,0,.4)',
+      fontSize: '22px', boxShadow: 'none',
       cursor: 'pointer', zIndex: '2147483646',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      transition: 'transform .2s, box-shadow .2s',
+      transition: 'transform .2s',
       fontFamily: 'sans-serif', lineHeight: '1'
     });
     btn.onmouseenter = function () { this.style.transform = 'scale(1.1)'; this.style.animation = 'ntfBell .5s ease'; };
@@ -99,7 +99,7 @@
     backdrop.onclick = togglePanel;
     css(backdrop, {
       position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
-      background: 'rgba(5,10,20,.6)', backdropFilter: 'blur(3px)',
+      background: 'transparent', backdropFilter: 'none',
       zIndex: '2147483644', opacity: '0', pointerEvents: 'none',
       transition: 'opacity .3s'
     });
@@ -427,11 +427,11 @@
         _socket.emit('joinUser', { userId: _currentUserId });
       });
       _socket.on('new_notification', function (data) {
-        // Increment badge and re-fetch if panel is open
+        // Increment badge and re-fetch if panel is open — no popup toast
         _unreadCount++;
         updateBadge();
         if (_panelOpen) fetchAndRender();
-        showToast('🔔 ' + (data.message || 'New notification'), false);
+        // showToast suppressed: toasts appear too frequently; badge is sufficient
       });
     } catch (e) {
       // Socket.io not critical — polling will cover it

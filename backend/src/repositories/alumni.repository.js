@@ -306,14 +306,15 @@ async function getAssignmentsByMember(memberId, { page, limit, offset, search, d
       SELECT
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
         a.department, a.email, a.phone, a.company, a.designation,
-        a.working_details, a.linkedin_profile, a.is_updated,
+        a.working_details, a.linkedin_profile, a.experience,
+        a.city, a.country, a.state, a.address, a.is_updated,
         a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.status,
         aa.assigned_date, aa.completed_date
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
       WHERE aa.member_id = @memberId
-        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
+        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR a.father_name LIKE @search)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@status IS NULL OR aa.status = @status)

@@ -2254,9 +2254,9 @@
     <script src="js/services/api.js"></script>
     <script>
       window.Toast = window.Toast || {
-        success: function (t, m) { window.showToast(t, m, 'success'); },
+        success: function (t, m) { /* Completely removed green popups */ },
         warning: function (t, m) { window.showToast(t, m, 'warning'); },
-        info: function (t, m) { window.showToast(t, m, 'info'); },
+        info: function (t, m) { /* Completely removed info popups */ },
         danger: function (t, m) { window.showToast(t, m, 'danger'); },
         error: function (t, m) { window.showToast(t, m, 'danger'); }
       };

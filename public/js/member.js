@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     'use strict';
 
     let alumniData = [];
@@ -11,6 +11,7 @@
     let _apiAlumniData = null;
     let _apiDataLoaded = false;
     let previewPage = 1;
+    let previewLimit = 10;
     window.openModal = function (modalId) {
         var modal = document.getElementById(modalId);
         if (modal) {
@@ -120,9 +121,20 @@
                     actionButtons += '<button class="btn-undo-icon" onclick="confirmUndoSubmission(' + r.id + ', \'' + safeName + '\')" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
                 }
                 actionButtons += '</div>';
+                var fatherVal = String(r.father_name || r.fatherName || '');
+                var safeName = String(r.name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                var safeFather = fatherVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                var nameCellContent = '<div>' +
+                    '<div style="display:flex;align-items:center;gap:6px;">' +
+                    '  <strong style="color:#1E293B;">' + (r.name || '-') + '</strong>' +
+                    '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + safeName + '\', \'' + safeFather + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+                    '</div>' +
+                    (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
+                    '</div>';
+
                 html += '<tr>' +
                     '<td style="font-weight:600;color:var(--text-secondary);">' + serial + '</td>' +
-                    '<td><strong>' + r.name + '</strong></td>' +
+                    '<td>' + nameCellContent + '</td>' +
                     '<td>' + r.department + '</td>' +
                     '<td>' + r.batch + '</td>' +
                     '<td>' + r.company + '</td>' +
@@ -275,7 +287,7 @@
     window._currentModalRecordIndex = -1;
 
     function getEffectiveAlumniList() {
-        return (filteredAlumniData && filteredAlumniData.length > 0) ? filteredAlumniData : alumniData;
+        return (filteredData && filteredData.length > 0) ? filteredData : alumniData;
     }
 
     function applyPreFilledLocking() {
@@ -363,16 +375,16 @@
             form.style.opacity = '0.3';
             form.style.transform = dir > 0 ? 'translateX(15px)' : 'translateX(-15px)';
             setTimeout(function () {
-                openModal(targetRecord.id);
+                openUpdateModal(targetRecord.id);
                 form.style.opacity = '1';
                 form.style.transform = 'translateX(0)';
             }, 150);
         } else {
-            openModal(targetRecord.id);
+            openUpdateModal(targetRecord.id);
         }
     };
 
-    function openModal(index) {
+    function openUpdateModal(index) {
         const targetId = parseInt(index, 10);
         const recordIdx = alumniData.findIndex(function (r) { return r.id === targetId; });
         if (recordIdx === -1) return;
@@ -424,26 +436,27 @@
 
         // Auto-toggle secondary containers if values exist
         var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
-        var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('button');
-        if (record.secondary_email) {
+        var secEmailBtn = secEmailContainer && secEmailContainer.previousElementSibling ? secEmailContainer.previousElementSibling.querySelector('button') : null;
+        if (record.secondary_email && secEmailContainer) {
             secEmailContainer.style.display = 'block';
             if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
-        } else {
+        } else if (secEmailContainer) {
             secEmailContainer.style.display = 'none';
             if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
         var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
-        var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('button');
-        if (record.secondary_phone) {
+        var secPhoneBtn = secPhoneContainer && secPhoneContainer.previousElementSibling ? secPhoneContainer.previousElementSibling.querySelector('button') : null;
+        if (record.secondary_phone && secPhoneContainer) {
             secPhoneContainer.style.display = 'block';
             if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i> Remove Secondary';
-        } else {
+        } else if (secPhoneContainer) {
             secPhoneContainer.style.display = 'none';
             if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Secondary';
         }
 
-        document.getElementById('fieldSmartParser').value = '';
+        var parserEl = document.getElementById('fieldSmartParser');
+        if (parserEl) parserEl.value = '';
         loadAutosave(record.id);
 
         if (typeof applyPreFilledLocking === 'function') applyPreFilledLocking();
@@ -461,12 +474,15 @@
             submitNextBtn.classList.remove('loading');
             submitNextBtn.disabled = false;
         }
-        updateModal.classList.add('show');
+        var updateModalEl = document.getElementById('updateModal');
+        if (updateModalEl) updateModalEl.classList.add('show');
         document.body.style.overflow = 'hidden';
     }
+    window.openUpdateModal = openUpdateModal;
 
-    function closeModal() {
-        updateModal.classList.remove('show');
+    function closeUpdateModal() {
+        var updateModalEl = document.getElementById('updateModal');
+        if (updateModalEl) updateModalEl.classList.remove('show');
         document.body.style.overflow = '';
         saveDraftBtn.classList.remove('loading');
         saveDraftBtn.disabled = false;
@@ -478,9 +494,10 @@
         }
         clearErrors();
     }
+    window.closeUpdateModal = closeUpdateModal;
 
     // Auto-save form progress to localStorage
-    let autosaveTimeout = null;
+    var autosaveTimeout = null;
     function triggerAutosave() {
         if (autosaveTimeout) clearTimeout(autosaveTimeout);
         autosaveTimeout = setTimeout(function () {
@@ -574,8 +591,6 @@
 
                     triggerAutosave();
                     saveAutosave();
-
-                    showToast('Field updated and saved!', 'success');
                 };
 
                 actionWrapper.appendChild(pencilBtn);
@@ -611,8 +626,6 @@
                     document.getElementById('fieldPhone').value = data.phone || '';
                     document.getElementById('fieldLinkedin').value = data.linkedin_profile || '';
                     document.getElementById('fieldGovtJob').value = data.govtJob || 'No';
-
-                    showToast('Loaded unsaved changes from auto-save draft.', 'success');
                 }
             } catch (e) {
                 console.error(e);
@@ -733,8 +746,9 @@
     }
 
     function showToast(message, type) {
+        if (type === 'success' || type === 'info') return;
         if (typeof window.showToast === 'function') {
-            window.showToast(type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Success', message, type === 'error' ? 'danger' : type);
+            window.showToast(type === 'error' ? 'Error' : 'Warning', message, type === 'error' ? 'danger' : type);
             return;
         }
         type = type || 'success';
@@ -971,13 +985,14 @@
         var btn = e.target.closest('.btn-update');
         if (btn) {
             const idx = btn.getAttribute('data-index');
-            openModal(idx);
+            openUpdateModal(idx);
         }
     }
 
     function handleModalClose(e) {
-        if (e.target === updateModal || e.target === modalClose || e.target.closest('#modalClose') || e.target.closest('#cancelModalBtn')) {
-            closeModal();
+        var updateModalEl = document.getElementById('updateModal');
+        if (e.target === updateModalEl || e.target === modalClose || e.target.closest('#modalClose') || e.target.closest('#cancelModalBtn')) {
+            closeUpdateModal();
         }
     }
 
@@ -1093,11 +1108,13 @@
             if (!body) return;
             body.innerHTML = '<tr><td colspan="18" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>';
 
-            var search = document.getElementById('previewSearch').value || '';
+            var searchEl = document.getElementById('previewSearch');
+            var search = searchEl ? searchEl.value.trim() : '';
             var dept = filterDept ? filterDept.value : '';
             var batch = filterBatch ? filterBatch.value : '';
             var status = filterStatus ? filterStatus.value : '';
-            var limitVal = parseInt(document.getElementById('previewLimit').value, 10) || 10;
+            var limitEl = document.getElementById('previewLimit');
+            var limitVal = limitEl ? (parseInt(limitEl.value, 10) || 10) : 10;
             previewLimit = limitVal;
 
             API.getAssignedAlumni({
@@ -1114,6 +1131,9 @@
                     records = res.data.records || (Array.isArray(res.data) ? res.data : []);
                     var pag = res.data.pagination;
                     total = (pag && pag.total) ? pag.total : records.length;
+                } else if (Array.isArray(alumniData) && alumniData.length > 0) {
+                    records = alumniData;
+                    total = records.length;
                 }
 
                 var infoEl = document.getElementById('previewTableInfo');
@@ -1139,12 +1159,12 @@
                 var html = '';
                 records.forEach(function (row, idx) {
                     var serial = (previewPage - 1) * previewLimit + idx + 1;
-                    var status = row.status || 'Pending';
+                    var statusStr = row.status || 'Pending';
                     var badgeClass = 'badge-secondary';
-                    if (status === 'Completed') badgeClass = 'badge-success';
-                    else if (status === 'Pending') badgeClass = 'badge-warning';
-                    else if (status === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
-                    else if (status === 'Draft') badgeClass = 'badge-info';
+                    if (statusStr === 'Completed') badgeClass = 'badge-success';
+                    else if (statusStr === 'Pending') badgeClass = 'badge-warning';
+                    else if (statusStr === 'ASSIGNED_TO_LEADER') badgeClass = 'badge-primary';
+                    else if (statusStr === 'Draft') badgeClass = 'badge-info';
 
                     var link = row.linkedin_profile || '';
                     var linkedin;
@@ -1154,20 +1174,23 @@
                         var iconClass = isFb ? 'fab fa-facebook' : 'fab fa-linkedin';
                         var iconColor = isFb ? '#1877F2' : '#0A66C2';
                         var titleText = isFb ? 'Open Facebook Profile' : 'Open LinkedIn Profile';
+                        var safeHref = String(href).replace(/'/g, "\\'").replace(/"/g, "&quot;");
                         linkedin = '<div style="display:flex;align-items:center;gap:10px;">' +
-                            '<a href="' + href + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
-                            '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + href.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
+                            '<a href="' + safeHref + '" target="_blank" rel="noopener noreferrer" style="color:' + iconColor + ';font-size:1.15rem;text-decoration:none;" title="' + titleText + '"><i class="' + iconClass + '"></i></a>' +
+                            '<button onclick="event.stopPropagation();showLinkPreview(this,\'' + safeHref + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.85rem;padding:2px 4px;line-height:1;" title="Show URL"><i class="far fa-eye"></i></button>' +
                             '</div>';
                     } else {
                         linkedin = '-';
                     }
                     var updatedDateStr = row.updated_date ? new Date(row.updated_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
-                    var fatherVal = row.father_name || row.fatherName || row.pi_father_name || '';
+                    var fatherVal = String(row.father_name || row.fatherName || row.pi_father_name || '');
+                    var safeName = String(row.name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                    var safeFather = fatherVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                     var nameCellContent = '<div>' +
                         '<div style="display:flex;align-items:center;gap:6px;">' +
                         '  <span style="font-weight:600;color:#1E293B;">' + (row.name || '-') + '</span>' +
-                        '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + (row.name || '').replace(/'/g, "\\'") + '\', \'' + fatherVal.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+                        '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + safeName + '\', \'' + safeFather + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
                         '</div>' +
                         (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
                         '</div>';
@@ -1188,7 +1211,7 @@
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.city || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.country || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + linkedin + '</td>' +
-                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + status + '</span></td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + statusStr + '</span></td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + updatedDateStr + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.working_details || '-') + '</td>' +
                         '</tr>';
@@ -1196,8 +1219,49 @@
                 body.innerHTML = html;
                 renderPreviewPagination(total);
             }).catch(function (err) {
-                console.error(err);
-                body.innerHTML = '<tr><td colspan="18" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
+                console.error('loadPreviewSpreadsheet error:', err);
+                if (Array.isArray(alumniData) && alumniData.length > 0) {
+                    var records = alumniData;
+                    var total = records.length;
+                    var infoEl = document.getElementById('previewTableInfo');
+                    if (infoEl) {
+                        infoEl.textContent = 'Showing 1 to ' + records.length + ' of ' + total + ' entries';
+                    }
+                    var html = '';
+                    records.forEach(function (row, idx) {
+                        var serial = idx + 1;
+                        var statusStr = row.status || 'Pending';
+                        var badgeClass = statusStr === 'Completed' ? 'badge-success' : 'badge-warning';
+                        var fatherVal = String(row.father_name || row.fatherName || '');
+                        var safeName = String(row.name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                        var safeFather = fatherVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                        var nameCellContent = '<div><div style="display:flex;align-items:center;gap:6px;"><span style="font-weight:600;">' + (row.name || '-') + '</span><button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + safeName + '\', \'' + safeFather + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;"><i class="far fa-copy"></i></button></div></div>';
+                        html += '<tr>' +
+                            '<td class="sticky-col" style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; left:0;">' + serial + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600;">' + nameCellContent + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.register_no || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.father_name || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.date_of_birth || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.department || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.batch || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.email || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.phone || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.company || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.designation || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.experience || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.city || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.country || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.linkedin_profile || '-') + '</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + statusStr + '</span></td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">-</td>' +
+                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.working_details || '-') + '</td>' +
+                            '</tr>';
+                    });
+                    body.innerHTML = html;
+                    renderPreviewPagination(total);
+                } else {
+                    body.innerHTML = '<tr><td colspan="18" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
+                }
             });
         };
 

@@ -5769,3 +5769,44 @@ body.dark-mode .shortcut-card .shortcut-desc {
   overflow-y: auto !important;
   padding: 20px 24px;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   REMOVE: Right-side floating bell, edge pull tab, and all dark
+   backdrop overlays / vignettes
+   ──────────────────────────────────────────────────────────── */
+
+/* Hide floating notification bell completely */
+#ntfFloatBtn {
+  display: none !important;
+}
+
+/* Hide chat edge pull-tab (right side dark shadow bar) */
+.chat-edge-tab {
+  display: none !important;
+}
+
+/* Remove dark backdrop overlays */
+.chat-drawer-backdrop,
+#ntfBackdrop,
+.sidebar-overlay {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
+}
+
+/* Remove all box-shadows from page structure */
+body::after, body::before,
+.main-content::after, .main-content::before,
+.page-wrapper::after, .page-wrapper::before,
+.content-wrapper::after, .content-wrapper::before {
+  display: none !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* Remove green and info toast popups completely */
+.toast.success,
+.toast.info {
+  display: none !important;
+}
