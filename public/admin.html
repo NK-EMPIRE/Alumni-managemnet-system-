@@ -915,6 +915,15 @@
           <div
             style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
             <h3 style="font-size:1rem;font-weight:600;color:#1E293B;">Import History</h3>
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-secondary);">
+              <label for="importHistoryLimitSelect" style="margin:0;font-weight:500;">Rows per page:</label>
+              <select id="importHistoryLimitSelect" class="form-control" onchange="changeImportHistoryLimit(this.value)" style="width:auto;padding:4px 8px;font-size:0.85rem;height:auto;">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
           </div>
           <div class="table-container">
             <table class="table">

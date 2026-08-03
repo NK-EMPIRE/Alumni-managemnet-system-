@@ -2291,6 +2291,13 @@ function initImportHandlers() {
   }
 
   var currentImportHistoryPage = 1;
+  var currentImportHistoryLimit = 10;
+
+  window.changeImportHistoryLimit = function (val) {
+    currentImportHistoryLimit = parseInt(val, 10) || 10;
+    currentImportHistoryPage = 1;
+    loadImportHistoryTable(1);
+  };
 
   window.loadImportHistoryTable = function (page) {
     page = page || currentImportHistoryPage || 1;
@@ -2303,7 +2310,7 @@ function initImportHandlers() {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:#64748B;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Loading import history...</td></tr>';
 
-    API.getImportHistory({ page: page, limit: 10 }).then(function (res) {
+    API.getImportHistory({ page: page, limit: currentImportHistoryLimit }).then(function (res) {
       var rows = [];
       var pagination = {};
 
@@ -2329,7 +2336,7 @@ function initImportHandlers() {
       var end = Math.min(page * limit, total);
 
       if (infoEl) {
-        infoEl.textContent = 'Showing ' + start + 'â€“' + end + ' of ' + total + ' imports (Page ' + page + ' of ' + totalPages + ')';
+        infoEl.textContent = 'Showing ' + start + ' - ' + end + ' of ' + total + ' imports (Page ' + page + ' of ' + totalPages + ')';
       }
 
       if (controlsEl) {
@@ -2368,14 +2375,20 @@ function initImportHandlers() {
         var actionBtn = item.status === 'Rolled Back' ? '<span style="font-size:0.75rem;color:#94A3B8;font-style:italic;">Rolled Back</span>' :
           '<button class="btn btn-sm btn-danger" onclick="confirmRollbackImport(' + item.import_id + ', \'' + (fileName).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;font-size:0.75rem;border-radius:6px;background:#EF4444;color:#fff;border:none;" title="Rollback this Excel import"><i class="fas fa-undo"></i> Rollback</button>';
 
+        var impCount = item.imported !== undefined ? item.imported : (item.imported_count || 0);
+        var mrgCount = item.merged !== undefined ? item.merged : (item.merged_count || 0);
+        var dupCount = item.duplicates !== undefined ? item.duplicates : (item.duplicates_count || 0);
+        var errCount = item.errors !== undefined ? item.errors : (item.errors_count || 0);
+        var impUser  = item.importer_name || item.imported_by_name || 'Admin';
+
         html += '<tr>' +
           '<td style="font-weight:600;color:#64748B;">' + rowNum + '</td>' +
           '<td><strong style="color:#1E293B;"><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i>' + fileName + '</strong></td>' +
-          '<td><span style="color:#10B981;font-weight:700;">' + (item.imported_count || 0) + '</span></td>' +
-          '<td><span style="color:#2563EB;font-weight:700;">' + (item.merged_count || 0) + '</span></td>' +
-          '<td><span style="color:#F59E0B;font-weight:700;">' + (item.duplicates_count || 0) + '</span></td>' +
-          '<td><span style="color:#EF4444;font-weight:700;">' + (item.errors_count || 0) + '</span></td>' +
-          '<td>' + (item.imported_by_name || 'Admin') + '</td>' +
+          '<td><span style="color:#10B981;font-weight:700;">' + impCount + '</span></td>' +
+          '<td><span style="color:#2563EB;font-weight:700;">' + mrgCount + '</span></td>' +
+          '<td><span style="color:#F59E0B;font-weight:700;">' + dupCount + '</span></td>' +
+          '<td><span style="color:#EF4444;font-weight:700;">' + errCount + '</span></td>' +
+          '<td>' + impUser + '</td>' +
           '<td style="color:#64748B;font-size:0.8rem;">' + formattedDate + '</td>' +
           '<td style="color:#64748B;">' + (item.duration_sec ? item.duration_sec + 's' : '-') + '</td>' +
           '<td>' + statusBadge + '</td>' +
@@ -2518,7 +2531,14 @@ function initImportHandlers() {
           var sel = [];
           document.querySelectorAll('.modal-sheet-cb:checked').forEach(function (c) { sel.push(c.value); });
           activeSheetModalData.selectedSheets = sel;
-          loadSheetPreviewGrid(file, sel);
+          if (sel.length > 0) {
+            loadSheetPreviewGrid(file, sel);
+          } else {
+            var tbody = document.getElementById('importSheetModalTableBody');
+            var badge = document.getElementById('sheetPreviewRowsBadge');
+            if (badge) badge.textContent = '0 Rows';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#64748B;"><i class="fas fa-hand-pointer" style="margin-right:6px;"></i> Please select one or more sheets above to generate preview.</td></tr>';
+          }
         });
       });
 
@@ -2541,12 +2561,18 @@ function initImportHandlers() {
           e.preventDefault();
           document.querySelectorAll('.modal-sheet-cb').forEach(function (c) { c.checked = false; });
           activeSheetModalData.selectedSheets = [];
-          loadSheetPreviewGrid(file, []);
+          var tbody = document.getElementById('importSheetModalTableBody');
+          var badge = document.getElementById('sheetPreviewRowsBadge');
+          if (badge) badge.textContent = '0 Rows';
+          if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#64748B;"><i class="fas fa-hand-pointer" style="margin-right:6px;"></i> Please select one or more sheets above to generate preview.</td></tr>';
         };
       }
 
-      // Initial grid preview load
-      loadSheetPreviewGrid(file, checkedSheets);
+      // Initial state: prompt user to select a sheet before generating preview
+      var initialTbody = document.getElementById('importSheetModalTableBody');
+      var initialBadge = document.getElementById('sheetPreviewRowsBadge');
+      if (initialBadge) initialBadge.textContent = '0 Rows';
+      if (initialTbody) initialTbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#64748B;"><i class="fas fa-hand-pointer" style="margin-right:6px;"></i> Please select one or more sheets above to generate preview.</td></tr>';
     }).catch(function (err) {
       if (headerEl) {
         headerEl.innerHTML = '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong></div>';
