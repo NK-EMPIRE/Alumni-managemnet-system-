@@ -60,39 +60,6 @@
     ].join('');
     document.head.appendChild(style);
 
-    // Floating bell button
-    var btn = document.createElement('button');
-    btn.id = 'ntfFloatBtn';
-    btn.title = 'Notifications';
-    btn.innerHTML = '🔔';
-    btn.onclick = togglePanel;
-    css(btn, {
-      position: 'fixed', bottom: '96px', right: '24px',
-      width: '52px', height: '52px', borderRadius: '50%',
-      background: 'linear-gradient(135deg,#1e293b,#0f172a)',
-      color: '#fff', border: '2px solid #334155',
-      fontSize: '22px', boxShadow: '0 6px 20px rgba(0,0,0,.4)',
-      cursor: 'pointer', zIndex: '2147483646',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      transition: 'transform .2s, box-shadow .2s',
-      fontFamily: 'sans-serif', lineHeight: '1'
-    });
-    btn.onmouseenter = function () { this.style.transform = 'scale(1.1)'; this.style.animation = 'ntfBell .5s ease'; };
-    btn.onmouseleave = function () { this.style.transform = 'scale(1)'; this.style.animation = 'none'; };
-    document.body.appendChild(btn);
-
-    // Unread badge on the bell button
-    var badge = document.createElement('span');
-    badge.id = 'ntfBadge';
-    css(badge, {
-      position: 'absolute', top: '-4px', right: '-4px',
-      background: DK.danger, color: '#fff', fontSize: '10px',
-      fontWeight: '700', padding: '2px 6px', borderRadius: '12px',
-      border: '2px solid #0f172a', display: 'none', fontFamily: 'sans-serif'
-    });
-    btn.style.position = 'fixed';
-    btn.appendChild(badge);
-
     // Backdrop
     var backdrop = document.createElement('div');
     backdrop.id = 'ntfBackdrop';
@@ -112,8 +79,8 @@
       position: 'fixed', top: '0', right: '0',
       width: '380px', maxWidth: '100vw', height: '100vh',
       background: DK.bg, zIndex: '2147483645',
-      display: 'flex', flexDirection: 'column',
-      boxShadow: '-8px 0 40px rgba(0,0,0,.55)',
+      display: 'none', flexDirection: 'column',
+      boxShadow: 'none', visibility: 'hidden',
       transform: 'translateX(100%)',
       transition: 'transform .35s cubic-bezier(.16,1,.3,1)',
       fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
@@ -193,6 +160,9 @@
 
     _panelOpen = !_panelOpen;
     if (_panelOpen) {
+      panel.style.display = 'flex';
+      panel.style.visibility = 'visible';
+      panel.style.boxShadow = '-8px 0 40px rgba(0,0,0,.55)';
       panel.style.willChange = 'transform';
       panel.style.transform  = 'translateX(0)';
       if (backdrop) { backdrop.style.opacity = '1'; backdrop.style.pointerEvents = 'auto'; }
@@ -203,8 +173,15 @@
       panel.style.willChange = 'transform';
       panel.style.transform  = 'translateX(100%)';
       if (backdrop) { backdrop.style.opacity = '0'; backdrop.style.pointerEvents = 'none'; }
-      if (btn) btn.style.display = 'flex';
-      setTimeout(function () { panel.style.willChange = 'auto'; }, 400);
+      if (btn) btn.style.display = 'none';
+      setTimeout(function () {
+        if (!_panelOpen) {
+          panel.style.display = 'none';
+          panel.style.visibility = 'hidden';
+          panel.style.boxShadow = 'none';
+        }
+        panel.style.willChange = 'auto';
+      }, 380);
     }
   }
   window.toggleNotificationsPanel = togglePanel;

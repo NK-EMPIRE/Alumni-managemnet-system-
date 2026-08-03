@@ -72,15 +72,33 @@
 
     function init() {
         if (_initialized) return;
+        var pName = (window.location.pathname || '').toLowerCase();
+        if (pName === '/' || pName.endsWith('/index.html') || pName.endsWith('/')) {
+            return;
+        }
         _initialized = true;
         var token = localStorage.getItem('token');
+        var userRole = '';
         if (token) {
-            try { var p = JSON.parse(atob(token.split('.')[1])); _currentUserId = p.userId || p.id; } catch (e) {}
+            try {
+                var p = JSON.parse(atob(token.split('.')[1]));
+                _currentUserId = p.userId || p.id;
+                userRole = String(p.role || p.role_name || '').toUpperCase();
+            } catch (e) {}
         }
-        buildDOM();
+        var isAdmin = userRole.indexOf('ADMIN') !== -1 || window.location.pathname.indexOf('admin.html') !== -1;
+        if (isAdmin) {
+            _activeTab = 'global';
+        } else if (pName.indexOf('teammember') !== -1 || pName.indexOf('teamleader') !== -1) {
+            _activeTab = 'team';
+        }
+
+        buildDOM(isAdmin);
         if (token) {
             fetchMessages('global', true);
-            fetchMessages('team', true);
+            if (!isAdmin) {
+                fetchMessages('team', true);
+            }
             startPoll();
         } else {
             var body = $('cpBody');
@@ -88,7 +106,7 @@
         }
     }
 
-    function buildDOM() {
+    function buildDOM(isAdmin) {
         if ($('cpFloatBtn')) return;
 
         var style = document.createElement('style');
@@ -110,30 +128,28 @@
         floatBtn.onclick = togglePanel;
         css(floatBtn, {
             position: 'fixed', bottom: '24px', right: '24px',
-            width: '60px', height: '60px', borderRadius: '50%',
-            background: 'linear-gradient(135deg,#2563eb,#1d4ed8)',
-            color: '#fff', border: 'none', fontSize: '28px',
-            boxShadow: '0 8px 24px rgba(37,99,235,.5)',
+            width: '56px', height: '56px', borderRadius: '50%',
+            background: 'linear-gradient(135deg,#3b82f6,#2563eb)',
+            color: '#fff', border: 'none', fontSize: '24px',
+            boxShadow: '0 8px 24px rgba(37,99,235,.4)',
             cursor: 'pointer', zIndex: '2147483647',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'transform .2s, box-shadow .2s, opacity .25s',
-            fontFamily: 'sans-serif', lineHeight: '1',
-            opacity: '1', pointerEvents: 'auto'
+            transition: 'transform .2s, box-shadow .2s',
+            fontFamily: 'sans-serif'
         });
-        floatBtn.onmouseenter = function () { this.style.transform = 'scale(1.1)'; };
-        floatBtn.onmouseleave = function () { this.style.transform = 'scale(1)'; };
-        document.body.appendChild(floatBtn);
+        floatBtn.onmouseenter = function () { css(this, { transform: 'scale(1.08)', boxShadow: '0 10px 28px rgba(37,99,235,.5)' }); };
+        floatBtn.onmouseleave = function () { css(this, { transform: 'scale(1)',    boxShadow: '0 8px 24px rgba(37,99,235,.4)' }); };
 
-        var badge = document.createElement('span');
-        badge.id = 'cpTotalBadge';
-        css(badge, {
-            position: 'absolute', top: '-4px', right: '-4px',
+        var badgeTotal = document.createElement('span');
+        badgeTotal.id = 'cpTotalBadge';
+        css(badgeTotal, {
+            position: 'absolute', top: '-2px', right: '-2px',
             background: DK.badgeRed, color: '#fff', fontSize: '11px',
-            fontWeight: '700', padding: '2px 7px', borderRadius: '12px',
-            border: '2px solid #fff', display: 'none', fontFamily: 'sans-serif'
+            fontWeight: '700', padding: '2px 6px', borderRadius: '10px',
+            border: '2px solid #0f172a', display: 'none', fontFamily: 'sans-serif'
         });
-        floatBtn.style.position = 'fixed';
-        floatBtn.appendChild(badge);
+        floatBtn.appendChild(badgeTotal);
+        document.body.appendChild(floatBtn);
 
         var backdrop = document.createElement('div');
         backdrop.id = 'cpBackdrop';
@@ -152,8 +168,8 @@
             position: 'fixed', top: '0', right: '0',
             width: '380px', maxWidth: '100vw', height: '100vh',
             background: DK.bg, zIndex: '2147483646',
-            display: 'flex', flexDirection: 'column',
-            boxShadow: '-8px 0 40px rgba(0,0,0,.55)',
+            display: 'none', flexDirection: 'column',
+            boxShadow: 'none', visibility: 'hidden',
             transform: 'translateX(100%)',
             transition: 'transform .35s cubic-bezier(.16,1,.3,1)',
             fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
@@ -188,11 +204,11 @@
         var titleGroup = document.createElement('div');
         var titleText = document.createElement('div');
         titleText.id = 'cpTitle';
-        titleText.textContent = 'Global Information Feed';
+        titleText.textContent = _activeTab === 'team' ? 'Team Workspace' : 'Global Information Feed';
         css(titleText, { fontSize: '16px', fontWeight: '700', color: DK.textPrimary, fontFamily: 'sans-serif' });
         var subtitleText = document.createElement('div');
         subtitleText.id = 'cpSubtitle';
-        subtitleText.textContent = 'Public announcements & site updates';
+        subtitleText.textContent = _activeTab === 'team' ? 'Internal team discussion & chat' : 'Public announcements & site updates';
         css(subtitleText, { fontSize: '12px', color: DK.textMuted, marginTop: '2px', fontFamily: 'sans-serif' });
         titleGroup.appendChild(titleText);
         titleGroup.appendChild(subtitleText);
@@ -200,8 +216,7 @@
         titleArea.appendChild(titleGroup);
 
         var closeBtn = document.createElement('button');
-        closeBtn.textContent = '✕';
-        closeBtn.title = 'Close Panel';
+        closeBtn.innerHTML = '&#10005;';
         closeBtn.onclick = togglePanel;
         css(closeBtn, {
             background: 'rgba(255,255,255,.08)', border: 'none',
@@ -217,8 +232,9 @@
         header.appendChild(closeBtn);
 
         var tabBar = document.createElement('div');
+        tabBar.id = 'cpTabBar';
         css(tabBar, {
-            display: 'flex', background: DK.surface,
+            display: isAdmin ? 'none' : 'flex', background: DK.surface,
             padding: '8px 10px', gap: '6px', flexShrink: '0',
             borderBottom: '1px solid ' + DK.border
         });
@@ -228,9 +244,12 @@
         tabGlobal.innerHTML = '🌐 Global <span id="cpBadgeGlobal" style="background:#ef4444;color:#fff;font-size:11px;padding:1px 6px;border-radius:10px;font-weight:700;display:none;margin-left:4px">0</span>';
         css(tabGlobal, {
             flex: '1', padding: '9px 8px', border: 'none', borderRadius: '8px',
-            background: DK.accent, color: '#ffffff', fontWeight: '700',
+            background: _activeTab === 'global' ? DK.accent : 'transparent',
+            color: _activeTab === 'global' ? '#ffffff' : DK.textMuted,
+            fontWeight: _activeTab === 'global' ? '700' : '600',
             fontSize: '13px', cursor: 'pointer', fontFamily: 'sans-serif',
-            boxShadow: '0 2px 8px rgba(59,130,246,.35)', transition: 'all .2s'
+            boxShadow: _activeTab === 'global' ? '0 2px 8px rgba(59,130,246,.35)' : 'none',
+            transition: 'all .2s'
         });
         tabGlobal.onclick = function () { switchTab('global'); };
 
@@ -239,8 +258,12 @@
         tabTeam.innerHTML = '👥 Team <span id="cpBadgeTeam" style="background:#ef4444;color:#fff;font-size:11px;padding:1px 6px;border-radius:10px;font-weight:700;display:none;margin-left:4px">0</span>';
         css(tabTeam, {
             flex: '1', padding: '9px 8px', border: 'none', borderRadius: '8px',
-            background: 'transparent', color: DK.textMuted, fontWeight: '600',
-            fontSize: '13px', cursor: 'pointer', fontFamily: 'sans-serif', transition: 'all .2s'
+            background: _activeTab === 'team' ? DK.accent : 'transparent',
+            color: _activeTab === 'team' ? '#ffffff' : DK.textMuted,
+            fontWeight: _activeTab === 'team' ? '700' : '600',
+            fontSize: '13px', cursor: 'pointer', fontFamily: 'sans-serif',
+            boxShadow: _activeTab === 'team' ? '0 2px 8px rgba(59,130,246,.35)' : 'none',
+            transition: 'all .2s'
         });
         tabTeam.onclick = function () { switchTab('team'); };
 
@@ -308,6 +331,9 @@
 
         _panelIsOpen = !_panelIsOpen;
         if (_panelIsOpen) {
+            panel.style.display = 'flex';
+            panel.style.visibility = 'visible';
+            panel.style.boxShadow = '-8px 0 40px rgba(0,0,0,.55)';
             panel.style.willChange = 'transform';
             panel.style.transform = 'translateX(0)';
             if (backdrop) { backdrop.style.opacity = '1'; backdrop.style.pointerEvents = 'auto'; }
@@ -327,7 +353,14 @@
             panel.style.transform = 'translateX(100%)';
             if (backdrop) { backdrop.style.opacity = '0'; backdrop.style.pointerEvents = 'none'; }
             if (floatBtn) { floatBtn.style.display = 'flex'; floatBtn.style.pointerEvents = 'auto'; }
-            setTimeout(function () { panel.style.willChange = 'auto'; }, 400);
+            setTimeout(function () {
+                if (!_panelIsOpen) {
+                    panel.style.display = 'none';
+                    panel.style.visibility = 'hidden';
+                    panel.style.boxShadow = 'none';
+                }
+                panel.style.willChange = 'auto';
+            }, 380);
         }
     }
     window.toggleChatPanel = togglePanel;
