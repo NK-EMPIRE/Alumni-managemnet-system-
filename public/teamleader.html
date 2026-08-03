@@ -1245,9 +1245,10 @@
         <div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <label style="font-size:0.85rem;font-weight:600;color:#374151">Distribution Method:</label>
           <select id="distMethodSelect" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;color:#1E293B" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
+            <option value="RoundRobin">Round Robin (Equal Split)</option>
+            <option value="WorkloadBalanced">Workload Balanced (Lowest Backlog First)</option>
             <option value="DepartmentWise">Department-Wise (Auto-match by Department)</option>
             <option value="FacultyWise">Faculty-Wise (Auto-match by Faculty)</option>
-            <option value="RoundRobin">Round Robin (Equal Split)</option>
             <option value="BatchWise">Batch-Wise (Manual Count)</option>
           </select>
 
@@ -1260,6 +1261,15 @@
           <select id="distBatchInput" style="padding:6px 12px;border:1px solid #D1D5DB;border-radius:6px;font-size:0.85rem;width:160px;margin-left:8px">
             <option value="">Select Batch...</option>
           </select>
+        </div>
+
+        <!-- Department Mapping Section for DepartmentWise -->
+        <div id="distDeptMappingSection" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px;margin-bottom:16px;">
+          <h4 style="font-size:0.88rem;font-weight:700;color:#1E293B;margin:0 0 6px;"><i class="fas fa-building" style="color:#2563EB;margin-right:6px;"></i>Department Assignment per Team Member / Leader</h4>
+          <p style="font-size:0.78rem;color:#64748B;margin:0 0 14px;">Select target department(s) for each team member and the leader to match against pending alumni records.</p>
+          <div id="distDeptMappingGrid">
+            <!-- Populated dynamically by JS -->
+          </div>
         </div>
 
         <!-- Preview Table -->
@@ -1346,11 +1356,13 @@
         <div id="circulateStep1" style="padding:20px 24px;">
           <div style="margin-bottom:14px;">
             <label style="font-size:0.78rem;font-weight:600;color:#64748B;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em;">
-              <span style="width:18px;height:18px;background:#E0E7FF;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-building" style="color:#4F46E5;font-size:0.65rem;"></i></span>
-              Filter Alumni by Department
+              <span style="width:18px;height:18px;background:#E0E7FF;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-sitemap" style="color:#4F46E5;font-size:0.65rem;"></i></span>
+              Reassignment Algorithm
             </label>
-            <select class="form-control" id="circulateDeptFilter" onchange="onCirculateDeptChange()" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;width:100%;">
-              <option value="all">All Departments</option>
+            <select class="form-control" id="circulateAlgorithm" style="padding:9px 12px;border-radius:8px;font-size:0.85rem;width:100%;">
+              <option value="RoundRobin">Round Robin (Equal Split)</option>
+              <option value="DepartmentWise">Department-Wise Auto Match</option>
+              <option value="BatchWise">Batch-Wise Custom Split</option>
             </select>
           </div>
           <div id="circulateWorkloadTable" style="overflow-x:auto;margin-bottom:16px;border-radius:10px;border:1px solid var(--border);background:#F8FAFC;">
@@ -1842,8 +1854,9 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
           <div>
             <label class="form-label" style="font-size:0.85rem;font-weight:600;color:var(--text-dark);margin-bottom:6px;display:block;">Distribution Method</label>
-            <select id="distMethodSelect" class="form-control form-select" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
+            <select id="distMethodSelect" style="width:100%;height:38px;padding:6px 12px;font-size:0.85rem;border:1px solid #CBD5E1;border-radius:6px;background-color:#ffffff;color:#1E293B;outline:none;" onchange="if(window.onDistMethodChange) window.onDistMethodChange();">
               <option value="RoundRobin">Round Robin (Equal Auto-Split)</option>
+              <option value="WorkloadBalanced">Workload Balanced (Lowest Backlog First)</option>
               <option value="DepartmentWise">Department-Wise Manual Assignment</option>
               <option value="FacultyWise">Faculty-Wise Auto Match</option>
               <option value="BatchWise">Batch-Wise Custom Split</option>

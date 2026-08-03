@@ -80,7 +80,7 @@ async function getTeamLoad(currentUser, { leaderId, department }) {
  * Preview: which Pending alumni records will move from source → targets.
  * Does NOT write anything to the DB.
  */
-async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMemberIds, count, allocations, department }) {
+async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMemberIds, count, allocations, department, algorithm = 'RoundRobin' }) {
   const pool = await getPool();
 
   const { team } = await getTeamLoad(currentUser, { leaderId, department });
@@ -110,7 +110,7 @@ async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMe
   const targetCheck = await pool.request()
     .input('teamId', sql.Int, team.team_id)
     .query(`
-      SELECT u.user_id, u.first_name + ' ' + u.last_name AS name
+      SELECT u.user_id, u.first_name + ' ' + u.last_name AS name, u.department
       FROM Users u
       WHERE u.is_active = 1
         AND u.user_id IN (
@@ -119,7 +119,11 @@ async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMe
         )
     `);
   const validMemberMap = {};
-  targetCheck.recordset.forEach(m => { validMemberMap[m.user_id] = m.name; });
+  const memberDeptMap = {};
+  targetCheck.recordset.forEach(m => {
+    validMemberMap[m.user_id] = m.name;
+    if (m.department) memberDeptMap[m.user_id] = m.department.toUpperCase().trim();
+  });
 
   for (const tid of targetIds) {
     if (!validMemberMap[tid]) {
@@ -145,7 +149,7 @@ async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMe
 
   const pendingRes = await pendingReq.query(`
       SELECT TOP (@limit)
-        aa.assignment_id, aa.alumni_id, a.name, a.register_no, a.department, aa.status AS current_status
+        aa.assignment_id, aa.alumni_id, a.name, a.register_no, a.department, a.batch, aa.status AS current_status
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON a.alumni_id = aa.alumni_id
       WHERE aa.member_id = @sourceMemberId
@@ -159,45 +163,92 @@ async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMe
     throw new AppError('No Pending alumni found for this source member.', 404);
   }
 
-  // Build allocations: custom map takes priority, otherwise even split
-  let allocationMap = {}; // { userId: count }
-  if (allocations && typeof allocations === 'object' && !Array.isArray(allocations)) {
-    // caller provided custom split e.g. { "5": 6, "7": 4 }
-    let totalAlloc = 0;
-    for (const uid of targetIds) {
-      const c = parseInt(allocations[uid] || 0, 10);
-      allocationMap[uid] = c;
-      totalAlloc += c;
+  const previewGroupMap = {};
+  targetIds.forEach(uid => {
+    previewGroupMap[uid] = {
+      targetMemberId: uid,
+      targetName: validMemberMap[uid],
+      count: 0,
+      alumni: []
+    };
+  });
+
+  if (algorithm === 'DepartmentWise') {
+    // Department-Wise Matching: match alumni department to target member department
+    const unmatched = [];
+    pendingAlumni.forEach(alumni => {
+      const alumDept = (alumni.department || '').toUpperCase().trim();
+      let matchedUid = null;
+      if (alumDept) {
+        matchedUid = targetIds.find(uid => memberDeptMap[uid] === alumDept || (memberDeptMap[uid] && (memberDeptMap[uid].includes(alumDept) || alumDept.includes(memberDeptMap[uid]))));
+      }
+      if (matchedUid) {
+        previewGroupMap[matchedUid].alumni.push(alumni);
+        previewGroupMap[matchedUid].count++;
+      } else {
+        unmatched.push(alumni);
+      }
+    });
+
+    // Distribute remaining unmatched alumni via Round Robin across target members
+    if (unmatched.length > 0) {
+      let q = 0;
+      unmatched.forEach(alumni => {
+        const uid = targetIds[q % targetIds.length];
+        previewGroupMap[uid].alumni.push(alumni);
+        previewGroupMap[uid].count++;
+        q++;
+      });
     }
-    if (totalAlloc !== pendingAlumni.length) {
-      throw new AppError(`Custom allocation total (${totalAlloc}) must equal pending count (${pendingAlumni.length}).`, 400);
-    }
+
+  } else if (algorithm === 'BatchWise') {
+    // Batch-Wise Matching: sort by batch and distribute batch groups across target members
+    const sortedAlumni = [...pendingAlumni].sort((a, b) => (a.batch || '').localeCompare(b.batch || ''));
+    let q = 0;
+    sortedAlumni.forEach(alumni => {
+      const uid = targetIds[q % targetIds.length];
+      previewGroupMap[uid].alumni.push(alumni);
+      previewGroupMap[uid].count++;
+      q++;
+    });
+
   } else {
-    // Even split
-    const base = Math.floor(pendingAlumni.length / targetIds.length);
-    const extra = pendingAlumni.length % targetIds.length;
-    targetIds.forEach((uid, i) => {
-      allocationMap[uid] = base + (i < extra ? 1 : 0);
+    // RoundRobin (Default): Even split across target members
+    let allocationMap = {};
+    if (allocations && typeof allocations === 'object' && !Array.isArray(allocations)) {
+      let totalAlloc = 0;
+      for (const uid of targetIds) {
+        const c = parseInt(allocations[uid] || 0, 10);
+        allocationMap[uid] = c;
+        totalAlloc += c;
+      }
+      if (totalAlloc !== pendingAlumni.length) {
+        throw new AppError(`Custom allocation total (${totalAlloc}) must equal pending count (${pendingAlumni.length}).`, 400);
+      }
+    } else {
+      const base = Math.floor(pendingAlumni.length / targetIds.length);
+      const extra = pendingAlumni.length % targetIds.length;
+      targetIds.forEach((uid, i) => {
+        allocationMap[uid] = base + (i < extra ? 1 : 0);
+      });
+    }
+
+    let idx = 0;
+    targetIds.forEach(uid => {
+      const slice = pendingAlumni.slice(idx, idx + allocationMap[uid]);
+      idx += allocationMap[uid];
+      previewGroupMap[uid].alumni = slice;
+      previewGroupMap[uid].count = slice.length;
     });
   }
 
-  // Build preview groups
-  let idx = 0;
-  const preview = targetIds.map(uid => {
-    const slice = pendingAlumni.slice(idx, idx + allocationMap[uid]);
-    idx += allocationMap[uid];
-    return {
-      targetMemberId: uid,
-      targetName: validMemberMap[uid],
-      count: slice.length,
-      alumni: slice
-    };
-  });
+  const preview = targetIds.map(uid => previewGroupMap[uid]);
 
   return {
     team,
     sourceMemberId,
     sourceName,
+    algorithm,
     totalMoving: pendingAlumni.length,
     preview
   };
@@ -207,7 +258,7 @@ async function previewReassign(currentUser, { leaderId, sourceMemberId, targetMe
  * Commit: execute the reassignment using exact assignment_ids from caller.
  * allocations: { "targetMemberId": [assignment_id, ...], ... }
  */
-async function commitReassign(currentUser, { leaderId, sourceMemberId, allocations }) {
+async function commitReassign(currentUser, { leaderId, sourceMemberId, allocations, department }) {
   if (!allocations || typeof allocations !== 'object') {
     throw new AppError('allocations map is required.', 400);
   }
@@ -261,7 +312,7 @@ async function commitReassign(currentUser, { leaderId, sourceMemberId, allocatio
         await transaction.request()
           .input('assignId', sql.Int, assignId)
           .input('targetMemberId', sql.Int, parseInt(targetId, 10))
-          .input('leaderUserId', sql.Int, leaderUserId)
+          .input('leaderUserId', sql.Int, currentUser.userId)
           .query(`
             INSERT INTO dbo.AssignmentAuditLog (alumni_id, old_member_id, new_member_id, changed_by)
             SELECT alumni_id, member_id, @targetMemberId, @leaderUserId

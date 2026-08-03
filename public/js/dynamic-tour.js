@@ -112,21 +112,30 @@
       }
     } catch(e) {}
 
-    // ── ADMIN PAGE TOUR STEPS ──
-    if (role === 'ADMIN' || document.getElementById('ssSearch')) {
-      // 1. Dashboard Overview Stats
-      var adminStat = document.querySelector('.stat-card, .cards-row > div');
+    // Fallback role detection based on unique page elements
+    if (document.getElementById('distributeModalBtn') || document.getElementById('navbarUserNameHeader')) {
+      role = 'LEADER';
+    } else if (document.getElementById('recordsBody') || document.getElementById('memberName')) {
+      role = 'MEMBER';
+    } else if (document.getElementById('statTotalAlumni') || document.querySelector('.sidebar-user-role')?.textContent.includes('Admin')) {
+      role = 'ADMIN';
+    }
+
+    // ── 1. ADMIN PAGE TOUR STEPS ──
+    if (role === 'ADMIN' && (document.getElementById('statTotalAlumni') || document.querySelector('[data-section="dashboard"]'))) {
+      // Step 1: Realtime Executive Analytics
+      var adminStat = document.querySelector('.stat-card') || document.querySelector('.cards-row > div');
       if (adminStat) {
         steps.push({
           type: 'modal-feature',
           selector: adminStat,
           title: 'System Realtime Analytics 📊',
           badge: 'Executive Dashboard',
-          description: 'Tracks total alumni records, pending updates, draft saves, completed verifications, and active team member performance live.'
+          description: 'Track total alumni records, pending updates, draft saves, completed verifications, and active team member performance live.'
         });
       }
 
-      // 2. Global Universal Search
+      // Step 2: Global Intelligent Search
       var searchInput = document.getElementById('ssSearch') || document.getElementById('globalSearchInput');
       if (searchInput) {
         steps.push({
@@ -146,7 +155,7 @@
         });
       }
 
-      // 3. Advanced Filter Button
+      // Step 3: Multi-Criteria Filter Button
       var filterBtn = document.getElementById('ssFilterBtnWrap') || document.querySelector('button[onclick*="FilterModal"]');
       if (filterBtn) {
         steps.push({
@@ -154,7 +163,7 @@
           selector: filterBtn,
           title: 'Multi-Criteria Dataset Filters 🎛️',
           badge: 'Smart Filtering',
-          description: 'Filter working datasets by Team Leader, Team Member, Department, Batch, or Status. Watch the live filter overlay in action!',
+          description: 'Filter working datasets by Team Leader, Team Member, Department, Batch, or Status.',
           demo: function () {
             var mId = document.getElementById('ssFilterModal') ? 'ssFilterModal' : 'dashboardFilterModal';
             if (window.openModal) window.openModal(mId);
@@ -163,8 +172,8 @@
         });
       }
 
-      // 4. Assign New Alumni Datasets
-      var assignNewBtn = document.querySelector('button[onclick*="assignAlumniModal"]');
+      // Step 4: Batch Alumni Assignment
+      var assignNewBtn = document.querySelector('button[onclick*="assignAlumniModal"]') || document.querySelector('[data-section="assignAlumni"]');
       if (assignNewBtn) {
         steps.push({
           type: 'modal-feature',
@@ -179,7 +188,7 @@
         });
       }
 
-      // 5. Reassign Modal & History Audit
+      // Step 5: Workload Reassignment
       var reassignBtn = document.querySelector('button[onclick*="openReassignModal"]');
       if (reassignBtn) {
         steps.push({
@@ -195,7 +204,7 @@
         });
       }
 
-      // 6. Database Health Diagnostics
+      // Step 6: Database Health Diagnostics
       var dbHealthBtn = document.querySelector('button[onclick*="openDbHealthModal"]');
       if (dbHealthBtn) {
         steps.push({
@@ -211,8 +220,8 @@
         });
       }
 
-      // 7. Customizable Export & Download
-      var exportBtn = document.querySelector('button[onclick*="openExportCustomizationModal"]');
+      // Step 7: Export Customization
+      var exportBtn = document.querySelector('button[onclick*="openExportCustomizationModal"]') || document.querySelector('button[onclick*="exportAlumniCSV"]');
       if (exportBtn) {
         steps.push({
           type: 'modal-feature',
@@ -227,7 +236,7 @@
         });
       }
 
-      // 8. Audit Logs Navigation Tab
+      // Step 8: Audit Logs Navigation
       var auditTab = document.querySelector('a[data-section="audit"]');
       if (auditTab) {
         steps.push({
@@ -240,17 +249,48 @@
       }
     }
 
-    // ── LEADER PAGE TOUR STEPS ──
-    if (role === 'LEADER' || document.getElementById('distributeModalOverlay')) {
-      // 1. Leader Request Details (n8n Email Campaign)
-      var emailCampBtn = document.querySelector('button[onclick*="openEmailCampaignModal"]');
+    // ── 2. LEADER PAGE TOUR STEPS ──
+    if (role === 'LEADER' || document.getElementById('distributeModalBtn') || document.getElementById('navbarUserNameHeader')) {
+      // Step 1: Overview Cards
+      var overviewCards = document.getElementById('overviewCards') || document.querySelector('.card');
+      if (overviewCards) {
+        steps.push({
+          type: 'modal-feature',
+          selector: overviewCards,
+          title: 'Team Overview & Distribution Stats 📊',
+          badge: 'Leader Dashboard',
+          description: 'View assigned records, completed verifications, and awaiting distribution counts for your team in real-time.'
+        });
+      }
+
+      // Step 2: Distribute to Members (Department-Wise, Round Robin, etc.)
+      var distBtn = document.getElementById('distributeModalBtn') || document.querySelector('button[onclick*="openDistributeModal"]');
+      if (distBtn) {
+        steps.push({
+          type: 'modal-feature',
+          selector: distBtn,
+          title: 'Distribute Alumni to Team Members 🎯',
+          badge: 'Department & Member Allocation',
+          description: 'Distribute assigned alumni records to team members and the team leader using Department-Wise auto match, Round Robin, or custom splits with instant preview.',
+          demo: function () {
+            distBtn.click();
+            setTimeout(function () {
+              var overlay = document.getElementById('distributeModalOverlay');
+              if (overlay) overlay.classList.remove('show');
+            }, 2500);
+          }
+        });
+      }
+
+      // Step 3: Request Details via Email Automation
+      var emailCampBtn = document.querySelector('.quick-action-btn[onclick*="openEmailCampaignModal"]') || document.querySelector('button[onclick*="openEmailCampaignModal"]');
       if (emailCampBtn) {
         steps.push({
           type: 'modal-feature',
           selector: emailCampBtn,
-          title: 'Request Details via n8n Automation 📧',
-          badge: 'Email Campaign',
-          description: 'Triggers bulk email requests to alumni with trackable Plus-Addressing headers to capture responses automatically.',
+          title: 'Request Alumni Details (Email Campaign) 📧',
+          badge: 'n8n Automation',
+          description: 'Triggers automated detail request email campaigns to alumni with trackable Plus-Addressing headers to capture responses automatically.',
           demo: function () {
             if (window.openEmailCampaignModal) window.openEmailCampaignModal();
             setTimeout(function () { if (window.closeModal) window.closeModal('emailCampaignModal'); }, 2200);
@@ -258,54 +298,86 @@
         });
       }
 
-      // 2. Circulate / Faculty-Wise Distribution
-      var distributeBtn = document.querySelector('button[onclick*="openCirculateModal"]') || document.querySelector('button[onclick*="openDistributeModal"]');
-      if (distributeBtn) {
+      // Step 4: Circulate Pending Records
+      var circulateBtn = document.querySelector('button[onclick*="openCirculateModal"]');
+      if (circulateBtn) {
         steps.push({
           type: 'modal-feature',
-          selector: distributeBtn,
-          title: 'Faculty-Wise Team Distribution 👥',
-          badge: 'Team Leader Allocation',
-          description: 'Distribute unassigned team alumni to faculty members evenly or by custom proportions with preview steps.',
-          demo: function () {
-            if (window.openModal) window.openModal('circulateModal');
-            setTimeout(function () { if (window.closeModal) window.closeModal('circulateModal'); }, 2200);
-          }
+          selector: circulateBtn,
+          title: 'Redistribute / Circulate Records 🔄',
+          badge: 'Workload Balancing',
+          description: 'Redistribute pending records within your team members evenly to accelerate progress.'
         });
       }
 
-      // 3. Leader Reassign Modal
-      var leaderReassignBtn = document.querySelector('button[onclick*="openLeaderReassignModal"]');
-      if (leaderReassignBtn) {
+      // Step 5: Team Members Progress Table
+      var memberTable = document.getElementById('memberTable') || document.querySelector('#section-dashboard .table');
+      if (memberTable) {
         steps.push({
           type: 'modal-feature',
-          selector: leaderReassignBtn,
-          title: 'Team Workload Rebalancing 🔄',
-          badge: 'Team Leadership',
-          description: 'Shift pending records between team members instantly to prevent bottlenecks and equalize progress.',
-          demo: function () {
-            if (window.openModal) window.openModal('leaderReassignModal');
-            setTimeout(function () { if (window.closeModal) window.closeModal('leaderReassignModal'); }, 2000);
-          }
+          selector: memberTable.closest('.card') || memberTable,
+          title: 'Team Performance Tracker 👥',
+          badge: 'Team Monitoring',
+          description: 'Monitor each team member\'s assigned, completed, and pending records along with progress bars and last activity timestamps.'
+        });
+      }
+
+      // Step 6: Progress & Completion Charts
+      var chartSec = document.querySelector('#section-dashboard canvas')?.closest('.card');
+      if (chartSec) {
+        steps.push({
+          type: 'modal-feature',
+          selector: chartSec,
+          title: 'Completion Rate Analytics 📈',
+          badge: 'Visual Insights',
+          description: 'Interactive charts rendering member completion rates and overall team status breakdown.'
+        });
+      }
+
+      // Step 7: Spreadsheet View & Full Screen Grid
+      var spreadsheetSec = document.getElementById('ssSearch')?.closest('.card') || document.querySelector('.spreadsheet-table');
+      if (spreadsheetSec) {
+        steps.push({
+          type: 'modal-feature',
+          selector: spreadsheetSec.closest('.card') || spreadsheetSec,
+          title: 'Master Alumni Data Grid & Full Screen 📋',
+          badge: 'Spreadsheet Grid',
+          description: 'Browse all team alumni records in a full-screen tabular spreadsheet view with search, filter, column toggles, and CSV export.'
         });
       }
     }
 
-    // ── MEMBER PAGE TOUR STEPS ──
-    if (role === 'MEMBER' || document.getElementById('recordsBody') || document.getElementById('memberName')) {
-      // 1. Member Analytics & Stat Cards
-      var memberStat = document.querySelector('.stat-card') || document.querySelector('.cards-row');
+    // ── 3. MEMBER PAGE TOUR STEPS ──
+    if (role === 'MEMBER' && (document.getElementById('recordsBody') || document.getElementById('memberName') || document.querySelector('.cards-row'))) {
+      // Step 1: Member Analytics Cards
+      var memberStat = document.querySelector('.cards-row') || document.querySelector('.stat-card');
       if (memberStat) {
         steps.push({
           type: 'modal-feature',
           selector: memberStat,
           title: 'Personal Progress & Workload Stats 📈',
-          badge: 'Member Analytics',
+          badge: 'Member Dashboard',
           description: 'Track assigned alumni records, completed updates, drafts, and daily targets live in real-time.'
         });
       }
 
-      // 2. Alumni Replies Inbox
+      // Step 2: Today's Tasks Modal
+      var todayTasksBtn = document.querySelector('button[onclick*="openTodayTasksModal"]');
+      if (todayTasksBtn) {
+        steps.push({
+          type: 'modal-feature',
+          selector: todayTasksBtn,
+          title: 'Today\'s Task List & Checklist 📋',
+          badge: 'Daily Planner',
+          description: 'Review today\'s assigned targets, auto-generated task summary, and remaining alumni verifications.',
+          demo: function () {
+            if (window.openTodayTasksModal) window.openTodayTasksModal();
+            setTimeout(function () { if (window.closeModal) window.closeModal('todayTasksModal'); }, 2200);
+          }
+        });
+      }
+
+      // Step 3: Alumni Email Replies Inbox
       var repliesNav = document.querySelector('[data-page="replies"]') || document.querySelector('button[onclick*="openAlumniRepliesModal"]') || document.querySelector('a[data-page="replies"]');
       if (repliesNav) {
         steps.push({
@@ -321,88 +393,32 @@
         });
       }
 
-      // 3. Today's Tasks Modal
-      var todayTasksBtn = document.querySelector('button[onclick*="openTodayTasksModal"]');
-      if (todayTasksBtn) {
-        steps.push({
-          type: 'modal-feature',
-          selector: todayTasksBtn,
-          title: 'Today\'s Task List & Daily Checklist 📋',
-          badge: 'Daily Planner',
-          description: 'Review today\'s assigned targets, auto-generated task summary, and remaining alumni verifications.',
-          demo: function () {
-            if (window.openTodayTasksModal) window.openTodayTasksModal();
-            setTimeout(function () { if (window.closeModal) window.closeModal('todayTasksModal'); }, 2200);
-          }
-        });
-      }
-
-      // 4. Member Assigned List & Edit Profile
+      // Step 4: Update Alumni Information
       var updateBtn = document.querySelector('.btn-update') || document.querySelector('.update-alumni-btn') || document.querySelector('button[onclick*="openUpdateModal"]');
       if (updateBtn) {
         steps.push({
           type: 'modal-feature',
           selector: updateBtn,
-          title: 'Alumni Information Update Form ✏️',
+          title: 'Alumni Profile Verification & Update ✏️',
           badge: 'Data Verification',
-          description: 'Verify and fill company, designation, city, secondary phone/email, and social links with Save Draft support.',
-          demo: function () {
-            try { updateBtn.click(); } catch(e) {}
-            setTimeout(function () {
-              var m = document.getElementById('updateAlumniModal') || document.getElementById('updateModal');
-              if (m && window.closeModal) window.closeModal(m.id);
-            }, 2400);
-          }
+          description: 'Verify and update company, designation, city, secondary phone/email, and social links with Save Draft support.'
         });
       }
 
-      // 5. Spreadsheet Sheet View Nav
+      // Step 5: Spreadsheet View Nav
       var previewNav = document.querySelector('[data-page="preview"]');
       if (previewNav) {
         steps.push({
           type: 'modal-feature',
           selector: previewNav,
-          title: 'Full-Screen Spreadsheet View 📊',
+          title: 'Full-Screen Tabular Spreadsheet View 📊',
           badge: 'Data Grid',
           description: 'Switch to a full-screen interactive spreadsheet grid to view all assigned fields across alumni in a clean tabular view.'
         });
       }
-
-      // 6. Dataset Filtering
-      var filterBtn = document.querySelector('button[onclick*="openFilterModal"]');
-      if (filterBtn) {
-        steps.push({
-          type: 'modal-feature',
-          selector: filterBtn,
-          title: 'Advanced Record Filtering 🎛️',
-          badge: 'Dataset Filter',
-          description: 'Filter your assigned list by Department, Batch, Verification Status, or Date range.',
-          demo: function () {
-            if (window.openFilterModal) window.openFilterModal();
-            setTimeout(function () { if (window.closeFilterModal) window.closeFilterModal(); }, 2000);
-          }
-        });
-      }
-
-      // 7. Custom Column Exporter
-      var memberExportBtn = document.querySelector('button[onclick*="openExportCustomizationModal"]') || document.querySelector('button[onclick*="handleExport"]');
-      if (memberExportBtn) {
-        steps.push({
-          type: 'modal-feature',
-          selector: memberExportBtn,
-          title: 'Custom Column CSV Exporter 📤',
-          badge: 'Data Export',
-          description: 'Select exact fields to export and download your assigned alumni records as a formatted CSV file.',
-          demo: function () {
-            if (window.openExportCustomizationModal) window.openExportCustomizationModal();
-            setTimeout(function () { if (window.closeModal) window.closeModal('exportCustomizationModal'); }, 2000);
-          }
-        });
-      }
     }
 
-    // ── UNIVERSAL TOOLBAR FEATURES ──
-    // Theme Switcher
+    // ── 4. UNIVERSAL TOOLBAR FEATURES ──
     var themeBtn = document.getElementById('themeToggle') || document.querySelector('button[id*="theme"]');
     if (themeBtn) {
       steps.push({

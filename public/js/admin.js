@@ -3240,8 +3240,6 @@ var ssSortDirection = 'DESC';
 var ssColumns = [
   { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
   { key: 'name', label: 'Name', visible: true, width: 160 },
-  { key: 'father_name', label: 'Father Name', visible: true, width: 150 },
-  { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 120 },
   { key: 'gender', label: 'Gender', visible: true, width: 80 },
   { key: 'department', label: 'Department', visible: true, width: 100 },
   { key: 'batch', label: 'Batch', visible: true, width: 80 },
@@ -3249,15 +3247,10 @@ var ssColumns = [
   { key: 'phone', label: 'Phone', visible: true, width: 120 },
   { key: 'company', label: 'Company/Institution', visible: true, width: 150 },
   { key: 'designation', label: 'Designation', visible: true, width: 150 },
-  { key: 'experience', label: 'Experience', visible: true, width: 100 },
-  { key: 'city', label: 'City', visible: true, width: 120 },
-  { key: 'state', label: 'State', visible: true, width: 120 },
-  { key: 'country', label: 'Country', visible: true, width: 120 },
   { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL', visible: true, width: 180 },
   { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
   { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
-  { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
-  { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
+  { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 }
 ];
 
 var debounceTimer;
@@ -4305,7 +4298,6 @@ window.reassignLoadTeam = function (selectedDept) {
     };
 
     sourceSel.onchange = onSourceSelect;
-    renderCheckboxes();
 
     document.getElementById('reassignStep1').style.display = 'none';
     document.getElementById('reassignStep2').style.display = 'block';
@@ -4323,21 +4315,21 @@ window.reassignPreview = function () {
   if (targetMemberIds.length === 0) { Toast.warning('Reassign', 'Please select at least one target member.'); return; }
 
   var count = parseInt(document.getElementById('reassignCount').value, 10) || null;
-  var deptFilter = document.getElementById('reassignDeptFilter') ? document.getElementById('reassignDeptFilter').value : 'all';
+  var algorithm = document.getElementById('reassignAlgorithm') ? document.getElementById('reassignAlgorithm').value : 'RoundRobin';
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ leaderId: _reassignLeaderId, sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, department: deptFilter })
+    body: JSON.stringify({ leaderId: _reassignLeaderId, sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, algorithm: algorithm })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Reassign', res && res.message || 'Preview failed.'); return; }
     _reassignPreviewData = res.data;
 
-    var deptSubtext = (deptFilter && deptFilter !== 'all') ? ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + deptFilter + ']</span>' : '';
+    var algSubtext = ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + algorithm + ']</span>';
 
     var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">' +
-      'Moving <strong>' + res.data.totalMoving + '</strong> Pending alumni' + deptSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
+      'Moving <strong>' + res.data.totalMoving + '</strong> Pending alumni' + algSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
 
     res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:16px;">' +

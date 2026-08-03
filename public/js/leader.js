@@ -2303,7 +2303,7 @@
             '<div style="font-size:0.75rem;color:#2563EB;font-weight:600;margin-top:2px;">' + (count > 0 ? (count + ' Pending Alumni Records') : 'Available Department') + '</div>' +
           '</div>' +
           '<div style="min-width:230px;">' +
-            '<select class="dist-dept-target-select form-control" data-dept="' + dept + '" style="height:36px;font-size:0.82rem;border-color:#94A3B8;">' +
+            '<select class="dist-dept-target-select" data-dept="' + dept + '" style="width:100%;height:36px;font-size:0.82rem;border:1px solid #94A3B8;border-radius:6px;padding:6px 30px 6px 10px;background-color:#ffffff;color:#1E293B;outline:none;">' +
               memberOptions +
             '</select>' +
           '</div>' +
@@ -2318,7 +2318,7 @@
           '<label style="font-size:0.8rem;font-weight:700;color:#334155;display:block;">Unassigned Departments Strategy</label>' +
           '<span style="font-size:0.72rem;color:#64748B;">How to handle departments not manually assigned above</span>' +
         '</div>' +
-        '<select id="distDeptUnassignedFallback" class="form-control" style="width:230px;height:36px;font-size:0.8rem;">' +
+        '<select id="distDeptUnassignedFallback" style="width:230px;height:36px;font-size:0.8rem;border:1px solid #94A3B8;border-radius:6px;padding:6px 10px;background-color:#ffffff;color:#1E293B;outline:none;">' +
           '<option value="KeepUnassigned">Keep Unassigned (In Backlog)</option>' +
           '<option value="RoundRobin">Auto Round-Robin to Members</option>' +
           '<option value="AssignToLeader">Assign to Me (Team Leader)</option>' +
@@ -2416,14 +2416,24 @@
         if (method === 'RoundRobin') body.selectedMemberIds = teamMembers.map(function (m) { return m.id; });
         if (method === 'DepartmentWise') {
           var mapping = {};
-          document.querySelectorAll('.dist-dept-check:checked').forEach(function (cb) {
-            var memberId = parseInt(cb.getAttribute('data-member'), 10);
-            var deptName = cb.value;
-            if (deptName && memberId) {
-              mapping[deptName] = memberId;
+          document.querySelectorAll('.dist-dept-target-select').forEach(function (select) {
+            var targetUserId = select.value;
+            var deptName = select.getAttribute('data-dept');
+            if (deptName && targetUserId) {
+              mapping[deptName] = parseInt(targetUserId, 10);
+            }
+          });
+          // Also check for member-wise department selects if present
+          document.querySelectorAll('.dist-member-dept-select').forEach(function (select) {
+            var targetUserId = select.getAttribute('data-member-id');
+            var selectedDept = select.value;
+            if (targetUserId && selectedDept) {
+              mapping[selectedDept] = parseInt(targetUserId, 10);
             }
           });
           body.departmentMapping = mapping;
+          var fbSelect = document.getElementById('distDeptUnassignedFallback');
+          if (fbSelect && fbSelect.value) body.unmatchedFallback = fbSelect.value;
         }
         var fbSelect = document.getElementById('distUnmatchedFallbackSelect');
         if (fbSelect && fbSelect.value) {
@@ -2866,7 +2876,6 @@ window.openCirculateModal = function (selectedDept) {
     };
 
     sourceSel.onchange = onSourceSelect;
-    renderCheckboxes();
   }).catch(function (err) {
     document.getElementById('circulateWorkloadTable').innerHTML = '<p style="color:var(--danger);padding:12px;">Network error.</p>';
   });
@@ -2882,20 +2891,20 @@ window.circulatePreview = function () {
   var targetMemberIds = Array.from(cbs).map(function (cb) { return parseInt(cb.value, 10); });
   if (targetMemberIds.length === 0) { Toast.warning('Circulate', 'Please select at least one target.'); return; }
   var count = parseInt(document.getElementById('circulateCount').value, 10) || null;
-  var deptFilter = document.getElementById('circulateDeptFilter') ? document.getElementById('circulateDeptFilter').value : 'all';
+  var algorithm = document.getElementById('circulateAlgorithm') ? document.getElementById('circulateAlgorithm').value : 'RoundRobin';
 
   var token = localStorage.getItem('token');
   fetch('/api/v1/assignments/reassign/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, department: deptFilter })
+    body: JSON.stringify({ sourceMemberId: sourceMemberId, targetMemberIds: targetMemberIds, count: count, algorithm: algorithm })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (!res || !res.success) { Toast.error('Circulate', res && res.message || 'Preview failed.'); return; }
     _circulatePreviewData = res.data;
 
-    var deptSubtext = (deptFilter && deptFilter !== 'all') ? ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + deptFilter + ']</span>' : '';
+    var algSubtext = ' <span style="background:#E0E7FF;color:#4338CA;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">[' + algorithm + ']</span>';
 
-    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records' + deptSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
+    var html = '<p style="color:var(--text-secondary);margin-bottom:14px;font-size:0.85rem;">Moving <strong>' + res.data.totalMoving + '</strong> records' + algSubtext + ' from <strong>' + res.data.sourceName + '</strong>:</p>';
     res.data.preview.forEach(function (group) {
       html += '<div style="margin-bottom:14px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;padding:8px 12px;border-radius:8px;margin-bottom:6px;">' +

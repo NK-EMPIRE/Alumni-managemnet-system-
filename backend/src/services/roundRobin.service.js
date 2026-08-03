@@ -304,6 +304,53 @@ async function leaderPreview(currentUser, params = {}) {
       preview.push(allocationsMap[uid]);
     });
 
+  } else if (method === 'WorkloadBalanced') {
+    // Get active team members along with their current pending workload count
+    const usersResult = await pool.request()
+      .input('teamId', sql.Int, teamId)
+      .query(`
+        SELECT u.user_id, u.first_name + ' ' + u.last_name AS name,
+               COUNT(aa.assignment_id) AS pending_count
+        FROM Users u
+        INNER JOIN Roles r ON u.role_id = r.role_id
+        LEFT JOIN AlumniAssignments aa ON aa.member_id = u.user_id AND aa.team_id = @teamId AND aa.status = 'Pending'
+        WHERE u.user_id IN (
+          SELECT user_id FROM TeamMembers WHERE team_id = @teamId
+          UNION
+          SELECT leader_id FROM Teams WHERE team_id = @teamId
+        ) AND u.is_active = 1
+        GROUP BY u.user_id, u.first_name, u.last_name
+        ORDER BY pending_count ASC
+      `);
+
+    const activeMembers = usersResult.recordset;
+    if (activeMembers.length === 0) {
+      throw new AppError('No active team members or leader found for workload balanced distribution.', 400);
+    }
+
+    const memberMap = {};
+    activeMembers.forEach(m => {
+      memberMap[m.user_id] = {
+        userId: m.user_id,
+        userName: m.name,
+        currentPending: m.pending_count || 0,
+        count: 0,
+        alumniList: []
+      };
+    });
+
+    // Distribute alumni one by one to member with lowest current total (currentPending + assigned count)
+    const memberArray = activeMembers.map(m => memberMap[m.user_id]);
+    for (const alumni of poolAlumni) {
+      memberArray.sort((a, b) => (a.currentPending + a.count) - (b.currentPending + b.count));
+      memberArray[0].count++;
+      memberArray[0].alumniList.push(alumni);
+    }
+
+    memberArray.forEach(m => {
+      if (m.count > 0) preview.push(m);
+    });
+
   } else if (method === 'FacultyWise') {
     // Get active users of the team (including leader)
     const usersResult = await pool.request()
