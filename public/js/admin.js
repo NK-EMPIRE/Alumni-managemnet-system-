@@ -3,26 +3,14 @@
    Admin Dashboard JavaScript
    ============================================================ */
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”�const dummyTeamLeaders = [];
+const dummyTeamLeaders = [];
 const dummyTeamMembers = [];
 const dummyActivities = [];
 
 // Real notifications drawn from audit logs — no dummy data
 
 const dummyDeptProgress = [];
-const dummyBatchProgress = [];: 195, total: 285, color: '#F59E0B' },
-  { dept: 'ME', completed: 240, total: 350, color: '#EF4444' },
-  { dept: 'CE', completed: 170, total: 255, color: '#8B5CF6' },
-  { dept: 'IT', completed: 389, total: 595, color: '#EC4899' }
-];
-
-const dummyBatchProgress = [
-  { batch: '2024', completed: 120, total: 200, color: '#3B82F6' },
-  { batch: '2023', completed: 280, total: 400, color: '#10B981' },
-  { batch: '2022', completed: 350, total: 450, color: '#F59E0B' },
-  { batch: '2021', completed: 180, total: 250, color: '#EF4444' },
-  { batch: '2020', completed: 90, total: 120, color: '#8B5CF6' }
-];
+const dummyBatchProgress = [];
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     1b. IMPORT & AUDIT DATA
