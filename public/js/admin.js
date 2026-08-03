@@ -1,11 +1,11 @@
-/* ============================================================
+﻿/* ============================================================
    Alumni Professional Details Update Management System
    Admin Dashboard JavaScript
    ============================================================ */
 
-/* ────────────────────────────────────────────────────────────
-   1. DATA – Dummy datasets for Indian context
-   ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   1. DATA â€“ Dummy datasets for Indian context
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const dummyTeamLeaders = [
   { name: 'Amit Verma', email: 'amit.verma@alumnims.edu', phone: '+91-9876543210', dept: 'CSE', members: 4, assigned: 35 },
@@ -32,7 +32,7 @@ const dummyTeamMembers = [
 
 const dummyActivities = [];
 
-// Real notifications drawn from audit logs — no dummy data
+// Real notifications drawn from audit logs â€” no dummy data
 
 const dummyDeptProgress = [
   { dept: 'CSE', completed: 320, total: 465, color: '#3B82F6' },
@@ -51,9 +51,9 @@ const dummyBatchProgress = [
   { batch: '2020', completed: 90, total: 120, color: '#8B5CF6' }
 ];
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     1b. IMPORT & AUDIT DATA
-    ──────────────────────────────────────────────────────────── */
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 var importHistory = [
   { file: 'alumni_batch_2023.xlsx', imported: 200, merged: 45, skipped: 3, duplicates: 12, errors: 3, by: 'Admin User', date: '05 Jul 2026', status: 'Completed', original_name: 'alumni_batch_2023.xlsx', errorDetails: 'Row 23: Invalid email format "john.doe@"\nRow 67: Duplicate register number "2023CSE045"\nRow 89: Missing required field "FullName"' },
@@ -66,9 +66,9 @@ var importHistory = [
 
 var auditLogs = [];
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    2. STATE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const state = {
   currentPage: 1,
   rowsPerPage: 5,
@@ -115,9 +115,9 @@ function initSpreadsheetHandlers() {
   });
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     3b. SPREADSHEET STATE
-    ──────────────────────────────────────────────────────────── */
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var spreadsheetState = {
   currentPage: 1,
   rowsPerPage: 10,
@@ -135,9 +135,9 @@ var spreadsheetState = {
   editedAlumni: null
 };
 
-/* ────────────────────────────────────────────────────────────
-    3c. DOM READY – Initialization
-    ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    3c. DOM READY â€“ Initialization
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -267,9 +267,9 @@ function fetchAllData() {
   });
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    4. DATE HELPER
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function setCurrentDate() {
   var dateEl = document.getElementById('currentDate');
   var timeEl = document.getElementById('currentTime');
@@ -281,9 +281,9 @@ function setCurrentDate() {
   if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-IN', timeOptions);
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     5. DASHBOARD STATS
-    ──────────────────────────────────────────────────────────── */
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateDashboardStats() {
   var total, pending, completed, tlCount, tmCount, draft;
   if (_apiDataLoaded && _dashboardData) {
@@ -316,9 +316,9 @@ function setText(id, val) {
   if (el) el.textContent = val;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     6. ACTIVITY FEED
-    ──────────────────────────────────────────────────────────── */
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateActivityFeed() {
   var feed = document.getElementById('activityFeed');
   if (!feed) return;
@@ -346,9 +346,9 @@ function populateActivityFeed() {
   feed.innerHTML = html;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    7. TABLE POPULATION & PAGINATION
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateTable() {
   if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
     _alumniMapped = _apiAlumni.records.map(function (a) {
@@ -499,9 +499,9 @@ function goToPage(page) {
   renderTable();
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    8. TABLE SEARCH & FILTER
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var _filterDebounce = null;
 function filterTable() {
   clearTimeout(_filterDebounce);
@@ -613,12 +613,12 @@ function getVal(id) {
   return el ? el.value : '';
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    9. TEAM LEADERS TABLE
-   ──────────────────────────────────────────────────────────── */
-/* ────────────────────────────────────────────────────────────
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     Helper: View Team Leader Details
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function viewTeamLeaderDetails(name) {
   var data;
   if (_apiDataLoaded && _apiUsers && _apiUsers.records) {
@@ -671,9 +671,9 @@ function viewTeamLeaderDetails(name) {
   openModal('viewTLModal');
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     Helper: View Team Member Details
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function viewTeamMemberDetails(name) {
   var data;
   if (_apiDataLoaded && _apiMembers && _apiMembers.records) {
@@ -729,9 +729,9 @@ function populateTeamLeadersTable() {
   tbody.innerHTML = html;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    10. TEAM MEMBERS TABLE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateTeamMembersTable() {
   var tbody = document.getElementById('tmBody');
   if (!tbody) return;
@@ -762,9 +762,9 @@ function populateTeamMembersTable() {
   tbody.innerHTML = html;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    11. ASSIGN HISTORY TABLE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateAssignHistoryTable() {
   var tbody = document.getElementById('assignHistoryBody');
   if (!tbody) return;
@@ -808,9 +808,9 @@ function populateAssignHistoryTable() {
   tbody.innerHTML = html;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    12. DEPARTMENT PROGRESS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateDeptProgress() {
   var container = document.getElementById('deptProgressList');
   if (!container) return;
@@ -836,9 +836,9 @@ function populateDeptProgress() {
   container.innerHTML = html;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    13. TEAM LEADER RANKINGS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateTLRankings() {
   var container = document.getElementById('tlRankingList');
   if (!container) return;
@@ -865,9 +865,9 @@ function populateTLRankings() {
   container.innerHTML = html;
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    13b. TEAM PROGRESS WATCH (Admin Progress Page)
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function initProgressWatch() {
   var sel = document.getElementById('progressLeaderSelect');
   if (!sel) return;
@@ -881,7 +881,7 @@ function initProgressWatch() {
 function populateProgressLeaderDropdown() {
   var sel = document.getElementById('progressLeaderSelect');
   if (!sel) return;
-  sel.innerHTML = '<option value="">— Select Team Leader —</option>';
+  sel.innerHTML = '<option value="">â€” Select Team Leader â€”</option>';
   var leaders = _apiUsers && _apiUsers.records ? _apiUsers.records : [];
   leaders.forEach(function (l) {
     var opt = document.createElement('option');
@@ -972,9 +972,9 @@ function mkStatBox(label, val, color) {
     '</div>';
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    14. NOTIFICATIONS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateNotifications() {
   var list = document.getElementById('notifList');
   if (!list) return;
@@ -991,7 +991,7 @@ function populateNotifications() {
     rawNotifs = filteredLogs.slice(0, 10).map(function (r) {
       var nid = 'al_' + (r.audit_id || r.created_at + '_' + r.action);
       var actionStr = (r.action || '').replace(/_/g, ' ').toLowerCase();
-      var text = (r.username || 'Faculty') + ' — ' + actionStr;
+      var text = (r.username || 'Faculty') + ' â€” ' + actionStr;
       if (r.action === 'USER_CREATED') {
         text = 'New Faculty user created';
       } else if (r.action === 'EXCEL_IMPORTED') {
@@ -1125,9 +1125,9 @@ function populateDynamicFilters(filters) {
   });
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    15. TEAM LEADER DROPDOWNS (for modals)
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateTeamLeaderDropdowns() {
   var selects = ['tmTeamLeader', 'assignTeamLeader', 'ssFilterLeader', 'tmFilterLeader', 'expFilterLeader'];
   var leaders;
@@ -1251,9 +1251,9 @@ function populateTeamLeaderDropdowns() {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    16. CHARTS INITIALIZATION
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function initCharts() {
   try {
     updateChartsWithData(_dashboardData);
@@ -1305,9 +1305,9 @@ function updateChartsWithData(dashData) {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    17. SIDEBAR NAVIGATION
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function navigateTo(section, el) {
   /* Auto-close FAB menu if open */
   if (typeof fabOpen !== 'undefined' && fabOpen) {
@@ -1369,9 +1369,9 @@ function navigateTo(section, el) {
   closeDropdown('notifMenu');
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    18. SIDEBAR COLLAPSE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function toggleSidebar() {
   var wrapper = document.body;
   wrapper.classList.toggle('sidebar-collapsed');
@@ -1381,9 +1381,9 @@ function toggleSidebar() {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    19. MOBILE SIDEBAR
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function toggleMobileSidebar() {
   var sidebar = document.getElementById('sidebar');
   var overlay = document.getElementById('sidebarOverlay');
@@ -1400,9 +1400,9 @@ function closeMobileSidebar() {
   document.body.style.overflow = '';
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    20. SUBMENU TOGGLE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function toggleSubmenu(el) {
   var submenu = el.nextElementSibling;
   if (submenu && submenu.classList.contains('submenu')) {
@@ -1419,9 +1419,9 @@ function toggleSubmenu(el) {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    21. PROFILE DROPDOWN
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function toggleProfileDropdown(event) {
   event.stopPropagation();
   closeDropdown('notifMenu');
@@ -1429,9 +1429,9 @@ function toggleProfileDropdown(event) {
   menu.classList.toggle('show');
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    22. NOTIFICATIONS DROPDOWN
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function toggleNotifications(event) {
   event.stopPropagation();
   closeDropdown('profileMenu');
@@ -1439,9 +1439,9 @@ function toggleNotifications(event) {
   menu.classList.toggle('show');
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    22b. RESET REQUESTS DROPDOWN
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 window.toggleResetRequests = function (event) {
   event.stopPropagation();
   closeDropdown('profileMenu');
@@ -1539,9 +1539,9 @@ window.handleResetRequest = function (requestId, status, btn) {
   });
 };
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    23. DROPDOWN HELPERS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function closeDropdown(id) {
   var el = document.getElementById(id);
   if (el) el.classList.remove('show');
@@ -1557,9 +1557,9 @@ function setupClickOutside() {
   });
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    24. MODAL CONTROLS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 window.openModal = function (id) {
   var modal = document.getElementById(id);
   if (!modal) return;
@@ -1596,9 +1596,9 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    25. FORM VALIDATION & SUBMISSION
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function submitAddTeamLeader() {
   var btn = document.getElementById('tlSubmitBtn');
   if (!validateTLForm()) return;
@@ -1756,7 +1756,7 @@ function submitAssignAlumni() {
   });
 }
 
-/* ─── VALIDATORS ─── */
+/* â”€â”€â”€ VALIDATORS â”€â”€â”€ */
 function validateTLForm() {
   var modal = document.getElementById('addTeamLeaderModal');
   clearAllErrors(modal);
@@ -1810,7 +1810,7 @@ function validateAssignForm() {
   var valid = true;
 
   var dept = document.getElementById('assignDept');
-  // dept is optional — 'ALL' means all departments
+  // dept is optional â€” 'ALL' means all departments
   // no validation error needed for dept
 
   var batch = document.getElementById('assignBatch');
@@ -1953,7 +1953,7 @@ window.updateAssignPreviewSummary = function () {
   previewBox.style.display = 'block';
 };
 
-/* ─── BUTTON LOADING STATE ─── */
+/* â”€â”€â”€ BUTTON LOADING STATE â”€â”€â”€ */
 function showLoading(btn) {
   if (!btn) return;
   btn.disabled = true;
@@ -1966,9 +1966,9 @@ function hideLoading(btn) {
   btn.innerHTML = '<i class="fas fa-save"></i> Save';
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    26. PASSWORD TOGGLE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function togglePassword(inputId, btn) {
   var input = document.getElementById(inputId);
   if (!input) return;
@@ -1981,9 +1981,9 @@ function togglePassword(inputId, btn) {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    27. TEAM SEARCH / FILTER
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function filterTeamLeaders() {
   var q = getVal('tlSearch').toLowerCase();
   var rows = document.querySelectorAll('#tlBody tr');
@@ -2026,18 +2026,18 @@ function filterTeamMembers() {
   });
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    28. GLOBAL SEARCH
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function handleGlobalSearch(val) {
   if (val && val.length > 2) {
     Toast.info('Search', 'Searching for "' + val + '"...');
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    29. SETTINGS TABS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function switchSettingsTab(tab, btn) {
   var tabs = document.querySelectorAll('#settingsTabs .tab-item');
   tabs.forEach(function (t) { t.classList.remove('active'); });
@@ -2108,16 +2108,16 @@ window.saveAdminPassword = function () {
   });
 };
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    30. EXPORT BUTTON
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 window.handleExport = function () {
   window.openExportCustomizationModal();
 };
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    31. QUICK ACTION FAB
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var fabOpen = false;
 function toggleQuickActions() {
   fabOpen = !fabOpen;
@@ -2135,9 +2135,9 @@ function toggleQuickActions() {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    32. SESSION TIMEOUT SIMULATION
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var sessionTimer = null;
 var sessionCountdown = 60;
 var sessionOverlay = null;
@@ -2189,9 +2189,9 @@ function extendSession() {
   /* Reset idle timer */
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    33. LOGOUT HANDLER
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function handleLogout() {
   if (sessionTimer) clearInterval(sessionTimer);
   API.clearToken();
@@ -2201,19 +2201,19 @@ function handleLogout() {
   }, 1500);
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    34. RESPONSIVE SIDEBAR CLOSE ON RESIZE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 window.addEventListener('resize', function () {
   if (window.innerWidth >= 1024) {
     closeMobileSidebar();
   }
 });
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    35. COLLAPSIBLE SUBMENU ON PAGE LOAD
        (show Dashboard by default)
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 (function () {
   var sections = document.querySelectorAll('.content-section, .dashboard-section');
   sections.forEach(function (s) {
@@ -2223,9 +2223,9 @@ window.addEventListener('resize', function () {
   if (dash) { dash.style.display = 'block'; dash.classList.add('active'); }
 })();
 
-/* ────────────────────────────────────────────────────────────
-   36. IMPORT ALUMNI – File Handling
-   ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   36. IMPORT ALUMNI â€“ File Handling
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function initImportHandlers() {
   var uploadZone = document.getElementById('uploadZone');
   var fileInput = document.getElementById('fileInput');
@@ -2368,7 +2368,7 @@ function initImportHandlers() {
       var end = Math.min(page * limit, total);
 
       if (infoEl) {
-        infoEl.textContent = 'Showing ' + start + '–' + end + ' of ' + total + ' imports (Page ' + page + ' of ' + totalPages + ')';
+        infoEl.textContent = 'Showing ' + start + 'â€“' + end + ' of ' + total + ' imports (Page ' + page + ' of ' + totalPages + ')';
       }
 
       if (controlsEl) {
@@ -2741,191 +2741,6 @@ function initImportHandlers() {
     });
   }
 
-  /* Import button click */
-  importBtn.addEventListener('click', function () {
-    if (selectedImportFiles.length === 0) return;
-    importBtn.disabled = true;
-    importBtn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Importing...';
-
-    var startTime = performance.now();
-    var importPromises = selectedImportFiles.map(function (file) {
-      var formData = new FormData();
-      formData.append('file', file);
-      return API.uploadImport(formData).then(function (res) {
-        return { file: file.name, success: true, res: res };
-      }).catch(function (err) {
-        return { file: file.name, success: false, message: err.message };
-      });
-    });
-
-    Promise.all(importPromises).then(function (results) {
-      var duration = ((performance.now() - startTime) / 1000).toFixed(2);
-      importBtn.disabled = false;
-      importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
-      var pc = document.getElementById('importPreviewContainer');
-      if (pc) pc.style.display = 'none';
-
-      var iconEl = document.getElementById('importResultIcon');
-      var titleEl = document.getElementById('importResultTitle');
-      var detailsEl = document.getElementById('importResultDetails');
-      var durationEl = document.getElementById('importDurationSec');
-
-      if (durationEl) durationEl.textContent = duration;
-
-      var totalRows = 0;
-      var totalImported = 0;
-      var totalMerged = 0;
-      var totalSkipped = 0;
-      var totalDuplicates = 0;
-      var totalErrors = 0;
-      var allPendingAliases = [];
-      var allUnmappedColumns = [];
-      var failCount = 0;
-      var successCount = 0;
-
-      results.forEach(function (item) {
-        if (!item.success) {
-          failCount++;
-          return;
-        }
-        var res = item.res;
-        if (!res.success) {
-          failCount++;
-          return;
-        }
-        successCount++;
-        var s = res.data && (res.data.summary || res.data) ? (res.data.summary || res.data) : {};
-        totalRows += (s.totalRows || s.total_rows || s.totalRecords || 0);
-        totalImported += (s.imported || 0);
-        totalMerged += (s.merged || 0);
-        totalSkipped += (s.skipped || 0);
-        totalDuplicates += (s.duplicates || 0);
-        totalErrors += (s.errors || 0);
-        if (res.data.pendingAliasReview) {
-          allPendingAliases = allPendingAliases.concat(res.data.pendingAliasReview);
-        }
-        if (res.data.unmappedColumns) {
-          allUnmappedColumns = allUnmappedColumns.concat(res.data.unmappedColumns);
-        }
-      });
-
-      if (successCount > 0) {
-        if (iconEl) {
-          iconEl.style.background = '#ECFDF5';
-          iconEl.style.color = '#10B981';
-          iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
-        }
-        if (titleEl) titleEl.textContent = 'Import Finished (' + successCount + ' Succeeded, ' + failCount + ' Failed)';
-
-        var detailsHtml =
-          '<strong>Total Rows Processed:</strong> ' + totalRows + '<br>' +
-          '<strong>Imported:</strong> ' + totalImported + '<br>' +
-          '<strong>Merged/Updated:</strong> ' + totalMerged + '<br>' +
-          '<strong>Skipped:</strong> ' + totalSkipped + '<br>' +
-          '<strong>Duplicates:</strong> ' + totalDuplicates + '<br>' +
-          '<strong>Errors:</strong> ' + totalErrors;
-
-        if (allPendingAliases.length > 0) {
-          detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #F3F4F6; border-radius: 6px; text-align: left;">' +
-            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #374151;"><i class="fas fa-question-circle" style="color: #3B82F6;"></i> Pending Memory of Faculty to Confirm:</h4>';
-
-          allPendingAliases.forEach(function (item, idx) {
-            detailsHtml += '<div style="display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;">' +
-              '<input type="checkbox" class="alias-review-cb" id="alias_review_' + idx + '" checked data-excel-name="' + item.excelName + '" data-leader-id="' + item.suggestedLeaderId + '" style="margin-right: 8px;">' +
-              '<label for="alias_review_' + idx + '">Save memory "<strong>' + item.excelName + '</strong>" for Faculty <strong>' + item.suggestedLeaderName + '</strong></label>' +
-              '</div>';
-          });
-
-          detailsHtml += '<button id="confirmAliasesBtn" class="btn btn-sm btn-primary" style="margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px;"><i class="fas fa-check"></i> Confirm Selected Memories</button></div>';
-
-          // Event delegation bound once — safe even when modal HTML is re-injected
-          if (!window._aliasConfirmDelegated) {
-            window._aliasConfirmDelegated = true;
-            document.addEventListener('click', function (e) {
-              var btn = e.target.closest('#confirmAliasesBtn');
-              if (!btn) return;
-              var checkboxes = document.querySelectorAll('.alias-review-cb');
-              var pairs = [];
-              checkboxes.forEach(function (cb) {
-                if (cb.checked) {
-                  pairs.push({
-                    excelName: cb.getAttribute('data-excel-name'),
-                    leaderId: parseInt(cb.getAttribute('data-leader-id'), 10)
-                  });
-                }
-              });
-              if (pairs.length === 0) {
-                Toast.info('No Selection', 'Check at least one memory to save.');
-                return;
-              }
-              btn.disabled = true;
-              btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-              API.confirmAliases({ pairs: pairs }).then(function () {
-                btn.innerHTML = '<i class="fas fa-check"></i> Memories Saved!';
-                btn.style.background = '#10B981';
-                Toast.success('Memories Saved', 'Faculty memories saved successfully.');
-              }).catch(function (err) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check"></i> Confirm Selected Memories';
-                Toast.danger('Save Failed', err.message || 'Failed to save memories.');
-              });
-            });
-          }
-        }
-
-        if (allUnmappedColumns.length > 0) {
-          detailsHtml += '<div style="margin-top: 15px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 6px; text-align: left;">' +
-            '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #D97706;"><i class="fas fa-exclamation-triangle"></i> Unmapped Columns (Skipped):</h4>';
-          allUnmappedColumns.forEach(function (col) {
-            detailsHtml += '<div style="font-size: 12px; margin-bottom: 6px; color: #B45309;">' +
-              '• <strong>' + col.columnName + '</strong> (e.g. ' + col.sampleValues.join(', ') + ')' +
-              '</div>';
-          });
-          detailsHtml += '</div>';
-        }
-
-        if (detailsEl) detailsEl.innerHTML = detailsHtml;
-        Toast.success('Import Completed', 'Import finished in ' + duration + 's');
-        if (_apiDataLoaded) fetchAllData();
-      } else {
-        if (iconEl) {
-          iconEl.style.background = '#FEF2F2';
-          iconEl.style.color = '#EF4444';
-          iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
-        }
-        if (titleEl) titleEl.textContent = 'Import Failed';
-        if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> All file imports failed.';
-        Toast.danger('Import Failed', 'All file imports failed.');
-      }
-
-      openModal('importResultModal');
-    }).catch(function (err) {
-      var duration = ((performance.now() - startTime) / 1000).toFixed(2);
-      importBtn.disabled = false;
-      importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
-
-      var iconEl = document.getElementById('importResultIcon');
-      var titleEl = document.getElementById('importResultTitle');
-      var detailsEl = document.getElementById('importResultDetails');
-      var durationEl = document.getElementById('importDurationSec');
-
-      if (durationEl) durationEl.textContent = duration;
-      if (iconEl) {
-        iconEl.style.background = '#FEF2F2';
-        iconEl.style.color = '#EF4444';
-        iconEl.innerHTML = '<i class="fas fa-times-circle"></i>';
-      }
-      if (titleEl) titleEl.textContent = 'Import Failed';
-      if (detailsEl) detailsEl.innerHTML = '<strong>Reason:</strong> ' + err.message;
-
-      openModal('importResultModal');
-      Toast.danger('Import Failed', err.message);
-    });
-
-    if (fileNameEl) { fileNameEl.style.display = 'none'; }
-    fileInput.value = '';
-    selectedImportFiles = [];
-  });
 
   /* Download template button */
   if (downloadBtn) {
@@ -2958,9 +2773,9 @@ function initImportHandlers() {
   }
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    37. IMPORT HISTORY TABLE
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateImportHistory() {
   var tbody = document.getElementById('importHistoryBody');
   if (!tbody) return;
@@ -3111,9 +2926,9 @@ function showImportErrors(index) {
   openModal('importErrorModal');
 }
 
-/* ────────────────────────────────────────────────────────────
-    38. AUDIT LOGS – Table Population
-    ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    38. AUDIT LOGS â€“ Table Population
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function getAuditActionBadge(action) {
   var map = {
     'login': '<span class="badge badge-info"><i class="fas fa-sign-in-alt"></i> Login</span>',
@@ -3247,9 +3062,9 @@ window.changeAuditRowsPerPage = function (val) {
   renderAuditLogTable();
 };
 
-/* ────────────────────────────────────────────────────────────
-   39. AUDIT LOGS – Filters
-   ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   39. AUDIT LOGS â€“ Filters
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function initAuditHandlers() {
   var filterBtn = document.getElementById('auditFilterBtn');
   var resetBtn = document.getElementById('auditResetBtn');
@@ -3445,9 +3260,9 @@ function parseAuditDate(ts) {
   return new Date(year, month, day);
 }
 
-/* ────────────────────────────────────────────────────────────
-    40. REPORTS – View & Export
-    ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    40. REPORTS â€“ View & Export
+    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function viewReportData(type, title) {
   var columns, rows;
   if (type === 'alumni') {
@@ -3619,9 +3434,9 @@ function populateViewModal(record) {
   openModal('viewAlumniModal');
 }
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    19. SPREADSHEET-STYLE VIEW ALUMNI & DRAWER CONTROLS
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var ssPage = 1;
 var ssLimit = 10;
 var ssTotal = 0;
@@ -4061,9 +3876,9 @@ window.toggleColumnVisibility = function (key) {
   }
 };
 
-/* ────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    INTERACTIVE EXPORT ENGINE & CUSTOMIZATION MODAL
-   ──────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var _exportSelectedCols = {};
 
 window.exportAlumniCSV = function () {
@@ -4558,7 +4373,7 @@ window.submitEditAlumni = function () {
 // Auto refresh dashboard data disabled by user request
 
 // ============================================================
-// FEATURE 1 — REASSIGN / REDISTRIBUTE (Admin)
+// FEATURE 1 â€” REASSIGN / REDISTRIBUTE (Admin)
 // ============================================================
 
 var _reassignLeaderId = null;
@@ -4797,7 +4612,7 @@ if (typeof io !== 'undefined') {
 }
 
 // ============================================================
-// FEATURE 2 — DATABASE HEALTH CHECK (Admin)
+// FEATURE 2 â€” DATABASE HEALTH CHECK (Admin)
 // ============================================================
 
 var _healthCurrentType = null;
