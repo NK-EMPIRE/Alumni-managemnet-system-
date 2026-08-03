@@ -109,9 +109,10 @@
     max-width: 100vw !important;
     height: 100vh !important;
     background: var(--chat-bg) !important;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
     z-index: 999999 !important;
-    display: flex !important;
+    display: none !important;
+    visibility: hidden !important;
     flex-direction: column !important;
     transform: translateX(100%) !important;
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -119,6 +120,9 @@
 }
 
 .chat-side-panel.open {
+    display: flex !important;
+    visibility: visible !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2) !important;
     transform: translateX(0) !important;
 }
 
