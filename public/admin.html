@@ -107,7 +107,6 @@
         onclick="toggleSubmenu(this);navigateTo('teamLeaders', this)">
         <i class="fas fa-user-tie"></i>
         <span class="sidebar-item-text">Team Leaders</span>
-        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
         <a class="sidebar-item sub-item" data-section="addTeamLeader" onclick="openModal('addTeamLeaderModal')">
@@ -119,7 +118,6 @@
         onclick="toggleSubmenu(this);navigateTo('teamMembers', this)">
         <i class="fas fa-users"></i>
         <span class="sidebar-item-text">Team Members</span>
-        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
         <a class="sidebar-item sub-item" data-section="addTeamMember" onclick="openModal('addTeamMemberModal')">
@@ -135,7 +133,6 @@
         onclick="toggleSubmenu(this);navigateTo('viewAlumni', this)">
         <i class="fas fa-user-graduate"></i>
         <span class="sidebar-item-text">Alumni</span>
-        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s ease;"></i>
       </a>
       <div class="submenu" style="display:none;padding-left:36px;">
         <a class="sidebar-item sub-item" data-section="assignAlumni" onclick="navigateTo('assignAlumni', this)">
@@ -424,7 +421,7 @@
                   <option value="5">5</option>
                   <option value="10">10</option>
                   <option value="25">25</option>
-                  <option value="50">50</option>
+                  <option value="50" selected>50</option>
                   <option value="100">100</option>
                   <option value="250">250</option>
                   <option value="500">500</option>
@@ -569,7 +566,7 @@
                 style="width:auto;padding:4px 8px;font-size:0.8rem;height:30px;">
                 <option value="10">10</option>
                 <option value="25">25</option>
-                <option value="50">50</option>
+                <option value="50" selected>50</option>
                 <option value="100">100</option>
                 <option value="250">250</option>
                 <option value="500">500</option>
@@ -1010,9 +1007,9 @@
               <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
               <select class="form-control" id="auditRowsPerPage" style="width:auto;padding:4px 8px;font-size:0.8rem;">
                 <option value="5">5</option>
-                <option value="10" selected>10</option>
+                <option value="10">10</option>
                 <option value="25">25</option>
-                <option value="50">50</option>
+                <option value="50" selected>50</option>
                 <option value="100">100</option>
                 <option value="250">250</option>
                 <option value="500">500</option>
