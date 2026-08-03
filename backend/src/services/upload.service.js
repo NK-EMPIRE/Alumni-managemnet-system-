@@ -79,16 +79,24 @@ const XLSX = require('xlsx');
 
 async function getExcelSheets(filePath) {
   try {
-    const workbook = XLSX.readFile(filePath, { bookSheets: true, sheetStubs: false });
+    const workbook = XLSX.readFile(filePath);
     const sheetNames = workbook.SheetNames || [];
     
     const sheetsInfo = sheetNames.map(name => {
-      const sheet = workbook.Sheets[name];
-      const range = sheet && sheet['!ref'] ? XLSX.utils.decode_range(sheet['!ref']) : null;
-      const totalRows = range ? (range.e.r - range.s.r + 1) : 0;
+      const sheet = (workbook.Sheets && workbook.Sheets[name]) ? workbook.Sheets[name] : null;
+      let totalRows = 'All';
+      if (sheet && sheet['!ref']) {
+        try {
+          const range = XLSX.utils.decode_range(sheet['!ref']);
+          const count = range.e.r - range.s.r + 1;
+          totalRows = count > 1 ? count - 1 : (count > 0 ? count : 'All');
+        } catch (e) {
+          totalRows = 'All';
+        }
+      }
       return {
         name,
-        totalRows: totalRows > 1 ? totalRows - 1 : (totalRows > 0 ? totalRows : 'All')
+        totalRows
       };
     });
 
