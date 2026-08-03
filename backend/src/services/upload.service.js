@@ -75,9 +75,28 @@ async function getFacultyAndAliasStdin(selectedSheets = []) {
   }
 }
 
+const XLSX = require('xlsx');
+
 async function getExcelSheets(filePath) {
-  const result = await runPythonImporter(filePath, "", ['--inspect-sheets']);
-  return { sheets: result.sheets || [] };
+  try {
+    const workbook = XLSX.readFile(filePath, { bookSheets: true, sheetStubs: false });
+    const sheetNames = workbook.SheetNames || [];
+    
+    const sheetsInfo = sheetNames.map(name => {
+      const sheet = workbook.Sheets[name];
+      const range = sheet && sheet['!ref'] ? XLSX.utils.decode_range(sheet['!ref']) : null;
+      const totalRows = range ? (range.e.r - range.s.r + 1) : 0;
+      return {
+        name,
+        totalRows: totalRows > 1 ? totalRows - 1 : (totalRows > 0 ? totalRows : 'All')
+      };
+    });
+
+    return { sheets: sheetsInfo };
+  } catch (err) {
+    logger.error('Native xlsx sheet inspection error: ' + err.message);
+    return { sheets: [] };
+  }
 }
 
 async function processExcelImport(filePath, originalName, currentUser, selectedSheets = []) {
