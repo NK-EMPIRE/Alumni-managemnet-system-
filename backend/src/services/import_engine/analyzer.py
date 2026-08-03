@@ -11,11 +11,15 @@ class WorkbookAnalyzer:
         except Exception as e:
             raise ValueError(f"Failed to open workbook: {str(e)}")
 
-        target_set = set(str(s).strip() for s in target_sheets) if target_sheets else None
+        target_set = None
+        if target_sheets:
+            cleaned = [str(s).strip() for s in target_sheets if str(s).strip() and str(s).strip().upper() != 'DEFAULT_ALL']
+            if cleaned:
+                target_set = set(s.lower() for s in cleaned)
 
         valid_sheets = {}
         for sheet_name in xl.sheet_names:
-            if target_set and str(sheet_name).strip() not in target_set:
+            if target_set and str(sheet_name).strip().lower() not in target_set:
                 continue
             try:
                 df = xl.parse(sheet_name, header=None)

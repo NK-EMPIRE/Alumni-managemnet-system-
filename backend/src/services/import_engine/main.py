@@ -6,6 +6,18 @@ import time
 import re
 from typing import Dict, Any, List
 
+# Ensure UTF-8 stream encoding on Windows
+if hasattr(sys.stdin, 'reconfigure'):
+    try:
+        sys.stdin.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 # Include local service modules
 from analyzer import WorkbookAnalyzer
 from header_detector import HeaderDetector

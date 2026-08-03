@@ -2462,31 +2462,30 @@ function initImportHandlers() {
 
   function openSheetImportModalForFile(file) {
     activeSheetModalData = { file: file, selectedSheets: [] };
-    showUploadZoneLoading(file);
+    hideUploadZoneLoading();
 
     var overlay = document.getElementById('importSheetModalOverlay');
     var headerEl = document.getElementById('importFileDetailsHeader');
     var container = document.getElementById('sheetSelectionContainer');
 
-    // Show modal immediately so user sees popup without delay!
+    // Show modal overlay immediately
     if (overlay) overlay.style.display = 'flex';
 
     if (headerEl) {
       headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
         '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong> <span style="color:#64748B;font-size:0.8rem;">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span></div>' +
-        '<div style="font-size:0.8rem;color:#2563EB;font-weight:600;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Inspecting workbook sheets...</div>' +
+        '<div style="font-size:0.8rem;color:#2563EB;font-weight:600;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Reading workbook sheets...</div>' +
         '</div>';
     }
 
     if (container) {
-      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#2563EB;font-weight:600;"><i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom:8px;display:block;"></i> Inspecting available sheets in ' + file.name + '...</div>';
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#2563EB;font-weight:600;"><i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom:8px;display:block;"></i> Reading available sheets in ' + file.name + '...</div>';
     }
 
     var formData = new FormData();
     formData.append('file', file);
 
     API.inspectSheets(formData).then(function (res) {
-      hideUploadZoneLoading();
       var sheets = (res.success && res.data && Array.isArray(res.data.sheets)) ? res.data.sheets : [];
 
       if (headerEl) {
@@ -2502,10 +2501,10 @@ function initImportHandlers() {
 
       var html = '';
       sheets.forEach(function (sh, i) {
-        html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.84rem;color:#1E293B;">' +
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.84rem;color:#1E293B;">' +
           '<input type="checkbox" class="modal-sheet-cb" value="' + sh.name + '" checked style="width:16px;height:16px;accent-color:#2563EB;">' +
           '<span>' + sh.name + '</span>' +
-          '<span style="margin-left:auto;font-size:0.75rem;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:10px;">' + (sh.totalRows || 'All') + ' rows</span>' +
+          '<span style="margin-left:auto;font-size:0.75rem;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:10px;font-weight:700;">' + (sh.totalRows || 'All') + ' rows</span>' +
           '</label>';
       });
 
@@ -2530,7 +2529,8 @@ function initImportHandlers() {
       var deselectAllLink = document.getElementById('deselectAllSheetsLink');
 
       if (selectAllLink) {
-        selectAllLink.onclick = function () {
+        selectAllLink.onclick = function (e) {
+          e.preventDefault();
           document.querySelectorAll('.modal-sheet-cb').forEach(function (c) { c.checked = true; });
           var sel = sheets.map(function (s) { return s.name; });
           activeSheetModalData.selectedSheets = sel;
@@ -2539,7 +2539,8 @@ function initImportHandlers() {
       }
 
       if (deselectAllLink) {
-        deselectAllLink.onclick = function () {
+        deselectAllLink.onclick = function (e) {
+          e.preventDefault();
           document.querySelectorAll('.modal-sheet-cb').forEach(function (c) { c.checked = false; });
           activeSheetModalData.selectedSheets = [];
           loadSheetPreviewGrid(file, []);
@@ -2549,7 +2550,6 @@ function initImportHandlers() {
       // Initial grid preview load
       loadSheetPreviewGrid(file, checkedSheets);
     }).catch(function (err) {
-      hideUploadZoneLoading();
       if (headerEl) {
         headerEl.innerHTML = '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong></div>';
       }
