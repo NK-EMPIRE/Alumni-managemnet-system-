@@ -1570,16 +1570,13 @@ textarea.form-control {
   position: fixed;
   inset: 0;
   z-index: 100000;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
 }
 
 .modal-overlay.show {
@@ -1595,8 +1592,6 @@ textarea.form-control {
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.3s ease;
 }
 
 .modal-overlay.show .modal {
