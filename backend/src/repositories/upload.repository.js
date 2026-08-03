@@ -35,9 +35,9 @@ async function getImportHistory({ page, limit, offset }) {
     .query(`
       SELECT
         ih.*,
-        u.first_name + ' ' + u.last_name AS importer_name
+        ISNULL(u.first_name + ' ' + u.last_name, 'System') AS importer_name
       FROM ImportHistory ih
-      INNER JOIN Users u ON ih.imported_by = u.user_id
+      LEFT JOIN Users u ON ih.imported_by = u.user_id
       ORDER BY ih.created_at DESC
       OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
     `);

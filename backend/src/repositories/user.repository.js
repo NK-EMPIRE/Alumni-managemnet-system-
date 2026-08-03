@@ -50,9 +50,19 @@ async function findAll({ page, limit, offset, search, role, isActive }) {
 
   const total = countResult.recordset[0].total;
 
-  offset = offset !== undefined ? offset : (page - 1) * limit;
+  let safeLimit = parseInt(limit, 10);
+  if (isNaN(safeLimit) || safeLimit < 1) safeLimit = 10;
+
+  let safeOffset = parseInt(offset, 10);
+  if (isNaN(safeOffset) || safeOffset < 0) {
+    let safePage = parseInt(page, 10);
+    if (isNaN(safePage) || safePage < 1) safePage = 1;
+    safeOffset = (safePage - 1) * safeLimit;
+  }
 
   const dataRequest = pool.request();
+  dataRequest.input('offset', sql.Int, safeOffset);
+  dataRequest.input('limit', sql.Int, safeLimit);
 
   if (search) {
     dataRequest.input('search', sql.NVarChar(200), `%${search}%`);
@@ -87,8 +97,8 @@ async function findAll({ page, limit, offset, search, role, isActive }) {
     INNER JOIN Roles r ON u.role_id = r.role_id
     ${whereClause}
     ORDER BY u.first_name ASC, u.last_name ASC
-    OFFSET ${offset} ROWS
-    FETCH NEXT ${limit} ROWS ONLY
+    OFFSET @offset ROWS
+    FETCH NEXT @limit ROWS ONLY
   `);
 
   return { users: dataResult.recordset, total };

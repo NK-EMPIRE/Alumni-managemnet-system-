@@ -118,8 +118,10 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
     .input('alumniId', sql.Int, alumniId)
     .input('memberId', sql.Int, currentUser.userId)
     .query(`
-      SELECT assignment_id FROM AlumniAssignments
-      WHERE alumni_id = @alumniId AND member_id = @memberId
+      SELECT TOP 1 assignment_id FROM AlumniAssignments
+      WHERE alumni_id = @alumniId AND (member_id = @memberId OR EXISTS (
+        SELECT 1 FROM Users u JOIN Roles r ON u.role_id = r.role_id WHERE u.user_id = @memberId AND r.role_name IN ('ADMIN', 'LEADER')
+      ))
     `);
 
   if (assignmentResult.recordset.length > 0) {
@@ -222,8 +224,10 @@ async function saveDraft(alumniId, data, currentUser) {
     .input('alumniId', sql.Int, alumniId)
     .input('memberId', sql.Int, currentUser.userId)
     .query(`
-      SELECT assignment_id FROM AlumniAssignments
-      WHERE alumni_id = @alumniId AND member_id = @memberId
+      SELECT TOP 1 assignment_id FROM AlumniAssignments
+      WHERE alumni_id = @alumniId AND (member_id = @memberId OR EXISTS (
+        SELECT 1 FROM Users u JOIN Roles r ON u.role_id = r.role_id WHERE u.user_id = @memberId AND r.role_name IN ('ADMIN', 'LEADER')
+      ))
     `);
 
   if (assignmentResult.recordset.length > 0) {
@@ -260,8 +264,10 @@ async function submitAndComplete(alumniId, data, currentUser) {
     .input('alumniId', sql.Int, alumniId)
     .input('memberId', sql.Int, currentUser.userId)
     .query(`
-      SELECT assignment_id FROM AlumniAssignments
-      WHERE alumni_id = @alumniId AND member_id = @memberId
+      SELECT TOP 1 assignment_id FROM AlumniAssignments
+      WHERE alumni_id = @alumniId AND (member_id = @memberId OR EXISTS (
+        SELECT 1 FROM Users u JOIN Roles r ON u.role_id = r.role_id WHERE u.user_id = @memberId AND r.role_name IN ('ADMIN', 'LEADER')
+      ))
     `);
 
   if (assignmentResult.recordset.length > 0) {
