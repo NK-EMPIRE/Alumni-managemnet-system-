@@ -2302,17 +2302,56 @@ function initImportHandlers() {
     if (overlay) overlay.remove();
   }
 
-  window.loadImportHistoryTable = function () {
+  var currentImportHistoryPage = 1;
+
+  window.loadImportHistoryTable = function (page) {
+    page = page || currentImportHistoryPage || 1;
+    currentImportHistoryPage = page;
+
     var tbody = document.getElementById('importHistoryBody');
+    var infoEl = document.getElementById('importHistoryPaginationInfo');
+    var controlsEl = document.getElementById('importHistoryPaginationControls');
+
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:#64748B;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Loading import history...</td></tr>';
 
-    API.getImportHistory({ page: 1, limit: 20 }).then(function (res) {
+    API.getImportHistory({ page: page, limit: 10 }).then(function (res) {
       var rows = [];
+      var pagination = {};
+
       if (res && res.data) {
         rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
+        pagination = res.pagination || {};
       } else if (Array.isArray(res)) {
         rows = res;
+      }
+
+      var total = pagination.total || rows.length;
+      var totalPages = pagination.totalPages || Math.ceil(total / 10) || 1;
+      var limit = pagination.limit || 10;
+      var start = total === 0 ? 0 : (page - 1) * limit + 1;
+      var end = Math.min(page * limit, total);
+
+      if (infoEl) {
+        infoEl.textContent = 'Showing ' + start + '–' + end + ' of ' + total + ' imports (Page ' + page + ' of ' + totalPages + ')';
+      }
+
+      if (controlsEl) {
+        var ctrlHtml = '';
+        ctrlHtml += '<button class="btn btn-sm btn-outline" ' + (page <= 1 ? 'disabled' : '') + ' onclick="loadImportHistoryTable(' + (page - 1) + ')" style="padding:4px 10px;font-size:0.8rem;"><i class="fas fa-chevron-left"></i> Prev</button>';
+
+        for (var p = 1; p <= totalPages; p++) {
+          if (totalPages > 7 && Math.abs(p - page) > 2 && p !== 1 && p !== totalPages) {
+            if (p === 2 && page > 4) ctrlHtml += '<span style="padding:0 4px;color:#94A3B8;">...</span>';
+            if (p === totalPages - 1 && page < totalPages - 3) ctrlHtml += '<span style="padding:0 4px;color:#94A3B8;">...</span>';
+            continue;
+          }
+          var activeStyle = p === page ? 'background:#2563EB;color:#fff;border-color:#2563EB;font-weight:700;' : 'background:#fff;color:#475569;';
+          ctrlHtml += '<button class="btn btn-sm" onclick="loadImportHistoryTable(' + p + ')" style="padding:4px 10px;font-size:0.8rem;min-width:32px;' + activeStyle + '">' + p + '</button>';
+        }
+
+        ctrlHtml += '<button class="btn btn-sm btn-outline" ' + (page >= totalPages ? 'disabled' : '') + ' onclick="loadImportHistoryTable(' + (page + 1) + ')" style="padding:4px 10px;font-size:0.8rem;">Next <i class="fas fa-chevron-right"></i></button>';
+        controlsEl.innerHTML = ctrlHtml;
       }
 
       if (rows.length === 0) {
@@ -2322,15 +2361,19 @@ function initImportHandlers() {
 
       var html = '';
       rows.forEach(function (item, idx) {
+        var rowNum = (page - 1) * limit + idx + 1;
         var statusBadge = item.status === 'Completed' ? '<span class="badge badge-success">Completed</span>' :
                           item.status === 'Partial' ? '<span class="badge badge-warning">Partial</span>' :
+                          item.status === 'Rolled Back' ? '<span class="badge" style="background:#64748B;color:#fff;">Rolled Back</span>' :
                           '<span class="badge badge-danger">' + (item.status || 'Failed') + '</span>';
 
         var formattedDate = item.created_at ? new Date(item.created_at).toLocaleString() : '-';
         var fileName = item.original_name || item.file_name || 'Import #' + item.import_id;
+        var actionBtn = item.status === 'Rolled Back' ? '<span style="font-size:0.75rem;color:#94A3B8;font-style:italic;">Rolled Back</span>' :
+          '<button class="btn btn-sm btn-danger" onclick="confirmRollbackImport(' + item.import_id + ', \'' + (fileName).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;font-size:0.75rem;border-radius:6px;background:#EF4444;color:#fff;border:none;" title="Rollback this Excel import"><i class="fas fa-undo"></i> Rollback</button>';
 
         html += '<tr>' +
-          '<td style="font-weight:600;color:#64748B;">' + (idx + 1) + '</td>' +
+          '<td style="font-weight:600;color:#64748B;">' + rowNum + '</td>' +
           '<td><strong style="color:#1E293B;"><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i>' + fileName + '</strong></td>' +
           '<td><span style="color:#10B981;font-weight:700;">' + (item.imported_count || 0) + '</span></td>' +
           '<td><span style="color:#2563EB;font-weight:700;">' + (item.merged_count || 0) + '</span></td>' +
@@ -2340,9 +2383,7 @@ function initImportHandlers() {
           '<td style="color:#64748B;font-size:0.8rem;">' + formattedDate + '</td>' +
           '<td style="color:#64748B;">' + (item.duration_sec ? item.duration_sec + 's' : '-') + '</td>' +
           '<td>' + statusBadge + '</td>' +
-          '<td style="text-align:center;">' +
-          '<button class="btn btn-sm btn-danger" onclick="confirmRollbackImport(' + item.import_id + ', \'' + (fileName).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;font-size:0.75rem;border-radius:6px;background:#EF4444;color:#fff;border:none;" title="Rollback this Excel import"><i class="fas fa-undo"></i> Rollback</button>' +
-          '</td>' +
+          '<td style="text-align:center;">' + actionBtn + '</td>' +
           '</tr>';
       });
 
@@ -2359,7 +2400,7 @@ function initImportHandlers() {
 
     API.rollbackImport(importId).then(function () {
       Toast.success('Import Rolled Back', 'Excel import #' + importId + ' rolled back successfully.');
-      loadImportHistoryTable();
+      loadImportHistoryTable(currentImportHistoryPage);
       if (typeof fetchAllData === 'function') fetchAllData();
     }).catch(function (err) {
       Toast.danger('Rollback Failed', err.message || 'Failed to rollback import.');
@@ -2427,15 +2468,18 @@ function initImportHandlers() {
     var headerEl = document.getElementById('importFileDetailsHeader');
     var container = document.getElementById('sheetSelectionContainer');
 
+    // Show modal immediately so user sees popup without delay!
+    if (overlay) overlay.style.display = 'flex';
+
     if (headerEl) {
       headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
         '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong> <span style="color:#64748B;font-size:0.8rem;">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span></div>' +
-        '<div style="font-size:0.8rem;color:#475569;"><i class="fas fa-spinner fa-spin"></i> Inspecting workbook sheets...</div>' +
+        '<div style="font-size:0.8rem;color:#2563EB;font-weight:600;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Inspecting workbook sheets...</div>' +
         '</div>';
     }
 
     if (container) {
-      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;color:#64748B;"><span class="spinner spinner-sm"></span> Loading available sheets...</div>';
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#2563EB;font-weight:600;"><i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom:8px;display:block;"></i> Inspecting available sheets in ' + file.name + '...</div>';
     }
 
     var formData = new FormData();
@@ -2443,19 +2487,17 @@ function initImportHandlers() {
 
     API.inspectSheets(formData).then(function (res) {
       hideUploadZoneLoading();
-      if (overlay) overlay.style.display = 'flex';
-
       var sheets = (res.success && res.data && Array.isArray(res.data.sheets)) ? res.data.sheets : [];
+
       if (headerEl) {
         headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
           '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong> <span style="color:#64748B;font-size:0.8rem;">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span></div>' +
-          '<div style="font-size:0.82rem;font-weight:700;color:#1E3A8A;"><i class="fas fa-layer-group"></i> ' + sheets.length + ' Sheet(s) Found</div>' +
+          '<div style="font-size:0.82rem;font-weight:700;color:#1E3A8A;"><i class="fas fa-layer-group"></i> ' + (sheets.length || 1) + ' Sheet(s) Found</div>' +
           '</div>';
       }
 
       if (sheets.length === 0) {
-        if (container) container.innerHTML = '<div style="grid-column:1/-1;color:#EF4444;text-align:center;">No valid sheets found in workbook.</div>';
-        return;
+        sheets = [{ name: 'Sheet1', totalRows: 'All' }];
       }
 
       var html = '';
@@ -2463,7 +2505,7 @@ function initImportHandlers() {
         html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.84rem;color:#1E293B;">' +
           '<input type="checkbox" class="modal-sheet-cb" value="' + sh.name + '" checked style="width:16px;height:16px;accent-color:#2563EB;">' +
           '<span>' + sh.name + '</span>' +
-          '<span style="margin-left:auto;font-size:0.75rem;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:10px;">' + sh.totalRows + ' rows</span>' +
+          '<span style="margin-left:auto;font-size:0.75rem;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:10px;">' + (sh.totalRows || 'All') + ' rows</span>' +
           '</label>';
       });
 
@@ -2508,12 +2550,23 @@ function initImportHandlers() {
       loadSheetPreviewGrid(file, checkedSheets);
     }).catch(function (err) {
       hideUploadZoneLoading();
-      Toast.danger('Inspection Failed', err.message || 'Failed to inspect workbook sheets.');
+      if (headerEl) {
+        headerEl.innerHTML = '<div><strong><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i> ' + file.name + '</strong></div>';
+      }
+      if (container) {
+        container.innerHTML = '<div style="grid-column:1/-1;padding:12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;color:#1E40AF;font-size:0.85rem;">' +
+          '<label style="display:flex;align-items:center;gap:8px;font-weight:600;">' +
+          '<input type="checkbox" class="modal-sheet-cb" value="DEFAULT_ALL" checked style="width:16px;height:16px;accent-color:#2563EB;">' +
+          '<span>Import All Sheets (Default Mode)</span>' +
+          '</label></div>';
+      }
+      activeSheetModalData.selectedSheets = [];
+      loadSheetPreviewGrid(file, []);
     });
   }
 
   // Load import history on initialization of import section
-  loadImportHistoryTable();
+  loadImportHistoryTable(1);
 
   /* File selection handler */
   fileInput.addEventListener('change', function () {
@@ -2526,6 +2579,9 @@ function initImportHandlers() {
         }).join('');
       }
 
+      // ENABLE main import button
+      if (importBtn) importBtn.disabled = false;
+
       // Open sheet selection modal for primary selected file
       openSheetImportModalForFile(selectedImportFiles[0]);
     } else {
@@ -2533,9 +2589,21 @@ function initImportHandlers() {
       if (fileNameEl) { fileNameEl.style.display = 'none'; }
       var pc = document.getElementById('importPreviewContainer');
       if (pc) pc.style.display = 'none';
-      importBtn.disabled = true;
+      if (importBtn) importBtn.disabled = true;
     }
   });
+
+  /* Main page Import Data button click handler */
+  if (importBtn) {
+    importBtn.onclick = function (e) {
+      e.preventDefault();
+      if (selectedImportFiles && selectedImportFiles.length > 0) {
+        openSheetImportModalForFile(selectedImportFiles[0]);
+      } else {
+        Toast.warning('No File Selected', 'Please browse or drag and drop an Excel file to import.');
+      }
+    };
+  }
 
   // Modal confirm button click handler
   var confirmSheetBtn = document.getElementById('confirmSheetImportBtn');
