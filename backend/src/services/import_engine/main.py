@@ -44,6 +44,37 @@ def main():
     alias_map = {}
     target_sheets = []
     inspect_sheets_mode = "--inspect-sheets" in sys.argv
+
+    if inspect_sheets_mode:
+        try:
+            analyzer = WorkbookAnalyzer(file_path)
+            valid_sheets = analyzer.get_valid_sheets()
+            sheets_info = []
+            for s_name, df in valid_sheets.items():
+                total_r = len(df)
+                sheets_info.append({
+                    "name": s_name,
+                    "totalRows": (total_r - 1) if total_r > 1 else total_r
+                })
+            if not sheets_info:
+                xl = pd.ExcelFile(file_path, engine='openpyxl')
+                sheets_info = [{"name": s, "totalRows": "All"} for s in xl.sheet_names]
+            print(json.dumps({"success": True, "sheets": sheets_info}))
+            sys.exit(0)
+        except Exception as e:
+            try:
+                xl = pd.ExcelFile(file_path, engine='openpyxl')
+                sheets_info = [{"name": s, "totalRows": "All"} for s in xl.sheet_names]
+                print(json.dumps({"success": True, "sheets": sheets_info}))
+                sys.exit(0)
+            except Exception as ex:
+                print(json.dumps({"success": False, "error": f"Failed to inspect sheets: {str(ex)}"}))
+                sys.exit(1)
+
+    # Load faculty list, aliases & selected sheets from stdin if provided
+    faculty_list = []
+    alias_map = {}
+    target_sheets = []
     
     try:
         # Read from standard input (non-blocking style check)
@@ -71,20 +102,10 @@ def main():
 
     try:
         analyzer = WorkbookAnalyzer(file_path)
-        valid_sheets = analyzer.get_valid_sheets(target_sheets=target_sheets if not inspect_sheets_mode else None)
+        valid_sheets = analyzer.get_valid_sheets(target_sheets=target_sheets)
     except Exception as e:
         print(json.dumps({"success": False, "error": f"Failed to read workbook: {str(e)}"}))
         sys.exit(1)
-
-    if inspect_sheets_mode:
-        sheets_info = []
-        for s_name, df in valid_sheets.items():
-            sheets_info.append({
-                "name": s_name,
-                "totalRows": len(df)
-            })
-        print(json.dumps({"success": True, "sheets": sheets_info}))
-        sys.exit(0)
 
     mapper = ColumnMapper()
     detector = HeaderDetector(mapper.get_all_synonyms())

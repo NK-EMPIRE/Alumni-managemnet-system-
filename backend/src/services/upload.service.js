@@ -78,32 +78,42 @@ async function getFacultyAndAliasStdin(selectedSheets = []) {
 const XLSX = require('xlsx');
 
 async function getExcelSheets(filePath) {
+  // Primary engine: Python openpyxl via main.py --inspect-sheets
+  try {
+    const pythonResult = await runPythonImporter(filePath, "", ["--inspect-sheets"]);
+    if (pythonResult && Array.isArray(pythonResult.sheets) && pythonResult.sheets.length > 0) {
+      return { sheets: pythonResult.sheets };
+    }
+  } catch (pyErr) {
+    logger.warn('Python sheet inspection fallback triggered: ' + pyErr.message);
+  }
+
+  // Secondary engine: Node XLSX fallback with bulletproof safety
   try {
     const workbook = XLSX.readFile(filePath);
     const sheetNames = workbook.SheetNames || [];
     
     const sheetsInfo = sheetNames.map(name => {
-      const sheet = (workbook.Sheets && workbook.Sheets[name]) ? workbook.Sheets[name] : null;
       let totalRows = 'All';
-      if (sheet && sheet['!ref']) {
-        try {
-          const range = XLSX.utils.decode_range(sheet['!ref']);
-          const count = range.e.r - range.s.r + 1;
-          totalRows = count > 1 ? count - 1 : (count > 0 ? count : 'All');
-        } catch (e) {
-          totalRows = 'All';
+      try {
+        if (workbook.Sheets && workbook.Sheets[name]) {
+          const sheet = workbook.Sheets[name];
+          if (sheet && sheet['!ref']) {
+            const range = XLSX.utils.decode_range(sheet['!ref']);
+            const count = range.e.r - range.s.r + 1;
+            totalRows = count > 1 ? count - 1 : (count > 0 ? count : 'All');
+          }
         }
+      } catch (e) {
+        totalRows = 'All';
       }
-      return {
-        name,
-        totalRows
-      };
+      return { name, totalRows };
     });
 
-    return { sheets: sheetsInfo };
+    return { sheets: sheetsInfo.length > 0 ? sheetsInfo : [{ name: 'Sheet1', totalRows: 'All' }] };
   } catch (err) {
-    logger.error('Native xlsx sheet inspection error: ' + err.message);
-    return { sheets: [] };
+    logger.error('Node xlsx sheet inspection fallback error: ' + err.message);
+    return { sheets: [{ name: 'Sheet1', totalRows: 'All' }] };
   }
 }
 

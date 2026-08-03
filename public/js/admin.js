@@ -2260,14 +2260,40 @@ function initImportHandlers() {
       uploadZone.style.borderColor = 'var(--border)';
       uploadZone.style.background = '';
 
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        fileInput.files = e.dataTransfer.files;
-        // Trigger the change handler manually
-        var event = new Event('change', { bubbles: true });
-        fileInput.dispatchEvent(event);
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        var files = Array.prototype.slice.call(e.dataTransfer.files);
+        selectedImportFiles = files;
+
+        try {
+          var dt = new DataTransfer();
+          files.forEach(function (f) { dt.items.add(f); });
+          fileInput.files = dt.files;
+        } catch (err) {
+          // Ignore browser DataTransfer assignment restrictions
+        }
+
+        if (fileNameEl) {
+          fileNameEl.style.display = 'block';
+          fileNameEl.innerHTML = selectedImportFiles.map(function (f) {
+            return '<div style="margin-top: 4px; font-weight: 500;"><i class="fas fa-check-circle"></i> ' + f.name + ' (' + (f.size / 1024 / 1024).toFixed(2) + ' MB)</div>';
+          }).join('');
+        }
+
+        // ENABLE main import button
+        if (importBtn) importBtn.disabled = false;
+
+        // Open sheet selection modal for dropped file
+        openSheetImportModalForFile(selectedImportFiles[0]);
+      }
+    });
+
+    uploadZone.addEventListener('click', function (e) {
+      if (e.target !== browseBtn && !browseBtn.contains(e.target)) {
+        fileInput.click();
       }
     });
   }
+
   if (browseBtn) {
     browseBtn.addEventListener('click', function (e) {
       e.stopPropagation();
