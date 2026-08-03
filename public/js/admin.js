@@ -1,43 +1,16 @@
-﻿/* ============================================================
+/* ============================================================
    Alumni Professional Details Update Management System
    Admin Dashboard JavaScript
    ============================================================ */
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   1. DATA â€“ Dummy datasets for Indian context
-   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-
-const dummyTeamLeaders = [
-  { name: 'Amit Verma', email: 'amit.verma@alumnims.edu', phone: '+91-9876543210', dept: 'CSE', members: 4, assigned: 35 },
-  { name: 'Priya Sharma', email: 'priya.sharma@alumnims.edu', phone: '+91-9876543211', dept: 'ECE', members: 3, assigned: 28 },
-  { name: 'Rajesh Patel', email: 'rajesh.patel@alumnims.edu', phone: '+91-9876543212', dept: 'EEE', members: 5, assigned: 42 },
-  { name: 'Sunita Gupta', email: 'sunita.gupta@alumnims.edu', phone: '+91-9876543213', dept: 'IT', members: 4, assigned: 31 },
-  { name: 'Vikram Singh', email: 'vikram.singh@alumnims.edu', phone: '+91-9876543214', dept: 'ME', members: 3, assigned: 24 }
-];
-
-const dummyTeamMembers = [
-  { name: 'Anjali Rao', email: 'anjali.rao@alumnims.edu', phone: '+91-9988776651', dept: 'CSE', leader: 'Amit Verma', assigned: 8 },
-  { name: 'Deepak Nair', email: 'deepak.nair@alumnims.edu', phone: '+91-9988776652', dept: 'CSE', leader: 'Amit Verma', assigned: 10 },
-  { name: 'Kavita Joshi', email: 'kavita.joshi@alumnims.edu', phone: '+91-9988776653', dept: 'ECE', leader: 'Priya Sharma', assigned: 12 },
-  { name: 'Manoj Kumar', email: 'manoj.kumar@alumnims.edu', phone: '+91-9988776654', dept: 'ECE', leader: 'Priya Sharma', assigned: 6 },
-  { name: 'Neelam Reddy', email: 'neelam.reddy@alumnims.edu', phone: '+91-9988776655', dept: 'EEE', leader: 'Rajesh Patel', assigned: 15 },
-  { name: 'Pooja Mehta', email: 'pooja.mehta@alumnims.edu', phone: '+91-9988776656', dept: 'EEE', leader: 'Rajesh Patel', assigned: 9 },
-  { name: 'Rahul Saxena', email: 'rahul.saxena@alumnims.edu', phone: '+91-9988776657', dept: 'IT', leader: 'Sunita Gupta', assigned: 11 },
-  { name: 'Swati Desai', email: 'swati.desai@alumnims.edu', phone: '+91-9988776658', dept: 'ME', leader: 'Vikram Singh', assigned: 7 },
-  { name: 'Ravi Kumar', email: 'ravi.kumar@alumnims.edu', phone: '+91-9988776659', dept: 'IT', leader: 'Sunita Gupta', assigned: 8 },
-  { name: 'Meena Iyer', email: 'meena.iyer@alumnims.edu', phone: '+91-9988776660', dept: 'ME', leader: 'Vikram Singh', assigned: 5 },
-  { name: 'Akash Gupta', email: 'akash.gupta@alumnims.edu', phone: '+91-9988776661', dept: 'EEE', leader: 'Rajesh Patel', assigned: 10 },
-  { name: 'Sneha Rao', email: 'sneha.rao@alumnims.edu', phone: '+91-9988776662', dept: 'CSE', leader: 'Amit Verma', assigned: 7 }
-];
-
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”�const dummyTeamLeaders = [];
+const dummyTeamMembers = [];
 const dummyActivities = [];
 
-// Real notifications drawn from audit logs â€” no dummy data
+// Real notifications drawn from audit logs — no dummy data
 
-const dummyDeptProgress = [
-  { dept: 'CSE', completed: 320, total: 465, color: '#3B82F6' },
-  { dept: 'ECE', completed: 280, total: 400, color: '#10B981' },
-  { dept: 'EEE', completed: 195, total: 285, color: '#F59E0B' },
+const dummyDeptProgress = [];
+const dummyBatchProgress = [];: 195, total: 285, color: '#F59E0B' },
   { dept: 'ME', completed: 240, total: 350, color: '#EF4444' },
   { dept: 'CE', completed: 170, total: 255, color: '#8B5CF6' },
   { dept: 'IT', completed: 389, total: 595, color: '#EC4899' }
@@ -2539,7 +2512,7 @@ function initImportHandlers() {
       var html = '';
       sheets.forEach(function (sh, i) {
         html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.84rem;color:#1E293B;">' +
-          '<input type="checkbox" class="modal-sheet-cb" value="' + sh.name + '" checked style="width:16px;height:16px;accent-color:#2563EB;">' +
+          '<input type="checkbox" class="modal-sheet-cb" value="' + sh.name + '" style="width:16px;height:16px;accent-color:#2563EB;">' +
           '<span>' + sh.name + '</span>' +
           '<span style="margin-left:auto;font-size:0.75rem;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:10px;font-weight:700;">' + (sh.totalRows || 'All') + ' rows</span>' +
           '</label>';
@@ -2547,8 +2520,8 @@ function initImportHandlers() {
 
       if (container) container.innerHTML = html;
 
-      // Collect initially checked sheets
-      var checkedSheets = sheets.map(function (s) { return s.name; });
+      // By default no sheets checked
+      var checkedSheets = [];
       activeSheetModalData.selectedSheets = checkedSheets;
 
       // Event listener for sheet checkboxes

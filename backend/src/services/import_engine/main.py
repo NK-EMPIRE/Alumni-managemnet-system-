@@ -354,7 +354,15 @@ def main():
         "errors": errors,
         "unmappedColumns": unmapped_output
     }
-    print(json.dumps(output, ensure_ascii=False, indent=2))
+
+    def json_serializer(obj):
+        if hasattr(obj, 'isoformat'):
+            return obj.isoformat()
+        if hasattr(obj, 'strftime'):
+            return obj.strftime('%Y-%m-%d')
+        return str(obj)
+
+    print(json.dumps(output, ensure_ascii=False, indent=2, default=json_serializer))
 
 if __name__ == '__main__':
     main()
