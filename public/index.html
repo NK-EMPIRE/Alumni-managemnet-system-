@@ -15,11 +15,14 @@
     rel="stylesheet">
   <link rel="stylesheet" href="/libs/fontawesome/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/chat.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js" type="module"></script>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden !important;
+    }
+
     body {
       background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('https://www.mzcet.in/assets/img/mzcet1.webp') !important;
       background-size: cover !important;
@@ -30,23 +33,29 @@
 
     .login-page {
       background: transparent !important;
+      height: 100vh !important;
+      min-height: 100vh !important;
+      max-height: 100vh !important;
+      overflow: hidden !important;
     }
 
     .login-illustration {
       background: linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%) !important;
-      border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+      border-right: 1px solid #E2E8F0 !important;
     }
 
     .login-form-wrapper {
-      background: rgba(248, 250, 252, 0.92) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
+      background: #F8FAFC !important;
+      box-shadow: none !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
 
     .login-card {
       background: #ffffff !important;
-      border: 1px solid rgba(255, 255, 255, 0.8) !important;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
+      border: 1px solid rgba(226, 232, 240, 0.8) !important;
+      box-shadow: 0 10px 40px rgba(37, 99, 235, 0.08) !important;
     }
 
     /* Premium Animated Loading Overlay */
@@ -411,7 +420,6 @@
   <script src="js/services/api.js"></script>
   <script src="js/app.js"></script>
   <script src="js/login.js"></script>
-  <script src="js/chat.js"></script>
 </body>
 
 </html>

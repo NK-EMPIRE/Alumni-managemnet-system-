@@ -112,8 +112,8 @@
       position: 'fixed', top: '0', right: '0',
       width: '380px', maxWidth: '100vw', height: '100vh',
       background: DK.bg, zIndex: '2147483645',
-      display: 'flex', flexDirection: 'column',
-      boxShadow: '-8px 0 40px rgba(0,0,0,.55)',
+      display: 'none', flexDirection: 'column',
+      boxShadow: 'none', visibility: 'hidden',
       transform: 'translateX(100%)',
       transition: 'transform .35s cubic-bezier(.16,1,.3,1)',
       fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
@@ -193,6 +193,9 @@
 
     _panelOpen = !_panelOpen;
     if (_panelOpen) {
+      panel.style.display = 'flex';
+      panel.style.visibility = 'visible';
+      panel.style.boxShadow = '-8px 0 40px rgba(0,0,0,.55)';
       panel.style.willChange = 'transform';
       panel.style.transform  = 'translateX(0)';
       if (backdrop) { backdrop.style.opacity = '1'; backdrop.style.pointerEvents = 'auto'; }
@@ -203,8 +206,15 @@
       panel.style.willChange = 'transform';
       panel.style.transform  = 'translateX(100%)';
       if (backdrop) { backdrop.style.opacity = '0'; backdrop.style.pointerEvents = 'none'; }
-      if (btn) btn.style.display = 'flex';
-      setTimeout(function () { panel.style.willChange = 'auto'; }, 400);
+      if (btn) btn.style.display = 'none';
+      setTimeout(function () {
+        if (!_panelOpen) {
+          panel.style.display = 'none';
+          panel.style.visibility = 'hidden';
+          panel.style.boxShadow = 'none';
+        }
+        panel.style.willChange = 'auto';
+      }, 380);
     }
   }
   window.toggleNotificationsPanel = togglePanel;
