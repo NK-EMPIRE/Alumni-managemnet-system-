@@ -2280,6 +2280,92 @@ function initImportHandlers() {
     if (overlay) overlay.style.display = 'none';
   };
 
+  function showUploadZoneLoading(file) {
+    var uploadZone = document.getElementById('uploadZone');
+    if (!uploadZone) return;
+    uploadZone.style.position = 'relative';
+    hideUploadZoneLoading();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'uploadZoneLoadingOverlay';
+    overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(4px);padding:24px;text-align:center;box-shadow:inset 0 0 0 2px #2563EB;';
+    overlay.innerHTML =
+      '<div style="width:44px;height:44px;border:4px solid #DBEAFE;border-top-color:#2563EB;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:14px;"></div>' +
+      '<h4 style="margin:0 0 6px 0;font-size:1.05rem;font-weight:700;color:#1E293B;"><i class="fas fa-file-excel" style="color:#2563EB;margin-right:8px;"></i> Inspecting Workbook Sheets...</h4>' +
+      '<p style="margin:0;font-size:0.85rem;color:#64748B;">Analyzing sheet structure in <strong>' + (file ? file.name : 'Excel file') + '</strong>... Please wait</p>';
+
+    uploadZone.appendChild(overlay);
+  }
+
+  function hideUploadZoneLoading() {
+    var overlay = document.getElementById('uploadZoneLoadingOverlay');
+    if (overlay) overlay.remove();
+  }
+
+  window.loadImportHistoryTable = function () {
+    var tbody = document.getElementById('importHistoryBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:#64748B;"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Loading import history...</td></tr>';
+
+    API.getImportHistory({ page: 1, limit: 20 }).then(function (res) {
+      var rows = [];
+      if (res && res.data) {
+        rows = Array.isArray(res.data) ? res.data : (res.data.rows || []);
+      } else if (Array.isArray(res)) {
+        rows = res;
+      }
+
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:#94A3B8;">No import history recorded yet.</td></tr>';
+        return;
+      }
+
+      var html = '';
+      rows.forEach(function (item, idx) {
+        var statusBadge = item.status === 'Completed' ? '<span class="badge badge-success">Completed</span>' :
+                          item.status === 'Partial' ? '<span class="badge badge-warning">Partial</span>' :
+                          '<span class="badge badge-danger">' + (item.status || 'Failed') + '</span>';
+
+        var formattedDate = item.created_at ? new Date(item.created_at).toLocaleString() : '-';
+        var fileName = item.original_name || item.file_name || 'Import #' + item.import_id;
+
+        html += '<tr>' +
+          '<td style="font-weight:600;color:#64748B;">' + (idx + 1) + '</td>' +
+          '<td><strong style="color:#1E293B;"><i class="fas fa-file-excel" style="color:#10B981;margin-right:6px;"></i>' + fileName + '</strong></td>' +
+          '<td><span style="color:#10B981;font-weight:700;">' + (item.imported_count || 0) + '</span></td>' +
+          '<td><span style="color:#2563EB;font-weight:700;">' + (item.merged_count || 0) + '</span></td>' +
+          '<td><span style="color:#F59E0B;font-weight:700;">' + (item.duplicates_count || 0) + '</span></td>' +
+          '<td><span style="color:#EF4444;font-weight:700;">' + (item.errors_count || 0) + '</span></td>' +
+          '<td>' + (item.imported_by_name || 'Admin') + '</td>' +
+          '<td style="color:#64748B;font-size:0.8rem;">' + formattedDate + '</td>' +
+          '<td style="color:#64748B;">' + (item.duration_sec ? item.duration_sec + 's' : '-') + '</td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td style="text-align:center;">' +
+          '<button class="btn btn-sm btn-danger" onclick="confirmRollbackImport(' + item.import_id + ', \'' + (fileName).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;font-size:0.75rem;border-radius:6px;background:#EF4444;color:#fff;border:none;" title="Rollback this Excel import"><i class="fas fa-undo"></i> Rollback</button>' +
+          '</td>' +
+          '</tr>';
+      });
+
+      tbody.innerHTML = html;
+    }).catch(function (err) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:#EF4444;">Failed to load import history.</td></tr>';
+    });
+  };
+
+  window.confirmRollbackImport = function (importId, fileName) {
+    if (!confirm('Are you sure you want to rollback the Excel import "' + fileName + '"?\n\nWarning: All alumni records imported in this batch will be permanently removed from the database.')) {
+      return;
+    }
+
+    API.rollbackImport(importId).then(function () {
+      Toast.success('Import Rolled Back', 'Excel import #' + importId + ' rolled back successfully.');
+      loadImportHistoryTable();
+      if (typeof fetchAllData === 'function') fetchAllData();
+    }).catch(function (err) {
+      Toast.danger('Rollback Failed', err.message || 'Failed to rollback import.');
+    });
+  };
+
   var activeSheetModalData = null;
 
   function loadSheetPreviewGrid(file, selectedSheets) {
@@ -2335,6 +2421,8 @@ function initImportHandlers() {
 
   function openSheetImportModalForFile(file) {
     activeSheetModalData = { file: file, selectedSheets: [] };
+    showUploadZoneLoading(file);
+
     var overlay = document.getElementById('importSheetModalOverlay');
     var headerEl = document.getElementById('importFileDetailsHeader');
     var container = document.getElementById('sheetSelectionContainer');
@@ -2350,12 +2438,13 @@ function initImportHandlers() {
       container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;color:#64748B;"><span class="spinner spinner-sm"></span> Loading available sheets...</div>';
     }
 
-    if (overlay) overlay.style.display = 'flex';
-
     var formData = new FormData();
     formData.append('file', file);
 
     API.inspectSheets(formData).then(function (res) {
+      hideUploadZoneLoading();
+      if (overlay) overlay.style.display = 'flex';
+
       var sheets = (res.success && res.data && Array.isArray(res.data.sheets)) ? res.data.sheets : [];
       if (headerEl) {
         headerEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
@@ -2418,9 +2507,13 @@ function initImportHandlers() {
       // Initial grid preview load
       loadSheetPreviewGrid(file, checkedSheets);
     }).catch(function (err) {
-      if (container) container.innerHTML = '<div style="grid-column:1/-1;color:#EF4444;text-align:center;">Failed to inspect sheets: ' + (err.message || 'Error') + '</div>';
+      hideUploadZoneLoading();
+      Toast.danger('Inspection Failed', err.message || 'Failed to inspect workbook sheets.');
     });
   }
+
+  // Load import history on initialization of import section
+  loadImportHistoryTable();
 
   /* File selection handler */
   fileInput.addEventListener('change', function () {
@@ -2521,6 +2614,7 @@ function initImportHandlers() {
 
           if (detailsEl) detailsEl.innerHTML = detailsHtml;
           Toast.success('Import Completed', 'Imported ' + totalImported + ' records from ' + selectedSheets.length + ' sheet(s) in ' + duration + 's');
+          loadImportHistoryTable();
           if (typeof fetchAllData === 'function') fetchAllData();
         } else {
           if (iconEl) {

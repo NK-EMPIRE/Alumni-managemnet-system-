@@ -228,6 +228,9 @@
     confirmAliases: function (data) {
         return post('/upload/aliases/confirm', data);
     },
+    rollbackImport: function (importId) {
+        return post('/upload/rollback/' + importId, {});
+    },
 
     // Round robin assignment
     getAvailableAlumniCount: function (params) {
