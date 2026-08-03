@@ -38,7 +38,7 @@ async function getImportHistory({ page, limit, offset }) {
         ISNULL(u.first_name + ' ' + u.last_name, 'System') AS importer_name
       FROM ImportHistory ih
       LEFT JOIN Users u ON ih.imported_by = u.user_id
-      ORDER BY ih.created_at DESC
+      ORDER BY ih.created_at ASC
       OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
     `);
   return { total, rows: result.recordset };
