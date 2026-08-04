@@ -1005,30 +1005,39 @@
     }
 
     function initNotifications() {
-        notifBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            notifDropdown.classList.toggle('active');
-        });
-        document.addEventListener('click', function (e) {
-            if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
-                notifDropdown.classList.remove('active');
-            }
-        });
-        markAllRead.addEventListener('click', function () {
-            var list = document.getElementById('notifList');
-            if (list) {
-                list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
-            }
-            var pendingIds = alumniData.filter(function (r) { return r.status === 'Pending' || r.status === 'Draft'; }).map(function (r) { return String(r.id); });
-            var cleared = JSON.parse(localStorage.getItem('cleared_notifications_member') || '[]');
-            pendingIds.forEach(function (id) { if (cleared.indexOf(id) === -1) cleared.push(id); });
-            localStorage.setItem('cleared_notifications_member', JSON.stringify(cleared));
+        var nBtn = document.getElementById('notifBtn');
+        var nDrop = document.getElementById('notifDropdown');
+        var mRead = document.getElementById('markAllRead');
 
-            var dot = document.querySelector('#notifBtn .notif-dot');
-            if (dot) dot.style.display = 'none';
-            showToast('All notifications cleared', 'success');
-            notifDropdown.classList.remove('active');
-        });
+        if (nBtn && nDrop) {
+            nBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                nDrop.classList.toggle('active');
+            });
+            document.addEventListener('click', function (e) {
+                if (!nBtn.contains(e.target) && !nDrop.contains(e.target)) {
+                    nDrop.classList.remove('active');
+                }
+            });
+        }
+
+        if (mRead) {
+            mRead.addEventListener('click', function () {
+                var list = document.getElementById('notifList');
+                if (list) {
+                    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No new notifications</div>';
+                }
+                var pendingIds = alumniData.filter(function (r) { return r.status === 'Pending' || r.status === 'Draft'; }).map(function (r) { return String(r.id); });
+                var cleared = JSON.parse(localStorage.getItem('cleared_notifications_member') || '[]');
+                pendingIds.forEach(function (id) { if (cleared.indexOf(id) === -1) cleared.push(id); });
+                localStorage.setItem('cleared_notifications_member', JSON.stringify(cleared));
+
+                var dot = document.querySelector('#notifBtn .notif-dot');
+                if (dot) dot.style.display = 'none';
+                showToast('All notifications cleared', 'success');
+                if (nDrop) nDrop.classList.remove('active');
+            });
+        }
     }
 
     function initSidebar() {
@@ -1582,13 +1591,11 @@
             });
         }
 
-        recordsBody.addEventListener('click', handleUpdateClick);
+        if (recordsBody) recordsBody.addEventListener('click', handleUpdateClick);
 
-        saveDraftBtn.addEventListener('click', handleSaveDraft);
-        submitRecordBtn.addEventListener('click', handleSubmitRecord);
-        if (submitNextBtn) {
-            submitNextBtn.addEventListener('click', handleSubmitNext);
-        }
+        if (saveDraftBtn) saveDraftBtn.addEventListener('click', handleSaveDraft);
+        if (submitRecordBtn) submitRecordBtn.addEventListener('click', handleSubmitRecord);
+        if (submitNextBtn) submitNextBtn.addEventListener('click', handleSubmitNext);
 
         // Set up input autosave listeners for all fields in the update modal form
         if (updateForm) {
@@ -1600,9 +1607,9 @@
             });
         }
 
-        modalClose.addEventListener('click', handleModalClose);
-        cancelModalBtn.addEventListener('click', handleModalClose);
-        updateModal.addEventListener('click', handleModalClose);
+        if (modalClose) modalClose.addEventListener('click', handleModalClose);
+        if (cancelModalBtn) cancelModalBtn.addEventListener('click', handleModalClose);
+        if (updateModal) updateModal.addEventListener('click', handleModalClose);
 
         document.addEventListener('keydown', handleKeyboard);
 
