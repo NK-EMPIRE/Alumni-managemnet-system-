@@ -176,15 +176,20 @@ function fetchAllData() {
     API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; }),
     API.getAlumniFilters().catch(function () { return null; })
   ]).then(function (results) {
-    _dashboardData = results[0] && results[0].success ? results[0].data : null;
-    _apiUsers = results[1] && results[1].success ? results[1].data : null;
-    _apiMembers = results[2] && results[2].success ? results[2].data : null;
-    _apiAlumni = results[3] && results[3].success ? results[3].data : null;
-    _apiImportHistory = results[4] && results[4].success ? results[4].data : null;
-    _apiTeams = results[5] && results[5].success ? results[5].data : null;
-    _apiAuditLogs = results[6] && results[6].success ? results[6].data : null;
-    _apiAssignHistory = results[7] && results[7].success ? results[7].data : null;
-    _apiAlumniFilters = results[8] && results[8].success ? results[8].data : null;
+    function extractData(res) {
+      if (!res) return null;
+      if (res.data !== undefined) return res.data;
+      return res;
+    }
+    _dashboardData = extractData(results[0]);
+    _apiUsers = extractData(results[1]);
+    _apiMembers = extractData(results[2]);
+    _apiAlumni = extractData(results[3]);
+    _apiImportHistory = extractData(results[4]);
+    _apiTeams = extractData(results[5]);
+    _apiAuditLogs = extractData(results[6]);
+    _apiAssignHistory = extractData(results[7]);
+    _apiAlumniFilters = extractData(results[8]);
     _apiDataLoaded = true;
 
     // Populate dynamic filters first
@@ -246,22 +251,49 @@ function setCurrentDate() {
     5. DASHBOARD STATS
     â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateDashboardStats() {
-  var total, pending, completed, tlCount, tmCount, draft;
-  if (_apiDataLoaded && _dashboardData) {
-    var d = _dashboardData;
-    total = d.totalAlumni || 0;
-    pending = d.pendingRecords || 0;
-    completed = d.completedRecords || 0;
-    tlCount = d.totalLeaders || 0;
-    tmCount = d.totalMembers || 0;
-    draft = d.draftRecords || 0;
-  } else {
-    total = 0;
-    pending = 0;
-    completed = 0;
-    tlCount = 0;
-    tmCount = 0;
-    draft = 0;
+  var total = 0, pending = 0, completed = 0, tlCount = 0, tmCount = 0, draft = 0;
+
+  if (_apiDataLoaded) {
+    if (_dashboardData) {
+      var d = _dashboardData;
+      total = d.totalAlumni || d.total || 0;
+      pending = d.pendingRecords || d.pending || 0;
+      completed = d.completedRecords || d.completed || 0;
+      tlCount = d.totalLeaders || d.leadersCount || 0;
+      tmCount = d.totalMembers || d.membersCount || 0;
+      draft = d.draftRecords || d.draft || 0;
+    }
+
+    // Fallback: calculate directly from records if overview counts are 0
+    var recs = null;
+    if (_apiAlumni) {
+      if (Array.isArray(_apiAlumni)) recs = _apiAlumni;
+      else if (Array.isArray(_apiAlumni.records)) recs = _apiAlumni.records;
+      else if (_apiAlumni.data && Array.isArray(_apiAlumni.data.records)) recs = _apiAlumni.data.records;
+      else if (_apiAlumni.data && Array.isArray(_apiAlumni.data)) recs = _apiAlumni.data;
+    }
+    if (recs && recs.length > 0) {
+      if (!total) total = recs.length;
+      var calcPending = 0, calcCompleted = 0, calcDraft = 0;
+      recs.forEach(function (r) {
+        var st = String(r.assignment_status || r.status || '').toLowerCase();
+        if (st === 'completed') calcCompleted++;
+        else if (st === 'draft') calcDraft++;
+        else calcPending++;
+      });
+      if (!completed) completed = calcCompleted;
+      if (!draft) draft = calcDraft;
+      if (!pending) pending = calcPending;
+    }
+
+    if (!tlCount && _apiUsers) {
+      var uRecs = Array.isArray(_apiUsers) ? _apiUsers : (_apiUsers.records || (_apiUsers.data ? _apiUsers.data.records || _apiUsers.data : []));
+      if (Array.isArray(uRecs)) tlCount = uRecs.length;
+    }
+    if (!tmCount && _apiMembers) {
+      var mRecs = Array.isArray(_apiMembers) ? _apiMembers : (_apiMembers.records || (_apiMembers.data ? _apiMembers.data.records || _apiMembers.data : []));
+      if (Array.isArray(mRecs)) tmCount = mRecs.length;
+    }
   }
 
   setText('totalAlumni', total);
