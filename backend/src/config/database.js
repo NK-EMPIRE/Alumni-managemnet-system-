@@ -10,6 +10,8 @@ function buildConfig() {
     server: process.env.DB_HOST || process.env.DB_SERVER,
     database: process.env.DB_NAME || process.env.DB_DATABASE,
     port: parseInt(process.env.DB_PORT, 10) || 1433,
+    connectionTimeout: 30000,
+    requestTimeout: 60000,
     pool: {
       max: parseInt(process.env.DB_POOL_MAX, 10) || 20,
       min: parseInt(process.env.DB_POOL_MIN, 10) || 2,
@@ -18,7 +20,8 @@ function buildConfig() {
     options: {
       encrypt: process.env.DB_ENCRYPT === 'true',
       trustServerCertificate: process.env.DB_TRUST_CERT === 'true' || process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
-      enableArithAbort: true
+      enableArithAbort: true,
+      cancelTimeout: 5000
     }
   };
 }
