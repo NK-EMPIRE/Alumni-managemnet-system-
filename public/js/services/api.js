@@ -314,6 +314,34 @@
     },
     updateSettings: function (settings, group) {
         return post('/settings', { settings: settings, group: group });
+    },
+
+    // Attendance
+    getAttendanceReport: function (params) {
+        return get('/attendance/report', params);
+    },
+    getAttendanceSummary: function (date) {
+        return get('/attendance/summary', date ? { date: date } : {});
+    },
+    getAttendanceDates: function () {
+        return get('/attendance/dates');
+    },
+    markAttendanceAbsent: function (date) {
+        return post('/attendance/mark-absent', { date: date });
+    },
+    updateAttendanceRecord: function (attendanceId, data) {
+        return patch('/attendance/' + attendanceId, data);
+    },
+    getMyAttendance: function (params) {
+        return get('/attendance/my', params);
+    },
+
+    // Alumni Categories
+    getAlumniCategoryGroups: function (params) {
+        return get('/alumni-category/groups', params);
+    },
+    getAlumniCategoryList: function (params) {
+        return get('/alumni-category/list', params);
     }
     };
 

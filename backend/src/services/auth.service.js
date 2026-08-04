@@ -4,6 +4,7 @@ const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = requir
 const { AuthenticationError } = require('../middleware/errorHandler');
 const { logger } = require('../utils/logger');
 const { getPool, sql } = require('../config/database');
+const attendanceService = require('./attendance.service');
 
 async function login(loginId, password, ip, userAgent) {
   const user = await authRepo.findByLoginId(loginId);
@@ -34,6 +35,11 @@ async function login(loginId, password, ip, userAgent) {
     userId: user.user_id,
     role: user.role_name,
     ip
+  });
+
+  // Auto attendance: fire-and-forget (never blocks login)
+  attendanceService.recordLoginAttendance(user.user_id, user.role_name).catch(function (err) {
+    logger.warn('[Attendance] Failed to record login attendance: ' + err.message);
   });
 
   return {

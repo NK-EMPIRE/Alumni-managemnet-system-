@@ -205,6 +205,14 @@
         <i class="fas fa-history"></i>
         <span class="sidebar-item-text">Audit Logs</span>
       </a>
+      <a class="sidebar-item" data-section="alumniCategory" onclick="navigateTo('alumniCategory', this)">
+        <i class="fas fa-layer-group"></i>
+        <span class="sidebar-item-text">Alumni Categories</span>
+      </a>
+      <a class="sidebar-item" data-section="attendance" onclick="navigateTo('attendance', this)">
+        <i class="fas fa-calendar-check"></i>
+        <span class="sidebar-item-text">Attendance</span>
+      </a>
 
       <div class="sidebar-label">Other</div>
       <a class="sidebar-item" data-section="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
@@ -1841,6 +1849,197 @@
     </div>
   </div>
 
+  <!-- ─── ALUMNI CATEGORIES SECTION ─── -->
+  <section id="section-alumniCategory" class="content-section" style="display:none;">
+    <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+      <div>
+        <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;">Alumni Category Analytics</h1>
+        <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Browse and filter alumni categorized dynamically by Designation, Company, City Address, and Profession.</p>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="fetchCategoryGroups()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+        <button class="btn btn-primary btn-sm" onclick="exportCategoryData()"><i class="fas fa-download"></i> Export Filtered CSV</button>
+      </div>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="card" style="padding:16px;margin-bottom:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;align-items:end;">
+        <div>
+          <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Department</label>
+          <select id="catFilterDept" class="form-control" onchange="fetchCategoryGroups()">
+            <option value="">All Departments</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Batch</label>
+          <select id="catFilterBatch" class="form-control" onchange="fetchCategoryGroups()">
+            <option value="">All Batches</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Profession Type</label>
+          <select id="catFilterProfType" class="form-control" onchange="fetchCategoryAlumni(1)">
+            <option value="">All Professions</option>
+            <option value="Private Sector">Private Sector</option>
+            <option value="Government">Government</option>
+            <option value="Business / Entrepreneur">Business / Entrepreneur</option>
+            <option value="Higher Studies">Higher Studies</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Unknown / Other">Unknown / Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Status</label>
+          <select id="catFilterStatus" class="form-control" onchange="fetchCategoryGroups()">
+            <option value="">All Statuses</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+            <option value="Draft">Draft</option>
+            <option value="Unassigned">Unassigned</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn btn-secondary" style="width:100%;" onclick="resetCategoryFilters()"><i class="fas fa-undo"></i> Reset Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Summary Cards Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:24px;">
+      <div class="card" style="padding:16px;background:linear-gradient(135deg, #3B82F6, #1D4ED8);color:#fff;border-radius:12px;">
+        <div style="font-size:0.8rem;opacity:0.9;font-weight:500;">Unique Designations</div>
+        <div style="font-size:1.8rem;font-weight:700;margin:6px 0 0;" id="catCountDesignations">0</div>
+      </div>
+      <div class="card" style="padding:16px;background:linear-gradient(135deg, #10B981, #047857);color:#fff;border-radius:12px;">
+        <div style="font-size:0.8rem;opacity:0.9;font-weight:500;">Companies Represented</div>
+        <div style="font-size:1.8rem;font-weight:700;margin:6px 0 0;" id="catCountCompanies">0</div>
+      </div>
+      <div class="card" style="padding:16px;background:linear-gradient(135deg, #F59E0B, #B45309);color:#fff;border-radius:12px;">
+        <div style="font-size:0.8rem;opacity:0.9;font-weight:500;">Cities / Company Locations</div>
+        <div style="font-size:1.8rem;font-weight:700;margin:6px 0 0;" id="catCountCities">0</div>
+      </div>
+      <div class="card" style="padding:16px;background:linear-gradient(135deg, #8B5CF6, #6D28D9);color:#fff;border-radius:12px;">
+        <div style="font-size:0.8rem;opacity:0.9;font-weight:500;">Government / Entrepreneur Jobs</div>
+        <div style="font-size:1.8rem;font-weight:700;margin:6px 0 0;" id="catCountGovt">0</div>
+      </div>
+    </div>
+
+    <!-- Category Drilldown & Alumni List Table -->
+    <div class="card" style="padding:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <h3 style="font-size:1.1rem;font-weight:700;margin:0;color:#1E293B;" id="catTableTitle">Categorized Alumni List</h3>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="text" id="catSearchInput" class="form-control" placeholder="Search by name, company, designation..." style="width:260px;" oninput="debounceCategorySearch()">
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table" style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0;">
+              <th style="padding:12px;">Register No</th>
+              <th style="padding:12px;">Name</th>
+              <th style="padding:12px;">Department</th>
+              <th style="padding:12px;">Batch</th>
+              <th style="padding:12px;">Designation</th>
+              <th style="padding:12px;">Company</th>
+              <th style="padding:12px;">Location / City</th>
+              <th style="padding:12px;">Profession Type</th>
+              <th style="padding:12px;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="catTableBody">
+            <tr><td colspan="9" style="text-align:center;padding:24px;color:#94A3B8;">Loading categorized alumni...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #E2E8F0;">
+        <div style="font-size:0.85rem;color:#64748B;" id="catPaginationInfo">Showing 0 entries</div>
+        <div id="catPaginationBtns" style="display:flex;gap:6px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── AUTO ATTENDANCE SYSTEM SECTION ─── -->
+  <section id="section-attendance" class="content-section" style="display:none;">
+    <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+      <div>
+        <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;">Tuesday Auto Attendance System</h1>
+        <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated login attendance tracking every Tuesday (Window: 1:15 PM – 2:45 PM IST). Present (1:15-1:30 PM) | Late (1:30-2:45 PM) | Absent (No Login).</p>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-warning btn-sm" onclick="triggerMarkAbsent()"><i class="fas fa-user-times"></i> Mark Absentees for Selected Date</button>
+        <button class="btn btn-secondary btn-sm" onclick="fetchAttendanceData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+    </div>
+
+    <!-- Attendance Controls & Summary Cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:20px;">
+      <div class="card" style="padding:16px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
+        <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Select Tuesday Date</label>
+        <select id="attDateSelect" class="form-control" onchange="fetchAttendanceData()">
+          <option value="">Latest Tuesday</option>
+        </select>
+      </div>
+      <div class="card" style="padding:16px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;color:#065F46;">
+        <div style="font-size:0.8rem;font-weight:600;text-transform:uppercase;">Present (On-Time 1:15 - 1:30 PM)</div>
+        <div style="font-size:1.8rem;font-weight:700;margin-top:4px;" id="attCountPresent">0</div>
+      </div>
+      <div class="card" style="padding:16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;color:#92400E;">
+        <div style="font-size:0.8rem;font-weight:600;text-transform:uppercase;">Late (Delayed 1:30 - 2:45 PM)</div>
+        <div style="font-size:1.8rem;font-weight:700;margin-top:4px;" id="attCountLate">0</div>
+      </div>
+      <div class="card" style="padding:16px;background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;color:#991B1B;">
+        <div style="font-size:0.8rem;font-weight:600;text-transform:uppercase;">Absent (No Login in Window)</div>
+        <div style="font-size:1.8rem;font-weight:700;margin-top:4px;" id="attCountAbsent">0</div>
+      </div>
+    </div>
+
+    <!-- Attendance Records Table -->
+    <div class="card" style="padding:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <h3 style="font-size:1.1rem;font-weight:700;margin:0;color:#1E293B;">User Attendance Log</h3>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <select id="attFilterStatus" class="form-control" onchange="fetchAttendanceReport(1)">
+            <option value="">All Statuses</option>
+            <option value="Present">Present (Green)</option>
+            <option value="Late">Late (Orange)</option>
+            <option value="Absent">Absent (Red)</option>
+          </select>
+          <select id="attFilterRole" class="form-control" onchange="fetchAttendanceReport(1)">
+            <option value="">All Roles</option>
+            <option value="LEADER">Team Leaders</option>
+            <option value="MEMBER">Team Members</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table" style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0;">
+              <th style="padding:12px;">Date</th>
+              <th style="padding:12px;">User Name</th>
+              <th style="padding:12px;">Role</th>
+              <th style="padding:12px;">Department</th>
+              <th style="padding:12px;">Login Time (IST)</th>
+              <th style="padding:12px;">Status</th>
+              <th style="padding:12px;">Marked By</th>
+              <th style="padding:12px;text-align:center;">Action Override</th>
+            </tr>
+          </thead>
+          <tbody id="attTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:24px;color:#94A3B8;">Loading attendance logs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #E2E8F0;">
+        <div style="font-size:0.85rem;color:#64748B;" id="attPaginationInfo">Showing 0 entries</div>
+        <div id="attPaginationBtns" style="display:flex;gap:6px;"></div>
+      </div>
+    </div>
+  </section>
+
+
 
   <!-- ============================================================
        DB HEALTH CHECK MODAL (Admin)
@@ -2368,6 +2567,7 @@
     </script>
     <script src="js/dynamic-tour.js"></script>
     <script src="js/admin.js?v=2.0.0"></script>
+    <script src="js/adminCategoryAttendance.js"></script>
     <script src="js/chat.js"></script>
 
 </body>

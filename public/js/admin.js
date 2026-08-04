@@ -1358,6 +1358,10 @@ function navigateTo(section, el) {
     fetchLatestAuditLogs(populateAuditLogTable);
   } else if (section === 'viewAlumni') {
     fetchSpreadsheetData();
+  } else if (section === 'alumniCategory') {
+    if (typeof window.fetchCategoryGroups === 'function') window.fetchCategoryGroups();
+  } else if (section === 'attendance') {
+    if (typeof window.fetchAttendanceData === 'function') window.fetchAttendanceData();
   }
 
   /* Update breadcrumb */
@@ -1371,7 +1375,9 @@ function navigateTo(section, el) {
       'progress': 'Progress',
       'settings': 'Settings',
       'import': 'Import Alumni',
-      'audit': 'Audit Logs'
+      'audit': 'Audit Logs',
+      'alumniCategory': 'Alumni Categories',
+      'attendance': 'Attendance'
     };
     var name = names[section] || 'Dashboard';
     bc.innerHTML = '<a href="#" onclick="event.preventDefault();navigateTo(\'dashboard\',document.querySelector(\'[data-section=dashboard]\'))">Home</a><span class="separator"><i class="fas fa-chevron-right"></i></span><span class="current">' + name + '</span>';
