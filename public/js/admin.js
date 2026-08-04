@@ -1362,6 +1362,8 @@ function navigateTo(section, el) {
     if (typeof window.fetchCategoryGroups === 'function') window.fetchCategoryGroups();
   } else if (section === 'attendance') {
     if (typeof window.fetchAttendanceData === 'function') window.fetchAttendanceData();
+  } else if (section === 'chat') {
+    if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
   }
 
   /* Update breadcrumb */
@@ -1377,7 +1379,8 @@ function navigateTo(section, el) {
       'import': 'Import Alumni',
       'audit': 'Audit Logs',
       'alumniCategory': 'Alumni Categories',
-      'attendance': 'Attendance'
+      'attendance': 'Attendance',
+      'chat': 'Chat Application'
     };
     var name = names[section] || 'Dashboard';
     bc.innerHTML = '<a href="#" onclick="event.preventDefault();navigateTo(\'dashboard\',document.querySelector(\'[data-section=dashboard]\'))">Home</a><span class="separator"><i class="fas fa-chevron-right"></i></span><span class="current">' + name + '</span>';
@@ -3777,19 +3780,18 @@ window.renderSpreadsheetTable = function (data) {
       bodyHtml += '<td>' + val + '</td>';
     });
 
-    // Action column
+    // Action column: strictly 3 buttons max (View/Edit, History, Reopen)
     var isCompleted = row.assignment_status === 'Completed' || row.assignment_status === 'Updated';
     var actionButtons = '<div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:nowrap;">';
-    actionButtons += '<button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="viewAlumniDetails(' + row.alumni_id + ')" title="View Details"><i class="fas fa-eye"></i></button>';
-    actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;" onclick="editAlumniRecord(' + row.alumni_id + ')" title="Edit Details"><i class="fas fa-edit"></i></button>';
+    actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 0.75rem; font-weight:600;" onclick="openUpdateModalAdmin(' + row.alumni_id + ')" title="View / Edit Profile"><i class="fas fa-edit"></i> View/Edit</button>';
     var _safeName = String(row.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="History"><i class="fas fa-history"></i></button>';
+    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="Workload History"><i class="fas fa-history"></i></button>';
     if (isCompleted || row.assignment_status === 'Completed') {
-      actionButtons += '<button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#EF4444; border:none;" onclick="confirmAdminReopenModal(' + row.alumni_id + ', \'' + _safeName + '\')" title="Reopen Record"><i class="fas fa-redo-alt"></i></button>';
+      actionButtons += '<button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#EF4444; border:none; border-radius:6px;" onclick="confirmAdminReopenModal(' + row.alumni_id + ', \'' + _safeName + '\')" title="Reopen Record"><i class="fas fa-redo-alt"></i></button>';
     }
     actionButtons += '</div>';
 
-    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center; min-width: 200px; width: 200px; white-space: nowrap;">' + actionButtons + '</td>';
+    bodyHtml += '<td style="position: sticky; right: 0; background: var(--bg-white); z-index: 2; border-left: 1px solid var(--border) !important; text-align: center; min-width: 180px; width: 180px; white-space: nowrap;">' + actionButtons + '</td>';
     bodyHtml += '</tr>';
   });
   body.innerHTML = bodyHtml;

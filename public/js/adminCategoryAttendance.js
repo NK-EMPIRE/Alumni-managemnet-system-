@@ -9,10 +9,29 @@ var catRowsPerPage = 20;
 var catSearchDebounce = null;
 var catActiveGroupFilter = null; // e.g. { key: 'designation', val: 'Software Engineer' }
 
+var catViewMode = 'cards'; // 'cards' or 'table'
+
+window.setCategoryViewMode = function (mode) {
+  catViewMode = mode;
+  var btnCards = document.getElementById('btnCatViewCards');
+  var btnTable = document.getElementById('btnCatViewTable');
+
+  if (btnCards && btnTable) {
+    if (mode === 'cards') {
+      btnCards.style.background = '#EFF6FF'; btnCards.style.color = '#2563EB'; btnCards.style.fontWeight = '600';
+      btnTable.style.background = 'transparent'; btnTable.style.color = '#64748B'; btnTable.style.fontWeight = 'normal';
+    } else {
+      btnTable.style.background = '#EFF6FF'; btnTable.style.color = '#2563EB'; btnTable.style.fontWeight = '600';
+      btnCards.style.background = 'transparent'; btnCards.style.color = '#64748B'; btnCards.style.fontWeight = 'normal';
+    }
+  }
+  fetchCategoryAlumni(catCurrentPage);
+};
+
 window.fetchCategoryGroups = function () {
   var dept = document.getElementById('catFilterDept') ? document.getElementById('catFilterDept').value : '';
   var batch = document.getElementById('catFilterBatch') ? document.getElementById('catFilterBatch').value : '';
-  var status = document.getElementById('catFilterStatus') ? document.getElementById('catFilterStatus').value : '';
+  var onlyUpdated = document.getElementById('catFilterOnlyUpdated') ? document.getElementById('catFilterOnlyUpdated').checked : true;
 
   // Populate dynamic dropdown options from filters API if empty
   if (typeof API !== 'undefined' && API.getAlumniFilters) {
@@ -32,7 +51,7 @@ window.fetchCategoryGroups = function () {
     }).catch(function (err) { console.error('Error fetching category filter options:', err); });
   }
 
-  API.getAlumniCategoryGroups({ department: dept, batch: batch, status: status })
+  API.getAlumniCategoryGroups({ department: dept, batch: batch, onlyUpdated: onlyUpdated })
     .then(function (res) {
       if (res && res.success && res.data) {
         var d = res.data;
@@ -40,6 +59,36 @@ window.fetchCategoryGroups = function () {
         var comps = d.companies || [];
         var cities = d.cities || [];
         var profs = d.professionTypes || [];
+
+        // Populate Designation dropdown
+        var desigSelect = document.getElementById('catFilterDesignation');
+        if (desigSelect && desigSelect.options.length <= 1) {
+          desigs.forEach(function (item) {
+            if (item.designation && item.designation !== 'Not Specified') {
+              desigSelect.innerHTML += '<option value="' + item.designation + '">' + item.designation + ' (' + item.count + ')</option>';
+            }
+          });
+        }
+
+        // Populate Company dropdown
+        var compSelect = document.getElementById('catFilterCompany');
+        if (compSelect && compSelect.options.length <= 1) {
+          comps.forEach(function (item) {
+            if (item.company && item.company !== 'Not Specified') {
+              compSelect.innerHTML += '<option value="' + item.company + '">' + item.company + ' (' + item.count + ')</option>';
+            }
+          });
+        }
+
+        // Populate City dropdown
+        var citySelect = document.getElementById('catFilterCity');
+        if (citySelect && citySelect.options.length <= 1) {
+          cities.forEach(function (item) {
+            if (item.city && item.city !== 'Not Specified') {
+              citySelect.innerHTML += '<option value="' + item.city + '">' + item.city + ' (' + item.count + ')</option>';
+            }
+          });
+        }
 
         var desigCount = desigs.filter(function (x) { return x.designation !== 'Not Specified'; }).length;
         var compCount = comps.filter(function (x) { return x.company !== 'Not Specified'; }).length;
@@ -69,26 +118,28 @@ window.fetchCategoryAlumni = function (page) {
   catCurrentPage = page || 1;
   var dept = document.getElementById('catFilterDept') ? document.getElementById('catFilterDept').value : '';
   var batch = document.getElementById('catFilterBatch') ? document.getElementById('catFilterBatch').value : '';
+  var desig = document.getElementById('catFilterDesignation') ? document.getElementById('catFilterDesignation').value : '';
+  var comp = document.getElementById('catFilterCompany') ? document.getElementById('catFilterCompany').value : '';
+  var city = document.getElementById('catFilterCity') ? document.getElementById('catFilterCity').value : '';
   var profType = document.getElementById('catFilterProfType') ? document.getElementById('catFilterProfType').value : '';
-  var status = document.getElementById('catFilterStatus') ? document.getElementById('catFilterStatus').value : '';
   var search = document.getElementById('catSearchInput') ? document.getElementById('catSearchInput').value : '';
+  var onlyUpdated = document.getElementById('catFilterOnlyUpdated') ? document.getElementById('catFilterOnlyUpdated').checked : true;
 
   var params = {
     page: catCurrentPage,
     limit: catRowsPerPage,
     department: dept || undefined,
     batch: batch || undefined,
+    designation: desig || undefined,
+    company: comp || undefined,
+    city: city || undefined,
     professionType: profType || undefined,
-    status: status || undefined,
-    search: search || undefined
+    search: search || undefined,
+    onlyUpdated: onlyUpdated
   };
 
-  if (catActiveGroupFilter) {
-    params[catActiveGroupFilter.key] = catActiveGroupFilter.val;
-  }
-
   var tbody = document.getElementById('catTableBody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#94A3B8;"><i class="fas fa-spinner fa-spin"></i> Loading categorized alumni...</td></tr>';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#94A3B8;"><i class="fas fa-spinner fa-spin"></i> Loading categorized alumni...</td></tr>';
 
   API.getAlumniCategoryList(params)
     .then(function (res) {
@@ -96,7 +147,7 @@ window.fetchCategoryAlumni = function (page) {
         var d = res.data !== undefined ? res.data : res;
         var data = (d && d.records) ? d.records : (Array.isArray(d) ? d : []);
         var total = (d && d.pagination) ? d.pagination.total : data.length;
-        renderCategoryTable(data);
+        renderCategoryDataView(data);
         renderCategoryPagination(total);
       } else {
         if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#EF4444;">Failed to load category records</td></tr>';
@@ -108,44 +159,81 @@ window.fetchCategoryAlumni = function (page) {
     });
 };
 
-function renderCategoryTable(data) {
+function renderCategoryDataView(data) {
   var tbody = document.getElementById('catTableBody');
   if (!tbody) return;
 
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#94A3B8;">No alumni records matching the selected categories</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#94A3B8;">No updated alumni records found matching the selected filters</td></tr>';
     return;
   }
 
-  var html = '';
-  data.forEach(function (row) {
-    var profClass = 'badge-secondary';
-    var pt = row.profession_type || 'Unknown';
-    if (pt === 'Government') profClass = 'badge-success';
-    else if (pt === 'Private Sector') profClass = 'badge-primary';
-    else if (pt === 'Business / Entrepreneur') profClass = 'badge-warning';
-    else if (pt === 'Higher Studies') profClass = 'badge-info';
+  if (catViewMode === 'cards') {
+    var cardsHtml = '<tr><td colspan="9" style="padding:10px 0;"><div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px;">';
+    data.forEach(function (row) {
+      var profClass = 'badge-secondary';
+      var pt = row.profession_type || 'Unknown';
+      if (pt === 'Government') profClass = 'badge-success';
+      else if (pt === 'Private Sector') profClass = 'badge-primary';
+      else if (pt === 'Business / Entrepreneur') profClass = 'badge-warning';
 
-    var stClass = 'badge-secondary';
-    var st = row.assignment_status || 'Unassigned';
-    if (st === 'Completed') stClass = 'badge-success';
-    else if (st === 'Pending') stClass = 'badge-warning';
-    else if (st === 'Draft') stClass = 'badge-info';
+      cardsHtml += `
+        <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+              <div>
+                <h4 style="margin:0 0 2px;font-size:1rem;font-weight:700;color:#0F172A;">${row.name || 'Unknown'}</h4>
+                <span style="font-size:0.78rem;color:#64748B;font-weight:600;">${row.register_no || '-'} • ${row.department || ''} (${row.batch || ''})</span>
+              </div>
+              <span class="badge ${profClass}" style="font-size:0.7rem;">${pt}</span>
+            </div>
+            
+            <div style="margin-bottom:12px;background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #F1F5F9;">
+              <div style="font-size:0.85rem;font-weight:700;color:#2563EB;margin-bottom:2px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>${row.designation || 'Role Not Specified'}</div>
+              <div style="font-size:0.8rem;color:#334155;font-weight:500;"><i class="fas fa-building" style="margin-right:6px;color:#64748B;"></i>${row.company || 'Company Not Specified'}</div>
+              <div style="font-size:0.75rem;color:#64748B;margin-top:2px;"><i class="fas fa-map-marker-alt" style="margin-right:6px;color:#EF4444;"></i>${row.current_city || row.city || 'Location Not Specified'}</div>
+            </div>
 
-    html += '<tr>';
-    html += '<td style="padding:10px 12px;font-weight:600;">' + (row.register_no || '-') + '</td>';
-    html += '<td style="padding:10px 12px;font-weight:600;color:#1E293B;">' + (row.name || 'Unknown') + '</td>';
-    html += '<td style="padding:10px 12px;">' + (row.department || '-') + '</td>';
-    html += '<td style="padding:10px 12px;">' + (row.batch || '-') + '</td>';
-    html += '<td style="padding:10px 12px;font-weight:500;">' + (row.designation || '-') + '</td>';
-    html += '<td style="padding:10px 12px;">' + (row.company || '-') + '</td>';
-    html += '<td style="padding:10px 12px;">' + (row.current_city || row.city || '-') + '</td>';
-    html += '<td style="padding:10px 12px;"><span class="badge ' + profClass + '">' + pt + '</span></td>';
-    html += '<td style="padding:10px 12px;"><span class="badge ' + stClass + '">' + st + '</span></td>';
-    html += '</tr>';
-  });
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:0.8rem;color:#475569;">
+              ${row.phone ? '<div><i class="fas fa-phone" style="width:16px;color:#10B981;"></i> <a href="tel:' + row.phone + '" style="color:#0F172A;text-decoration:none;">' + row.phone + '</a></div>' : ''}
+              ${row.email ? '<div><i class="fas fa-envelope" style="width:16px;color:#3B82F6;"></i> <a href="mailto:' + row.email + '" style="color:#0F172A;text-decoration:none;">' + row.email + '</a></div>' : ''}
+              ${row.linkedin_profile ? '<div><i class="fab fa-linkedin" style="width:16px;color:#0A66C2;"></i> <a href="' + (row.linkedin_profile.startsWith('http') ? row.linkedin_profile : 'https://' + row.linkedin_profile) + '" target="_blank" style="color:#0A66C2;font-weight:600;">LinkedIn Profile</a></div>' : ''}
+            </div>
+          </div>
 
-  tbody.innerHTML = html;
+          <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.75rem;color:#94A3B8;">Status: <strong style="color:#1E293B;">${row.assignment_status || 'Unassigned'}</strong></span>
+            <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:0.75rem;font-weight:600;" onclick="openUpdateModalAdmin(${row.alumni_id})"><i class="fas fa-eye"></i> View Profile</button>
+          </div>
+        </div>
+      `;
+    });
+    cardsHtml += '</div></td></tr>';
+    tbody.innerHTML = cardsHtml;
+  } else {
+    // Render standard table
+    var html = '';
+    data.forEach(function (row) {
+      var profClass = 'badge-secondary';
+      var pt = row.profession_type || 'Unknown';
+      if (pt === 'Government') profClass = 'badge-success';
+      else if (pt === 'Private Sector') profClass = 'badge-primary';
+      else if (pt === 'Business / Entrepreneur') profClass = 'badge-warning';
+
+      html += '<tr>';
+      html += '<td style="padding:10px 12px;font-weight:600;">' + (row.register_no || '-') + '</td>';
+      html += '<td style="padding:10px 12px;font-weight:600;color:#1E293B;">' + (row.name || 'Unknown') + '</td>';
+      html += '<td style="padding:10px 12px;">' + (row.department || '-') + '</td>';
+      html += '<td style="padding:10px 12px;">' + (row.batch || '-') + '</td>';
+      html += '<td style="padding:10px 12px;font-weight:600;color:#2563EB;">' + (row.designation || '-') + '</td>';
+      html += '<td style="padding:10px 12px;">' + (row.company || '-') + '</td>';
+      html += '<td style="padding:10px 12px;">' + (row.current_city || row.city || '-') + '</td>';
+      html += '<td style="padding:10px 12px;"><span class="badge ' + profClass + '">' + pt + '</span></td>';
+      html += '<td style="padding:10px 12px;"><button class="btn btn-outline btn-sm" style="padding:3px 8px;font-size:0.75rem;" onclick="openUpdateModalAdmin(' + row.alumni_id + ')"><i class="fas fa-eye"></i> Profile</button></td>';
+      html += '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
 }
 
 function renderCategoryPagination(total) {
@@ -168,23 +256,29 @@ function renderCategoryPagination(total) {
 }
 
 window.resetCategoryFilters = function () {
+  if (document.getElementById('catFilterDesignation')) document.getElementById('catFilterDesignation').value = '';
+  if (document.getElementById('catFilterCompany')) document.getElementById('catFilterCompany').value = '';
+  if (document.getElementById('catFilterCity')) document.getElementById('catFilterCity').value = '';
   if (document.getElementById('catFilterDept')) document.getElementById('catFilterDept').value = '';
   if (document.getElementById('catFilterBatch')) document.getElementById('catFilterBatch').value = '';
   if (document.getElementById('catFilterProfType')) document.getElementById('catFilterProfType').value = '';
-  if (document.getElementById('catFilterStatus')) document.getElementById('catFilterStatus').value = '';
   if (document.getElementById('catSearchInput')) document.getElementById('catSearchInput').value = '';
+  if (document.getElementById('catFilterOnlyUpdated')) document.getElementById('catFilterOnlyUpdated').checked = true;
   catActiveGroupFilter = null;
   fetchCategoryGroups();
 };
 
 window.exportCategoryData = function () {
+  var desig = document.getElementById('catFilterDesignation') ? document.getElementById('catFilterDesignation').value : '';
+  var comp = document.getElementById('catFilterCompany') ? document.getElementById('catFilterCompany').value : '';
+  var city = document.getElementById('catFilterCity') ? document.getElementById('catFilterCity').value : '';
   var dept = document.getElementById('catFilterDept') ? document.getElementById('catFilterDept').value : '';
   var batch = document.getElementById('catFilterBatch') ? document.getElementById('catFilterBatch').value : '';
   var profType = document.getElementById('catFilterProfType') ? document.getElementById('catFilterProfType').value : '';
-  var status = document.getElementById('catFilterStatus') ? document.getElementById('catFilterStatus').value : '';
   var search = document.getElementById('catSearchInput') ? document.getElementById('catSearchInput').value : '';
+  var onlyUpdated = document.getElementById('catFilterOnlyUpdated') ? document.getElementById('catFilterOnlyUpdated').checked : true;
 
-  API.getAlumniCategoryList({ page: 1, limit: 10000, department: dept, batch: batch, professionType: profType, status: status, search: search })
+  API.getAlumniCategoryList({ page: 1, limit: 10000, designation: desig, company: comp, city: city, department: dept, batch: batch, professionType: profType, search: search, onlyUpdated: onlyUpdated })
     .then(function (res) {
       if (res && res.success) {
         var records = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);

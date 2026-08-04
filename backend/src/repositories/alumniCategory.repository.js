@@ -4,14 +4,15 @@ const { sql, getPool } = require('../config/database');
  * Get aggregated category groups from alumni + ProfessionalInformation.
  * Returns counts grouped by designation, company, city, profession_type, department, batch.
  */
-async function getCategoryGroups({ department, batch, status }) {
+async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
   const pool = await getPool();
   const request = pool.request()
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null);
+    .input('status', sql.NVarChar(30), status || null)
+    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
-  // Designations
+  // Designations / Roles
   const desigResult = await request.query(`
     SELECT
       ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified') AS designation,
@@ -31,6 +32,7 @@ async function getCategoryGroups({ department, batch, status }) {
     WHERE (@department IS NULL OR a.department = @department)
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
+      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
     GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified')
     ORDER BY count DESC;
   `);
@@ -40,7 +42,8 @@ async function getCategoryGroups({ department, batch, status }) {
   const req2 = pool2.request()
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null);
+    .input('status', sql.NVarChar(30), status || null)
+    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
   const companyResult = await req2.query(`
     SELECT
@@ -59,6 +62,7 @@ async function getCategoryGroups({ department, batch, status }) {
     WHERE (@department IS NULL OR a.department = @department)
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
+      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
     GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified')
     ORDER BY count DESC;
   `);
@@ -68,7 +72,8 @@ async function getCategoryGroups({ department, batch, status }) {
   const req3 = pool3.request()
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null);
+    .input('status', sql.NVarChar(30), status || null)
+    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
   const cityResult = await req3.query(`
     SELECT
@@ -87,6 +92,7 @@ async function getCategoryGroups({ department, batch, status }) {
     WHERE (@department IS NULL OR a.department = @department)
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
+      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
     GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified')
     ORDER BY count DESC;
   `);
@@ -96,7 +102,8 @@ async function getCategoryGroups({ department, batch, status }) {
   const req4 = pool4.request()
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null);
+    .input('status', sql.NVarChar(30), status || null)
+    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
   const professionResult = await req4.query(`
     SELECT
@@ -122,6 +129,7 @@ async function getCategoryGroups({ department, batch, status }) {
     WHERE (@department IS NULL OR a.department = @department)
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
+      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
     GROUP BY
       CASE
         WHEN pi.is_government_job = 1 THEN 'Government'
@@ -143,9 +151,9 @@ async function getCategoryGroups({ department, batch, status }) {
 }
 
 /**
- * Get paginated alumni list filtered by category fields.
+ * Get paginated alumni list filtered by category fields with full contact details.
  */
-async function getCategoryAlumni({ designation, company, city, professionType, department, batch, status, search, page = 1, limit = 20 }) {
+async function getCategoryAlumni({ designation, company, city, professionType, department, batch, status, search, onlyUpdated, page = 1, limit = 20 }) {
   const pageNum = parseInt(page, 10);
   const limitNum = parseInt(limit, 10);
   const offset = (pageNum - 1) * limitNum;
@@ -161,18 +169,23 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
     .input('search', sql.NVarChar(200), search ? `%${search}%` : null)
-    .input('profType', sql.NVarChar(50), professionType || null);
+    .input('profType', sql.NVarChar(50), professionType || null)
+    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
   const result = await request.query(`
     WITH CatCTE AS (
       SELECT
-        a.alumni_id, a.register_no, a.name, a.department, a.batch, a.email, a.phone,
+        a.alumni_id, a.register_no, a.name, a.department, a.batch,
+        COALESCE(pi.email, a.email) AS email,
+        COALESCE(pi.phone, a.phone) AS phone,
+        a.secondary_email, a.secondary_phone,
         COALESCE(pi.designation, a.designation) AS designation,
         COALESCE(pi.company, a.company) AS company,
         COALESCE(pi.current_city, a.city) AS current_city,
         a.state, a.country,
+        COALESCE(pi.linkedin_url, a.linkedin_profile) AS linkedin_profile,
         pi.is_government_job, pi.is_entrepreneur, pi.higher_studies, pi.other_occupation,
-        a.working_details, a.linkedin_profile, a.experience,
+        a.working_details, a.experience, a.is_updated,
         ISNULL(aa.status, 'Unassigned') AS assignment_status,
         ul.first_name + ' ' + ul.last_name AS leader_name,
         um.first_name + ' ' + um.last_name AS member_name,
@@ -199,13 +212,14 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
       LEFT JOIN dbo.Users ul ON ul.user_id = t.leader_id
       LEFT JOIN dbo.Users um ON um.user_id = aa.member_id
       WHERE
-        (@designation IS NULL OR COALESCE(pi.designation, a.designation) = @designation)
+        (@onlyUpdated = 0 OR (a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL))
+        AND (@designation IS NULL OR COALESCE(pi.designation, a.designation) = @designation)
         AND (@company IS NULL OR COALESCE(pi.company, a.company) = @company)
         AND (@city IS NULL OR COALESCE(pi.current_city, a.city) = @city)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
-        AND (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR COALESCE(pi.company, a.company) LIKE @search OR COALESCE(pi.designation, a.designation) LIKE @search)
+        AND (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR COALESCE(pi.company, a.company) LIKE @search OR COALESCE(pi.designation, a.designation) LIKE @search OR a.register_no LIKE @search)
         AND (
           @profType IS NULL
           OR (
