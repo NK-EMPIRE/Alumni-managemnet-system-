@@ -3992,7 +3992,32 @@ window.toggleColumnVisibility = function (key) {
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    INTERACTIVE EXPORT ENGINE & CUSTOMIZATION MODAL
    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-var _exportSelectedCols = {};
+var fullExportColumns = [
+  { key: 'register_no', label: 'Register Number' },
+  { key: 'name', label: 'Name' },
+  { key: 'father_name', label: 'Father Name' },
+  { key: 'date_of_birth', label: 'Date of Birth' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'department', label: 'Department' },
+  { key: 'batch', label: 'Batch' },
+  { key: 'email', label: 'Primary Email' },
+  { key: 'secondary_email', label: 'Secondary Email' },
+  { key: 'phone', label: 'Primary Phone' },
+  { key: 'secondary_phone', label: 'Secondary Phone' },
+  { key: 'company', label: 'Company' },
+  { key: 'designation', label: 'Designation' },
+  { key: 'experience', label: 'Experience' },
+  { key: 'current_city', label: 'Company Address / City' },
+  { key: 'state', label: 'State' },
+  { key: 'country', label: 'Country' },
+  { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL' },
+  { key: 'working_details', label: 'Working Details' },
+  { key: 'is_government_job', label: 'Government Job' },
+  { key: 'assignment_status', label: 'Current Status' },
+  { key: 'leader_name', label: 'Leader' },
+  { key: 'member_name', label: 'Member' },
+  { key: 'updated_date', label: 'Updated Date' }
+];
 
 window.exportAlumniCSV = function () {
   window.openExportCustomizationModal();
@@ -4000,13 +4025,11 @@ window.exportAlumniCSV = function () {
 
 window.openExportCustomizationModal = function () {
   // 1. Initialize default column selections
-  if (typeof ssColumns !== 'undefined' && Array.isArray(ssColumns)) {
-    ssColumns.forEach(function (col) {
-      if (_exportSelectedCols[col.key] === undefined) {
-        _exportSelectedCols[col.key] = true;
-      }
-    });
-  }
+  fullExportColumns.forEach(function (col) {
+    if (_exportSelectedCols[col.key] === undefined) {
+      _exportSelectedCols[col.key] = true;
+    }
+  });
 
   // 2. Populate filter dropdowns inside the export modal if empty
   populateExportModalFilterOptions();
@@ -4141,7 +4164,7 @@ window.renderExportColumnChips = function () {
   if (!container) return;
 
   var html = '';
-  ssColumns.forEach(function (col) {
+  fullExportColumns.forEach(function (col) {
     var checked = _exportSelectedCols[col.key] ? 'checked' : '';
     html += '<label class="export-col-chip">' +
       '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
@@ -4157,7 +4180,7 @@ window.toggleExportCol = function (key, isChecked) {
 };
 
 window.selectAllExportCols = function (selectState) {
-  ssColumns.forEach(function (col) {
+  fullExportColumns.forEach(function (col) {
     _exportSelectedCols[col.key] = selectState;
   });
   renderExportColumnChips();
@@ -4169,7 +4192,7 @@ window.updateExportStatsBanner = function () {
   var statusEl = document.getElementById('expStatStatus');
 
   var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
-  if (colsEl) colsEl.innerText = selectedCount + ' / ' + ssColumns.length;
+  if (colsEl) colsEl.innerText = selectedCount + ' / ' + fullExportColumns.length;
 
   var expStatus = document.getElementById('expFilterStatus');
   var statusVal = expStatus ? expStatus.value : '';
@@ -4241,12 +4264,24 @@ window.startExportDownloadProcess = function () {
         data.forEach(function (row) {
           var line = activeCols.map(function (col) {
             var val = row[col.key];
-            if ((val === null || val === undefined) && col.key === 'father_name') {
-              val = row.fatherName || '';
+
+            // Robust field alias resolution
+            if (val === null || val === undefined || val === '') {
+              if (col.key === 'department') val = row.department || row.dept || '';
+              else if (col.key === 'register_no') val = row.register_no || row.registerNo || '';
+              else if (col.key === 'father_name') val = row.father_name || row.fatherName || '';
+              else if (col.key === 'date_of_birth') val = row.date_of_birth || row.dob || '';
+              else if (col.key === 'secondary_email') val = row.secondary_email || row.secondaryEmail || '';
+              else if (col.key === 'secondary_phone') val = row.secondary_phone || row.secondaryPhone || '';
+              else if (col.key === 'current_city') val = row.current_city || row.city || '';
+              else if (col.key === 'linkedin_profile') val = row.linkedin_profile || row.linkedin || '';
+              else if (col.key === 'is_government_job') val = row.is_government_job || row.govt_job || row.govtJob || '';
+              else if (col.key === 'assignment_status') val = row.assignment_status || row.status || '';
+              else if (col.key === 'leader_name') val = row.leader_name || row.assigned_leader_name || row.leader || '';
+              else if (col.key === 'member_name') val = row.member_name || row.assigned_person_name || row.member || '';
+              else if (col.key === 'updated_date') val = row.updated_date || row.updated_at || row.updatedAt || '';
             }
-            if (col.key === 'date_of_birth' || col.key === 'dob') {
-              val = row.date_of_birth || row.dob || val || '';
-            }
+
             if (val === null || val === undefined) val = '';
 
             if ((col.key === 'date_of_birth' || col.key === 'dob' || col.key === 'updated_date' || col.key === 'created_at') && val) {
