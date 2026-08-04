@@ -4305,142 +4305,258 @@ window.closeDrawer = function () {
 };
 
 
+var currentSelectedAlumniIdAdmin = null;
+
 window.editAlumniRecord = function (id) {
+  openUpdateModalAdmin(id);
+};
+
+window.openUpdateModal = function (id) {
+  openUpdateModalAdmin(id);
+};
+
+window.openUpdateModalAdmin = function (id) {
+  currentSelectedAlumniIdAdmin = id;
+  document.getElementById('fieldIndex').value = id;
+
+  var modal = document.getElementById('updateModal');
+  if (!modal) return;
+
+  modal.classList.add('show');
+  openModal('updateModal');
+
+  // Clear old errors
+  document.querySelectorAll('#updateForm input, #updateForm select').forEach(function (el) { el.classList.remove('error'); });
+  document.querySelectorAll('#updateForm .error-text').forEach(function (el) { el.style.display = 'none'; });
+
   API.getAlumniById(id).then(function (res) {
     if (res && res.success && res.data) {
       var record = res.data;
-      document.getElementById('editAlumniId').value = record.alumni_id;
-      document.getElementById('editName').value = record.name || '';
-      document.getElementById('editRegisterNo').value = record.register_no || '';
-      document.getElementById('editGender').value = record.gender || 'Male';
-      document.getElementById('editBatch').value = record.batch || '';
-      var selectEl = document.getElementById('editDepartment');
-      var rawDept = record.department || '';
-      if (rawDept) {
-        var exists = false;
-        for (var i = 0; i < selectEl.options.length; i++) {
-          if (selectEl.options[i].value === rawDept) {
-            exists = true;
-            break;
-          }
-        }
-        if (!exists) {
-          var opt = document.createElement('option');
-          opt.value = rawDept;
-          opt.text = rawDept;
-          selectEl.appendChild(opt);
-        }
-        selectEl.value = rawDept;
-      } else {
-        selectEl.value = '';
-      }
-      document.getElementById('editFatherName').value = record.father_name || record.pi_father_name || '';
-      document.getElementById('editDOB').value = record.date_of_birth || record.dob || '';
-      document.getElementById('editEmail').value = record.email || '';
-      document.getElementById('editPhone').value = record.phone || '';
-      document.getElementById('editSecondaryEmail').value = record.secondary_email || '';
-      document.getElementById('editSecondaryPhone').value = record.secondary_phone || '';
-      document.getElementById('editLinkedIn').value = record.linkedin_profile || '';
-      document.getElementById('editCompany').value = record.company || '';
-      document.getElementById('editDesignation').value = record.designation || '';
-      document.getElementById('editCity').value = record.current_city || record.city || '';
-      document.getElementById('editState').value = record.state || '';
-      document.getElementById('editCountry').value = record.country || '';
+      document.getElementById('modalTitle').textContent = record.name || 'Update Profile';
+      document.getElementById('modalSubtitle').textContent = (record.department || '') + ' (' + (record.batch || '') + ')';
+      document.getElementById('modalAvatar').textContent = (record.name || 'A').charAt(0).toUpperCase();
 
-      // Auto-toggle secondary containers if values exist
-      var secEmailContainer = document.getElementById('editSecondaryEmailContainer');
-      var secEmailBtn = secEmailContainer.previousElementSibling.querySelector('.btn-add-secondary');
-      if (record.secondary_email) {
-        secEmailContainer.style.display = 'block';
-        if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>';
-      } else {
-        secEmailContainer.style.display = 'none';
-        if (secEmailBtn) secEmailBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+      var status = record.assignment_status || 'Pending';
+      var isCompleted = status === 'Completed';
+      var isDraft = status === 'Draft';
+      var isReopened = status === 'Reopened';
+      var badgeClass = isCompleted ? 'badge-success' : (isDraft ? 'badge-info' : (isReopened ? 'badge-danger' : 'badge-warning'));
+      var badgeIcon = isCompleted ? 'fa-check-circle' : (isDraft ? 'fa-pen' : (isReopened ? 'fa-redo-alt' : 'fa-clock'));
+
+      var statusBadge = document.getElementById('modalStatusBadge');
+      if (statusBadge) {
+        statusBadge.className = 'status-badge ' + badgeClass;
+        statusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> ' + status;
       }
 
-      var secPhoneContainer = document.getElementById('editSecondaryPhoneContainer');
-      var secPhoneBtn = secPhoneContainer.previousElementSibling.querySelector('.btn-add-secondary');
-      if (record.secondary_phone) {
-        secPhoneContainer.style.display = 'block';
-        if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-minus-circle" style="color: #EF4444;"></i>';
-      } else {
-        secPhoneContainer.style.display = 'none';
-        if (secPhoneBtn) secPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+      document.getElementById('fieldName').value = record.name || '';
+      document.getElementById('fieldDept').value = record.department || '';
+      document.getElementById('fieldBatch').value = record.batch || '';
+      document.getElementById('fieldFatherName').value = record.father_name || record.pi_father_name || '';
+      document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
+      document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
+      document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
+      document.getElementById('fieldCity').value = record.current_city || record.city || '';
+      document.getElementById('fieldState').value = record.state || '';
+      document.getElementById('fieldCountry').value = record.country || '';
+      document.getElementById('fieldEmail').value = record.email || record.pi_email || '';
+      document.getElementById('fieldPhone').value = record.phone || record.pi_phone || '';
+      document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
+      document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
+      document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
+      document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
+
+      var secEmailContainer = document.getElementById('fieldSecondaryEmailContainer');
+      if (secEmailContainer) {
+        if (record.secondary_email) secEmailContainer.style.display = 'block';
+        else secEmailContainer.style.display = 'none';
       }
 
-      // Populate leader dropdown
-      populateEditLeaderDropdown(record.assigned_leader_id || (record.assignedTo ? record.assignedTo.userId : null));
-
-      document.getElementById('editStatus').value = record.assignment_status || 'Available';
-
-      openModal('editAlumniModal');
+      var secPhoneContainer = document.getElementById('fieldSecondaryPhoneContainer');
+      if (secPhoneContainer) {
+        if (record.secondary_phone) secPhoneContainer.style.display = 'block';
+        else secPhoneContainer.style.display = 'none';
+      }
     } else {
       Toast.error('Load Details', 'Alumni record not found');
     }
   }).catch(function (e) {
-    console.error('Edit modal fetch error:', e);
+    console.error('Update modal fetch error:', e);
     Toast.error('Load Details', 'Failed to retrieve alumni details');
   });
 };
 
-window.populateEditLeaderDropdown = function (selectedLeaderId) {
-  var dropdown = document.getElementById('editLeader');
-  if (!dropdown) return;
+var _isAdminModalEditMode = false;
+window.toggleModalFieldsEditMode = function () {
+  _isAdminModalEditMode = !_isAdminModalEditMode;
+  var topEditBtn = document.getElementById('modalTopEditBtn');
+  var fieldIds = [
+    'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
+    'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldState', 'fieldCountry',
+    'fieldEmail', 'fieldPhone', 'fieldSecondaryEmail', 'fieldSecondaryPhone',
+    'fieldLinkedin', 'fieldGovtJob'
+  ];
 
-  // Get team leaders from API
-  API.getUsers({ role: 'LEADER', page: 1, limit: 100 }).then(function (res) {
-    if (res && res.success && res.data && res.data.records) {
-      dropdown.innerHTML = '<option value="">No Leader Assigned</option>';
-      res.data.records.forEach(function (leader) {
-        var option = document.createElement('option');
-        option.value = leader.user_id;
-        option.text = leader.first_name + ' ' + leader.last_name;
-        if (leader.user_id === selectedLeaderId) {
-          option.selected = true;
-        }
-        dropdown.appendChild(option);
-      });
-    }
-  }).catch(function (err) {
-    console.error('Failed to load leaders:', err);
-  });
-};
-
-window.submitEditAlumni = function () {
-  var id = document.getElementById('editAlumniId').value;
-  var data = {
-    name: document.getElementById('editName').value,
-    registerNo: document.getElementById('editRegisterNo').value,
-    gender: document.getElementById('editGender').value,
-    batch: document.getElementById('editBatch').value,
-    department: document.getElementById('editDepartment').value,
-    father_name: document.getElementById('editFatherName').value,
-    date_of_birth: document.getElementById('editDOB').value,
-    email: document.getElementById('editEmail').value,
-    phone: document.getElementById('editPhone').value,
-    secondary_email: document.getElementById('editSecondaryEmail').value,
-    secondary_phone: document.getElementById('editSecondaryPhone').value,
-    linkedin_profile: document.getElementById('editLinkedIn').value,
-    company: document.getElementById('editCompany').value,
-    designation: document.getElementById('editDesignation').value,
-    city: document.getElementById('editCity').value,
-    state: document.getElementById('editState').value,
-    country: document.getElementById('editCountry').value
-  };
-
-  API.updateAlumni(id, data).then(function (res) {
-    if (res && res.success) {
-      Toast.success('Edit Alumni', 'Alumni record updated successfully');
-      closeModal('editAlumniModal');
-      fetchSpreadsheetData();
+  fieldIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (_isAdminModalEditMode) {
+      el.readOnly = false;
+      el.disabled = false;
     } else {
-      Toast.error('Edit Alumni', res.message || 'Failed to update record');
+      var val = el.value ? el.value.trim() : '';
+      var isPreFilled = val !== '' && val !== 'No' && val !== 'Select Department' && val !== 'Select Batch';
+      if (isPreFilled) {
+        el.readOnly = true;
+        if (el.tagName === 'SELECT') el.disabled = true;
+      }
     }
-  }).catch(function (err) {
-    console.error('Update error:', err);
-    Toast.error('Edit Alumni', 'An error occurred updating the record');
   });
+
+  if (topEditBtn) {
+    topEditBtn.style.transform = 'scale(1.25)';
+    setTimeout(function () { topEditBtn.style.transform = 'scale(1)'; }, 200);
+
+    if (_isAdminModalEditMode) {
+      topEditBtn.style.background = '#10B981';
+      topEditBtn.style.color = '#FFFFFF';
+      topEditBtn.style.borderColor = '#10B981';
+      topEditBtn.innerHTML = '<i class="fas fa-check"></i>';
+      topEditBtn.title = 'Editing Unlocked! Click again to lock fields.';
+    } else {
+      topEditBtn.style.background = '#EFF6FF';
+      topEditBtn.style.color = '#2563EB';
+      topEditBtn.style.borderColor = '#BFDBFE';
+      topEditBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+      topEditBtn.title = 'Click pencil to unlock pre-filled fields for editing';
+    }
+  }
 };
+
+function readAdminFormValues() {
+  return {
+    name: document.getElementById('fieldName').value,
+    department: document.getElementById('fieldDept').value,
+    batch: document.getElementById('fieldBatch').value,
+    father_name: document.getElementById('fieldFatherName').value,
+    date_of_birth: document.getElementById('fieldDOB').value,
+    company: document.getElementById('fieldCompany').value,
+    designation: document.getElementById('fieldDesignation').value,
+    current_city: document.getElementById('fieldCity').value,
+    state: document.getElementById('fieldState').value,
+    country: document.getElementById('fieldCountry').value,
+    email: document.getElementById('fieldEmail').value,
+    phone: document.getElementById('fieldPhone').value,
+    secondary_email: document.getElementById('fieldSecondaryEmail').value,
+    secondary_phone: document.getElementById('fieldSecondaryPhone').value,
+    linkedin_profile: document.getElementById('fieldLinkedin').value,
+    is_government_job: document.getElementById('fieldGovtJob').value === 'Yes'
+  };
+}
+
+function validateAdminForm() {
+  var isValid = true;
+  var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity'];
+  required.forEach(function (id) {
+    var el = document.getElementById(id);
+    var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
+    if (!el || !el.value || el.value.trim() === '') {
+      if (el) el.classList.add('error');
+      if (err) err.style.display = 'block';
+      isValid = false;
+    } else {
+      if (el) el.classList.remove('error');
+      if (err) err.style.display = 'none';
+    }
+  });
+
+  var emailEl = document.getElementById('fieldEmail');
+  var phoneEl = document.getElementById('fieldPhone');
+  var emailErr = document.getElementById('errorEmail');
+  var phoneErr = document.getElementById('errorPhone');
+
+  var emailVal = emailEl && emailEl.value ? emailEl.value.trim() : '';
+  var phoneVal = phoneEl && phoneEl.value ? phoneEl.value.trim() : '';
+
+  if (!emailVal && !phoneVal) {
+    if (emailEl) emailEl.classList.add('error');
+    if (phoneEl) phoneEl.classList.add('error');
+    if (emailErr) emailErr.style.display = 'block';
+    if (phoneErr) phoneErr.style.display = 'block';
+    isValid = false;
+  } else {
+    if (emailEl) emailEl.classList.remove('error');
+    if (phoneEl) phoneEl.classList.remove('error');
+    if (emailErr) emailErr.style.display = 'none';
+    if (phoneErr) phoneErr.style.display = 'none';
+  }
+
+  return isValid;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var saveDraftBtn = document.getElementById('saveDraftBtn');
+  var submitRecordBtn = document.getElementById('submitRecordBtn');
+  var submitNextBtn = document.getElementById('submitNextBtn');
+
+  if (saveDraftBtn) {
+    saveDraftBtn.addEventListener('click', function () {
+      if (!currentSelectedAlumniIdAdmin) return;
+      var data = readAdminFormValues();
+      API.updateAlumni(currentSelectedAlumniIdAdmin, data).then(function (res) {
+        Toast.success('Save Draft', 'Draft saved successfully.');
+        closeModal('updateModal');
+        fetchSpreadsheetData();
+      }).catch(function (err) {
+        Toast.error('Save Draft', err.message || 'Failed to save draft.');
+      });
+    });
+  }
+
+  if (submitRecordBtn) {
+    submitRecordBtn.addEventListener('click', function () {
+      if (!currentSelectedAlumniIdAdmin) return;
+      if (!validateAdminForm()) {
+        Toast.warning('Validation', 'Please fill in required fields.');
+        return;
+      }
+      var data = readAdminFormValues();
+      API.updateAlumni(currentSelectedAlumniIdAdmin, data).then(function (res) {
+        Toast.success('Update Record', 'Alumni record updated successfully.');
+        closeModal('updateModal');
+        fetchSpreadsheetData();
+      }).catch(function (err) {
+        Toast.error('Update Record', err.message || 'Failed to update record.');
+      });
+    });
+  }
+
+  if (submitNextBtn) {
+    submitNextBtn.addEventListener('click', function () {
+      if (!currentSelectedAlumniIdAdmin) return;
+      if (!validateAdminForm()) {
+        Toast.warning('Validation', 'Please fill in required fields.');
+        return;
+      }
+      var data = readAdminFormValues();
+      API.updateAlumni(currentSelectedAlumniIdAdmin, data).then(function (res) {
+        Toast.success('Update Record', 'Alumni record updated successfully.');
+        fetchSpreadsheetData();
+
+        // Navigate to next row in spreadsheet list if available
+        var currentIdx = _spreadsheetData.findIndex(function (r) { return String(r.alumni_id) === String(currentSelectedAlumniIdAdmin); });
+        if (currentIdx !== -1 && currentIdx + 1 < _spreadsheetData.length) {
+          openUpdateModalAdmin(_spreadsheetData[currentIdx + 1].alumni_id);
+        } else {
+          closeModal('updateModal');
+          Toast.success('Finished', 'All records reviewed!');
+        }
+      }).catch(function (err) {
+        Toast.error('Update Record', err.message || 'Failed to update record.');
+      });
+    });
+  }
+});
 
 // Auto refresh dashboard data disabled by user request
 
