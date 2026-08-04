@@ -705,18 +705,20 @@ async function reopenAssignment(currentUser, alumniId, { reason }) {
   if (currentUser.role === 'MEMBER' && assignment.member_id && Number(assignment.member_id) !== Number(currentUser.userId)) {
     throw new AppError('You are not authorized to undo this record.', 403);
   }
-  if (assignment.status !== 'Completed') {
-    throw new AppError('Only completed records can be reopened.', 400);
-  }
 
   const transaction = pool.transaction();
   await transaction.begin();
 
   try {
-    // Update the assignment record status to Reopened (keeping it assigned to the member/leader)
+    // Update the assignment record status to Draft (keeping it assigned to the member/leader)
     await transaction.request()
       .input('alumniId', sql.Int, alumniId)
-      .query("UPDATE AlumniAssignments SET status = 'Reopened', completed_date = NULL WHERE alumni_id = @alumniId");
+      .query("UPDATE AlumniAssignments SET status = 'Draft', completed_date = NULL WHERE alumni_id = @alumniId");
+
+    // Also reset Alumni table is_updated flag
+    await transaction.request()
+      .input('alumniId', sql.Int, alumniId)
+      .query("UPDATE Alumni SET is_updated = 0 WHERE alumni_id = @alumniId");
 
     await transaction.commit();
 

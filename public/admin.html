@@ -64,6 +64,63 @@
     body.dark-mode .guidelines-box li {
       color: #FFFFFF !important;
     }
+
+    /* ── DARK MODE OVERRIDES FOR TEAM LEADER & ASSIGNMENT SECTIONS ── */
+    body.dark-mode #section-teamLeaders,
+    body.dark-mode #section-assignAlumni,
+    body.dark-mode #section-progress {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #tlTable th,
+    body.dark-mode #assignHistoryTable th,
+    body.dark-mode #tmTable th,
+    body.dark-mode #tlDetailAlumniTable th {
+      background-color: #0F172A !important;
+      color: #94A3B8 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode #tlTable td,
+    body.dark-mode #assignHistoryTable td,
+    body.dark-mode #tmTable td,
+    body.dark-mode #tlDetailAlumniTable td {
+      color: #E2E8F0 !important;
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode #tlSearch,
+    body.dark-mode #tmSearch,
+    body.dark-mode #tmFilterLeader,
+    body.dark-mode #progressLeaderSelect,
+    body.dark-mode #assignTLSelect {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    /* Add Team Leader Modal & Detail Modals */
+    body.dark-mode #addTeamLeaderModal .modal-content,
+    body.dark-mode #teamLeaderDetailModal .modal-content,
+    body.dark-mode #assignAlumniModal .modal-content {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    /* Team Leader Rankings & Team Progress Panel */
+    body.dark-mode #tlRankingList .ranking-card,
+    body.dark-mode #tlRankingList .tl-rank-item,
+    body.dark-mode #teamProgressPanel {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #tlDetailMembersList {
+      background-color: #0F172A !important;
+      border-color: #334155 !important;
+    }
   </style>
 </head>
 
@@ -430,6 +487,7 @@
                   <option value="250">250</option>
                   <option value="500">500</option>
                   <option value="1000">1000</option>
+                  <option value="2500">2500</option>
                   <option value="5000">5000</option>
                 </select>
               </div>
@@ -575,6 +633,7 @@
                 <option value="250">250</option>
                 <option value="500">500</option>
                 <option value="1000">1000</option>
+                <option value="2500">2500</option>
                 <option value="5000">5000</option>
               </select>
             </div>
@@ -926,6 +985,11 @@
                 <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2500">2500</option>
+                <option value="5000">5000</option>
               </select>
             </div>
           </div>
@@ -1027,6 +1091,7 @@
                 <option value="250">250</option>
                 <option value="500">500</option>
                 <option value="1000">1000</option>
+                <option value="2500">2500</option>
                 <option value="5000">5000</option>
               </select>
             </div>
