@@ -188,7 +188,12 @@ async function getPool() {
           CREATE INDEX IX_AlumniAssignments_User_Status ON dbo.AlumniAssignments(member_id, status);
       END
 
-      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_Team_Status')
+      IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'team_id'
+      ) AND NOT EXISTS (
+          SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_Team_Status'
+      )
       BEGIN
           CREATE INDEX IX_AlumniAssignments_Team_Status ON dbo.AlumniAssignments(team_id, status);
       END
