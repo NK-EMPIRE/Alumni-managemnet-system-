@@ -2144,3 +2144,7 @@
 {"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-04 18:02:47.756"}
 {"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-04 18:02:47.756"}
 {"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-04 18:02:47.757"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 18:02:59.937"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-04 18:02:59.942"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-04 18:02:59.942"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-04 18:02:59.943"}
