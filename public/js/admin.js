@@ -3362,6 +3362,8 @@ function viewReportData(type, title) {
   showReportModal(title, columns, rows);
 }
 
+var _exportSelectedCols = {};
+
 var fullExportColumns = [
   { key: 'register_no', label: 'Register Number' },
   { key: 'name', label: 'Name' },
@@ -3601,9 +3603,9 @@ window.debounceSearch = function () {
 };
 
 window.fetchSpreadsheetData = function () {
-  var dept = document.getElementById('ssFilterDept').value;
-  var batch = document.getElementById('ssFilterBatch').value;
-  var status = document.getElementById('ssFilterStatus').value;
+  var dept = document.getElementById('ssFilterDept') ? document.getElementById('ssFilterDept').value : '';
+  var batch = document.getElementById('ssFilterBatch') ? document.getElementById('ssFilterBatch').value : '';
+  var status = document.getElementById('ssFilterStatus') ? document.getElementById('ssFilterStatus').value : '';
   var leaderId = document.getElementById('ssFilterLeader') ? document.getElementById('ssFilterLeader').value : '';
   var memberId = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
 
