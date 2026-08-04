@@ -92,9 +92,10 @@ window.fetchCategoryAlumni = function (page) {
 
   API.getAlumniCategoryList(params)
     .then(function (res) {
-      if (res && res.success) {
-        var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
-        var total = (res.data && res.data.pagination) ? res.data.pagination.total : data.length;
+      if (res && (res.success || res.data)) {
+        var d = res.data !== undefined ? res.data : res;
+        var data = (d && d.records) ? d.records : (Array.isArray(d) ? d : []);
+        var total = (d && d.pagination) ? d.pagination.total : data.length;
         renderCategoryTable(data);
         renderCategoryPagination(total);
       } else {
@@ -276,13 +277,14 @@ window.fetchAttendanceReport = function (page) {
 
   API.getAttendanceReport({ page: attCurrentPage, limit: attRowsPerPage, date: selectedDate || undefined, status: status || undefined, role: role || undefined })
     .then(function (res) {
-      if (res && res.success) {
-        var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
-        var total = (res.data && res.data.pagination) ? res.data.pagination.total : data.length;
+      if (res && (res.success || res.data)) {
+        var d = res.data !== undefined ? res.data : res;
+        var data = (d && d.records) ? d.records : (Array.isArray(d) ? d : []);
+        var total = (d && d.pagination) ? d.pagination.total : data.length;
         renderAttendanceTable(data);
         renderAttendancePagination(total);
       } else {
-        if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:#EF4444;">Failed to load attendance logs</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#EF4444;">Failed to load attendance logs</td></tr>';
       }
     })
     .catch(function (err) {

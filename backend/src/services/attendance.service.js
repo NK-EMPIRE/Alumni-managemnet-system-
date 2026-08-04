@@ -109,7 +109,7 @@ async function getReport({ page = 1, limit = 50, date, userId, status, role }) {
         a.attendance_id,
         a.user_id,
         u.first_name + ' ' + u.last_name AS user_name,
-        u.role_name AS role,
+        r.role_name AS role,
         u.department,
         a.attendance_date,
         a.login_time,
@@ -120,10 +120,11 @@ async function getReport({ page = 1, limit = 50, date, userId, status, role }) {
         COUNT(*) OVER() AS total_count
       FROM dbo.Attendance a
       JOIN dbo.Users u ON u.user_id = a.user_id
+      LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
       WHERE (@filterDate IS NULL OR a.attendance_date = @filterDate)
         AND (@filterUserId IS NULL OR a.user_id = @filterUserId)
         AND (@filterStatus IS NULL OR a.status = @filterStatus)
-        AND (@filterRole IS NULL OR u.role_name = @filterRole)
+        AND (@filterRole IS NULL OR r.role_name = @filterRole)
     )
     SELECT * FROM Att
     ORDER BY attendance_date DESC, user_name ASC
