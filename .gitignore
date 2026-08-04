@@ -20,3 +20,5 @@ backend/logs/application.log
 /log
 /pycache
 backend\logs
+/application.logs
+/error.logs
