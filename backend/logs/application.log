@@ -1919,3 +1919,26 @@
 {"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:21:22.329"}
 {"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:21:22.329"}
 {"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:21:22.330"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:21:50.695"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:21:50.699"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:21:50.699"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:21:50.700"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:23:23.182"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:23:23.186"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:23:23.186"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:23:23.186"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:23:32.888"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:23:32.892"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:23:32.893"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:23:32.893"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:24:03.550"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:24:03.555"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:24:03.555"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:24:03.555"}
+{"ip":"::1","level":"info","loginId":"devika2099@moiuntzion.ac.in","message":"[AUDIT] Login failed - user not found","timestamp":"2026-08-04 11:24:35.564"}
+{"ip":"::1","level":"info","loginId":"devika2099@moiuntzion.ac.in","message":"[AUDIT] Login failed - user not found","timestamp":"2026-08-04 11:24:36.904"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-08-04 11:24:45.624","userId":36}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:31:09.717"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:31:09.721"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:31:09.721"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:31:09.721"}

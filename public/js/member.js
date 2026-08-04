@@ -741,11 +741,7 @@
             saveDraftBtn.disabled = false;
             renderTable();
             incrementTodayCount();
-            var badgeClass = 'draft';
-            var badgeIcon = 'fa-pen';
-            modalStatusBadge.className = 'status-badge ' + badgeClass;
-            modalStatusBadge.innerHTML = '<i class="fas ' + badgeIcon + '"></i> Draft';
-            showToast('Record saved as draft', 'success');
+            closeUpdateModal();
         }
 
         if (_apiDataLoaded && record && record.id) {
@@ -1172,7 +1168,6 @@
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + linkedin + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + statusStr + '</span></td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + updatedDateStr + '</td>' +
-                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.working_details || '-') + '</td>' +
                         '</tr>';
                 });
                 body.innerHTML = html;
@@ -1210,13 +1205,12 @@
                             '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.linkedin_profile || '-') + '</td>' +
                             '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + statusStr + '</span></td>' +
                             '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">-</td>' +
-                            '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.working_details || '-') + '</td>' +
                             '</tr>';
                     });
                     body.innerHTML = html;
                     renderPreviewPagination(total);
                 } else {
-                    body.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
+                    body.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:24px;color:var(--danger);">Failed to load records.</td></tr>';
                 }
             });
         };
