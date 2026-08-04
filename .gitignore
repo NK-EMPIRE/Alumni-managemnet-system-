@@ -12,7 +12,7 @@ node_modules
 *.md.old
 tmp/
 .tempmediaStorage/
-backend/logs/
+/backend/logs/
 .env
 
 scratch/
