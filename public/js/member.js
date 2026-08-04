@@ -720,30 +720,8 @@
     }
 
     function showToast(message, type) {
-        if (type === 'success' || type === 'info') return;
-        if (typeof window.showToast === 'function') {
-            window.showToast(type === 'error' ? 'Error' : 'Warning', message, type === 'error' ? 'danger' : type);
-            return;
-        }
-        type = type || 'success';
-        var container = document.getElementById('toastContainer');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
-        var toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        var icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-        toast.innerHTML = '<i class="fas ' + (icons[type] || 'fa-info-circle') + '"></i> ' + message;
-        container.appendChild(toast);
-        setTimeout(function () {
-            toast.classList.add('removing');
-            setTimeout(function () {
-                if (toast.parentNode) toast.parentNode.removeChild(toast);
-            }, 300);
-        }, 3000);
+        // Disabled: Toast notifications removed from member page per request
+        return;
     }
 
     function handleSaveDraft() {
