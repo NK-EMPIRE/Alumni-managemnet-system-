@@ -178,6 +178,9 @@ function fetchAllData() {
   ]).then(function (results) {
     function extractData(res) {
       if (!res) return null;
+      // API wraps: { success: true, data: ... }
+      if (res.success === true) return res.data || res;
+      if (res.success === false) return null;
       if (res.data !== undefined) return res.data;
       return res;
     }
@@ -191,6 +194,11 @@ function fetchAllData() {
     _apiAssignHistory = extractData(results[7]);
     _apiAlumniFilters = extractData(results[8]);
     _apiDataLoaded = true;
+    // DEBUG: log what we got
+    console.log('[Admin] API results raw[0]:', results[0]);
+    console.log('[Admin] _dashboardData:', _dashboardData);
+    console.log('[Admin] _apiAlumni (after extract):', _apiAlumni);
+    console.log('[Admin] _apiAlumni.records:', _apiAlumni && _apiAlumni.records);
 
     // Populate dynamic filters first
     populateDynamicFilters(_apiAlumniFilters);
