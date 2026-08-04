@@ -311,19 +311,28 @@ function populateActivityFeed() {
    7. TABLE POPULATION & PAGINATION
    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function populateTable() {
-  if (_apiDataLoaded && _apiAlumni && _apiAlumni.records) {
-    _alumniMapped = _apiAlumni.records.map(function (a) {
+  var recs = null;
+  if (_apiDataLoaded && _apiAlumni) {
+    if (Array.isArray(_apiAlumni)) recs = _apiAlumni;
+    else if (Array.isArray(_apiAlumni.records)) recs = _apiAlumni.records;
+    else if (_apiAlumni.data && Array.isArray(_apiAlumni.data.records)) recs = _apiAlumni.data.records;
+    else if (_apiAlumni.data && Array.isArray(_apiAlumni.data)) recs = _apiAlumni.data;
+  }
+
+  if (recs && recs.length > 0) {
+    _alumniMapped = recs.map(function (a) {
       return {
         id: a.alumni_id || a.id,
         name: a.name || a.fullName || 'Unknown',
         dept: a.department || a.dept || '',
         batch: a.batch || '',
         company: a.company || '',
-        leader: a.member_name || a.assignedTo || a.leader || '',
-        status: a.assignment_status || 'Pending',
+        leader: a.member_name || a.leader_name || a.assignedTo || a.leader || '',
+        status: a.assignment_status || a.status || 'Pending',
         progress: (function (rec) {
-          if (rec.assignment_status === 'Completed') return 100;
-          if (rec.assignment_status === 'Pending') return 0;
+          var st = rec.assignment_status || rec.status;
+          if (st === 'Completed') return 100;
+          if (st === 'Pending') return 0;
           var fields = ['company', 'designation', 'email', 'phone', 'working_details', 'linkedin_profile'];
           var filled = 0;
           fields.forEach(function (f) { if (rec[f] && String(rec[f]).trim() !== '') filled++; });
@@ -333,7 +342,7 @@ function populateTable() {
     });
     state.filteredData = _alumniMapped.slice();
   } else {
-    _alumniMapped = null;
+    _alumniMapped = [];
     state.filteredData = [];
   }
 
