@@ -282,34 +282,81 @@
       border-radius: 12px;
       font-weight: 600;
     }
+    .btn-undo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #FFFBEB;
+      color: #D97706;
+      border: 1px solid #FCD34D;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .btn-undo-icon:hover {
+      background: #F59E0B;
+      color: #FFFFFF;
+      border-color: #F59E0B;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+      transform: scale(1.08);
+    }
+    body.dark-mode .btn-undo-icon {
+      background: rgba(245, 158, 11, 0.18) !important;
+      color: #FBBF24 !important;
+      border-color: rgba(245, 158, 11, 0.35) !important;
+    }
+    body.dark-mode .btn-undo-icon:hover {
+      background: #F59E0B !important;
+      color: #FFFFFF !important;
+    }
     /* ── DARK MODE OVERRIDES FOR TEAM LEADER SECTION ── */
     body.dark-mode {
+      --bg-white: #1E293B;
+      --bg-light: #0F172A;
+      --text-dark: #F8FAFC;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #94A3B8;
+      --border: #334155;
+      --primary-light: rgba(37, 99, 235, 0.2);
+      --surface: #1E293B;
       background-color: #0F172A !important;
       color: #F8FAFC !important;
+      color-scheme: dark;
     }
 
-    /* Fix inline-styled modal nav pill */
+    /* Fix inline-styled modal nav pill & titles */
     body.dark-mode .modal-nav-group {
       background: #0F172A !important;
       border-color: #334155 !important;
     }
     body.dark-mode #modalNavCounter {
       color: #CBD5E1 !important;
+      background: #0F172A !important;
+      border-color: #334155 !important;
     }
-    body.dark-mode #modalTitle {
+    body.dark-mode #modalTitle,
+    body.dark-mode .modal-header h2,
+    body.dark-mode .modal-header h3,
+    body.dark-mode .modal-header h4 {
       color: #F8FAFC !important;
     }
-    body.dark-mode #modalSubtitle {
+    body.dark-mode #modalSubtitle,
+    body.dark-mode .modal-header p {
       color: #94A3B8 !important;
     }
-    body.dark-mode .modal-header {
-      background-color: #1E293B !important;
-    }
+    body.dark-mode .modal-header,
     body.dark-mode .modal-body,
     body.dark-mode .modal-footer {
       background-color: #1E293B !important;
+      border-color: #334155 !important;
     }
-    /* Fix hardcoded inline-bg table header rows */
+
+    /* Fix hardcoded inline-bg table header rows & containers */
     body.dark-mode [style*="background:#F8FAFC"],
     body.dark-mode [style*="background: #F8FAFC"],
     body.dark-mode [style*="background:#EEF2F6"],
@@ -319,12 +366,32 @@
       color: #F8FAFC !important;
       border-color: #334155 !important;
     }
+
+    /* Fix light blue info alert cards in modals (e.g. Target Team Recipients in emailCampaignModal) */
+    body.dark-mode [style*="background:#EFF6FF"],
+    body.dark-mode [style*="background: #EFF6FF"],
+    body.dark-mode [style*="background:#DBEAFE"],
+    body.dark-mode [style*="background: #DBEAFE"] {
+      background-color: rgba(30, 58, 138, 0.4) !important;
+      border-color: rgba(96, 165, 250, 0.35) !important;
+      color: #F8FAFC !important;
+    }
+
     /* Fix hardcoded inline text colors */
     body.dark-mode [style*="color:#1E293B"],
     body.dark-mode [style*="color: #1E293B"],
     body.dark-mode [style*="color:#475569"],
-    body.dark-mode [style*="color:#0F172A"] {
+    body.dark-mode [style*="color:#0F172A"],
+    body.dark-mode [style*="color:#374151"] {
       color: #F8FAFC !important;
+    }
+    body.dark-mode [style*="color:#1E40AF"],
+    body.dark-mode [style*="color: #1E40AF"],
+    body.dark-mode [style*="color:#1E3A8A"],
+    body.dark-mode [style*="color: #1E3A8A"],
+    body.dark-mode [style*="color:#1D4ED8"],
+    body.dark-mode [style*="color: #1D4ED8"] {
+      color: #93C5FD !important;
     }
     body.dark-mode [style*="color:#64748B"],
     body.dark-mode [style*="color: #64748B"],
@@ -332,17 +399,20 @@
       color: #94A3B8 !important;
     }
 
+    /* Badges */
     body.dark-mode .leader-badge {
       background: rgba(37, 99, 235, 0.25) !important;
       color: #60A5FA !important;
       border: 1px solid rgba(96, 165, 250, 0.3) !important;
     }
 
+    /* Cards, containers, modals */
     body.dark-mode .card,
     body.dark-mode .stat-card,
     body.dark-mode .table-card,
     body.dark-mode .table-container,
     body.dark-mode .modal-content,
+    body.dark-mode .modal,
     body.dark-mode .export-modal-card {
       background-color: #1E293B !important;
       border-color: #334155 !important;
@@ -381,8 +451,11 @@
       color: #F8FAFC !important;
     }
 
+    /* Tables & Sticky Headers */
     body.dark-mode th,
-    body.dark-mode #memberDetailsTable th {
+    body.dark-mode #memberDetailsTable th,
+    body.dark-mode #ssTableHeadRow th,
+    body.dark-mode .sticky-col {
       background-color: #0F172A !important;
       color: #94A3B8 !important;
       border-bottom-color: #334155 !important;
@@ -398,6 +471,7 @@
       background-color: rgba(255, 255, 255, 0.03) !important;
     }
 
+    /* Form Controls */
     body.dark-mode input,
     body.dark-mode select,
     body.dark-mode textarea,
@@ -405,7 +479,14 @@
     body.dark-mode .filter-select,
     body.dark-mode #rowsPerPageSelect,
     body.dark-mode #myAssignmentsRowsPerPageSelect,
-    body.dark-mode #ssRowsPerPageSelect {
+    body.dark-mode #ssRowsPerPageSelect,
+    body.dark-mode #ssRowsPerPage,
+    body.dark-mode #distMethodSelect,
+    body.dark-mode #distBatchInput,
+    body.dark-mode #circulateAlgorithm,
+    body.dark-mode #circulateSourceSelect,
+    body.dark-mode #circulateCount,
+    body.dark-mode .count-input {
       background-color: #0F172A !important;
       color: #F8FAFC !important;
       border-color: #334155 !important;
@@ -426,27 +507,99 @@
       color: #F8FAFC !important;
     }
 
+    /* Quick Action Buttons */
+    body.dark-mode .quick-action-btn {
+      background: #1E293B !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode .quick-action-btn:hover {
+      background: rgba(37, 99, 235, 0.2) !important;
+      border-color: #60A5FA !important;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+    }
+    body.dark-mode .quick-action-btn span {
+      color: #F8FAFC !important;
+    }
+
+    /* Progress Ring & Widgets */
+    body.dark-mode .progress-ring-bg {
+      stroke: #334155 !important;
+    }
+    body.dark-mode .progress-ring-text .value {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode .progress-ring-text .label {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode .timeline::before {
+      background: #334155 !important;
+    }
+    body.dark-mode .timeline-dot {
+      border-color: #1E293B !important;
+    }
+
+    /* Modal Campaign Tabs & Email Body Preview Overrides */
+    body.dark-mode #campaignEmailLivePreviewBox,
+    body.dark-mode #distDeptMappingSection,
+    body.dark-mode #distFallbackDeptSection,
+    body.dark-mode #distEmptyState {
+      background-color: #0F172A !important;
+      border-color: #334155 !important;
+      color: #E2E8F0 !important;
+    }
+    body.dark-mode #campaignTabRecipients table th,
+    body.dark-mode #campaignTabRecipients table td {
+      border-color: #334155 !important;
+    }
+    body.dark-mode [id^="tabBtnCampaign"] {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode #tabBtnCampaignRecipients[style*="border-bottom"],
+    body.dark-mode #tabBtnCampaignTemplate[style*="border-bottom"] {
+      color: #60A5FA !important;
+      border-bottom-color: #3B82F6 !important;
+    }
+    body.dark-mode .timeline-content h4 {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode .timeline-content p {
+      color: #94A3B8 !important;
+    }
+    body.dark-mode .skeleton-pulse {
+      background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%) !important;
+    }
+
+    /* Spreadsheet Toolbar & Dropdowns */
+    body.dark-mode #colVisibilityMenu {
+      background-color: #1E293B !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #myAssignmentsFilteredCount {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    /* Pagination */
     body.dark-mode .pagination button,
     body.dark-mode .pagination-item {
       background: #1E293B !important;
       color: #CBD5E1 !important;
       border-color: #334155 !important;
     }
-
     body.dark-mode .pagination button:hover:not(:disabled),
     body.dark-mode .pagination-item:hover:not(:disabled) {
       background: var(--primary, #2563EB) !important;
       color: #ffffff !important;
       border-color: var(--primary, #2563EB) !important;
     }
-
     body.dark-mode .pagination button.active,
     body.dark-mode .pagination-item.active {
       background: var(--primary, #2563EB) !important;
       color: #ffffff !important;
       border-color: var(--primary, #2563EB) !important;
     }
-
     body.dark-mode .pagination button:disabled,
     body.dark-mode .pagination-item:disabled {
       background: #0F172A !important;
@@ -455,71 +608,86 @@
       opacity: 0.5 !important;
     }
 
-    body.dark-mode #myAssignmentsFilteredCount {
+    /* Modals & Sub-sections */
+    body.dark-mode #lockMessage {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #FCA5A5 !important;
+    }
+    body.dark-mode #totalPoolCount,
+    body.dark-mode #modalTotalAssign {
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #assignMembersList,
+    body.dark-mode #circulateWorkloadTable,
+    body.dark-mode #circulateTargetCheckboxes,
+    body.dark-mode #circulatePreviewContent,
+    body.dark-mode #distDeptMappingSection,
+    body.dark-mode #distFallbackDeptSection {
       background-color: #0F172A !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+    body.dark-mode #distUnmatchedSection {
+      background-color: rgba(245, 158, 11, 0.15) !important;
+      border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+    body.dark-mode #distUnmatchedSection strong,
+    body.dark-mode #distUnmatchedSection p {
+      color: #FCD34D !important;
+    }
+
+    /* Floating Modal Nav & Smart Parser Box */
+    body.dark-mode .floating-modal-nav-btn {
+      background-color: #1E293B !important;
       color: #F8FAFC !important;
       border-color: #334155 !important;
     }
+    body.dark-mode .floating-modal-nav-btn:hover {
+      background-color: var(--primary, #2563EB) !important;
+      color: #FFFFFF !important;
+    }
 
-    body.dark-mode #filterDrawer {
+    /* Status Badges */
+    body.dark-mode .status-badge.pending,
+    body.dark-mode #modalStatusBadge {
+      background: rgba(245, 158, 11, 0.2) !important;
+      color: #FBBF24 !important;
+      border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+
+    /* Tour Tooltips, Shortcut Cards & Session Timeout */
+    body.dark-mode .shortcut-card {
+      background-color: #0F172A !important;
+      border-color: #334155 !important;
+      color: #F8FAFC !important;
+    }
+    body.dark-mode kbd {
+      background-color: #1E293B !important;
+      color: #60A5FA !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode .session-timeout-card {
       background-color: #1E293B !important;
       border-color: #334155 !important;
       color: #F8FAFC !important;
     }
-
-    body.dark-mode .modal-header {
-      border-bottom-color: #334155 !important;
+    body.dark-mode .session-timeout-card h3 {
+      color: #F8FAFC !important;
     }
-
-    body.dark-mode .modal-footer {
-      border-top-color: #334155 !important;
-      background-color: #1E293B !important;
-    }
-
-    body.dark-mode .tabs {
-      border-bottom-color: #334155 !important;
-    }
-
-    body.dark-mode .tab-item {
+    body.dark-mode .session-timeout-card p {
       color: #94A3B8 !important;
     }
 
-    body.dark-mode .tab-item.active {
-      color: var(--primary, #2563EB) !important;
-    }
-
-    body.dark-mode .btn-secondary,
-    body.dark-mode .btn-outline {
-      background-color: #0F172A !important;
-      color: #F8FAFC !important;
-      border-color: #334155 !important;
-    }
-
-    body.dark-mode .btn-secondary:hover,
-    body.dark-mode .btn-outline:hover {
-      background-color: #1E293B !important;
-    }
-
-    body.dark-mode #lockMessage {
-      background-color: rgba(239, 68, 68, 0.15) !important;
-      border-color: rgba(239, 68, 68, 0.3) !important;
-      color: #FCA5A5 !important;
-    }
-
-    body.dark-mode #totalPoolCount {
-      color: #F8FAFC !important;
-    }
-
+    /* Notifications */
     body.dark-mode #notifDropdown {
       background-color: #1E293B !important;
       border-color: #334155 !important;
       color: #F8FAFC !important;
     }
-
     body.dark-mode .notification-item.unread {
       background-color: rgba(37, 99, 235, 0.15) !important;
     }
-
     body.dark-mode .notification-item.unread:hover {
       background-color: rgba(37, 99, 235, 0.25) !important;
     }
@@ -721,6 +889,12 @@
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2500">2500</option>
+                <option value="5000">5000</option>
               </select>
             </div>
             <div class="pagination-info" id="paginationInfo">Showing 1-8 of 8 members</div>
@@ -807,6 +981,12 @@
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2500">2500</option>
+                <option value="5000">5000</option>
               </select>
             </div>
             <div class="pagination-info" id="myAssignmentsPaginationInfo">Showing 0 of 0 assignments</div>
@@ -883,6 +1063,7 @@
               <option value="250">250</option>
               <option value="500">500</option>
               <option value="1000">1000</option>
+              <option value="2500">2500</option>
               <option value="5000">5000</option>
             </select>
           </div>
@@ -1069,6 +1250,7 @@
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
             <span style="font-size:13px;color:#64748B;font-weight:500;">Current Status:</span>
             <span class="status-badge pending" id="modalStatusBadge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:50px;font-size:12px;font-weight:600;background:#FFFBEB;color:#92400E;"><i class="fas fa-clock"></i> Pending</span>
+            <button type="button" class="btn-undo-icon" id="undoSubmitBtn" style="display:none;" onclick="undoAlumniSubmission()" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>
           </div>
           <!-- Smart Profile Parser -->
           <div class="form-group" style="margin-bottom: 20px; background: var(--bg-light); padding: 15px; border-radius: 8px; border: 1px dashed var(--primary-light);">
@@ -1193,9 +1375,6 @@
           </div>
           <input type="hidden" id="fieldIndex" value="">
           <div class="submit-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #E2E8F0;margin-top:8px;flex-wrap:wrap;">
-            <button type="button" class="btn btn-warning" id="undoSubmitBtn" style="color:#fff;display:none;" onclick="undoAlumniSubmission()">
-              <i class="fas fa-undo"></i> Undo Submit
-            </button>
             <button type="button" class="btn btn-outline" id="saveDraftBtn">
               <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text">Save Draft</span>
@@ -1921,6 +2100,30 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/app.js"></script>
+  <!-- UNDO CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="undoConfirmModal" style="display:none;">
+    <div class="modal" style="max-width:440px;width:92vw;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:16px 20px;">
+        <h3 style="color:#B45309;margin:0;font-size:1.1rem;font-weight:700;"><i class="fas fa-undo" style="margin-right:8px;color:#F59E0B;"></i>Confirm Undo Submission</h3>
+        <button class="modal-close" onclick="closeUndoModal()" style="color:#B45309;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <p style="font-size:0.9rem;color:var(--text-dark);margin:0 0 12px;line-height:1.5;">
+          Are you sure you want to undo submission for <strong id="undoTargetName" style="color:#2563EB;">this record</strong>?
+        </p>
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:10px 14px;border-radius:8px;font-size:0.82rem;line-height:1.4;">
+          <i class="fas fa-info-circle" style="margin-right:4px;"></i> This record will automatically revert to <strong>Draft</strong> status so you can continue editing it.
+        </div>
+      </div>
+      <div style="padding:14px 20px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeUndoModal()">Cancel</button>
+        <button class="btn btn-warning btn-sm" id="confirmUndoBtn" onclick="executeUndoSubmission()" style="background:#F59E0B;color:#fff;border:none;font-weight:600;">
+          <i class="fas fa-undo"></i> Undo & Change to Draft
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/charts.js"></script>
   <script src="js/services/api.js"></script>
   <script src="js/dynamic-tour.js"></script>

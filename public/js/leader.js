@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   var totalAlumni = 0;
@@ -926,7 +926,13 @@
           if (desgVal !== '-') desgVal = desgVal.replace(regex, highlightMark);
         }
 
-        var actionBtns = '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
+        var safeName = (r.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        var actionBtns = '<div style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;">' +
+          '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
+        if (isCompleted) {
+          actionBtns += '<button type="button" class="btn-undo-icon" onclick="event.stopPropagation();confirmUndoSubmission(' + r.alumni_id + ', \'' + safeName + '\')" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
+        }
+        actionBtns += '</div>';
         var fatherVal = r.father_name || r.fatherName || r.pi_father_name || '';
         var nameCellHtml = '<div>' +
           '<div style="display:flex;align-items:center;gap:6px;">' +
@@ -1039,6 +1045,7 @@
 
   function openUpdateModal(alumniId) {
     currentSelectedAlumniId = alumniId;
+    window.currentSelectedAlumniId = alumniId;
     var targetId = parseInt(alumniId, 10);
     if (myFilteredAssignments && myFilteredAssignments.length > 0) {
       window._currentLeaderRecordIndex = myFilteredAssignments.findIndex(function (r) { return r.alumni_id === targetId; });
@@ -3238,3 +3245,102 @@ window.markReplyAsReviewed = function (replyId) {
     }
   }).catch(function () { });
 };
+
+var _undoTargetId = null;
+
+window.confirmUndoSubmission = function (alumniId, name) {
+  _undoTargetId = alumniId;
+  var nameEl = document.getElementById('undoTargetName');
+  if (nameEl) nameEl.textContent = name || 'this record';
+  if (typeof window.openModal === 'function') {
+    window.openModal('undoConfirmModal');
+  } else {
+    var modal = document.getElementById('undoConfirmModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+    }
+  }
+};
+
+window.closeUndoModal = function () {
+  _undoTargetId = null;
+  if (typeof window.closeModal === 'function') {
+    window.closeModal('undoConfirmModal');
+  } else {
+    var modal = document.getElementById('undoConfirmModal');
+    if (modal) {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+    }
+  }
+};
+
+window.executeUndoSubmission = function () {
+  if (!_undoTargetId) return;
+  var btn = document.getElementById('confirmUndoBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...';
+  }
+
+  var apiCall = (window.API && typeof window.API.reopenAssignment === 'function')
+    ? window.API.reopenAssignment(_undoTargetId, 'Undone by team leader')
+    : (window.API && typeof window.API.reopenAlumni === 'function'
+      ? window.API.reopenAlumni(_undoTargetId)
+      : Promise.reject(new Error('API unavailable')));
+
+  apiCall.then(function (res) {
+    if (window.Toast && typeof window.Toast.warning === 'function') {
+      window.Toast.warning('Submission Undone!', 'Record moved back to Draft.');
+    } else if (typeof showToast === 'function') {
+      showToast('Submission Undone', 'Record moved back to Draft.', 'warning');
+    }
+
+    // Optimistically update local assignments array so the record status becomes Draft immediately
+    if (typeof myAssignmentsData !== 'undefined' && Array.isArray(myAssignmentsData)) {
+      myAssignmentsData.forEach(function (rec) {
+        if (rec.alumni_id == _undoTargetId || rec.id == _undoTargetId) {
+          rec.status = 'Draft';
+        }
+      });
+    }
+
+    window.closeUndoModal();
+
+    // Hide update modal if open for this record
+    var updateModalOverlay = document.getElementById('updateModal');
+    if (updateModalOverlay) {
+      if (typeof window.closeModal === 'function') {
+        window.closeModal('updateModal');
+      } else {
+        updateModalOverlay.classList.remove('show');
+        updateModalOverlay.style.display = 'none';
+      }
+    }
+
+    // Re-render table and fetch fresh data from backend
+    if (typeof renderMyAssignmentsTable === 'function') renderMyAssignmentsTable();
+    if (typeof loadMyAssignments === 'function') loadMyAssignments();
+    if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+  }).catch(function (err) {
+    var errMsg = (err && err.message) || 'Failed to undo submission.';
+    if (window.Toast && typeof window.Toast.danger === 'function') {
+      window.Toast.danger('Undo Failed', errMsg);
+    } else if (typeof showToast === 'function') {
+      showToast('Undo Failed', errMsg, 'danger');
+    }
+  }).finally(function () {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-undo"></i> Undo & Change to Draft';
+    }
+  });
+};
+
+window.undoAlumniSubmission = function () {
+  if (!window.currentSelectedAlumniId) return;
+  var recordName = (document.getElementById('modalTitle') ? document.getElementById('modalTitle').textContent : '');
+  window.confirmUndoSubmission(window.currentSelectedAlumniId, recordName);
+};
+

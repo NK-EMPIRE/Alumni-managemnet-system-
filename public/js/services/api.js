@@ -183,7 +183,7 @@
         return patch('/alumni/' + id + '/reopen', {});
     },
     reopenAssignment: function (id, reason) {
-        return post('/assignments/reopen/' + id, { reason: reason || 'Undone by user' });
+        return patch('/alumni/' + id + '/reopen', { reason: reason || 'Undone by user' });
     },
 
     uploadImport: function (formData) {
