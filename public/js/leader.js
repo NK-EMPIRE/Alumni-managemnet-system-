@@ -670,10 +670,20 @@
   }
 
   function setupSearchAndFilter() {
-    document.getElementById('tableSearch').addEventListener('input', function () {
-      currentPage = 1;
-      populateTeamTable();
-    });
+    var tblSearch = document.getElementById('tableSearch');
+    if (tblSearch) {
+      tblSearch.addEventListener('input', function () {
+        currentPage = 1;
+        populateTeamTable();
+      });
+    }
+    var memSearch = document.getElementById('memberSearch');
+    if (memSearch) {
+      memSearch.addEventListener('input', function () {
+        currentPage = 1;
+        populateTeamTable();
+      });
+    }
     var globalSearch = document.getElementById('globalSearch');
     if (globalSearch) {
       globalSearch.addEventListener('input', function () {
@@ -681,8 +691,12 @@
         var activeItem = document.querySelector('.sidebar-item.active');
         var activePage = activeItem ? activeItem.getAttribute('data-page') : 'dashboard';
         if (activePage === 'dashboard') {
-          var el = document.getElementById('memberSearch');
-          if (el) { el.value = val; populateTeamTable(); }
+          var el1 = document.getElementById('tableSearch');
+          var el2 = document.getElementById('memberSearch');
+          if (el1) el1.value = val;
+          if (el2) el2.value = val;
+          currentPage = 1;
+          populateTeamTable();
         } else if (activePage === 'assignments') {
           var el = document.getElementById('myAssignmentsSearch');
           if (el) { el.value = val; renderMyAssignmentsTable(); }
@@ -1659,14 +1673,43 @@
     var ssDept = document.getElementById('ssFilterDept');
     var ssBatch = document.getElementById('ssFilterBatch');
     if (ssDept) {
+      var currentDeptVal = ssDept.value;
       var html = '<option value="">All Depts</option>';
-      Object.keys(deptMap).sort().forEach(function (d) { html += '<option value="' + d + '">' + d + '</option>'; });
+      Object.keys(deptMap).sort().forEach(function (d) {
+        var sel = d === currentDeptVal ? ' selected' : '';
+        html += '<option value="' + d + '"' + sel + '>' + d + '</option>';
+      });
       ssDept.innerHTML = html;
     }
     if (ssBatch) {
+      var currentBatchVal = ssBatch.value;
       var html = '<option value="">All Batches</option>';
-      Object.keys(batchMap).sort().forEach(function (b) { html += '<option value="' + b + '">' + b + '</option>'; });
+      Object.keys(batchMap).sort().forEach(function (b) {
+        var sel = b === currentBatchVal ? ' selected' : '';
+        html += '<option value="' + b + '"' + sel + '>' + b + '</option>';
+      });
       ssBatch.innerHTML = html;
+    }
+
+    var memVal = document.getElementById('ssFilterMember') ? document.getElementById('ssFilterMember').value : '';
+    var deptVal = ssDept ? ssDept.value : '';
+    var batchVal = ssBatch ? ssBatch.value : '';
+    var statusVal = document.getElementById('ssFilterStatus') ? document.getElementById('ssFilterStatus').value : '';
+    var dateFromVal = document.getElementById('ssDateFrom') ? document.getElementById('ssDateFrom').value : '';
+    var dateToVal = document.getElementById('ssDateTo') ? document.getElementById('ssDateTo').value : '';
+
+    var activeCount = 0;
+    if (memVal) activeCount++;
+    if (deptVal) activeCount++;
+    if (batchVal) activeCount++;
+    if (statusVal) activeCount++;
+    if (dateFromVal) activeCount++;
+    if (dateToVal) activeCount++;
+
+    var badge = document.getElementById('activeFilterBadge');
+    if (badge) {
+      badge.textContent = activeCount;
+      badge.style.display = activeCount > 0 ? 'inline-block' : 'none';
     }
   }
 
