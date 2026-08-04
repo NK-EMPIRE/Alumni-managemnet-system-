@@ -16,7 +16,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
   // Designations / Roles
   const desigResult = await createRequest().query(`
     SELECT
-      ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified') AS designation,
+      ISNULL(NULLIF(LTRIM(RTRIM(pi.designation)), ''), 'Not Specified') AS designation,
       COUNT(DISTINCT a.alumni_id) AS count
     FROM dbo.Alumni a
     LEFT JOIN (
@@ -34,14 +34,14 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
       AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
-    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified')
+    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(pi.designation)), ''), 'Not Specified')
     ORDER BY count DESC;
   `);
 
   // Companies
   const companyResult = await createRequest().query(`
     SELECT
-      ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified') AS company,
+      ISNULL(NULLIF(LTRIM(RTRIM(pi.company)), ''), 'Not Specified') AS company,
       COUNT(DISTINCT a.alumni_id) AS count
     FROM dbo.Alumni a
     LEFT JOIN (
@@ -57,14 +57,14 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
       AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
-    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified')
+    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(pi.company)), ''), 'Not Specified')
     ORDER BY count DESC;
   `);
 
   // Cities / Company Addresses
   const cityResult = await createRequest().query(`
     SELECT
-      ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified') AS city,
+      ISNULL(NULLIF(LTRIM(RTRIM(pi.current_city)), ''), 'Not Specified') AS city,
       COUNT(DISTINCT a.alumni_id) AS count
     FROM dbo.Alumni a
     LEFT JOIN (
@@ -80,7 +80,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
       AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL)
-    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified')
+    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(pi.current_city)), ''), 'Not Specified')
     ORDER BY count DESC;
   `);
 
@@ -92,7 +92,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
         WHEN pi.is_entrepreneur = 1 THEN 'Business / Entrepreneur'
         WHEN pi.higher_studies IS NOT NULL AND pi.higher_studies <> '' THEN 'Higher Studies'
         WHEN LOWER(ISNULL(pi.other_occupation,'')) LIKE '%freelance%' THEN 'Freelance'
-        WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> '') THEN 'Private Sector'
+        WHEN (pi.company IS NOT NULL AND pi.company <> '') THEN 'Private Sector'
         ELSE 'Unknown / Other'
       END AS profession_type,
       COUNT(DISTINCT a.alumni_id) AS count
@@ -116,7 +116,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
         WHEN pi.is_entrepreneur = 1 THEN 'Business / Entrepreneur'
         WHEN pi.higher_studies IS NOT NULL AND pi.higher_studies <> '' THEN 'Higher Studies'
         WHEN LOWER(ISNULL(pi.other_occupation,'')) LIKE '%freelance%' THEN 'Freelance'
-        WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> '') THEN 'Private Sector'
+        WHEN (pi.company IS NOT NULL AND pi.company <> '') THEN 'Private Sector'
         ELSE 'Unknown / Other'
       END
     ORDER BY count DESC;
@@ -159,9 +159,9 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
         COALESCE(pi.email, a.email) AS email,
         COALESCE(pi.phone, a.phone) AS phone,
         a.secondary_email, a.secondary_phone,
-        COALESCE(pi.designation, a.designation) AS designation,
-        COALESCE(pi.company, a.company) AS company,
-        COALESCE(pi.current_city, a.city) AS current_city,
+        pi.designation AS designation,
+        pi.company AS company,
+        pi.current_city AS current_city,
         a.state, a.country,
         COALESCE(pi.linkedin_url, a.linkedin_profile) AS linkedin_profile,
         pi.is_government_job, pi.is_entrepreneur, pi.higher_studies, pi.other_occupation,
@@ -174,7 +174,7 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
           WHEN pi.is_entrepreneur = 1 THEN 'Business / Entrepreneur'
           WHEN pi.higher_studies IS NOT NULL AND pi.higher_studies <> '' THEN 'Higher Studies'
           WHEN LOWER(ISNULL(pi.other_occupation,'')) LIKE '%freelance%' THEN 'Freelance'
-          WHEN COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> '' THEN 'Private Sector'
+          WHEN pi.company IS NOT NULL AND pi.company <> '' THEN 'Private Sector'
           ELSE 'Unknown / Other'
         END AS profession_type,
         COUNT(*) OVER() AS total_count
@@ -193,13 +193,13 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
       LEFT JOIN dbo.Users um ON um.user_id = aa.member_id
       WHERE
         (@onlyUpdated = 0 OR (a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL))
-        AND (@designation IS NULL OR COALESCE(pi.designation, a.designation) = @designation)
-        AND (@company IS NULL OR COALESCE(pi.company, a.company) = @company)
-        AND (@city IS NULL OR COALESCE(pi.current_city, a.city) = @city)
+        AND (@designation IS NULL OR pi.designation = @designation)
+        AND (@company IS NULL OR pi.company = @company)
+        AND (@city IS NULL OR pi.current_city = @city)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
-        AND (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR COALESCE(pi.company, a.company) LIKE @search OR COALESCE(pi.designation, a.designation) LIKE @search OR a.register_no LIKE @search)
+        AND (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR pi.company LIKE @search OR pi.designation LIKE @search OR a.register_no LIKE @search)
         AND (
           @profType IS NULL
           OR (
@@ -211,14 +211,14 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
           ) OR (
             @profType = 'Freelance' AND LOWER(ISNULL(pi.other_occupation,'')) LIKE '%freelance%'
           ) OR (
-            @profType = 'Private Sector' AND COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> ''
+            @profType = 'Private Sector' AND pi.company IS NOT NULL AND pi.company <> ''
             AND (pi.is_government_job IS NULL OR pi.is_government_job = 0)
             AND (pi.is_entrepreneur IS NULL OR pi.is_entrepreneur = 0)
           ) OR (
             @profType = 'Unknown / Other' AND (pi.is_government_job IS NULL OR pi.is_government_job = 0)
             AND (pi.is_entrepreneur IS NULL OR pi.is_entrepreneur = 0)
             AND (pi.higher_studies IS NULL OR pi.higher_studies = '')
-            AND (COALESCE(pi.company, a.company) IS NULL OR COALESCE(pi.company, a.company) = '')
+            AND (pi.company IS NULL OR pi.company = '')
           )
         )
     )
