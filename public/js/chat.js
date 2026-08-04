@@ -458,13 +458,8 @@
                 senderRow.style.cssText = 'font-size:12px;color:' + DK.textMuted + ';margin-bottom:3px;display:flex;align-items:center;gap:6px;font-family:sans-serif';
                 var name = document.createElement('span');
                 name.textContent = msg.sender_name || 'User';
+                name.style.cssText = 'font-weight:700;color:#93c5fd;font-size:12px;';
                 senderRow.appendChild(name);
-                if (msg.sender_role) {
-                    var pill = document.createElement('span');
-                    pill.textContent = msg.sender_role;
-                    pill.style.cssText = 'background:#1e3a5f;color:#93c5fd;font-size:10px;padding:1px 7px;border-radius:4px;font-weight:700;text-transform:uppercase;font-family:sans-serif;letter-spacing:.5px';
-                    senderRow.appendChild(pill);
-                }
                 item.appendChild(senderRow);
             }
             var bubble = document.createElement('div');
