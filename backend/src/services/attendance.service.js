@@ -19,9 +19,7 @@ function isTuesday(date) {
  * Outside window: do nothing
  */
 async function recordLoginAttendance(userId, role) {
-  // Only track LEADER and MEMBER
-  if (role !== 'LEADER' && role !== 'MEMBER') return;
-
+  // Track all active users including ADMIN, LEADER, MEMBER
   const nowUTC = new Date();
   const nowIST = toIST(nowUTC);
 
@@ -59,7 +57,7 @@ async function recordLoginAttendance(userId, role) {
 }
 
 /**
- * Mark all LEADER/MEMBER users who have NO record for the given Tuesday as Absent.
+ * Mark all active users (ADMIN, LEADER, MEMBER) who have NO record for the given Tuesday as Absent.
  * @param {string} dateStr - YYYY-MM-DD (must be a Tuesday)
  */
 async function markAbsentees(dateStr) {
@@ -78,8 +76,7 @@ async function markAbsentees(dateStr) {
       INSERT INTO dbo.Attendance (user_id, attendance_date, login_time, status, marked_by)
       SELECT u.user_id, @targetDate, NULL, 'Absent', 'system'
       FROM dbo.Users u
-      WHERE u.role_name IN ('LEADER', 'MEMBER')
-        AND u.is_active = 1
+      WHERE u.is_active = 1
         AND NOT EXISTS (
           SELECT 1 FROM dbo.Attendance a
           WHERE a.user_id = u.user_id AND a.attendance_date = @targetDate

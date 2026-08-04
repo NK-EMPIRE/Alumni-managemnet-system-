@@ -322,9 +322,6 @@ function renderAttendanceTable(data) {
     html += '<td style="padding:12px;font-family:monospace;font-weight:600;">' + timeStr + '</td>';
     html += '<td style="padding:12px;">' + statusBadge + '</td>';
     html += '<td style="padding:12px;font-size:0.85rem;color:#64748B;">' + (row.marked_by || 'system') + '</td>';
-    html += '<td style="padding:12px;text-align:center;">';
-    html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:0.75rem;" onclick="overrideAttendanceRecord(' + row.attendance_id + ',\'' + row.status + '\')"><i class="fas fa-edit"></i> Override</button>';
-    html += '</td>';
     html += '</tr>';
   });
 
@@ -356,7 +353,7 @@ window.triggerMarkAbsent = function () {
     selectedDate = new Date().toISOString().slice(0, 10);
   }
 
-  if (!confirm('Mark absentees for ' + selectedDate + '? This will record "Absent" status for all active Leaders & Members who did not log in between 1:15 PM - 2:45 PM IST.')) {
+  if (!confirm('Mark absentees for ' + selectedDate + '? This will record "Absent" status for all active Users (Admins, Leaders & Members) who did not log in between 1:15 PM - 2:45 PM IST.')) {
     return;
   }
 
@@ -371,30 +368,5 @@ window.triggerMarkAbsent = function () {
     })
     .catch(function (err) {
       Toast.error('Error', err.message || 'Failed to trigger absent marking.');
-    });
-};
-
-window.overrideAttendanceRecord = function (attendanceId, currentStatus) {
-  var newStatus = prompt('Override Attendance Status (Present / Late / Absent):', currentStatus);
-  if (!newStatus) return;
-  newStatus = newStatus.trim();
-  if (!['Present', 'Late', 'Absent'].includes(newStatus)) {
-    Toast.warning('Invalid Status', 'Must be exactly: Present, Late, or Absent');
-    return;
-  }
-
-  var notes = prompt('Enter override reason / note (optional):', 'Admin manual override');
-
-  API.updateAttendanceRecord(attendanceId, { status: newStatus, notes: notes })
-    .then(function (res) {
-      if (res && res.success) {
-        Toast.success('Override Updated', 'Attendance record updated to ' + newStatus);
-        fetchAttendanceData();
-      } else {
-        Toast.error('Update Failed', res ? res.message : 'Failed to update record.');
-      }
-    })
-    .catch(function (err) {
-      Toast.error('Error', err.message || 'Failed to override attendance.');
     });
 };

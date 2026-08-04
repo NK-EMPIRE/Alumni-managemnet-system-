@@ -2008,6 +2008,7 @@
           </select>
           <select id="attFilterRole" class="form-control" onchange="fetchAttendanceReport(1)">
             <option value="">All Roles</option>
+            <option value="ADMIN">Admins</option>
             <option value="LEADER">Team Leaders</option>
             <option value="MEMBER">Team Members</option>
           </select>
@@ -2024,11 +2025,10 @@
               <th style="padding:12px;">Login Time (IST)</th>
               <th style="padding:12px;">Status</th>
               <th style="padding:12px;">Marked By</th>
-              <th style="padding:12px;text-align:center;">Action Override</th>
             </tr>
           </thead>
           <tbody id="attTableBody">
-            <tr><td colspan="8" style="text-align:center;padding:24px;color:#94A3B8;">Loading attendance logs...</td></tr>
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:#94A3B8;">Loading attendance logs...</td></tr>
           </tbody>
         </table>
       </div>
