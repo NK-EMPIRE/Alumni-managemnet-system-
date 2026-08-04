@@ -201,12 +201,30 @@ async function clearMessages({ reqUser, channelType }) {
   }
   const pool = await getPool();
   await ensureChannelColumn(pool);
-  const request = pool.request();
+
   if (channelType && channelType !== 'all') {
-    request.input('channelType', sql.NVarChar(50), channelType);
-    await request.query(`DELETE FROM dbo.WorkspaceMessages WHERE channel_type = @channelType`);
+    // 1. Nullify or delete Notifications that reference messages in this channel
+    await pool.request()
+      .input('channelType', sql.NVarChar(50), channelType)
+      .query(`
+        UPDATE dbo.Notifications
+        SET source_message_id = NULL
+        WHERE source_message_id IN (
+          SELECT message_id FROM dbo.WorkspaceMessages WHERE channel_type = @channelType
+        )
+      `);
+    // 2. Now safely delete the messages
+    await pool.request()
+      .input('channelType', sql.NVarChar(50), channelType)
+      .query(`DELETE FROM dbo.WorkspaceMessages WHERE channel_type = @channelType`);
   } else {
-    await request.query(`DELETE FROM dbo.WorkspaceMessages`);
+    // 1. Nullify all Notifications referencing any message
+    await pool.request().query(`
+      UPDATE dbo.Notifications SET source_message_id = NULL
+      WHERE source_message_id IS NOT NULL
+    `);
+    // 2. Delete all messages
+    await pool.request().query(`DELETE FROM dbo.WorkspaceMessages`);
   }
   return true;
 }
