@@ -13,17 +13,41 @@
     var _currentUserId = null;
     var _initialized = false;
 
-    // Dark theme palette
-    var DK = {
-        bg:          '#0f172a',
-        surface:     '#1e293b',
-        border:      '#334155',
-        textPrimary: '#f1f5f9',
-        textMuted:   '#94a3b8',
-        accent:      '#3b82f6',
-        accentHover: '#2563eb',
-        badgeRed:    '#ef4444'
+    // Theme palettes
+    var THEMES = {
+        dark: {
+            bg:          '#0f172a',
+            surface:     '#1e293b',
+            border:      '#334155',
+            textPrimary: '#f1f5f9',
+            textMuted:   '#94a3b8',
+            accent:      '#3b82f6',
+            accentHover: '#2563eb',
+            badgeRed:    '#ef4444',
+            inputBg:     '#0d1726',
+            bubbleOther: '#1e293b'
+        },
+        light: {
+            bg:          '#f8fafc',
+            surface:     '#ffffff',
+            border:      '#e2e8f0',
+            textPrimary: '#1e293b',
+            textMuted:   '#64748b',
+            accent:      '#3b82f6',
+            accentHover: '#2563eb',
+            badgeRed:    '#ef4444',
+            inputBg:     '#f1f5f9',
+            bubbleOther: '#f1f5f9'
+        }
     };
+    var _isDark = true;
+
+    function getTheme() {
+        return _isDark ? THEMES.dark : THEMES.light;
+    }
+
+    // Keep DK as alias for current theme (backward compat)
+    var DK = THEMES.dark;
 
     function esc(str) {
         if (!str) return '';
@@ -90,7 +114,17 @@
         // Default everyone to global tab; team tab still available for non-admins
         _activeTab = 'global';
 
+        // Restore theme preference
+        try {
+            var savedTheme = localStorage.getItem('cpTheme');
+            if (savedTheme === 'light') _isDark = false;
+        } catch(e) {}
+
         buildDOM(isAdmin);
+
+        // Sync theme toggle button icon
+        var tb = $('cpThemeBtn');
+        if (tb) tb.textContent = _isDark ? '☀️' : '🌙';
         if (token) {
             fetchMessages('global', true);
             if (!isAdmin) {
@@ -212,6 +246,26 @@
         titleArea.appendChild(icon);
         titleArea.appendChild(titleGroup);
 
+        var themeBtn = document.createElement('button');
+        themeBtn.id = 'cpThemeBtn';
+        themeBtn.title = 'Toggle light/dark mode';
+        themeBtn.textContent = '☀️';
+        css(themeBtn, {
+            background: 'rgba(255,255,255,.08)', border: 'none',
+            color: DK.textPrimary, width: '34px', height: '34px',
+            borderRadius: '8px', cursor: 'pointer', fontSize: '16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'sans-serif', flexShrink: '0', transition: 'background .2s',
+            marginRight: '4px'
+        });
+        themeBtn.onclick = function () {
+            _isDark = !_isDark;
+            themeBtn.textContent = _isDark ? '☀️' : '🌙';
+            applyTheme();
+        };
+        themeBtn.onmouseenter = function () { css(this, { background: 'rgba(255,255,255,.15)' }); };
+        themeBtn.onmouseleave = function () { css(this, { background: 'rgba(255,255,255,.08)' }); };
+
         var closeBtn = document.createElement('button');
         closeBtn.innerHTML = '&#10005;';
         closeBtn.onclick = togglePanel;
@@ -225,8 +279,14 @@
         closeBtn.onmouseenter = function () { css(this, { background: 'rgba(239,68,68,.75)' }); };
         closeBtn.onmouseleave = function () { css(this, { background: 'rgba(255,255,255,.08)' }); };
 
+        var headerBtns = document.createElement('div');
+        css(headerBtns, { display: 'flex', alignItems: 'center', gap: '4px' });
+        headerBtns.appendChild(themeBtn);
+        headerBtns.appendChild(closeBtn);
+
         header.appendChild(titleArea);
-        header.appendChild(closeBtn);
+        header.appendChild(headerBtns);
+
 
         var tabBar = document.createElement('div');
         tabBar.id = 'cpTabBar';
@@ -356,6 +416,30 @@
             panel.appendChild(msgBody);
             panel.appendChild(footer);
         }
+    }
+
+    function applyTheme() {
+        var T = getTheme();
+        var panel   = $('cpPanel');
+        var tabBar  = $('cpTabBar');
+        var body    = $('cpBody');
+        var input   = $('cpInput');
+        if (panel)  panel.style.background  = T.bg;
+        if (tabBar) { tabBar.style.background = T.surface; tabBar.style.borderBottomColor = T.border; }
+        if (body)   body.style.background   = T.bg;
+        if (input) {
+            input.style.background = T.inputBg;
+            input.style.color      = T.textPrimary;
+            input.style.borderColor = T.border;
+        }
+        // Update header background
+        var header = panel ? panel.querySelector('div:first-child') : null;
+        if (header) { header.style.background = T.surface; header.style.borderBottomColor = T.border; }
+        // float button stays dark always
+        var clearRow = $('cpClearBtn') ? $('cpClearBtn').parentElement : null;
+        if (clearRow) { clearRow.style.background = T.surface; clearRow.style.borderTopColor = T.border; }
+        // Store preference
+        try { localStorage.setItem('cpTheme', _isDark ? 'dark' : 'light'); } catch(e) {}
     }
 
     function togglePanel() {

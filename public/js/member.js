@@ -1051,6 +1051,9 @@
                     if (typeof window.openEmailCampaignModal === 'function') window.openEmailCampaignModal();
                     return;
                 }
+                if (page === 'chat' || page === 'notifications') {
+                    return;
+                }
 
                 document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
                 item.classList.add('active');
