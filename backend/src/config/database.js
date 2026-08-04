@@ -175,17 +175,22 @@ async function getPool() {
       /* ── Performance Indexes for Large Datasets ── */
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'IX_Alumni_Dept_Batch')
       BEGIN
-          CREATE INDEX IX_Alumni_Dept_Batch ON dbo.Alumni(department, batch);
+          EXEC('CREATE INDEX IX_Alumni_Dept_Batch ON dbo.Alumni(department, batch)');
       END
 
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'IX_Alumni_RegisterNo')
       BEGIN
-          CREATE INDEX IX_Alumni_RegisterNo ON dbo.Alumni(register_no);
+          EXEC('CREATE INDEX IX_Alumni_RegisterNo ON dbo.Alumni(register_no)');
       END
 
-      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_User_Status')
+      IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'member_id'
+      ) AND NOT EXISTS (
+          SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_User_Status'
+      )
       BEGIN
-          CREATE INDEX IX_AlumniAssignments_User_Status ON dbo.AlumniAssignments(member_id, status);
+          EXEC('CREATE INDEX IX_AlumniAssignments_User_Status ON dbo.AlumniAssignments(member_id, status)');
       END
 
       IF EXISTS (
@@ -195,22 +200,27 @@ async function getPool() {
           SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_Team_Status'
       )
       BEGIN
-          CREATE INDEX IX_AlumniAssignments_Team_Status ON dbo.AlumniAssignments(team_id, status);
+          EXEC('CREATE INDEX IX_AlumniAssignments_Team_Status ON dbo.AlumniAssignments(team_id, status)');
       END
 
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_AlumniId')
       BEGIN
-          CREATE INDEX IX_AlumniAssignments_AlumniId ON dbo.AlumniAssignments(alumni_id);
+          EXEC('CREATE INDEX IX_AlumniAssignments_AlumniId ON dbo.AlumniAssignments(alumni_id)');
       END
 
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IX_Users_Email')
       BEGIN
-          CREATE INDEX IX_Users_Email ON dbo.Users(email);
+          EXEC('CREATE INDEX IX_Users_Email ON dbo.Users(email)');
       END
 
-      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IX_Users_Team_Role')
+      IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'team_id'
+      ) AND NOT EXISTS (
+          SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IX_Users_Team_Role'
+      )
       BEGIN
-          CREATE INDEX IX_Users_Team_Role ON dbo.Users(team_id, role_id);
+          EXEC('CREATE INDEX IX_Users_Team_Role ON dbo.Users(team_id, role_id)');
       END
     `);
   } catch (e) {
