@@ -5775,8 +5775,10 @@ body.dark-mode .shortcut-card .shortcut-desc {
    backdrop overlays / vignettes
    ──────────────────────────────────────────────────────────── */
 
-/* Hide floating notification bell completely */
-#ntfFloatBtn {
+/* Hide floating notification bell & chat button completely */
+#ntfFloatBtn,
+#cpFloatBtn,
+.chat-launcher-btn {
   display: none !important;
 }
 

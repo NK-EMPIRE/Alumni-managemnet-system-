@@ -207,6 +207,10 @@
       </a>
 
       <div class="sidebar-label">Other</div>
+      <a class="sidebar-item" data-section="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
+        <i class="fas fa-comments"></i>
+        <span class="sidebar-item-text">Chat</span>
+      </a>
       <a class="sidebar-item" data-section="settings" onclick="navigateTo('settings', this)">
         <i class="fas fa-cog"></i>
         <span class="sidebar-item-text">Settings</span>
@@ -2339,7 +2343,7 @@
     <script src="js/dynamic-tour.js"></script>
     <script src="js/admin.js?v=2.0.0"></script>
     <script src="js/chat.js"></script>
-    <script src="js/notifications.js"></script>
+
 </body>
 
 </html>

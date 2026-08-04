@@ -1216,6 +1216,9 @@
     <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal(); return false;" href="#">
         <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
     </a>
+    <a class="nav-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
+        <i class="fas fa-comments"></i> <span class="nav-item-text">Chat</span>
+    </a>
     <a class="nav-item" data-page="settings">
         <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
     </a>
@@ -1260,17 +1263,18 @@
               <i class="fas fa-magic"></i>
             </button>
 
-            <div style="position:relative; display:none !important;">
-                <button class="topbar-btn" id="notifBtn">
+            <!-- Notification Dropdown -->
+            <div style="position:relative;">
+                <button class="topbar-btn" id="notifBtn" onclick="toggleNotifications(event)" title="Notifications" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;position:relative;">
                     <i class="fas fa-bell"></i>
-                    <span class="notif-dot"></span>
+                    <span id="notifCount" class="notification-count" style="display:none;position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
                 </button>
-                <div class="notif-dropdown" id="notifDropdown">
-                    <div class="notif-dropdown-header">
-                        <h4>Notifications</h4>
-                        <button id="markAllRead" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
+                <div class="notif-dropdown" id="notifDropdown" style="width:340px; right:0; left:auto !important; display:none; position:absolute; top:100%; z-index:1000; background:#fff; border:1px solid #E2E8F0; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:10px;">
+                    <div class="notif-dropdown-header" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #E2E8F0;margin-bottom:8px;">
+                        <h4 style="margin:0;font-size:0.9rem;color:#1E293B;">Notifications</h4>
+                        <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
                     </div>
-                    <div id="notifList"></div>
+                    <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
                 </div>
             </div>
 
@@ -1401,17 +1405,13 @@
                             <th style="padding:12px 16px;text-align:left;">Phone</th>
                             <th style="padding:12px 16px;text-align:left;">Company/Institution</th>
                             <th style="padding:12px 16px;text-align:left;">Designation</th>
-                            <th style="padding:12px 16px;text-align:left;">Experience</th>
-                            <th style="padding:12px 16px;text-align:left;">City</th>
-                            <th style="padding:12px 16px;text-align:left;">Country</th>
                             <th style="padding:12px 16px;text-align:left;">LinkedIn/Facebook URL</th>
                             <th style="padding:12px 16px;text-align:left;">Current Status</th>
                             <th style="padding:12px 16px;text-align:left;">Updated Date</th>
-                            <th style="padding:12px 16px;text-align:left;">Working Details</th>
                         </tr>
                     </thead>
                     <tbody id="previewSpreadsheetBody">
-                        <tr><td colspan="18" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>
+                        <tr><td colspan="14" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1512,6 +1512,9 @@
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:12px;">
+                <button type="button" id="modalTopEditBtn" onclick="toggleModalFieldsEditMode()" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#2563EB;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;" title="Click pencil to unlock pre-filled fields for editing">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
                 <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;background:#F1F5F9;padding:4px 10px;border-radius:12px;border:1px solid #CBD5E1;">1 / 1</span>
                 <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
             </div>
@@ -1537,30 +1540,14 @@
                     </div>
                     <div class="form-group">
                         <label>Department <span class="required">*</span></label>
-                        <select id="fieldDept">
-                            <option value="">Select Department</option>
-                            <option value="CSE">CSE</option>
-                            <option value="ECE">ECE</option>
-                            <option value="EEE">EEE</option>
-                            <option value="ME">ME</option>
-                            <option value="CE">CE</option>
-                            <option value="IT">IT</option>
-                        </select>
+                        <input type="text" id="fieldDept" placeholder="Department" readonly>
                         <div class="error-text" id="errorDept">Department is required</div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Batch <span class="required">*</span></label>
-                        <select id="fieldBatch">
-                            <option value="">Select Batch</option>
-                            <option value="2018">2018</option>
-                            <option value="2019">2019</option>
-                            <option value="2020">2020</option>
-                            <option value="2021">2021</option>
-                            <option value="2022">2022</option>
-                            <option value="2023">2023</option>
-                        </select>
+                        <input type="text" id="fieldBatch" placeholder="Batch" readonly>
                         <div class="error-text" id="errorBatch">Batch is required</div>
                     </div>
                     <div class="form-group">
@@ -2074,6 +2061,6 @@
 </script>
 <script src="js/member.js?v=2.0.0"></script>
 <script src="js/chat.js"></script>
-<script src="js/notifications.js"></script>
+
 </body>
 </html>

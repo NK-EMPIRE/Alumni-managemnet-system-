@@ -87,11 +87,8 @@
             } catch (e) {}
         }
         var isAdmin = userRole.indexOf('ADMIN') !== -1 || window.location.pathname.indexOf('admin.html') !== -1;
-        if (isAdmin) {
-            _activeTab = 'global';
-        } else if (pName.indexOf('teammember') !== -1 || pName.indexOf('teamleader') !== -1) {
-            _activeTab = 'team';
-        }
+        // Default everyone to global tab; team tab still available for non-admins
+        _activeTab = 'global';
 
         buildDOM(isAdmin);
         if (token) {
@@ -166,7 +163,7 @@
         panel.id = 'cpPanel';
         css(panel, {
             position: 'fixed', top: '0', right: '0',
-            width: '380px', maxWidth: '100vw', height: '100vh',
+            width: '480px', maxWidth: '100vw', height: '100vh',
             background: DK.bg, zIndex: '2147483646',
             display: 'none', flexDirection: 'column',
             boxShadow: 'none', visibility: 'hidden',
@@ -317,10 +314,48 @@
         footer.appendChild(input);
         footer.appendChild(sendBtn);
 
-        panel.appendChild(header);
-        panel.appendChild(tabBar);
-        panel.appendChild(msgBody);
-        panel.appendChild(footer);
+        // Admin-only: Clear Chat button
+        if (isAdmin) {
+            var clearBtn = document.createElement('button');
+            clearBtn.id = 'cpClearBtn';
+            clearBtn.title = 'Clear all chat messages';
+            clearBtn.innerHTML = '🗑 Clear Chat';
+            css(clearBtn, {
+                padding: '7px 14px', borderRadius: '8px', border: '1px solid #ef4444',
+                background: 'rgba(239,68,68,.12)', color: '#ef4444', fontSize: '12px',
+                fontWeight: '600', cursor: 'pointer', fontFamily: 'sans-serif',
+                transition: 'background .2s', marginLeft: '4px', flexShrink: '0'
+            });
+            clearBtn.onmouseenter = function () { css(this, { background: 'rgba(239,68,68,.25)' }); };
+            clearBtn.onmouseleave = function () { css(this, { background: 'rgba(239,68,68,.12)' }); };
+            clearBtn.onclick = function () {
+                if (!confirm('Clear all messages in the ' + _activeTab + ' chat? This cannot be undone.')) return;
+                var token = localStorage.getItem('token');
+                fetch('/api/v1/chat/messages?channelType=' + _activeTab, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                }).then(function (r) { return r.json(); }).then(function (res) {
+                    if (res && res.success) {
+                        var body = $('cpBody');
+                        if (body) body.innerHTML = '<div style="text-align:center;padding:40px 16px;color:' + DK.textMuted + ';font-size:14px;font-family:sans-serif"><div style="font-size:32px;margin-bottom:8px">🗑</div>Chat cleared.</div>';
+                        _lastGlobalId = 0; _lastTeamId = 0;
+                    }
+                }).catch(function () {});
+            };
+            var clearRow = document.createElement('div');
+            css(clearRow, { padding: '8px 14px', background: DK.surface, borderTop: '1px solid ' + DK.border, display: 'flex', justifyContent: 'flex-end', flexShrink: '0' });
+            clearRow.appendChild(clearBtn);
+            panel.appendChild(header);
+            panel.appendChild(tabBar);
+            panel.appendChild(msgBody);
+            panel.appendChild(footer);
+            panel.appendChild(clearRow);
+        } else {
+            panel.appendChild(header);
+            panel.appendChild(tabBar);
+            panel.appendChild(msgBody);
+            panel.appendChild(footer);
+        }
     }
 
     function togglePanel() {
@@ -364,6 +399,7 @@
         }
     }
     window.toggleChatPanel = togglePanel;
+    window.toggleChatDrawer = togglePanel;
 
     function switchTab(channel) {
         if (_activeTab === channel) return;
@@ -403,6 +439,31 @@
         if (bt) { bt.textContent = _unreadTeam;   bt.style.display = _unreadTeam   > 0 ? 'inline' : 'none'; }
         var t = _unreadGlobal + _unreadTeam;
         if (total) { total.textContent = t > 99 ? '99+' : t; total.style.display = (t > 0 && !_panelIsOpen) ? 'inline' : 'none'; }
+        // Pulse the sidebar chat icon when unread messages exist
+        var chatLinks = document.querySelectorAll('[data-page="chat"], [data-section="chat"]');
+        chatLinks.forEach(function (link) {
+            var icon = link.querySelector('i');
+            if (!icon) return;
+            if (t > 0 && !_panelIsOpen) {
+                icon.style.color = '#ef4444';
+                icon.style.animation = 'none';
+                var badge = link.querySelector('.cpSidebarBadge');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'cpSidebarBadge';
+                    badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:0 5px;margin-left:auto;';
+                    link.style.display = 'flex';
+                    link.style.alignItems = 'center';
+                    link.appendChild(badge);
+                }
+                badge.textContent = t > 99 ? '99+' : t;
+                badge.style.display = 'inline-flex';
+            } else {
+                icon.style.color = '';
+                var badge = link.querySelector('.cpSidebarBadge');
+                if (badge) badge.style.display = 'none';
+            }
+        });
     }
 
     function fetchMessages(channel, isInitial) {
@@ -458,13 +519,8 @@
                 senderRow.style.cssText = 'font-size:12px;color:' + DK.textMuted + ';margin-bottom:3px;display:flex;align-items:center;gap:6px;font-family:sans-serif';
                 var name = document.createElement('span');
                 name.textContent = msg.sender_name || 'User';
+                name.style.cssText = 'font-weight:700;color:#93c5fd;font-size:12px;';
                 senderRow.appendChild(name);
-                if (msg.sender_role) {
-                    var pill = document.createElement('span');
-                    pill.textContent = msg.sender_role;
-                    pill.style.cssText = 'background:#1e3a5f;color:#93c5fd;font-size:10px;padding:1px 7px;border-radius:4px;font-weight:700;text-transform:uppercase;font-family:sans-serif;letter-spacing:.5px';
-                    senderRow.appendChild(pill);
-                }
                 item.appendChild(senderRow);
             }
             var bubble = document.createElement('div');
@@ -510,7 +566,7 @@
                     renderMessages([res.data], false);
                     if (_activeTab === 'global' && res.data.message_id > _lastGlobalId) _lastGlobalId = res.data.message_id;
                     if (_activeTab === 'team'   && res.data.message_id > _lastTeamId)   _lastTeamId   = res.data.message_id;
-                    showToast('Message sent! 🚀', false);
+                    // Sent successfully — no toast needed
                 } else {
                     showToast('Failed to send message.', true);
                 }

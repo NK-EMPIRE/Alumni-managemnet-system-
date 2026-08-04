@@ -171,6 +171,57 @@ async function getPool() {
       BEGIN
           CREATE INDEX IX_WorkspaceMessages_CreatedAt ON dbo.WorkspaceMessages(created_at DESC);
       END
+
+      /* ── Performance Indexes for Large Datasets ── */
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'IX_Alumni_Dept_Batch')
+      BEGIN
+          EXEC('CREATE INDEX IX_Alumni_Dept_Batch ON dbo.Alumni(department, batch)');
+      END
+
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'IX_Alumni_RegisterNo')
+      BEGIN
+          EXEC('CREATE INDEX IX_Alumni_RegisterNo ON dbo.Alumni(register_no)');
+      END
+
+      IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'member_id'
+      ) AND NOT EXISTS (
+          SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_User_Status'
+      )
+      BEGIN
+          EXEC('CREATE INDEX IX_AlumniAssignments_User_Status ON dbo.AlumniAssignments(member_id, status)');
+      END
+
+      IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'team_id'
+      ) AND NOT EXISTS (
+          SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_Team_Status'
+      )
+      BEGIN
+          EXEC('CREATE INDEX IX_AlumniAssignments_Team_Status ON dbo.AlumniAssignments(team_id, status)');
+      END
+
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.AlumniAssignments') AND name = 'IX_AlumniAssignments_AlumniId')
+      BEGIN
+          EXEC('CREATE INDEX IX_AlumniAssignments_AlumniId ON dbo.AlumniAssignments(alumni_id)');
+      END
+
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IX_Users_Email')
+      BEGIN
+          EXEC('CREATE INDEX IX_Users_Email ON dbo.Users(email)');
+      END
+
+      IF EXISTS (
+          SELECT * FROM sys.columns 
+          WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'team_id'
+      ) AND NOT EXISTS (
+          SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IX_Users_Team_Role'
+      )
+      BEGIN
+          EXEC('CREATE INDEX IX_Users_Team_Role ON dbo.Users(team_id, role_id)');
+      END
     `);
   } catch (e) {
     logger.error('Database migration failed:', e);

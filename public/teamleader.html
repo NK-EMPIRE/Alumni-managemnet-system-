@@ -736,6 +736,10 @@
         <i class="fas fa-file-alt"></i>
         <span class="sidebar-item-text">Alumni</span>
       </a>
+      <a class="sidebar-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
+        <i class="fas fa-comments"></i>
+        <span class="sidebar-item-text">Chat</span>
+      </a>
       <a class="sidebar-item" data-page="settings" href="#">
         <i class="fas fa-cog"></i>
         <span class="sidebar-item-text">Settings</span>
@@ -780,17 +784,18 @@
           <i class="fas fa-magic"></i>
         </button>
 
-        <button class="navbar-btn" id="notifBtn" title="Notifications" style="display:none !important;">
-          <i class="fas fa-bell"></i>
-          <span class="notification-count" id="notifCount">5</span>
-        </button>
-        <div class="dropdown" id="notifDropdownContainer" style="display:none !important;">
-          <div class="dropdown-menu" id="notifDropdown" style="width:340px; right:0; left:auto !important;">
-            <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;">
-              <span>Notifications</span>
+        <!-- Notification Dropdown -->
+        <div class="dropdown" id="notifDropdownContainer" style="position:relative;">
+          <button class="navbar-btn" id="notifBtn" onclick="toggleNotifications(event)" title="Notifications" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;position:relative;">
+            <i class="fas fa-bell"></i>
+            <span class="notification-count" id="notifCount" style="display:none;position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
+          </button>
+          <div class="dropdown-menu" id="notifDropdown" style="width:340px; right:0; left:auto !important; display:none; position:absolute; top:100%; z-index:1000; background:#fff; border:1px solid #E2E8F0; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:10px;">
+            <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #E2E8F0;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:0.9rem;color:#1E293B;">Notifications</span>
               <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
             </div>
-            <div id="notifList"></div>
+            <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
           </div>
         </div>
       </div>
@@ -1267,30 +1272,14 @@
             </div>
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
-              <select id="fieldDept" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-                <option value="">Select Department</option>
-                <option value="CSE">CSE</option>
-                <option value="ECE">ECE</option>
-                <option value="EEE">EEE</option>
-                <option value="ME">ME</option>
-                <option value="CE">CE</option>
-                <option value="IT">IT</option>
-              </select>
+              <input type="text" id="fieldDept" placeholder="Department" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Batch <span class="required" style="color:#EF4444">*</span></label>
-              <select id="fieldBatch" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-                <option value="">Select Batch</option>
-                <option value="2018">2018</option>
-                <option value="2019">2019</option>
-                <option value="2020">2020</option>
-                <option value="2021">2021</option>
-                <option value="2022">2022</option>
-                <option value="2023">2023</option>
-              </select>
+              <input type="text" id="fieldBatch" placeholder="Batch" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
             </div>
             <div class="form-group">
@@ -2140,6 +2129,6 @@
   </script>
   <script src="js/leader.js"></script>
   <script src="js/chat.js"></script>
-  <script src="js/notifications.js"></script>
+
 </body>
 </html>
