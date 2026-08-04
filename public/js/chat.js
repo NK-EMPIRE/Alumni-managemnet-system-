@@ -397,8 +397,10 @@
                 }).then(function (r) { return r.json(); }).then(function (res) {
                     if (res && res.success) {
                         var body = $('cpBody');
-                        if (body) body.innerHTML = '<div style="text-align:center;padding:40px 16px;color:' + DK.textMuted + ';font-size:14px;font-family:sans-serif"><div style="font-size:32px;margin-bottom:8px">🗑</div>Chat cleared.</div>';
-                        _lastGlobalId = 0; _lastTeamId = 0;
+                        if (body) body.innerHTML = '<div style="text-align:center;padding:40px 16px;color:' + getTheme().textMuted + ';font-size:14px;font-family:sans-serif"><div style="font-size:32px;margin-bottom:8px">🗑</div>Chat cleared.</div>';
+                        if (_activeTab === 'global') _lastGlobalId = 0;
+                        if (_activeTab === 'team') _lastTeamId = 0;
+                        fetchMessages(_activeTab, true);
                     }
                 }).catch(function () {});
             };
@@ -590,6 +592,7 @@
         var body = $('cpBody');
         if (!body) return;
         if (isInitial) body.innerHTML = '';
+        var T = getTheme();
         messages.forEach(function (msg) {
             var isMine = _currentUserId && parseInt(msg.user_id, 10) === parseInt(_currentUserId, 10);
             var item = document.createElement('div');
@@ -600,10 +603,10 @@
             });
             if (!isMine) {
                 var senderRow = document.createElement('div');
-                senderRow.style.cssText = 'font-size:12px;color:' + DK.textMuted + ';margin-bottom:3px;display:flex;align-items:center;gap:6px;font-family:sans-serif';
+                senderRow.style.cssText = 'font-size:12px;color:' + T.textMuted + ';margin-bottom:3px;display:flex;align-items:center;gap:6px;font-family:sans-serif';
                 var name = document.createElement('span');
                 name.textContent = msg.sender_name || 'User';
-                name.style.cssText = 'font-weight:700;color:#93c5fd;font-size:12px;';
+                name.style.cssText = 'font-weight:700;color:' + (_isDark ? '#93c5fd' : '#1d4ed8') + ';font-size:12px;';
                 senderRow.appendChild(name);
                 item.appendChild(senderRow);
             }
@@ -613,17 +616,17 @@
                 padding: '10px 14px',
                 borderRadius: isMine ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
                 fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word',
-                background: isMine ? 'linear-gradient(135deg,#3b82f6,#2563eb)' : DK.surface,
-                color: isMine ? '#fff' : DK.textPrimary,
-                border: isMine ? 'none' : '1px solid ' + DK.border,
-                boxShadow: isMine ? '0 2px 8px rgba(59,130,246,.3)' : '0 1px 4px rgba(0,0,0,.25)',
+                background: isMine ? 'linear-gradient(135deg,#3b82f6,#2563eb)' : T.bubbleOther,
+                color: isMine ? '#fff' : T.textPrimary,
+                border: isMine ? 'none' : '1px solid ' + T.border,
+                boxShadow: isMine ? '0 2px 8px rgba(59,130,246,.3)' : '0 1px 4px rgba(0,0,0,.08)',
                 fontFamily: 'sans-serif'
             });
             var timeDiv = document.createElement('div');
             timeDiv.textContent = msg.created_at
                 ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : '';
-            timeDiv.style.cssText = 'font-size:11px;color:' + DK.textMuted + ';margin-top:4px;font-family:sans-serif';
+            timeDiv.style.cssText = 'font-size:11px;color:' + T.textMuted + ';margin-top:4px;font-family:sans-serif';
             item.appendChild(bubble);
             item.appendChild(timeDiv);
             body.appendChild(item);

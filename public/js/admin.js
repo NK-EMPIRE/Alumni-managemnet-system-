@@ -779,13 +779,19 @@ function populateDeptProgress() {
   var colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
   if (_apiDataLoaded && _dashboardData && _dashboardData.batchWiseProgress) {
     data = _dashboardData.batchWiseProgress.map(function (d, i) {
-      return { dept: 'Batch ' + (d.batch || '-'), completed: d.completed || 0, total: d.total || 1, color: d.color || colors[i % colors.length] };
+      return { rawBatch: d.batch || '', dept: 'Batch ' + (d.batch || '-'), completed: d.completed || 0, total: d.total || 1, color: d.color || colors[i % colors.length] };
     });
   } else {
     data = dummyBatchProgress.map(function (d) {
-      return { dept: 'Batch ' + d.batch, completed: d.completed, total: d.total, color: d.color };
+      return { rawBatch: d.batch || '', dept: 'Batch ' + d.batch, completed: d.completed, total: d.total, color: d.color };
     });
   }
+  // Sort in ascending order of batch year
+  data.sort(function (a, b) {
+    var valA = parseInt(String(a.rawBatch).replace(/\D/g, ''), 10) || 0;
+    var valB = parseInt(String(b.rawBatch).replace(/\D/g, ''), 10) || 0;
+    return valA - valB;
+  });
   var html = '';
   data.forEach(function (d) {
     var pct = Math.round((d.completed / d.total) * 100);
@@ -3432,19 +3438,16 @@ var ssSortColumn = 'alumni_id';
 var ssSortDirection = 'DESC';
 
 var ssColumns = [
-  { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
   { key: 'name', label: 'Name', visible: true, width: 160 },
-  { key: 'gender', label: 'Gender', visible: true, width: 80 },
-  { key: 'department', label: 'Department', visible: true, width: 100 },
   { key: 'batch', label: 'Batch', visible: true, width: 80 },
   { key: 'email', label: 'Email', visible: true, width: 180 },
   { key: 'phone', label: 'Phone', visible: true, width: 120 },
-  { key: 'company', label: 'Company/Institution', visible: true, width: 150 },
+  { key: 'company', label: 'Company', visible: true, width: 150 },
   { key: 'designation', label: 'Designation', visible: true, width: 150 },
   { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL', visible: true, width: 180 },
-  { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
-  { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
-  { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 }
+  { key: 'assignment_status', label: 'Status', visible: true, width: 120 },
+  { key: 'leader_name', label: 'Leader', visible: true, width: 130 },
+  { key: 'member_name', label: 'Member', visible: true, width: 130 }
 ];
 
 var debounceTimer;

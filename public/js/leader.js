@@ -586,6 +586,9 @@
           }
           return;
         }
+        if (page === 'chat' || page === 'notifications') {
+          return;
+        }
         document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });
         this.classList.add('active');
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
