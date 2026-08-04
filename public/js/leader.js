@@ -1141,6 +1141,53 @@
         document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
         document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
 
+  var _isModalEditMode = false;
+  window.toggleModalFieldsEditMode = function () {
+    _isModalEditMode = !_isModalEditMode;
+    var topEditBtn = document.getElementById('modalTopEditBtn');
+    var fieldIds = [
+      'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
+      'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldState', 'fieldCountry',
+      'fieldEmail', 'fieldPhone', 'fieldSecondaryEmail', 'fieldSecondaryPhone',
+      'fieldLinkedin', 'fieldGovtJob'
+    ];
+
+    fieldIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (_isModalEditMode) {
+        el.readOnly = false;
+        el.disabled = false;
+      } else {
+        var val = el.value ? el.value.trim() : '';
+        var isPreFilled = val !== '' && val !== 'No' && val !== 'Select Department' && val !== 'Select Batch';
+        if (isPreFilled) {
+          el.readOnly = true;
+          if (el.tagName === 'SELECT') el.disabled = true;
+        }
+      }
+    });
+
+    if (topEditBtn) {
+      topEditBtn.style.transform = 'scale(1.25)';
+      setTimeout(function () { topEditBtn.style.transform = 'scale(1)'; }, 200);
+
+      if (_isModalEditMode) {
+        topEditBtn.style.background = '#10B981';
+        topEditBtn.style.color = '#FFFFFF';
+        topEditBtn.style.borderColor = '#10B981';
+        topEditBtn.innerHTML = '<i class="fas fa-check"></i>';
+        topEditBtn.title = 'Editing Unlocked! Click again to lock fields.';
+      } else {
+        topEditBtn.style.background = '#EFF6FF';
+        topEditBtn.style.color = '#2563EB';
+        topEditBtn.style.borderColor = '#BFDBFE';
+        topEditBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+        topEditBtn.title = 'Click pencil to unlock pre-filled fields for editing';
+      }
+    }
+  };
+
   function applyPreFilledLockingLeader() {
     var fieldIds = [
       'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
