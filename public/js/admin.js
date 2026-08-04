@@ -3311,6 +3311,95 @@ function viewReportData(type, title) {
   showReportModal(title, columns, rows);
 }
 
+var fullExportColumns = [
+  { key: 'register_no', label: 'Register Number' },
+  { key: 'name', label: 'Name' },
+  { key: 'father_name', label: 'Father Name' },
+  { key: 'date_of_birth', label: 'Date of Birth' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'department', label: 'Department' },
+  { key: 'batch', label: 'Batch' },
+  { key: 'email', label: 'Primary Email' },
+  { key: 'secondary_email', label: 'Secondary Email' },
+  { key: 'phone', label: 'Primary Phone' },
+  { key: 'secondary_phone', label: 'Secondary Phone' },
+  { key: 'company', label: 'Company' },
+  { key: 'designation', label: 'Designation' },
+  { key: 'experience', label: 'Experience' },
+  { key: 'current_city', label: 'Company Address / City' },
+  { key: 'state', label: 'State' },
+  { key: 'country', label: 'Country' },
+  { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL' },
+  { key: 'working_details', label: 'Working Details' },
+  { key: 'is_government_job', label: 'Government Job' },
+  { key: 'assignment_status', label: 'Status' },
+  { key: 'leader_name', label: 'Leader' },
+  { key: 'member_name', label: 'Member' },
+  { key: 'updated_date', label: 'Updated Date' }
+];
+
+window.openExportCustomizationModal = function () {
+  // 1. Initialize default column selections for all available export columns
+  fullExportColumns.forEach(function (col) {
+    if (_exportSelectedCols[col.key] === undefined) {
+      _exportSelectedCols[col.key] = true;
+    }
+  });
+
+  // 2. Populate filter dropdowns inside the export modal if empty
+  populateExportModalFilterOptions();
+
+  // 3. Sync active page/spreadsheet filters to export modal inputs
+  syncSpreadsheetFiltersToExportModal();
+
+  // 4. Render export column selection chips & update count banner
+  renderExportColumnChips();
+  onExportFilterChange();
+
+  // 5. Show modal overlay
+  openModal('exportCustomizationModal');
+};
+
+window.renderExportColumnChips = function () {
+  var container = document.getElementById('exportColsContainer');
+  if (!container) return;
+
+  var html = '';
+  fullExportColumns.forEach(function (col) {
+    var checked = _exportSelectedCols[col.key] ? 'checked' : '';
+    html += '<label class="export-col-chip">' +
+      '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
+      '<span>' + col.label + '</span>' +
+      '</label>';
+  });
+  container.innerHTML = html;
+};
+
+window.toggleExportCol = function (key, isChecked) {
+  _exportSelectedCols[key] = isChecked;
+  updateExportStatsBanner();
+};
+
+window.selectAllExportCols = function (selectState) {
+  fullExportColumns.forEach(function (col) {
+    _exportSelectedCols[col.key] = selectState;
+  });
+  renderExportColumnChips();
+  updateExportStatsBanner();
+};
+
+window.updateExportStatsBanner = function () {
+  var colsEl = document.getElementById('expStatCols');
+  var statusEl = document.getElementById('expStatStatus');
+
+  var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
+  if (colsEl) colsEl.innerText = selectedCount + ' / ' + fullExportColumns.length;
+
+  var expStatus = document.getElementById('expFilterStatus');
+  var statusVal = expStatus ? expStatus.value : '';
+  if (statusEl) statusEl.innerText = statusVal ? statusVal.toUpperCase() : 'ALL';
+};
+
 function showReportModal(title, columns, rows) {
   var existing = document.getElementById('reportViewerModal');
   if (existing) existing.remove();
@@ -4103,7 +4192,7 @@ window.startExportDownloadProcess = function () {
         if (title) title.innerText = 'Export Ready!';
         if (sub) sub.innerText = 'Downloading file to your computer...';
 
-        var activeCols = ssColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
+        var activeCols = fullExportColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
         var csv = '\uFEFF';
         var headers = activeCols.map(function (c) { return c.label; });
         csv += headers.join(',') + '\r\n';

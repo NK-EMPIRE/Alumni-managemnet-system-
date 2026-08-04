@@ -1858,8 +1858,34 @@
     openExportCustomizationModal();
   };
 
+  var fullExportColumns = [
+    { key: 'register_no', label: 'Register Number' },
+    { key: 'name', label: 'Name' },
+    { key: 'father_name', label: 'Father Name' },
+    { key: 'date_of_birth', label: 'Date of Birth' },
+    { key: 'gender', label: 'Gender' },
+    { key: 'department', label: 'Department' },
+    { key: 'batch', label: 'Batch' },
+    { key: 'email', label: 'Primary Email' },
+    { key: 'secondary_email', label: 'Secondary Email' },
+    { key: 'phone', label: 'Primary Phone' },
+    { key: 'secondary_phone', label: 'Secondary Phone' },
+    { key: 'company', label: 'Company' },
+    { key: 'designation', label: 'Designation' },
+    { key: 'experience', label: 'Experience' },
+    { key: 'current_city', label: 'Company Address / City' },
+    { key: 'state', label: 'State' },
+    { key: 'country', label: 'Country' },
+    { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL' },
+    { key: 'working_details', label: 'Working Details' },
+    { key: 'is_government_job', label: 'Government Job' },
+    { key: 'assignment_status', label: 'Current Status' },
+    { key: 'member_name', label: 'Member' },
+    { key: 'updated_date', label: 'Updated Date' }
+  ];
+
   window.openExportCustomizationModal = function () {
-    ssColumns.forEach(function (col) {
+    fullExportColumns.forEach(function (col) {
       if (_exportSelectedCols[col.key] === undefined) {
         _exportSelectedCols[col.key] = true;
       }
@@ -1974,7 +2000,7 @@
     if (!container) return;
 
     var html = '';
-    ssColumns.forEach(function (col) {
+    fullExportColumns.forEach(function (col) {
       var checked = _exportSelectedCols[col.key] ? 'checked' : '';
       html += '<label class="export-col-chip">' +
         '<input type="checkbox" ' + checked + ' onchange="toggleExportCol(\'' + col.key + '\', this.checked)">' +
@@ -1990,7 +2016,7 @@
   };
 
   window.selectAllExportCols = function (selectState) {
-    ssColumns.forEach(function (col) {
+    fullExportColumns.forEach(function (col) {
       _exportSelectedCols[col.key] = selectState;
     });
     renderExportColumnChips();
@@ -2002,7 +2028,7 @@
     var statusEl = document.getElementById('expStatStatus');
 
     var selectedCount = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; }).length;
-    if (colsEl) colsEl.innerText = selectedCount + ' / ' + ssColumns.length;
+    if (colsEl) colsEl.innerText = selectedCount + ' / ' + fullExportColumns.length;
 
     var expStatus = document.getElementById('expFilterStatus');
     var statusVal = expStatus ? expStatus.value : '';
@@ -2066,7 +2092,7 @@
           if (title) title.innerText = 'Export Ready!';
           if (sub) sub.innerText = 'Downloading file to your computer...';
 
-          var activeCols = ssColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
+          var activeCols = fullExportColumns.filter(function (c) { return _exportSelectedCols[c.key]; });
           var csv = '\uFEFF';
           var headers = activeCols.map(function (c) { return c.label; });
           csv += headers.join(',') + '\r\n';
