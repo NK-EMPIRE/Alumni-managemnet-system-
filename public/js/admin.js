@@ -45,8 +45,10 @@ var auditState = {
 var selectedImportFiles = [];
 
 function initSpreadsheetHandlers() {
-  // Initialize leader dropdown for edit modal
-  populateEditLeaderDropdown(null);
+  // Initialize leader dropdown for edit modal (called lazily when modal opens)
+  if (typeof populateEditLeaderDropdown === 'function') {
+    populateEditLeaderDropdown(null);
+  }
 
   // Populate department and batch filters from Excel data dynamically
   API.getAlumniFilters().then(function (res) {
