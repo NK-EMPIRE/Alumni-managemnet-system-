@@ -73,7 +73,7 @@
       color: '#fff', border: '2px solid #334155',
       fontSize: '22px', boxShadow: 'none',
       cursor: 'pointer', zIndex: '2147483646',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      display: 'none', alignItems: 'center', justifyContent: 'center',
       transition: 'transform .2s',
       fontFamily: 'sans-serif', lineHeight: '1'
     });
