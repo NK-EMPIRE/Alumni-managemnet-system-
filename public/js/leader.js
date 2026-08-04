@@ -1482,27 +1482,18 @@
   var ssSortDirection = 'DESC';
 
   var ssColumns = [
-    { key: 'register_no', label: 'Register Number', visible: true, width: 140 },
     { key: 'name', label: 'Name', visible: true, width: 160 },
-    { key: 'father_name', label: 'Father Name', visible: true, width: 150 },
+    { key: 'register_no', label: 'Register No', visible: true, width: 140 },
+    { key: 'father_name', label: 'Father\'s Name', visible: true, width: 150 },
     { key: 'date_of_birth', label: 'Date of Birth', visible: true, width: 120 },
-    { key: 'gender', label: 'Gender', visible: true, width: 80 },
     { key: 'department', label: 'Department', visible: true, width: 100 },
     { key: 'batch', label: 'Batch', visible: true, width: 80 },
-    { key: 'email', label: 'Primary Email', visible: true, width: 180 },
-    { key: 'secondary_email', label: 'Secondary Email', visible: true, width: 180 },
-    { key: 'phone', label: 'Primary Phone', visible: true, width: 120 },
-    { key: 'secondary_phone', label: 'Secondary Phone', visible: true, width: 120 },
+    { key: 'email', label: 'Email', visible: true, width: 180 },
+    { key: 'phone', label: 'Phone', visible: true, width: 120 },
     { key: 'company', label: 'Company/Institution', visible: true, width: 150 },
     { key: 'designation', label: 'Designation', visible: true, width: 150 },
-    { key: 'experience', label: 'Experience', visible: true, width: 100 },
-    { key: 'city', label: 'City', visible: true, width: 120 },
-    { key: 'state', label: 'State', visible: true, width: 120 },
-    { key: 'country', label: 'Country', visible: true, width: 120 },
-    { key: 'linkedin_profile', label: 'LinkedIn', visible: true, width: 180 },
+    { key: 'linkedin_profile', label: 'LinkedIn/Facebook URL', visible: true, width: 180 },
     { key: 'assignment_status', label: 'Current Status', visible: true, width: 120 },
-    { key: 'leader_name', label: 'Assigned Leader', visible: true, width: 150 },
-    { key: 'member_name', label: 'Assigned Member', visible: true, width: 150 },
     { key: 'updated_date', label: 'Updated Date', visible: true, width: 140 }
   ];
 
@@ -1615,7 +1606,18 @@
       ssColumns.forEach(function (col) {
         if (!col.visible) return;
         var val = '';
-        if (col.key === 'assignment_status') {
+        if (col.key === 'name') {
+          var fatherVal = String(row.father_name || row.fatherName || row.pi_father_name || '');
+          var safeName = String(row.name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+          var safeFather = fatherVal.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+          val = '<div>' +
+            '<div style="display:flex;align-items:center;gap:6px;">' +
+            '  <span style="font-weight:600;color:#1E293B;">' + (row.name || '-') + '</span>' +
+            '  <button type="button" onclick="event.stopPropagation();copyAlumniAndFather(\'' + safeName + '\', \'' + safeFather + '\')" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:0.8rem;padding:2px;" title="Copy Alumni & Father Name"><i class="far fa-copy"></i></button>' +
+            '</div>' +
+            (fatherVal ? '<div style="font-size:0.75rem;color:#64748B;font-weight:400;margin-top:2px;">S/O: ' + fatherVal + '</div>' : '') +
+            '</div>';
+        } else if (col.key === 'assignment_status') {
           var status = row.status || 'Pending';
           var badgeClass = status === 'Completed' ? 'badge-success' : (status === 'Draft' ? 'badge-info' : 'badge-warning');
           val = '<span class="badge ' + badgeClass + '">' + status + '</span>';
