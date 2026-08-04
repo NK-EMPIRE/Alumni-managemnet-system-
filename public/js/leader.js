@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   var totalAlumni = 0;
@@ -1027,14 +1027,30 @@
   };
 
   function ensureOptionExists(selectEl, val) {
-    if (!val) return;
-    for (var i = 0; i < selectEl.options.length; i++) {
-      if (selectEl.options[i].value === val) return;
+    if (!selectEl) return;
+    var existingValues = [];
+    for (var i = selectEl.options.length - 1; i >= 0; i--) {
+      var v = selectEl.options[i].value;
+      if (existingValues.indexOf(v) !== -1 && v !== '') {
+        selectEl.remove(i);
+      } else {
+        existingValues.push(v);
+      }
     }
-    var opt = document.createElement('option');
-    opt.value = val;
-    opt.textContent = val;
-    selectEl.appendChild(opt);
+    if (!val) return;
+    var found = false;
+    for (var j = 0; j < selectEl.options.length; j++) {
+      if (selectEl.options[j].value === val || selectEl.options[j].text === val) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = val;
+      selectEl.appendChild(opt);
+    }
   }
 
   function openUpdateModal(alumniId) {

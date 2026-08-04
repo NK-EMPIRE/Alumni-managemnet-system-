@@ -364,6 +364,7 @@
         }
     }
     window.toggleChatPanel = togglePanel;
+    window.toggleChatDrawer = togglePanel;
 
     function switchTab(channel) {
         if (_activeTab === channel) return;

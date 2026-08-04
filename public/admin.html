@@ -150,7 +150,7 @@
       </a>
 
       <div class="sidebar-label">Other</div>
-      <a class="sidebar-item" data-section="chat" onclick="if(typeof toggleChatDrawer==='function')toggleChatDrawer();else if(typeof togglePanel==='function')togglePanel();return false;" href="#">
+      <a class="sidebar-item" data-section="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
         <i class="fas fa-comments"></i>
         <span class="sidebar-item-text">Team Chat</span>
       </a>

@@ -274,14 +274,30 @@
     }
 
     function ensureOptionExists(selectEl, val) {
-        if (!val) return;
-        for (let i = 0; i < selectEl.options.length; i++) {
-            if (selectEl.options[i].value === val) return;
+        if (!selectEl) return;
+        var existingValues = [];
+        for (var i = selectEl.options.length - 1; i >= 0; i--) {
+            var v = selectEl.options[i].value;
+            if (existingValues.indexOf(v) !== -1 && v !== '') {
+                selectEl.remove(i);
+            } else {
+                existingValues.push(v);
+            }
         }
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = val;
-        selectEl.appendChild(opt);
+        if (!val) return;
+        var found = false;
+        for (var j = 0; j < selectEl.options.length; j++) {
+            if (selectEl.options[j].value === val || selectEl.options[j].text === val) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val;
+            selectEl.appendChild(opt);
+        }
     }
 
     window._currentModalRecordIndex = -1;
@@ -306,7 +322,8 @@
             topEditBtn.style.background = '#EFF6FF';
             topEditBtn.style.color = '#2563EB';
             topEditBtn.style.borderColor = '#BFDBFE';
-            topEditBtn.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit Pre-Filled Data';
+            topEditBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            topEditBtn.title = 'Click pencil to unlock pre-filled data for editing';
         }
 
         fieldIds.forEach(function (id) {
@@ -353,16 +370,23 @@
         });
 
         if (topEditBtn) {
+            topEditBtn.style.transform = 'scale(1.25)';
+            setTimeout(function () { topEditBtn.style.transform = 'scale(1)'; }, 200);
+
             if (_isModalEditMode) {
                 topEditBtn.style.background = '#10B981';
                 topEditBtn.style.color = '#FFFFFF';
                 topEditBtn.style.borderColor = '#10B981';
-                topEditBtn.innerHTML = '<i class="fas fa-check"></i> Editing Unlocked';
+                topEditBtn.innerHTML = '<i class="fas fa-check"></i>';
+                topEditBtn.title = 'Editing Unlocked! Click again to lock fields.';
+                showToast('Editing unlocked for all pre-filled fields', 'success');
             } else {
                 topEditBtn.style.background = '#EFF6FF';
                 topEditBtn.style.color = '#2563EB';
                 topEditBtn.style.borderColor = '#BFDBFE';
-                topEditBtn.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit Pre-Filled Data';
+                topEditBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                topEditBtn.title = 'Click pencil to unlock pre-filled data for editing';
+                showToast('Pre-filled fields locked', 'warning');
             }
         }
     };

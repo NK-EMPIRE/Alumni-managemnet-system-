@@ -1216,7 +1216,7 @@
     <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal(); return false;" href="#">
         <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
     </a>
-    <a class="nav-item" data-page="chat" onclick="if(typeof toggleChatDrawer==='function')toggleChatDrawer();else if(typeof togglePanel==='function')togglePanel();return false;" href="#">
+    <a class="nav-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
         <i class="fas fa-comments"></i> <span class="nav-item-text">Team Chat</span>
     </a>
     <a class="nav-item" data-page="settings">
@@ -1504,8 +1504,8 @@
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:12px;">
-                <button type="button" id="modalTopEditBtn" onclick="toggleModalFieldsEditMode()" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#2563EB;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;" title="Click to unlock pre-filled fields for editing">
-                    <i class="fas fa-pencil-alt"></i> Edit Pre-Filled Data
+                <button type="button" id="modalTopEditBtn" onclick="toggleModalFieldsEditMode()" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#2563EB;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;" title="Click pencil to unlock pre-filled fields for editing">
+                    <i class="fas fa-pencil-alt"></i>
                 </button>
                 <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;background:#F1F5F9;padding:4px 10px;border-radius:12px;border:1px solid #CBD5E1;">1 / 1</span>
                 <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
