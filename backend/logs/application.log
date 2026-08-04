@@ -1942,3 +1942,24 @@
 {"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:31:09.721"}
 {"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:31:09.721"}
 {"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:31:09.721"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:31:32.733"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:31:32.739"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:31:32.740"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:31:32.740"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:34:05.354"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:34:05.357"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:34:05.358"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:34:05.358"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:34:14.888"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:34:14.892"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:34:14.893"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:34:14.894"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:35:42.139"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:35:42.143"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:35:42.143"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:35:42.144"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-08-04 11:35:59.626","userId":36}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-04 11:38:13.986"}
+{"level":"info","message":"Server running on http://localhost:9000","timestamp":"2026-08-04 11:38:13.990"}
+{"level":"info","message":"Frontend: http://localhost:9000","timestamp":"2026-08-04 11:38:13.990"}
+{"level":"info","message":"API: http://localhost:9000/api/v1","timestamp":"2026-08-04 11:38:13.990"}

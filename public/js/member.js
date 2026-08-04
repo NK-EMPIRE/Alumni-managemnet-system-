@@ -275,6 +275,10 @@
 
     function ensureOptionExists(selectEl, val) {
         if (!selectEl) return;
+        if (!selectEl.options) {
+            if (val !== undefined && val !== null) selectEl.value = val;
+            return;
+        }
         var existing = {};
         for (var i = selectEl.options.length - 1; i >= 0; i--) {
             var optVal = selectEl.options[i].value || selectEl.options[i].text;

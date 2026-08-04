@@ -1028,6 +1028,10 @@
 
   function ensureOptionExists(selectEl, val) {
     if (!selectEl) return;
+    if (!selectEl.options) {
+      if (val !== undefined && val !== null) selectEl.value = val;
+      return;
+    }
     var existingValues = [];
     for (var i = selectEl.options.length - 1; i >= 0; i--) {
       var v = selectEl.options[i].value;
