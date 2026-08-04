@@ -33,24 +33,31 @@ window.fetchCategoryGroups = function () {
   var batch = document.getElementById('catFilterBatch') ? document.getElementById('catFilterBatch').value : '';
   var onlyUpdated = document.getElementById('catFilterOnlyUpdated') ? document.getElementById('catFilterOnlyUpdated').checked : true;
 
-  // Populate dynamic dropdown options from filters API if empty
+  // Always reload dept/batch dropdowns from filters API
   if (typeof API !== 'undefined' && API.getAlumniFilters) {
     API.getAlumniFilters().then(function (res) {
       if (res && res.success && res.data) {
         var depts = res.data.departments || [];
         var batches = res.data.batches || [];
+        var savedDept = document.getElementById('catFilterDept') ? document.getElementById('catFilterDept').value : '';
+        var savedBatch = document.getElementById('catFilterBatch') ? document.getElementById('catFilterBatch').value : '';
         var deptEl = document.getElementById('catFilterDept');
         var batchEl = document.getElementById('catFilterBatch');
-        if (deptEl && deptEl.options.length <= 1) {
+        if (deptEl) {
+          deptEl.innerHTML = '<option value="">All Departments</option>';
           depts.forEach(function (d) { deptEl.innerHTML += '<option value="' + d + '">' + d + '</option>'; });
+          if (savedDept) deptEl.value = savedDept;
         }
-        if (batchEl && batchEl.options.length <= 1) {
+        if (batchEl) {
+          batchEl.innerHTML = '<option value="">All Batches</option>';
           batches.forEach(function (b) { batchEl.innerHTML += '<option value="' + b + '">' + b + '</option>'; });
+          if (savedBatch) batchEl.value = savedBatch;
         }
       }
     }).catch(function (err) { console.error('Error fetching category filter options:', err); });
   }
 
+  // Always reload role/company/city dropdowns from category groups
   API.getAlumniCategoryGroups({ department: dept, batch: batch, onlyUpdated: onlyUpdated })
     .then(function (res) {
       if (res && res.success && res.data) {
@@ -60,34 +67,45 @@ window.fetchCategoryGroups = function () {
         var cities = d.cities || [];
         var profs = d.professionTypes || [];
 
-        // Populate Designation dropdown
+        // Saved values to restore after reload
+        var savedDesig = document.getElementById('catFilterDesignation') ? document.getElementById('catFilterDesignation').value : '';
+        var savedComp = document.getElementById('catFilterCompany') ? document.getElementById('catFilterCompany').value : '';
+        var savedCity = document.getElementById('catFilterCity') ? document.getElementById('catFilterCity').value : '';
+
+        // Repopulate Designation dropdown
         var desigSelect = document.getElementById('catFilterDesignation');
-        if (desigSelect && desigSelect.options.length <= 1) {
+        if (desigSelect) {
+          desigSelect.innerHTML = '<option value="">All Roles / Designations</option>';
           desigs.forEach(function (item) {
             if (item.designation && item.designation !== 'Not Specified') {
               desigSelect.innerHTML += '<option value="' + item.designation + '">' + item.designation + ' (' + item.count + ')</option>';
             }
           });
+          if (savedDesig) desigSelect.value = savedDesig;
         }
 
-        // Populate Company dropdown
+        // Repopulate Company dropdown
         var compSelect = document.getElementById('catFilterCompany');
-        if (compSelect && compSelect.options.length <= 1) {
+        if (compSelect) {
+          compSelect.innerHTML = '<option value="">All Companies</option>';
           comps.forEach(function (item) {
             if (item.company && item.company !== 'Not Specified') {
               compSelect.innerHTML += '<option value="' + item.company + '">' + item.company + ' (' + item.count + ')</option>';
             }
           });
+          if (savedComp) compSelect.value = savedComp;
         }
 
-        // Populate City dropdown
+        // Repopulate City dropdown
         var citySelect = document.getElementById('catFilterCity');
-        if (citySelect && citySelect.options.length <= 1) {
+        if (citySelect) {
+          citySelect.innerHTML = '<option value="">All Locations</option>';
           cities.forEach(function (item) {
             if (item.city && item.city !== 'Not Specified') {
               citySelect.innerHTML += '<option value="' + item.city + '">' + item.city + ' (' + item.count + ')</option>';
             }
           });
+          if (savedCity) citySelect.value = savedCity;
         }
 
         var desigCount = desigs.filter(function (x) { return x.designation !== 'Not Specified'; }).length;
@@ -211,7 +229,7 @@ function renderCategoryDataView(data) {
     cardsHtml += '</div></td></tr>';
     tbody.innerHTML = cardsHtml;
   } else {
-    // Render standard table
+    // Render table view with full contact info
     var html = '';
     data.forEach(function (row) {
       var profClass = 'badge-secondary';
@@ -220,16 +238,26 @@ function renderCategoryDataView(data) {
       else if (pt === 'Private Sector') profClass = 'badge-primary';
       else if (pt === 'Business / Entrepreneur') profClass = 'badge-warning';
 
-      html += '<tr>';
-      html += '<td style="padding:10px 12px;font-weight:600;">' + (row.register_no || '-') + '</td>';
-      html += '<td style="padding:10px 12px;font-weight:600;color:#1E293B;">' + (row.name || 'Unknown') + '</td>';
-      html += '<td style="padding:10px 12px;">' + (row.department || '-') + '</td>';
-      html += '<td style="padding:10px 12px;">' + (row.batch || '-') + '</td>';
-      html += '<td style="padding:10px 12px;font-weight:600;color:#2563EB;">' + (row.designation || '-') + '</td>';
-      html += '<td style="padding:10px 12px;">' + (row.company || '-') + '</td>';
-      html += '<td style="padding:10px 12px;">' + (row.current_city || row.city || '-') + '</td>';
-      html += '<td style="padding:10px 12px;"><span class="badge ' + profClass + '">' + pt + '</span></td>';
-      html += '<td style="padding:10px 12px;"><button class="btn btn-outline btn-sm" style="padding:3px 8px;font-size:0.75rem;" onclick="openUpdateModalAdmin(' + row.alumni_id + ')"><i class="fas fa-eye"></i> Profile</button></td>';
+      var statusClass = 'badge-secondary';
+      var st = row.assignment_status || 'Unassigned';
+      if (st === 'Completed' || st === 'Updated') statusClass = 'badge-success';
+      else if (st === 'Pending') statusClass = 'badge-warning';
+      else if (st === 'Reopened') statusClass = 'badge-danger';
+
+      var phoneHtml = row.phone ? '<a href="tel:' + row.phone + '" style="color:#10B981;text-decoration:none;font-size:0.8rem;" title="Call"><i class="fas fa-phone" style="margin-right:3px;"></i>' + row.phone + '</a>' : '<span style="color:#CBD5E1;">—</span>';
+      var emailHtml = row.email ? '<a href="mailto:' + row.email + '" style="color:#3B82F6;text-decoration:none;font-size:0.78rem;" title="Email"><i class="fas fa-envelope" style="margin-right:3px;"></i>' + row.email + '</a>' : '<span style="color:#CBD5E1;">—</span>';
+      var linkedinHtml = row.linkedin_profile ? '<a href="' + (row.linkedin_profile.startsWith('http') ? row.linkedin_profile : 'https://' + row.linkedin_profile) + '" target="_blank" style="color:#0A66C2;font-weight:600;font-size:0.8rem;"><i class="fab fa-linkedin"></i> LinkedIn</a>' : '<span style="color:#CBD5E1;">—</span>';
+
+      html += '<tr style="border-bottom:1px solid #F1F5F9;">';
+      html += '<td style="padding:10px 12px;font-weight:600;font-size:0.82rem;">' + (row.register_no || '-') + '</td>';
+      html += '<td style="padding:10px 12px;font-weight:600;color:#1E293B;">' + (row.name || 'Unknown') + '<br><span style="font-size:0.73rem;color:#64748B;">' + (row.department || '') + ' • ' + (row.batch || '') + '</span></td>';
+      html += '<td style="padding:10px 12px;font-weight:600;color:#2563EB;font-size:0.85rem;">' + (row.designation || '<span style="color:#CBD5E1;">—</span>') + '<br><span style="font-size:0.75rem;color:#334155;font-weight:400;">' + (row.company || '') + '</span></td>';
+      html += '<td style="padding:10px 12px;font-size:0.82rem;color:#475569;">' + (row.current_city || row.city || '<span style="color:#CBD5E1;">—</span>') + '</td>';
+      html += '<td style="padding:10px 12px;"><span class="badge ' + profClass + '" style="font-size:0.72rem;">' + pt + '</span></td>';
+      html += '<td style="padding:10px 12px;">' + phoneHtml + '<br>' + emailHtml + '</td>';
+      html += '<td style="padding:10px 12px;">' + linkedinHtml + '</td>';
+      html += '<td style="padding:10px 12px;"><span class="badge ' + statusClass + '" style="font-size:0.72rem;">' + st + '</span></td>';
+      html += '<td style="padding:10px 12px;"><button class="btn btn-primary btn-sm" style="padding:3px 10px;font-size:0.75rem;font-weight:600;" onclick="openUpdateModalAdmin(' + row.alumni_id + ')"><i class="fas fa-edit"></i> View</button></td>';
       html += '</tr>';
     });
     tbody.innerHTML = html;
