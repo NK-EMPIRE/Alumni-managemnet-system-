@@ -616,11 +616,20 @@
           <i class="fas fa-magic"></i>
         </button>
 
-        <!-- Topbar Notification Bell Button -->
-        <button class="navbar-btn" id="notifBtn" onclick="if(typeof window.toggleNotificationsPanel==='function')window.toggleNotificationsPanel();return false;" title="Notifications" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;position:relative;">
-          <i class="fas fa-bell"></i>
-          <span class="notification-count" id="notifCount" style="display:none;position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
-        </button>
+        <!-- Notification Dropdown -->
+        <div class="dropdown" id="notifDropdownContainer" style="position:relative;">
+          <button class="navbar-btn" id="notifBtn" onclick="toggleNotifications(event)" title="Notifications" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;position:relative;">
+            <i class="fas fa-bell"></i>
+            <span class="notification-count" id="notifCount" style="display:none;position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
+          </button>
+          <div class="dropdown-menu" id="notifDropdown" style="width:340px; right:0; left:auto !important; display:none; position:absolute; top:100%; z-index:1000; background:#fff; border:1px solid #E2E8F0; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:10px;">
+            <div class="dropdown-header" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #E2E8F0;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:0.9rem;color:#1E293B;">Notifications</span>
+              <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
+            </div>
+            <div id="notifList"></div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -1917,6 +1926,6 @@
   </script>
   <script src="js/leader.js"></script>
   <script src="js/chat.js"></script>
-  <script src="js/notifications.js"></script>
+
 </body>
 </html>

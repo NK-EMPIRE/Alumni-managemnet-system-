@@ -288,6 +288,22 @@
     timeline.innerHTML = html;
   }
 
+  window.toggleNotifications = function (e) {
+    if (e) e.stopPropagation();
+    var dropdown = document.getElementById('notifDropdown');
+    if (!dropdown) return;
+    var isShowing = dropdown.style.display === 'block';
+    dropdown.style.display = isShowing ? 'none' : 'block';
+  };
+
+  document.addEventListener('click', function (e) {
+    var dropdown = document.getElementById('notifDropdown');
+    var btn = document.getElementById('notifBtn');
+    if (dropdown && btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+
   function populateNotifications() {
     var list = document.getElementById('notifList');
     if (!list) return;
