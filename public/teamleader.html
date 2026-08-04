@@ -570,7 +570,7 @@
       </a>
       <a class="sidebar-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
         <i class="fas fa-comments"></i>
-        <span class="sidebar-item-text">Team Chat</span>
+        <span class="sidebar-item-text">Chat</span>
       </a>
       <a class="sidebar-item" data-page="settings" href="#">
         <i class="fas fa-cog"></i>
@@ -627,7 +627,7 @@
               <span style="font-weight:600;font-size:0.9rem;color:#1E293B;">Notifications</span>
               <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
             </div>
-            <div id="notifList"></div>
+            <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
           </div>
         </div>
       </div>

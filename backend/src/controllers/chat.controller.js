@@ -29,7 +29,21 @@ async function sendMessage(req, res, next) {
   }
 }
 
+async function clearMessages(req, res, next) {
+  try {
+    const { channelType } = req.query;
+    await chatService.clearMessages({ reqUser: req.user, channelType });
+    return success(res, null, 'Messages cleared successfully');
+  } catch (err) {
+    if (err.message && err.message.includes('Only admins')) {
+      return error(res, err.message, 403);
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   getMessages,
-  sendMessage
+  sendMessage,
+  clearMessages
 };

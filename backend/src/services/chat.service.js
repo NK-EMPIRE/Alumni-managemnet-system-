@@ -194,8 +194,26 @@ async function sendMessage({ reqUser, userId, messageText, attachmentUrl, channe
   return savedMessage;
 }
 
+async function clearMessages({ reqUser, channelType }) {
+  const userRole = (reqUser && reqUser.role) ? String(reqUser.role).toUpperCase() : '';
+  if (!userRole.includes('ADMIN')) {
+    throw new Error('Only admins can clear chat messages');
+  }
+  const pool = await getPool();
+  await ensureChannelColumn(pool);
+  const request = pool.request();
+  if (channelType && channelType !== 'all') {
+    request.input('channelType', sql.NVarChar(50), channelType);
+    await request.query(`DELETE FROM dbo.WorkspaceMessages WHERE channel_type = @channelType`);
+  } else {
+    await request.query(`DELETE FROM dbo.WorkspaceMessages`);
+  }
+  return true;
+}
+
 module.exports = {
   getMessages,
-  sendMessage
+  sendMessage,
+  clearMessages
 };
 

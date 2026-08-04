@@ -8,5 +8,6 @@ router.use(authenticate);
 
 router.get('/messages', chatController.getMessages);
 router.post('/messages', chatController.sendMessage);
+router.delete('/messages', chatController.clearMessages);
 
 module.exports = router;

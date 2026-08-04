@@ -1217,7 +1217,7 @@
         <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
     </a>
     <a class="nav-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
-        <i class="fas fa-comments"></i> <span class="nav-item-text">Team Chat</span>
+        <i class="fas fa-comments"></i> <span class="nav-item-text">Chat</span>
     </a>
     <a class="nav-item" data-page="settings">
         <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
@@ -1274,7 +1274,7 @@
                         <h4 style="margin:0;font-size:0.9rem;color:#1E293B;">Notifications</h4>
                         <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
                     </div>
-                    <div id="notifList"></div>
+                    <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
                 </div>
             </div>
 

@@ -234,6 +234,16 @@
         }
     });
 
+    window.clearAllNotifications = function () {
+        var list = document.getElementById('notifList');
+        if (list) {
+            list.innerHTML = '<div style="padding:16px;text-align:center;color:#64748B;font-size:0.8rem;">No new notifications</div>';
+        }
+        var count = document.getElementById('notifCount');
+        if (count) { count.textContent = '0'; count.style.display = 'none'; }
+        localStorage.setItem('notif_member_cleared', Date.now().toString());
+    };
+
     window.openFilterModal = function () {
         var modal = document.getElementById('ssFilterModal');
         if (modal) modal.classList.add('show');
