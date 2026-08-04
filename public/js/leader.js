@@ -586,7 +586,17 @@
           }
           return;
         }
-        if (page === 'chat' || page === 'notifications') {
+        if (page === 'chat') {
+          // Show full-page WhatsApp chat section
+          document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });
+          document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); s.style.display = 'none'; });
+          document.querySelector('.sidebar-item[data-page="chat"]') && document.querySelector('.sidebar-item[data-page="chat"]').classList.add('active');
+          var chatSec = document.getElementById('section-chat');
+          if (chatSec) { chatSec.style.display = 'block'; chatSec.classList.add('active'); }
+          if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
+          return;
+        }
+        if (page === 'notifications') {
           return;
         }
         document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });

@@ -736,7 +736,7 @@
         <i class="fas fa-file-alt"></i>
         <span class="sidebar-item-text">Alumni</span>
       </a>
-      <a class="sidebar-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
+      <a class="sidebar-item" data-page="chat" href="#">
         <i class="fas fa-comments"></i>
         <span class="sidebar-item-text">Chat</span>
       </a>
@@ -1139,6 +1139,12 @@
         </div>
       </div>
     </section>
+
+      <!-- Full-Page WhatsApp Chat Section -->
+      <section id="section-chat" class="content-section" style="display:none;">
+        <div id="chatPageApp" style="padding:20px 0;"></div>
+      </section>
+
     </main>
     <style>
       .content-section { display: none; }
@@ -2131,6 +2137,7 @@
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
   <script src="js/leader.js"></script>
+  <script src="js/chatPage.js"></script>
   <script src="js/chat.js"></script>
 
 </body>

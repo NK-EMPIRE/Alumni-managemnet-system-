@@ -304,25 +304,47 @@
     if (!dropdown) return;
 
     var lastAt = val.lastIndexOf('@');
-    if (lastAt !== -1 && lastAt === val.length - 1) {
-      // Show mention suggestions
-      var html = '<div style="padding:6px 12px;font-size:0.75rem;font-weight:700;color:#64748B;">Mention Team Member</div>';
-      _mentionUsers.slice(0, 5).forEach(function (u) {
-        var name = u.first_name ? (u.first_name + ' ' + (u.last_name || '')) : u.username;
-        html += `<div onclick="selectMentionUser('${name}')" style="padding:8px 12px;font-size:0.85rem;cursor:pointer;border-bottom:1px solid #F1F5F9;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='#fff'">${name}</div>`;
-      });
-      dropdown.innerHTML = html;
-      dropdown.style.display = 'block';
+    if (lastAt !== -1) {
+      var query = val.substring(lastAt + 1).toLowerCase();
+      // Only show if @ comes after whitespace or is at start (not already part of a word before)
+      var charBefore = lastAt > 0 ? val[lastAt - 1] : ' ';
+      if (charBefore === ' ' || charBefore === '\n' || lastAt === 0) {
+        var filtered = _mentionUsers.filter(function (u) {
+          var name = u.first_name ? (u.first_name + ' ' + (u.last_name || '')) : (u.username || '');
+          return name.toLowerCase().indexOf(query) !== -1;
+        });
+
+        if (filtered.length > 0) {
+          var html = '<div style="padding:6px 12px;font-size:0.75rem;font-weight:700;color:#64748B;">Mention Team Member</div>';
+          filtered.slice(0, 8).forEach(function (u) {
+            var name = u.first_name ? (u.first_name + ' ' + (u.last_name || '')) : u.username;
+            var role = u.role_name || u.role || 'Member';
+            html += '<div onclick="selectMentionUser(\'' + name.replace(/'/g, "\\'") + '\', ' + lastAt + ')" style="padding:8px 12px;font-size:0.85rem;cursor:pointer;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background=\'#F8FAFC\'" onmouseout="this.style.background=\'#fff\'">'
+              + '<div style="width:28px;height:28px;border-radius:50%;background:#DBEAFE;color:#2563EB;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;flex-shrink:0;">' + name.charAt(0).toUpperCase() + '</div>'
+              + '<div><div style="font-weight:600;color:#1E293B;">' + name + '</div><div style="font-size:0.72rem;color:#64748B;">' + role + '</div></div>'
+              + '</div>';
+          });
+          dropdown.innerHTML = html;
+          dropdown.style.display = 'block';
+        } else {
+          dropdown.style.display = 'none';
+        }
+      } else {
+        dropdown.style.display = 'none';
+      }
     } else {
       dropdown.style.display = 'none';
     }
   };
 
-  window.selectMentionUser = function (name) {
+  window.selectMentionUser = function (name, atIndex) {
     var input = document.getElementById('chatMessageInput');
     var dropdown = document.getElementById('mentionDropdown');
     if (input) {
-      input.value = input.value + name + ' ';
+      var val = input.value;
+      // Replace from the @ symbol onwards with the selected name
+      var before = (atIndex !== undefined && atIndex >= 0) ? val.substring(0, atIndex) : val.replace(/@\S*$/, '');
+      input.value = before + '@' + name + ' ';
       input.focus();
     }
     if (dropdown) dropdown.style.display = 'none';

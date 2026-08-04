@@ -1216,7 +1216,7 @@
     <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal(); return false;" href="#">
         <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
     </a>
-    <a class="nav-item" data-page="chat" onclick="if(typeof window.toggleChatPanel==='function')window.toggleChatPanel();return false;" href="#">
+    <a class="nav-item" data-page="chat" href="#">
         <i class="fas fa-comments"></i> <span class="nav-item-text">Chat</span>
     </a>
     <a class="nav-item" data-page="settings">
@@ -1496,8 +1496,14 @@
             </button>
           </div>
         </div>
+    </div> <!-- section-settings end -->
+
+    <!-- Full-Page WhatsApp Chat Section -->
+    <div id="section-chat" class="content-section" style="display:none;padding:0;">
+      <div id="chatPageApp"></div>
     </div>
-</div>
+
+</div> <!-- end content-wrapper -->
 
 <div class="modal-overlay" id="updateModal" style="overflow-x:visible;">
     <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;overflow:visible;">
@@ -2060,6 +2066,7 @@
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
 </script>
 <script src="js/member.js?v=2.0.0"></script>
+<script src="js/chatPage.js"></script>
 <script src="js/chat.js"></script>
 
 </body>

@@ -1083,7 +1083,22 @@
                     if (typeof window.openEmailCampaignModal === 'function') window.openEmailCampaignModal();
                     return;
                 }
-                if (page === 'chat' || page === 'notifications') {
+                if (page === 'chat') {
+                    // Show full-page WhatsApp chat section
+                    document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+                    item.classList.add('active');
+                    var dashS = document.getElementById('section-dashboard');
+                    var setS = document.getElementById('section-settings');
+                    var preS = document.getElementById('section-preview');
+                    if (dashS) dashS.style.display = 'none';
+                    if (setS) setS.style.display = 'none';
+                    if (preS) preS.style.display = 'none';
+                    var chatSec = document.getElementById('section-chat');
+                    if (chatSec) chatSec.style.display = 'block';
+                    if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
+                    return;
+                }
+                if (page === 'notifications') {
                     return;
                 }
 
