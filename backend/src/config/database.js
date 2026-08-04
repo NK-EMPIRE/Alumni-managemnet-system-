@@ -159,6 +159,19 @@ async function getPool() {
           CREATE INDEX IX_EmailCampaignRecipients_Campaign ON dbo.EmailCampaignRecipients(campaign_id);
       END
 
+      IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'company')
+      BEGIN
+          ALTER TABLE dbo.Alumni ADD company NVARCHAR(200) NULL;
+      END
+      IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'designation')
+      BEGIN
+          ALTER TABLE dbo.Alumni ADD designation NVARCHAR(200) NULL;
+      END
+      IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'city')
+      BEGIN
+          ALTER TABLE dbo.Alumni ADD city NVARCHAR(100) NULL;
+      END
+
       IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = OBJECT_ID('dbo.WorkspaceMessages'))
       BEGIN
           CREATE TABLE dbo.WorkspaceMessages (
