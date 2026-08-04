@@ -907,8 +907,9 @@
             incrementTodayCount();
             showToast('Record submitted successfully!', 'success');
 
-            // Find the next pending/draft record
-            var nextRecord = alumniData.find(function (r) {
+            // Find the next pending/draft record based on current filter state
+            var listToSearch = (filteredData && filteredData.length > 0) ? filteredData : alumniData;
+            var nextRecord = listToSearch.find(function (r) {
                 return r.status !== 'Completed' && r.id !== idx;
             });
 
@@ -916,7 +917,7 @@
                 openUpdateModal(nextRecord.id);
             } else {
                 closeUpdateModal();
-                showToast('All assigned records completed! Great job!', 'success');
+                showToast('All filtered records completed! Great job!', 'success');
             }
         }
 

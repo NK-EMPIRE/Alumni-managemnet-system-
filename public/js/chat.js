@@ -426,21 +426,55 @@
         var tabBar  = $('cpTabBar');
         var body    = $('cpBody');
         var input   = $('cpInput');
+        var title   = $('cpTitle');
+        var sub     = $('cpSubtitle');
+        var themeBtn = $('cpThemeBtn');
+
         if (panel)  panel.style.background  = T.bg;
         if (tabBar) { tabBar.style.background = T.surface; tabBar.style.borderBottomColor = T.border; }
         if (body)   body.style.background   = T.bg;
+        if (title)  title.style.color       = T.textPrimary;
+        if (sub)    sub.style.color         = T.textMuted;
+
         if (input) {
-            input.style.background = T.inputBg;
-            input.style.color      = T.textPrimary;
+            input.style.background  = T.inputBg;
+            input.style.color       = T.textPrimary;
             input.style.borderColor = T.border;
         }
-        // Update header background
+
+        // Header
         var header = panel ? panel.querySelector('div:first-child') : null;
         if (header) { header.style.background = T.surface; header.style.borderBottomColor = T.border; }
-        // float button stays dark always
+
+        // Header buttons (Theme & Close)
+        var closeBtn = panel ? panel.querySelector('button[title="Send Message"]') : null;
+        if (themeBtn) {
+            themeBtn.style.color = T.textPrimary;
+            themeBtn.style.background = _isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+        }
+
+        // Footer container
+        if (input && input.parentElement) {
+            input.parentElement.style.background = T.surface;
+            input.parentElement.style.borderTopColor = T.border;
+        }
+
+        // Tabs
+        var tabG = $('cpTabGlobal');
+        var tabT = $('cpTabTeam');
+        if (tabG && _activeTab !== 'global') tabG.style.color = T.textMuted;
+        if (tabT && _activeTab !== 'team')   tabT.style.color = T.textMuted;
+
+        // Clear row
         var clearRow = $('cpClearBtn') ? $('cpClearBtn').parentElement : null;
         if (clearRow) { clearRow.style.background = T.surface; clearRow.style.borderTopColor = T.border; }
-        // Store preference
+
+        // Re-render messages if panel is open to update bubble & text colors
+        var token = localStorage.getItem('token');
+        if (token && _panelIsOpen) {
+            fetchMessages(_activeTab, true);
+        }
+
         try { localStorage.setItem('cpTheme', _isDark ? 'dark' : 'light'); } catch(e) {}
     }
 
@@ -452,6 +486,7 @@
 
         _panelIsOpen = !_panelIsOpen;
         if (_panelIsOpen) {
+            applyTheme();
             panel.style.display = 'flex';
             panel.style.visibility = 'visible';
             panel.style.boxShadow = '-8px 0 40px rgba(0,0,0,.55)';
