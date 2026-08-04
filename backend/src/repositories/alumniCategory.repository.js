@@ -6,14 +6,15 @@ const { sql, getPool } = require('../config/database');
  */
 async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
   const pool = await getPool();
-  const request = pool.request()
+
+  const createRequest = () => pool.request()
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
     .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
   // Designations / Roles
-  const desigResult = await request.query(`
+  const desigResult = await createRequest().query(`
     SELECT
       ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified') AS designation,
       COUNT(DISTINCT a.alumni_id) AS count
@@ -38,14 +39,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
   `);
 
   // Companies
-  const pool2 = await getPool();
-  const req2 = pool2.request()
-    .input('department', sql.NVarChar(50), department || null)
-    .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null)
-    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
-
-  const companyResult = await req2.query(`
+  const companyResult = await createRequest().query(`
     SELECT
       ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified') AS company,
       COUNT(DISTINCT a.alumni_id) AS count
@@ -68,14 +62,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
   `);
 
   // Cities / Company Addresses
-  const pool3 = await getPool();
-  const req3 = pool3.request()
-    .input('department', sql.NVarChar(50), department || null)
-    .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null)
-    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
-
-  const cityResult = await req3.query(`
+  const cityResult = await createRequest().query(`
     SELECT
       ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified') AS city,
       COUNT(DISTINCT a.alumni_id) AS count
@@ -98,14 +85,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
   `);
 
   // Profession types
-  const pool4 = await getPool();
-  const req4 = pool4.request()
-    .input('department', sql.NVarChar(50), department || null)
-    .input('batch', sql.NVarChar(10), batch || null)
-    .input('status', sql.NVarChar(30), status || null)
-    .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
-
-  const professionResult = await req4.query(`
+  const professionResult = await createRequest().query(`
     SELECT
       CASE
         WHEN pi.is_government_job = 1 THEN 'Government'
