@@ -1328,7 +1328,7 @@
 
   function validateForm() {
     var isValid = true;
-    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldEmail', 'fieldPhone'];
+    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity'];
     required.forEach(function (id) {
       var el = document.getElementById(id);
       var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
@@ -1341,6 +1341,28 @@
         if (err) err.style.display = 'none';
       }
     });
+
+    var emailEl = document.getElementById('fieldEmail');
+    var phoneEl = document.getElementById('fieldPhone');
+    var emailErr = document.getElementById('errorEmail');
+    var phoneErr = document.getElementById('errorPhone');
+
+    var emailVal = emailEl && emailEl.value ? emailEl.value.trim() : '';
+    var phoneVal = phoneEl && phoneEl.value ? phoneEl.value.trim() : '';
+
+    if (!emailVal && !phoneVal) {
+      if (emailEl) emailEl.classList.add('error');
+      if (phoneEl) phoneEl.classList.add('error');
+      if (emailErr) emailErr.style.display = 'block';
+      if (phoneErr) phoneErr.style.display = 'block';
+      isValid = false;
+    } else {
+      if (emailEl) emailEl.classList.remove('error');
+      if (phoneEl) phoneEl.classList.remove('error');
+      if (emailErr) emailErr.style.display = 'none';
+      if (phoneErr) phoneErr.style.display = 'none';
+    }
+
     return isValid;
   }
 

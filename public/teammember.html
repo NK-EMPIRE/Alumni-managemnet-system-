@@ -1563,9 +1563,9 @@
                         <div class="error-text" id="errorDesignation">Designation is required</div>
                     </div>
                     <div class="form-group">
-                        <label>Current City <span class="required">*</span></label>
-                        <input type="text" id="fieldCity" placeholder="Current city">
-                        <div class="error-text" id="errorCity">City is required</div>
+                        <label>Company Address <span class="required">*</span></label>
+                        <input type="text" id="fieldCity" placeholder="Company address">
+                        <div class="error-text" id="errorCity">Company Address is required</div>
                     </div>
                 </div>
                 <div class="form-row">
@@ -1591,11 +1591,11 @@
                 <div class="form-row" style="flex-direction: column; gap: 16px;">
                     <div class="form-group" style="width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label style="margin: 0;">Email <span class="required">*</span></label>
+                            <label style="margin: 0;">Email <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone required)</span></label>
                             <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                         </div>
                         <input type="email" id="fieldEmail" placeholder="email@example.com">
-                        <div class="error-text" id="errorEmail">Email is required</div>
+                        <div class="error-text" id="errorEmail">At least one contact (Email or Phone) is required</div>
                     </div>
                     <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; width: 100%;">
                         <label>Secondary Email</label>
@@ -1605,11 +1605,11 @@
                 <div class="form-row" style="flex-direction: column; gap: 16px;">
                     <div class="form-group" style="width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label style="margin: 0;">Phone <span class="required">*</span></label>
+                            <label style="margin: 0;">Phone <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone required)</span></label>
                             <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                         </div>
                         <input type="text" id="fieldPhone" placeholder="Phone number">
-                        <div class="error-text" id="errorPhone">Phone is required</div>
+                        <div class="error-text" id="errorPhone">At least one contact (Email or Phone) is required</div>
                     </div>
                     <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; width: 100%;">
                         <label>Secondary Phone</label>

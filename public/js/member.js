@@ -733,7 +733,7 @@
             { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' },
             { id: 'fieldCompany', errorId: 'errorCompany', label: 'Company' },
             { id: 'fieldDesignation', errorId: 'errorDesignation', label: 'Designation' },
-            { id: 'fieldCity', errorId: 'errorCity', label: 'City' }
+            { id: 'fieldCity', errorId: 'errorCity', label: 'Company Address' }
         ];
 
         fields.forEach(function (f) {
@@ -745,6 +745,28 @@
                 isValid = false;
             }
         });
+
+        // Contact validation: either Email or Phone must be present
+        const emailEl = document.getElementById('fieldEmail');
+        const phoneEl = document.getElementById('fieldPhone');
+        const emailErr = document.getElementById('errorEmail');
+        const phoneErr = document.getElementById('errorPhone');
+
+        const emailVal = emailEl && emailEl.value ? emailEl.value.trim() : '';
+        const phoneVal = phoneEl && phoneEl.value ? phoneEl.value.trim() : '';
+
+        if (!emailVal && !phoneVal) {
+            if (emailEl) emailEl.classList.add('error');
+            if (phoneEl) phoneEl.classList.add('error');
+            if (emailErr) emailErr.classList.add('show');
+            if (phoneErr) phoneErr.classList.add('show');
+            isValid = false;
+        } else {
+            if (emailEl) emailEl.classList.remove('error');
+            if (phoneEl) phoneEl.classList.remove('error');
+            if (emailErr) emailErr.classList.remove('show');
+            if (phoneErr) phoneErr.classList.remove('show');
+        }
 
         return isValid;
     }
