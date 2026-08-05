@@ -209,6 +209,10 @@
         <i class="fas fa-layer-group"></i>
         <span class="sidebar-item-text">Alumni Categories</span>
       </a>
+      <a class="sidebar-item" data-section="alumniAnalysis" onclick="navigateTo('alumniAnalysis', this)">
+        <i class="fas fa-chart-pie"></i>
+        <span class="sidebar-item-text">Alumni Analysis</span>
+      </a>
       <a class="sidebar-item" data-section="attendance" onclick="navigateTo('attendance', this)">
         <i class="fas fa-calendar-check"></i>
         <span class="sidebar-item-text">Attendance</span>
@@ -1271,6 +1275,117 @@
         </div>
       </section>
 
+      <!-- ─── ALUMNI ANALYSIS REPORTING SECTION ─── -->
+      <section id="section-alumniAnalysis" class="content-section" style="display:none;">
+        <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+          <div>
+            <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;">Alumni Analysis &amp; Reporting</h1>
+            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Filterable browse view for verified alumni professional records with custom rule-based query search.</p>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary btn-sm" onclick="initAnalysisPage()"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button class="btn btn-secondary btn-sm" onclick="resetAnalysisFilters()"><i class="fas fa-undo"></i> Reset Filters</button>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="card" style="padding:18px;margin-bottom:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:12px;padding-bottom:12px;border-bottom:1px solid #F1F5F9;">
+            <div style="font-size:0.9rem;font-weight:700;color:#0F172A;"><i class="fas fa-filter" style="color:#2563EB;margin-right:6px;"></i> Analysis Filters</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-outline btn-sm" id="btnAnalysisViewCards" onclick="setAnalysisViewMode('cards')" style="background:#EFF6FF;color:#2563EB;font-weight:600;"><i class="fas fa-th-large"></i> Notion Cards</button>
+              <button class="btn btn-outline btn-sm" id="btnAnalysisViewTable" onclick="setAnalysisViewMode('table')"><i class="fas fa-list"></i> Table View</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;align-items:end;">
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Role Category</label>
+              <select id="analysisFilterRoleCategory" class="form-control" onchange="fetchAnalysisData(1)">
+                <option value="">All Role Categories</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Company</label>
+              <select id="analysisFilterCompany" class="form-control" onchange="fetchAnalysisData(1)">
+                <option value="">All Companies</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">City <span style="font-weight:normal;color:#94A3B8;">(partial)</span></label>
+              <input type="text" id="analysisFilterCity" class="form-control" placeholder="e.g. Chennai, Karaikudi" oninput="debounceAnalysisSearch()">
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">State</label>
+              <input type="text" id="analysisFilterState" class="form-control" placeholder="State" oninput="debounceAnalysisSearch()">
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Country</label>
+              <input type="text" id="analysisFilterCountry" class="form-control" placeholder="Country" oninput="debounceAnalysisSearch()">
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Department</label>
+              <select id="analysisFilterDept" class="form-control" onchange="fetchAnalysisData(1)">
+                <option value="">All Departments</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Batch</label>
+              <select id="analysisFilterBatch" class="form-control" onchange="fetchAnalysisData(1)">
+                <option value="">All Batches</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Status</label>
+              <select id="analysisFilterStatus" class="form-control" onchange="fetchAnalysisData(1)">
+                <option value="">All Statuses</option>
+                <option value="Completed">Completed</option>
+                <option value="Draft">Draft</option>
+                <option value="Pending">Pending</option>
+                <option value="Unassigned">Unassigned</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Custom Query <span style="font-weight:normal;color:#94A3B8;">(free text rule-based search)</span></label>
+            <input type="text" id="analysisCustomQueryInput" class="form-control" placeholder="e.g. alumni who worked at Zoho, or batch 2018-2020 in HR roles" style="width:100%;" oninput="debounceAnalysisSearch()">
+          </div>
+        </div>
+
+        <!-- Data View & Table -->
+        <div class="card" style="padding:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
+          <div class="table-responsive">
+            <table class="table" style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0;font-size:0.8rem;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">
+                  <th style="padding:10px 12px;">Reg No</th>
+                  <th style="padding:10px 12px;">Name &amp; Dept</th>
+                  <th style="padding:10px 12px;">Role &amp; Company</th>
+                  <th style="padding:10px 12px;">Location</th>
+                  <th style="padding:10px 12px;">Contact Details</th>
+                  <th style="padding:10px 12px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="analysisTableBody">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:#94A3B8;">Loading analysis data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #E2E8F0;">
+            <div style="font-size:0.85rem;color:#64748B;" id="analysisPaginationInfo">Showing 0 entries</div>
+            <div id="analysisPaginationBtns" style="display:flex;gap:6px;"></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ─── AUTO ATTENDANCE SYSTEM SECTION ─── -->
       <section id="section-attendance" class="content-section" style="display:none;">
         <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
@@ -1820,9 +1935,9 @@
               <div class="error-text" id="errorDesignation" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Designation is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company Address <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldCity" placeholder="Company address" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company Address is required</div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">City <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldCity" placeholder="City" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City is required</div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
@@ -2595,6 +2710,7 @@
     <script src="js/dynamic-tour.js"></script>
     <script src="js/admin.js?v=2.0.0"></script>
     <script src="js/adminCategoryAttendance.js"></script>
+    <script src="js/alumniAnalysis.js"></script>
     <script src="js/chatPage.js"></script>
     <script src="js/chat.js"></script>
 

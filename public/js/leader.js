@@ -604,6 +604,9 @@
         document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
         var target = document.getElementById('section-' + page);
         if (target) target.classList.add('active');
+        if (page === 'alumniAnalysis' && typeof window.initAnalysisPage === 'function') {
+          window.initAnalysisPage();
+        }
         window.scrollTo({ top: 0, behavior: 'instant' });
 
         var globalHeader = document.getElementById('globalPageHeader');

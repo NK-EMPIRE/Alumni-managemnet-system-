@@ -342,6 +342,17 @@
     },
     getAlumniCategoryList: function (params) {
         return get('/alumni-category/list', params);
+    },
+
+    // Alumni Analysis
+    getAlumniAnalysis: function (params) {
+        return get('/alumni-analysis', params);
+    },
+    getAnalysisCompanies: function () {
+        return get('/alumni-analysis/companies');
+    },
+    getAnalysisRoleCategories: function () {
+        return get('/alumni-analysis/role-categories');
     }
     };
 

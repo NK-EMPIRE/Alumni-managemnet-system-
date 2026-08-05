@@ -21,6 +21,7 @@ const chatRoutes = require('./chat.routes');
 const notificationRoutes = require('./notification.routes');
 const attendanceRoutes = require('./attendance.routes');
 const alumniCategoryRoutes = require('./alumniCategory.routes');
+const alumniAnalysisRoutes = require('./alumniAnalysis.routes');
 
 
 const router = Router();
@@ -58,5 +59,6 @@ router.use('/chat', chatRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/alumni-category', alumniCategoryRoutes);
+router.use('/alumni-analysis', alumniAnalysisRoutes);
 
 module.exports = router;
