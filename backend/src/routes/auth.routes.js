@@ -19,6 +19,7 @@ router.post('/reset-password-with-temp', [
   body('newPassword').isLength({ min: 6 })
 ], validate, authController.resetPasswordWithTemp);
 
+router.get('/me', authenticate, authController.getMe);
 router.get('/reset-password-requests', authenticate, authorize('ADMIN'), authController.getResetRequests);
 router.patch('/reset-password-requests/:requestId', authenticate, authorize('ADMIN'), authController.updateResetRequestStatus);
 

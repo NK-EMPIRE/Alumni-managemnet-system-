@@ -21,10 +21,37 @@ async function ensureChannelColumn(pool) {
       BEGIN
         ALTER TABLE dbo.WorkspaceMessages ADD team_id INT NULL;
       END
+
+      IF NOT EXISTS (
+        SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = 'WorkspaceMessages' AND COLUMN_NAME = 'recipient_id'
+      )
+      BEGIN
+        ALTER TABLE dbo.WorkspaceMessages ADD recipient_id INT NULL;
+      END
+
+      IF NOT EXISTS (
+        SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'last_seen'
+      )
+      BEGIN
+        ALTER TABLE dbo.Users ADD last_seen DATETIME NULL;
+      END
     `);
     _columnChecked = true;
   } catch (e) {
-    console.error('Error ensuring channel_type / team_id columns:', e.message);
+    console.error('Error ensuring database columns for chat:', e.message);
+  }
+}
+
+async function updateLastSeen(pool, userId) {
+  if (!userId) return;
+  try {
+    const req = pool.request();
+    req.input('userId', sql.Int, userId);
+    await req.query(`UPDATE dbo.Users SET last_seen = GETUTCDATE() WHERE user_id = @userId`);
+  } catch (e) {
+    console.error('Error updating last_seen:', e.message);
   }
 }
 
@@ -39,17 +66,136 @@ async function getUserTeamIds(pool, userId) {
   return result.recordset.map(r => r.team_id);
 }
 
-async function getMessages({ reqUser, limit = 50, sinceId, channelType = 'global', teamId }) {
+async function getMentionUsers({ reqUser, channelType = 'global', teamId }) {
+  if (!reqUser || !reqUser.userId) return [];
   const pool = await getPool();
   await ensureChannelColumn(pool);
+  await updateLastSeen(pool, reqUser.userId);
+
+  const req = pool.request();
+  req.input('currentUserId', sql.Int, reqUser.userId);
+
+  if (channelType === 'team') {
+    const teamIds = await getUserTeamIds(pool, reqUser.userId);
+    if (!teamIds || teamIds.length === 0) return [];
+
+    let teamCondition = '';
+    const parsedTeamId = teamId ? parseInt(teamId, 10) : null;
+    if (parsedTeamId && teamIds.includes(parsedTeamId)) {
+      req.input('targetTeamId', sql.Int, parsedTeamId);
+      teamCondition = `t.team_id = @targetTeamId`;
+    } else {
+      const teamIdInputs = teamIds.map((id, idx) => {
+        const paramName = `tId_${idx}`;
+        req.input(paramName, sql.Int, id);
+        return `@${paramName}`;
+      }).join(',');
+      teamCondition = `t.team_id IN (${teamIdInputs})`;
+    }
+
+    const query = `
+      SELECT DISTINCT u.user_id, u.first_name, u.last_name, u.email, u.department,
+             r.role_name, u.last_seen,
+             CASE WHEN DATEDIFF(MINUTE, u.last_seen, GETUTCDATE()) <= 5 THEN 1 ELSE 0 END AS is_online
+      FROM dbo.Users u
+      LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
+      LEFT JOIN dbo.TeamMembers tm ON u.user_id = tm.user_id
+      LEFT JOIN dbo.Teams t ON (t.team_id = tm.team_id OR t.leader_id = u.user_id)
+      WHERE u.user_id <> @currentUserId
+        AND u.is_active = 1
+        AND (${teamCondition})
+      ORDER BY u.first_name, u.last_name
+    `;
+    const res = await req.query(query);
+    return res.recordset;
+  }
+
+  // Global channel: return all active users except the current logged-in user
+  const query = `
+    SELECT u.user_id, u.first_name, u.last_name, u.email, u.department,
+           r.role_name, u.last_seen,
+           CASE WHEN DATEDIFF(MINUTE, u.last_seen, GETUTCDATE()) <= 5 THEN 1 ELSE 0 END AS is_online
+    FROM dbo.Users u
+    LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
+    WHERE u.user_id <> @currentUserId
+      AND u.is_active = 1
+    ORDER BY u.first_name, u.last_name
+  `;
+  const res = await req.query(query);
+  return res.recordset;
+}
+
+async function getContacts({ reqUser }) {
+  if (!reqUser || !reqUser.userId) return [];
+  const pool = await getPool();
+  await ensureChannelColumn(pool);
+  await updateLastSeen(pool, reqUser.userId);
+
+  const req = pool.request();
+  req.input('currentUserId', sql.Int, reqUser.userId);
+
+  const query = `
+    SELECT u.user_id, u.first_name, u.last_name, u.email, u.department,
+           r.role_name, u.last_seen,
+           CASE WHEN DATEDIFF(MINUTE, u.last_seen, GETUTCDATE()) <= 5 THEN 1 ELSE 0 END AS is_online
+    FROM dbo.Users u
+    LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
+    WHERE u.user_id <> @currentUserId
+      AND u.is_active = 1
+    ORDER BY is_online DESC, u.first_name, u.last_name
+  `;
+  const res = await req.query(query);
+  return res.recordset;
+}
+
+async function getMessages({ reqUser, limit = 50, sinceId, channelType = 'global', teamId, recipientId }) {
+  const pool = await getPool();
+  await ensureChannelColumn(pool);
+  if (reqUser && reqUser.userId) {
+    await updateLastSeen(pool, reqUser.userId);
+  }
   const request = pool.request();
 
-  const channel = (channelType === 'team') ? 'team' : 'global';
+  const channel = channelType;
   const userRole = (reqUser && reqUser.role) ? String(reqUser.role).toUpperCase() : '';
   const isAdmin = userRole.includes('ADMIN');
 
+  if (channel === 'private') {
+    if (!reqUser || !reqUser.userId || !recipientId) return [];
+    const targetId = parseInt(recipientId, 10);
+    if (!targetId || isNaN(targetId)) return [];
+
+    request.input('myUserId', sql.Int, reqUser.userId);
+    request.input('targetUserId', sql.Int, targetId);
+
+    let query = `
+      SELECT TOP (${parseInt(limit, 10) || 50})
+             m.message_id, m.user_id, m.recipient_id, m.message_text, m.attachment_url, m.created_at,
+             'private' AS channel_type, m.team_id,
+             (u.first_name + ' ' + u.last_name) AS sender_name,
+             u.email AS sender_email,
+             r.role_name AS sender_role, u.department AS sender_department,
+             CASE WHEN rec.last_seen IS NOT NULL AND rec.last_seen >= m.created_at THEN 1 ELSE 0 END AS is_read
+      FROM dbo.WorkspaceMessages m
+      JOIN dbo.Users u ON m.user_id = u.user_id
+      LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
+      LEFT JOIN dbo.Users rec ON (CASE WHEN m.user_id = @myUserId THEN m.recipient_id ELSE m.user_id END) = rec.user_id
+      WHERE ISNULL(m.channel_type, 'global') = 'private'
+        AND ((m.user_id = @myUserId AND m.recipient_id = @targetUserId)
+          OR (m.user_id = @targetUserId AND m.recipient_id = @myUserId))
+    `;
+
+    if (sinceId && !isNaN(parseInt(sinceId, 10))) {
+      query += ` AND m.message_id > @sinceId`;
+      request.input('sinceId', sql.Int, parseInt(sinceId, 10));
+    }
+
+    query += ` ORDER BY m.message_id DESC`;
+    const res = await request.query(query);
+    return res.recordset.reverse();
+  }
+
   if (channel === 'team') {
-    // Admin or unauthenticated users must NOT view team chat
     if (isAdmin || !reqUser || !reqUser.userId) {
       return [];
     }
@@ -75,11 +221,13 @@ async function getMessages({ reqUser, limit = 50, sinceId, channelType = 'global
 
     let query = `
       SELECT TOP (${parseInt(limit, 10) || 50})
-             m.message_id, m.user_id, m.message_text, m.attachment_url, m.created_at,
+             m.message_id, m.user_id, m.recipient_id, m.message_text, m.attachment_url, m.created_at,
              ISNULL(m.channel_type, 'global') AS channel_type, m.team_id,
              (u.first_name + ' ' + u.last_name) AS sender_name,
+             u.email AS sender_email,
              r.role_name AS sender_role, u.department AS sender_department,
-             t.team_name AS sender_team_name
+             t.team_name AS sender_team_name,
+             CASE WHEN EXISTS (SELECT 1 FROM dbo.Users ru WHERE ru.user_id <> m.user_id AND ru.last_seen >= m.created_at) THEN 1 ELSE 0 END AS is_read
       FROM dbo.WorkspaceMessages m
       JOIN dbo.Users u ON m.user_id = u.user_id
       LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
@@ -102,11 +250,13 @@ async function getMessages({ reqUser, limit = 50, sinceId, channelType = 'global
   // Global channel messages ONLY
   let query = `
     SELECT TOP (${parseInt(limit, 10) || 50})
-           m.message_id, m.user_id, m.message_text, m.attachment_url, m.created_at,
+           m.message_id, m.user_id, m.recipient_id, m.message_text, m.attachment_url, m.created_at,
            ISNULL(m.channel_type, 'global') AS channel_type, m.team_id,
            (u.first_name + ' ' + u.last_name) AS sender_name,
+           u.email AS sender_email,
            r.role_name AS sender_role, u.department AS sender_department,
-           NULL AS sender_team_name
+           NULL AS sender_team_name,
+           CASE WHEN EXISTS (SELECT 1 FROM dbo.Users ru WHERE ru.user_id <> m.user_id AND ru.last_seen >= m.created_at) THEN 1 ELSE 0 END AS is_read
     FROM dbo.WorkspaceMessages m
     JOIN dbo.Users u ON m.user_id = u.user_id
     LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
@@ -124,21 +274,28 @@ async function getMessages({ reqUser, limit = 50, sinceId, channelType = 'global
   return res.recordset.reverse();
 }
 
-async function sendMessage({ reqUser, userId, messageText, attachmentUrl, channelType = 'global', teamId }) {
+async function sendMessage({ reqUser, userId, messageText, attachmentUrl, channelType = 'global', teamId, recipientId }) {
   if (!messageText || !messageText.trim()) {
     throw new Error('Message text cannot be empty');
   }
 
   const pool = await getPool();
   await ensureChannelColumn(pool);
+  await updateLastSeen(pool, userId);
 
-  const channel = (channelType === 'team') ? 'team' : 'global';
+  const channel = channelType;
   const userRole = (reqUser && reqUser.role) ? String(reqUser.role).toUpperCase() : '';
   const isAdmin = userRole.includes('ADMIN');
 
   let assignedTeamId = null;
+  let targetRecipientId = null;
 
-  if (channel === 'team') {
+  if (channel === 'private') {
+    if (!recipientId) {
+      throw new Error('Recipient is required for private message');
+    }
+    targetRecipientId = parseInt(recipientId, 10);
+  } else if (channel === 'team') {
     if (isAdmin) {
       throw new Error('Admins cannot send messages in team chat');
     }
@@ -160,10 +317,11 @@ async function sendMessage({ reqUser, userId, messageText, attachmentUrl, channe
     .input('attachmentUrl', sql.VarChar(500), attachmentUrl || null)
     .input('channelType', sql.NVarChar(50), channel)
     .input('teamId', sql.Int, assignedTeamId)
+    .input('recipientId', sql.Int, targetRecipientId)
     .query(`
-      INSERT INTO dbo.WorkspaceMessages (user_id, message_text, attachment_url, channel_type, team_id, created_at)
+      INSERT INTO dbo.WorkspaceMessages (user_id, message_text, attachment_url, channel_type, team_id, recipient_id, created_at)
       OUTPUT INSERTED.message_id, INSERTED.created_at
-      VALUES (@userId, @messageText, @attachmentUrl, @channelType, @teamId, GETUTCDATE());
+      VALUES (@userId, @messageText, @attachmentUrl, @channelType, @teamId, @recipientId, GETUTCDATE());
     `);
 
   const newId = insertRes.recordset[0].message_id;
@@ -171,7 +329,7 @@ async function sendMessage({ reqUser, userId, messageText, attachmentUrl, channe
   const detailRes = await pool.request()
     .input('messageId', sql.Int, newId)
     .query(`
-      SELECT m.message_id, m.user_id, m.message_text, m.attachment_url, m.created_at,
+      SELECT m.message_id, m.user_id, m.recipient_id, m.message_text, m.attachment_url, m.created_at,
              ISNULL(m.channel_type, 'global') AS channel_type, m.team_id,
              (u.first_name + ' ' + u.last_name) AS sender_name,
              r.role_name AS sender_role, u.department AS sender_department,
@@ -185,8 +343,6 @@ async function sendMessage({ reqUser, userId, messageText, attachmentUrl, channe
 
   const savedMessage = detailRes.recordset[0];
 
-  // Fire-and-forget: detect LinkedIn URLs in global messages and create notifications.
-  // Never awaited — a detection error must never break the send response.
   if (channel === 'global') {
     notificationService.detectAndNotify(messageText.trim(), userId, newId);
   }
@@ -203,7 +359,6 @@ async function clearMessages({ reqUser, channelType }) {
   await ensureChannelColumn(pool);
 
   if (channelType && channelType !== 'all') {
-    // 1. Nullify or delete Notifications that reference messages in this channel
     await pool.request()
       .input('channelType', sql.NVarChar(50), channelType)
       .query(`
@@ -213,25 +368,33 @@ async function clearMessages({ reqUser, channelType }) {
           SELECT message_id FROM dbo.WorkspaceMessages WHERE channel_type = @channelType
         )
       `);
-    // 2. Now safely delete the messages
     await pool.request()
       .input('channelType', sql.NVarChar(50), channelType)
       .query(`DELETE FROM dbo.WorkspaceMessages WHERE channel_type = @channelType`);
   } else {
-    // 1. Nullify all Notifications referencing any message
     await pool.request().query(`
       UPDATE dbo.Notifications SET source_message_id = NULL
       WHERE source_message_id IS NOT NULL
     `);
-    // 2. Delete all messages
     await pool.request().query(`DELETE FROM dbo.WorkspaceMessages`);
   }
+  return true;
+}
+
+async function heartbeat(userId) {
+  if (!userId) return false;
+  const pool = await getPool();
+  await ensureChannelColumn(pool);
+  await updateLastSeen(pool, userId);
   return true;
 }
 
 module.exports = {
   getMessages,
   sendMessage,
-  clearMessages
+  clearMessages,
+  getMentionUsers,
+  getContacts,
+  heartbeat
 };
 

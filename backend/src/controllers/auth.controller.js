@@ -70,6 +70,12 @@ const sso = asyncHandler(async (req, res) => {
   success(res, result, 'SSO login successful');
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const userId = req.user.userId;
+  const me = await authService.getMe(userId);
+  success(res, me, 'Profile retrieved');
+});
+
 module.exports = {
   login,
   refreshToken,
@@ -78,5 +84,6 @@ module.exports = {
   resetPasswordWithTemp,
   getResetRequests,
   updateResetRequestStatus,
-  sso
+  sso,
+  getMe
 };

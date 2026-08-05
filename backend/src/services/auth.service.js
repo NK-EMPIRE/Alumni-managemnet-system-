@@ -233,6 +233,20 @@ async function updateResetRequestStatus(requestId, status, adminUser) {
   }
 }
 
+async function getMe(userId) {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('userId', sql.Int, userId)
+    .query(`
+      SELECT u.user_id, u.first_name, u.last_name, u.email, u.department,
+             r.role_name AS role
+      FROM dbo.Users u
+      LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
+      WHERE u.user_id = @userId
+    `);
+  return result.recordset[0] || null;
+}
+
 module.exports = {
   login,
   changePassword,
@@ -240,5 +254,6 @@ module.exports = {
   forgotPassword,
   resetPasswordWithTemp,
   getResetRequests,
-  updateResetRequestStatus
+  updateResetRequestStatus,
+  getMe
 };

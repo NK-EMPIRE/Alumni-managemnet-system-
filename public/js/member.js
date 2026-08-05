@@ -1109,6 +1109,10 @@
                 var dashboardSection = document.getElementById('section-dashboard');
                 var settingsSection = document.getElementById('section-settings');
                 var previewSection = document.getElementById('section-preview');
+                var chatSection = document.getElementById('section-chat');
+
+                if (chatSection) chatSection.style.display = 'none';
+
                 if (page === 'dashboard') {
                     if (dashboardSection) dashboardSection.style.display = 'block';
                     if (settingsSection) settingsSection.style.display = 'none';

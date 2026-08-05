@@ -601,9 +601,15 @@
         }
         document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });
         this.classList.add('active');
-        document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); });
+        document.querySelectorAll('.content-section').forEach(function (s) {
+          s.classList.remove('active');
+          s.style.display = 'none';
+        });
         var target = document.getElementById('section-' + page);
-        if (target) target.classList.add('active');
+        if (target) {
+          target.style.display = 'block';
+          target.classList.add('active');
+        }
         window.scrollTo({ top: 0, behavior: 'instant' });
 
         var globalHeader = document.getElementById('globalPageHeader');

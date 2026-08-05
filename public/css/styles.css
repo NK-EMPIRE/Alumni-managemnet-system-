@@ -5978,9 +5978,40 @@ tbody td { padding: 11px 14px; font-size: 0.86rem; vertical-align: middle; }
 }
 .content-section.active { animation: notionFadeIn 0.22s var(--ease) forwards; }
 
-/* Chat section sizing */
-#section-chat { min-height: calc(100vh - 130px); padding: 0 !important; }
-#chatPageApp  { min-height: calc(100vh - 130px); }
+/* Chat section sizing & full-bleed coverage of unwanted whitespace */
+#section-chat {
+  min-height: calc(100vh - 76px) !important;
+  padding: 0 !important;
+  margin: -12px -32px -32px -32px !important;
+}
+
+.content-wrapper #section-chat {
+  margin: -28px -32px -28px -32px !important;
+}
+
+@media (max-width: 1024px) {
+  #section-chat {
+    margin: -10px -20px -28px -20px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #section-chat {
+    margin: -8px -16px -24px -16px !important;
+  }
+}
+
+#chatPageApp {
+  min-height: calc(100vh - 76px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#chatPageApp .whatsapp-app-container {
+  height: calc(100vh - 76px) !important;
+  width: 100% !important;
+  border-radius: 12px;
+}
 
 /* Alumni analytics toolbar */
 .alumni-analytics-toolbar {
