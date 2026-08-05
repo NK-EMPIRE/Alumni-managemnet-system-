@@ -7,10 +7,10 @@ const { ROLES } = require('../constants');
 const router = Router();
 router.use(authenticate);
 
-// All read-only analysis endpoints accessible to ADMIN and LEADER
-router.get('/', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisAlumni);
-router.get('/companies', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisCompanies);
-router.get('/role-categories', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisRoleCategories);
+// Read-only analysis endpoints accessible exclusively to ADMIN
+router.get('/', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisAlumni);
+router.get('/companies', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisCompanies);
+router.get('/role-categories', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisRoleCategories);
 
 // Autocomplete suggestions endpoint accessible to all authenticated roles for update modals
 router.get('/suggestions', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getSuggestions);
