@@ -610,6 +610,9 @@
           target.style.display = 'block';
           target.classList.add('active');
         }
+        if (page === 'alumniAnalysis' && typeof window.initAnalysisPage === 'function') {
+          window.initAnalysisPage();
+        }
         window.scrollTo({ top: 0, behavior: 'instant' });
 
         var globalHeader = document.getElementById('globalPageHeader');

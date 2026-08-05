@@ -1360,6 +1360,8 @@ function navigateTo(section, el) {
     fetchSpreadsheetData();
   } else if (section === 'alumniCategory') {
     if (typeof window.fetchCategoryGroups === 'function') window.fetchCategoryGroups();
+  } else if (section === 'alumniAnalysis') {
+    if (typeof window.initAnalysisPage === 'function') window.initAnalysisPage();
   } else if (section === 'attendance') {
     if (typeof window.fetchAttendanceData === 'function') window.fetchAttendanceData();
   } else if (section === 'chat') {
@@ -1379,6 +1381,7 @@ function navigateTo(section, el) {
       'import': 'Import Alumni',
       'audit': 'Audit Logs',
       'alumniCategory': 'Alumni Categories',
+      'alumniAnalysis': 'Alumni Analysis',
       'attendance': 'Attendance',
       'chat': 'Chat Application'
     };
