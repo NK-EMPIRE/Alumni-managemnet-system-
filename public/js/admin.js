@@ -4620,7 +4620,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
       var data = readAdminFormValues();
-      API.updateAlumni(currentSelectedAlumniIdAdmin, data).then(function (res) {
+      API.submitProfessionalInfo(currentSelectedAlumniIdAdmin, data).then(function (res) {
         Toast.success('Update Record', 'Alumni record updated successfully.');
         closeModal('updateModal');
         fetchSpreadsheetData();
