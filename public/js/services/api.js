@@ -353,6 +353,9 @@
     },
     getAnalysisRoleCategories: function () {
         return get('/alumni-analysis/role-categories');
+    },
+    getSuggestions: function (field, query) {
+        return get('/alumni-analysis/suggestions', { field: field, query: query });
     }
     };
 

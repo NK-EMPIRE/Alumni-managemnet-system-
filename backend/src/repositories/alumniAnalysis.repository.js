@@ -233,8 +233,56 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
   return results;
 }
 
+/**
+ * Live Typeahead Autocomplete suggestions query for designation, company, city, state, country.
+ */
+async function getSuggestions({ field, query, limit = 15 }) {
+  if (!query || !field) return [];
+  const qStr = query.trim().toLowerCase();
+  const pool = await getPool();
+
+  const allowedFields = {
+    designation: ['COALESCE(pi.designation, a.designation)', 'designation'],
+    company: ['COALESCE(pi.company, a.company)', 'company'],
+    city: ['COALESCE(pi.current_city, a.city)', 'current_city'],
+    state: ['COALESCE(pi.state, a.state)', 'state'],
+    country: ['COALESCE(pi.country, a.country)', 'country']
+  };
+
+  if (!allowedFields[field]) return [];
+
+  const [colExpr, alias] = allowedFields[field];
+
+  const dbReq = pool.request().input('q', sql.NVarChar(200), `%${qStr}%`);
+  const dbRes = await dbReq.query(`
+    SELECT DISTINCT LTRIM(RTRIM(${colExpr})) AS val
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    WHERE ${colExpr} IS NOT NULL
+      AND LTRIM(RTRIM(CAST(${colExpr} AS NVARCHAR(MAX)))) <> ''
+      AND LOWER(${colExpr}) LIKE @q
+    ORDER BY val ASC
+  `);
+
+  const dbMatches = dbRes.recordset.map(r => r.val).filter(Boolean);
+
+  let dictionaryMatches = [];
+  if (field === 'designation') {
+    const { GLOBAL_ROLES } = require('../constants/globalRoles');
+    dictionaryMatches = GLOBAL_ROLES.filter(r => r.toLowerCase().includes(qStr));
+  }
+
+  // Combine DB matches first, then dictionary matches, maintaining uniqueness
+  const combined = Array.from(new Set([...dbMatches, ...dictionaryMatches])).slice(0, parseInt(limit, 10));
+  return combined;
+}
+
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
-  getAnalysisRoleCategories
+  getAnalysisRoleCategories,
+  getSuggestions
 };
