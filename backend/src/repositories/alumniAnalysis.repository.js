@@ -235,6 +235,7 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
 
 /**
  * Live Typeahead Autocomplete suggestions query for designation, company, city, state, country.
+ * Queries: 1. DB (Alumni & ProfessionalInformation), 2. Custom LookupDictionary, 3. Global Dictionary.
  */
 async function getSuggestions({ field, query, limit = 15 }) {
   if (!query || !field) return [];
@@ -253,6 +254,7 @@ async function getSuggestions({ field, query, limit = 15 }) {
 
   const [colExpr, alias] = allowedFields[field];
 
+  // 1. Fetch matches from Alumni & ProfessionalInformation tables
   const dbReq = pool.request().input('q', sql.NVarChar(200), `%${qStr}%`);
   const dbRes = await dbReq.query(`
     SELECT DISTINCT LTRIM(RTRIM(${colExpr})) AS val
@@ -266,23 +268,61 @@ async function getSuggestions({ field, query, limit = 15 }) {
       AND LOWER(${colExpr}) LIKE @q
     ORDER BY val ASC
   `);
-
   const dbMatches = dbRes.recordset.map(r => r.val).filter(Boolean);
 
+  // 2. Fetch matches from custom user-added LookupDictionary table
+  const customReq = pool.request()
+    .input('cat', sql.VarChar(50), field)
+    .input('q', sql.NVarChar(200), `%${qStr}%`);
+  const customRes = await customReq.query(`
+    SELECT DISTINCT LTRIM(RTRIM(value)) AS val
+    FROM dbo.LookupDictionary
+    WHERE category = @cat
+      AND LOWER(value) LIKE @q
+    ORDER BY val ASC
+  `);
+  const customMatches = customRes.recordset.map(r => r.val).filter(Boolean);
+
+  // 3. Predefined Global Dictionaries
   let dictionaryMatches = [];
   if (field === 'designation') {
     const { GLOBAL_ROLES } = require('../constants/globalRoles');
     dictionaryMatches = GLOBAL_ROLES.filter(r => r.toLowerCase().includes(qStr));
   }
 
-  // Combine DB matches first, then dictionary matches, maintaining uniqueness
-  const combined = Array.from(new Set([...dbMatches, ...dictionaryMatches])).slice(0, parseInt(limit, 10));
+  // Combine custom user-added values first, then DB matches, then global dictionary
+  const combined = Array.from(new Set([...customMatches, ...dbMatches, ...dictionaryMatches])).slice(0, parseInt(limit, 10));
   return combined;
+}
+
+/**
+ * Saves a new custom typeahead term into dbo.LookupDictionary so it appears in future typeahead searches.
+ */
+async function addSuggestion({ category, value }) {
+  if (!category || !value || !value.trim()) return null;
+  const valClean = value.trim();
+  const pool = await getPool();
+
+  const req = pool.request()
+    .input('cat', sql.VarChar(50), category)
+    .input('val', sql.NVarChar(255), valClean);
+
+  await req.query(`
+    IF NOT EXISTS (
+      SELECT 1 FROM dbo.LookupDictionary WHERE category = @cat AND LOWER(value) = LOWER(@val)
+    )
+    BEGIN
+      INSERT INTO dbo.LookupDictionary (category, value) VALUES (@cat, @val);
+    END
+  `);
+
+  return valClean;
 }
 
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
   getAnalysisRoleCategories,
-  getSuggestions
+  getSuggestions,
+  addSuggestion
 };

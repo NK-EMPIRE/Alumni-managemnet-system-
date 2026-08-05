@@ -1,24 +1,52 @@
 const GLOBAL_ROLES = [
+  // Domestic & Unclassified Statuses
+  'Home Maker', 'Housewife', 'Discontinued', 'Higher Studies', 'Not Working',
+  'Unemployed', 'Job Seeking', 'Self Employed', 'Own Business', 'Freelancer',
+
+  // Government & Public Sector
+  'Police Officer', 'Police Inspector', 'Sub Inspector (PSI)', 'Constable',
+  'Village Administrative Officer (VAO)', 'Panchayat Secretary', 'Tehsildar',
+  'Revenue Inspector', 'IAS Officer', 'IPS Officer', 'TNPSC Officer',
+  'Government Teacher', 'Government School Headmaster', 'Assistant Section Officer',
+  'Postal Assistant', 'Bank PO', 'Bank Clerk', 'Railway Engineer', 'Loco Pilot',
+  'Defense Officer', 'Army Officer', 'Navy Officer', 'Air Force Officer',
+
+  // Education & Academia
+  'Professor', 'Associate Professor', 'Assistant Professor', 'Dean',
+  'Head of Department (HOD)', 'Principal', 'Lecturer', 'Guest Lecturer',
+  'Research Scholar', 'Postdoctoral Researcher', 'Academic Coordinator',
+  'Lab Instructor', 'School Teacher', 'Tutor',
+
+  // Healthcare & Life Sciences
+  'Doctor', 'Physician', 'Surgeon', 'Dentist', 'Pharmacist', 'Nurse',
+  'Medical Officer', 'Lab Technician', 'Biomedical Engineer', 'Clinical Researcher',
+
+  // Engineering & Technical Trades
+  'Civil Engineer', 'Site Engineer', 'Structural Engineer', 'Project Engineer',
+  'Electrical Engineer', 'Electronics Engineer', 'Mechanical Engineer',
+  'Quality Control (QC) Engineer', 'Safety Engineer', 'Maintenance Engineer',
+  'Production Technician', 'CAD Designer', 'Automation Engineer',
+
+  // Corporate, IT & Software
   'Accountant', 'Accounts Executive', 'Accounts Manager', 'Account Manager', 'Actuary',
   'AI Engineer', 'AI Specialist', 'AI Research Scientist', 'Analyst', 'Android Developer',
   'Application Developer', 'Architect', 'Artificial Intelligence Engineer', 'Assistant Manager',
-  'Assistant Professor', 'Associate Director', 'Associate Engineer', 'Audit Associate',
-  'Auditor', 'Automation Engineer', 'Backend Developer', 'Big Data Engineer', 'Biomedical Engineer',
-  'Business Analyst', 'Business Development Executive', 'Business Development Manager',
-  'Chief Executive Officer (CEO)', 'Chief Financial Officer (CFO)', 'Chief Technology Officer (CTO)',
-  'Civil Engineer', 'Cloud Architect', 'Cloud Engineer', 'Cloud Solutions Engineer',
-  'Consultant', 'Content Writer', 'Cyber Security Analyst', 'Data Analyst', 'Data Engineer',
+  'Associate Director', 'Associate Engineer', 'Audit Associate', 'Auditor',
+  'Backend Developer', 'Big Data Engineer', 'Business Analyst', 'Business Development Executive',
+  'Business Development Manager', 'Chief Executive Officer (CEO)', 'Chief Financial Officer (CFO)',
+  'Chief Technology Officer (CTO)', 'Cloud Architect', 'Cloud Engineer', 'Consultant',
+  'Content Writer', 'Cyber Security Analyst', 'Data Analyst', 'Data Engineer',
   'Data Scientist', 'Database Administrator', 'Design Engineer', 'DevOps Engineer',
-  'Digital Marketing Executive', 'Digital Marketing Manager', 'Director', 'Electrical Engineer',
+  'Digital Marketing Executive', 'Digital Marketing Manager', 'Director',
   'Embedded Systems Engineer', 'Engineering Manager', 'Entrepreneur', 'Executive Assistant',
   'Finance Manager', 'Financial Analyst', 'Founder & CEO', 'Frontend Developer',
   'Full Stack Developer', 'General Manager', 'Graphic Designer', 'HR Executive',
   'HR Manager', 'HR Recruiter', 'Human Resources Business Partner (HRBP)', 'Industrial Engineer',
   'Information Security Analyst', 'iOS Developer', 'IT Consultant', 'IT Support Specialist',
   'Java Developer', 'Lead Engineer', 'Machine Learning Engineer', 'Marketing Executive',
-  'Marketing Manager', 'Mechanical Engineer', 'Network Engineer', 'Operations Manager',
-  'Product Designer', 'Product Manager', 'Product Owner', 'Project Coordinator',
-  'Project Manager', 'Python Developer', 'Quality Assurance (QA) Engineer', 'Quality Engineer',
+  'Marketing Manager', 'Network Engineer', 'Operations Manager', 'Product Designer',
+  'Product Manager', 'Product Owner', 'Project Coordinator', 'Project Manager',
+  'Python Developer', 'Quality Assurance (QA) Engineer', 'Quality Engineer',
   'Research Analyst', 'Research Assistant', 'Research Associate', 'Research Scientist',
   'Sales Executive', 'Sales Manager', 'Scrum Master', 'Senior Accountant',
   'Senior Business Analyst', 'Senior Data Engineer', 'Senior Data Scientist',

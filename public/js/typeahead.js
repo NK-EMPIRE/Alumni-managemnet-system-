@@ -1,31 +1,111 @@
 /* ============================================================
-   TYPEAHEAD AUTOCOMPLETE CONTROLLER FOR MODALS & FORMS
+   FLOATING INTERACTIVE TYPEAHEAD OVERLAY WITH ADD OPTION
    ============================================================ */
 
 (function () {
   var suggestionDebounce = null;
+  var activeOverlay = null;
+  var activeInput = null;
 
   var FIELDS_CONFIG = [
-    { id: 'fieldDesignation', field: 'designation', listId: 'dlDesignation' },
-    { id: 'fieldCompany', field: 'company', listId: 'dlCompany' },
-    { id: 'fieldCity', field: 'city', listId: 'dlCity' },
-    { id: 'fieldState', field: 'state', listId: 'dlState' },
-    { id: 'fieldCountry', field: 'country', listId: 'dlCountry' }
+    { id: 'fieldDesignation', field: 'designation' },
+    { id: 'fieldCompany', field: 'company' },
+    { id: 'fieldCity', field: 'city' },
+    { id: 'fieldState', field: 'state' },
+    { id: 'fieldCountry', field: 'country' }
   ];
 
-  function ensureDatalist(listId) {
-    var dl = document.getElementById(listId);
-    if (!dl) {
-      dl = document.createElement('datalist');
-      dl.id = listId;
-      document.body.appendChild(dl);
+  function removeActiveOverlay() {
+    if (activeOverlay && activeOverlay.parentNode) {
+      activeOverlay.parentNode.removeChild(activeOverlay);
     }
-    return dl;
+    activeOverlay = null;
+    activeInput = null;
   }
 
-  function handleTypeaheadInput(inputEl, field, listId) {
+  function createOverlay(inputEl, field, suggestions, query) {
+    removeActiveOverlay();
+
+    var rect = inputEl.getBoundingClientRect();
+    var overlay = document.createElement('div');
+    overlay.className = 'typeahead-floating-menu';
+    overlay.style.cssText = [
+      'position: absolute',
+      'top: ' + (window.scrollY + rect.bottom + 4) + 'px',
+      'left: ' + (window.scrollX + rect.left) + 'px',
+      'width: ' + rect.width + 'px',
+      'max-height: 220px',
+      'overflow-y: auto',
+      'background: #ffffff',
+      'border: 1px solid #CBD5E1',
+      'border-radius: 8px',
+      'box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      'z-index: 999999',
+      'font-family: inherit',
+      'font-size: 13px'
+    ].join(';');
+
+    var exactFound = false;
+    var cleanQuery = query.trim();
+
+    if (suggestions && suggestions.length > 0) {
+      suggestions.forEach(function (item) {
+        if (item.toLowerCase() === cleanQuery.toLowerCase()) {
+          exactFound = true;
+        }
+
+        var row = document.createElement('div');
+        row.style.cssText = 'padding: 8px 12px; cursor: pointer; color: #1E293B; border-bottom: 1px solid #F1F5F9;';
+        row.innerHTML = '<span>' + item + '</span>';
+        row.onmouseover = function () { row.style.background = '#F1F5F9'; };
+        row.onmouseout = function () { row.style.background = '#ffffff'; };
+        row.onmousedown = function (e) {
+          e.preventDefault();
+          inputEl.value = item;
+          removeActiveOverlay();
+        };
+        overlay.appendChild(row);
+      });
+    }
+
+    // If exact match not in suggestions, display "Add [typed input]" option
+    if (!exactFound && cleanQuery.length > 0) {
+      var addRow = document.createElement('div');
+      addRow.style.cssText = 'padding: 9px 12px; cursor: pointer; color: #2563EB; font-weight: 600; background: #EFF6FF; border-top: 1px solid #DBEAFE;';
+      addRow.innerHTML = '<i class="fas fa-plus-circle" style="margin-right: 6px;"></i> Add "' + cleanQuery.replace(/"/g, '&quot;') + '" as new ' + field;
+      addRow.onmouseover = function () { addRow.style.background = '#DBEAFE'; };
+      addRow.onmouseout = function () { addRow.style.background = '#EFF6FF'; };
+      addRow.onmousedown = function (e) {
+        e.preventDefault();
+        inputEl.value = cleanQuery;
+        removeActiveOverlay();
+
+        if (typeof API !== 'undefined' && API.addSuggestion) {
+          API.addSuggestion(field, cleanQuery)
+            .then(function () {
+              if (window.Toast && window.Toast.success) {
+                window.Toast.success('Added', '"' + cleanQuery + '" saved to autocomplete dictionary.');
+              }
+            })
+            .catch(function (err) {
+              console.error('Error adding suggestion:', err);
+            });
+        }
+      };
+      overlay.appendChild(addRow);
+    }
+
+    document.body.appendChild(overlay);
+    activeOverlay = overlay;
+    activeInput = inputEl;
+  }
+
+  function handleInput(inputEl, field) {
     var val = inputEl.value.trim();
-    if (!val || val.length < 1) return;
+    if (!val || val.length < 1) {
+      removeActiveOverlay();
+      return;
+    }
 
     clearTimeout(suggestionDebounce);
     suggestionDebounce = setTimeout(function () {
@@ -33,21 +113,14 @@
 
       API.getSuggestions(field, val)
         .then(function (res) {
-          if (res && res.success && Array.isArray(res.data)) {
-            var dl = ensureDatalist(listId);
-            inputEl.setAttribute('list', listId);
-            dl.innerHTML = '';
-            res.data.forEach(function (suggestion) {
-              var opt = document.createElement('option');
-              opt.value = suggestion;
-              dl.appendChild(opt);
-            });
+          if (res && res.success) {
+            createOverlay(inputEl, field, res.data || [], val);
           }
         })
         .catch(function (err) {
-          console.error('Error fetching autocomplete suggestions for ' + field + ':', err);
+          console.error('Error fetching suggestions:', err);
         });
-    }, 250);
+    }, 200);
   }
 
   function initTypeaheadAutocomplete() {
@@ -56,11 +129,17 @@
       inputs.forEach(function (input) {
         input.setAttribute('autocomplete', 'off');
         input.addEventListener('input', function () {
-          handleTypeaheadInput(input, cfg.field, cfg.listId);
+          handleInput(input, cfg.field);
+        });
+        input.addEventListener('blur', function () {
+          setTimeout(removeActiveOverlay, 200);
         });
       });
     });
   }
+
+  window.addEventListener('resize', removeActiveOverlay);
+  window.addEventListener('scroll', removeActiveOverlay, true);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initTypeaheadAutocomplete);

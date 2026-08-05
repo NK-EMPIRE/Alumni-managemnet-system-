@@ -59,9 +59,19 @@ const getSuggestions = asyncHandler(async (req, res) => {
   success(res, suggestions, 'Autocomplete suggestions retrieved successfully');
 });
 
+const addSuggestion = asyncHandler(async (req, res) => {
+  const { category, value } = req.body;
+  if (!category || !value || !value.trim()) {
+    return res.status(400).json({ success: false, message: 'Category and value are required' });
+  }
+  const addedVal = await alumniAnalysisRepo.addSuggestion({ category, value });
+  success(res, { value: addedVal }, 'Suggestion added successfully');
+});
+
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
   getAnalysisRoleCategories,
-  getSuggestions
+  getSuggestions,
+  addSuggestion
 };

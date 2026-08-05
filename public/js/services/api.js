@@ -356,6 +356,9 @@
     },
     getSuggestions: function (field, query) {
         return get('/alumni-analysis/suggestions', { field: field, query: query });
+    },
+    addSuggestion: function (category, value) {
+        return post('/alumni-analysis/add-suggestion', { category: category, value: value });
     }
     };
 

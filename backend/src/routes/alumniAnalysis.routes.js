@@ -14,5 +14,6 @@ router.get('/role-categories', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnaly
 
 // Autocomplete suggestions endpoint accessible to all authenticated roles for update modals
 router.get('/suggestions', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getSuggestions);
+router.post('/add-suggestion', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.addSuggestion);
 
 module.exports = router;
