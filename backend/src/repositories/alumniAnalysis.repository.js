@@ -94,7 +94,7 @@ async function getAnalysisAlumni({
         um.first_name + ' ' + um.last_name AS member_name,
         COUNT(*) OVER() AS total_count
       FROM dbo.Alumni a
-      INNER JOIN (
+      LEFT JOIN (
         SELECT * FROM dbo.ProfessionalInformation
         WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
       ) pi ON pi.alumni_id = a.alumni_id
@@ -107,10 +107,11 @@ async function getAnalysisAlumni({
       LEFT JOIN dbo.Users ul ON ul.user_id = t.leader_id
       LEFT JOIN dbo.Users um ON um.user_id = aa.member_id
       WHERE
-        COALESCE(pi.company, a.company) IS NOT NULL
-        AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
-        AND COALESCE(pi.designation, a.designation) IS NOT NULL
-        AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> ''
+        (
+          (COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '')
+          OR (COALESCE(pi.designation, a.designation) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> '')
+          OR (a.working_details IS NOT NULL AND LTRIM(RTRIM(CAST(a.working_details AS NVARCHAR(MAX)))) <> '')
+        )
         AND (@leaderId IS NULL OR t.leader_id = @leaderId)
         AND (@memberId IS NULL OR aa.member_id = @memberId)
         AND (@company IS NULL OR COALESCE(pi.company, a.company) = @company)
@@ -155,7 +156,7 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
   const result = await request.query(`
     SELECT DISTINCT LTRIM(RTRIM(COALESCE(pi.company, a.company))) AS company
     FROM dbo.Alumni a
-    INNER JOIN (
+    LEFT JOIN (
       SELECT * FROM dbo.ProfessionalInformation
       WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
     ) pi ON pi.alumni_id = a.alumni_id
@@ -167,8 +168,6 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
     LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
     WHERE COALESCE(pi.company, a.company) IS NOT NULL
       AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
-      AND COALESCE(pi.designation, a.designation) IS NOT NULL
-      AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> ''
       AND (@leaderId IS NULL OR t.leader_id = @leaderId)
       AND (@memberId IS NULL OR aa.member_id = @memberId)
     ORDER BY company ASC;
@@ -206,7 +205,7 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
     const query = `
       SELECT COUNT(DISTINCT a.alumni_id) AS count
       FROM dbo.Alumni a
-      INNER JOIN (
+      LEFT JOIN (
         SELECT * FROM dbo.ProfessionalInformation
         WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
       ) pi ON pi.alumni_id = a.alumni_id
@@ -216,10 +215,11 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
         FROM dbo.AlumniAssignments
       ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
       LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
-      WHERE COALESCE(pi.company, a.company) IS NOT NULL
-        AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
-        AND COALESCE(pi.designation, a.designation) IS NOT NULL
-        AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> ''
+      WHERE (
+          (COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '')
+          OR (COALESCE(pi.designation, a.designation) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> '')
+          OR (a.working_details IS NOT NULL AND LTRIM(RTRIM(CAST(a.working_details AS NVARCHAR(MAX)))) <> '')
+        )
         AND (@leaderId IS NULL OR t.leader_id = @leaderId)
         AND (@memberId IS NULL OR aa.member_id = @memberId)
         AND (${condition});
