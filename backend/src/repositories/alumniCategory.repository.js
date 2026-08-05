@@ -68,7 +68,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
       COUNT(DISTINCT a.alumni_id) AS count
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT alumni_id, current_city, is_government_job
+      SELECT alumni_id, designation, company, current_city, is_government_job
       FROM dbo.ProfessionalInformation
       WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
     ) pi ON pi.alumni_id = a.alumni_id
@@ -98,7 +98,7 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
       COUNT(DISTINCT a.alumni_id) AS count
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT alumni_id, company, is_government_job, is_entrepreneur, higher_studies, other_occupation
+      SELECT alumni_id, designation, company, is_government_job, is_entrepreneur, higher_studies, other_occupation
       FROM dbo.ProfessionalInformation
       WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
     ) pi ON pi.alumni_id = a.alumni_id
