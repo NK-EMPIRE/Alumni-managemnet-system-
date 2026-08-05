@@ -53,8 +53,15 @@ const getAnalysisRoleCategories = asyncHandler(async (req, res) => {
   success(res, categories, 'Analysis role categories retrieved successfully');
 });
 
+const getSuggestions = asyncHandler(async (req, res) => {
+  const { field, query } = req.query;
+  const suggestions = await alumniAnalysisRepo.getSuggestions({ field, query });
+  success(res, suggestions, 'Autocomplete suggestions retrieved successfully');
+});
+
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
-  getAnalysisRoleCategories
+  getAnalysisRoleCategories,
+  getSuggestions
 };
