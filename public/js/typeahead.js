@@ -34,12 +34,13 @@
       'top: ' + (window.scrollY + rect.bottom + 4) + 'px',
       'left: ' + (window.scrollX + rect.left) + 'px',
       'width: ' + rect.width + 'px',
-      'max-height: 220px',
+      'max-height: 280px',
       'overflow-y: auto',
+      'overscroll-behavior: contain',
       'background: #ffffff',
       'border: 1px solid #CBD5E1',
       'border-radius: 8px',
-      'box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      'box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
       'z-index: 999999',
       'font-family: inherit',
       'font-size: 13px'
@@ -139,7 +140,12 @@
   }
 
   window.addEventListener('resize', removeActiveOverlay);
-  window.addEventListener('scroll', removeActiveOverlay, true);
+  window.addEventListener('scroll', function (e) {
+    if (activeOverlay && activeOverlay.contains(e.target)) {
+      return; // Allow internal menu scrolling
+    }
+    removeActiveOverlay();
+  }, true);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initTypeaheadAutocomplete);

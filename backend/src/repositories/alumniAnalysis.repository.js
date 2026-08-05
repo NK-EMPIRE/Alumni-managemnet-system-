@@ -237,7 +237,7 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
  * Live Typeahead Autocomplete suggestions query for designation, company, city, state, country.
  * Queries: 1. DB (Alumni & ProfessionalInformation), 2. Custom LookupDictionary, 3. Global Dictionary.
  */
-async function getSuggestions({ field, query, limit = 15 }) {
+async function getSuggestions({ field, query, limit = 100 }) {
   if (!query || !field) return [];
   const qStr = query.trim().toLowerCase();
   const pool = await getPool();
