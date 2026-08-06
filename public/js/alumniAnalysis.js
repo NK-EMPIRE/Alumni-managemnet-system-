@@ -137,6 +137,11 @@ window.closeAnalysisFiltersModal = function () {
   if (modal) modal.style.display = 'none';
 };
 
+window.onAnalysisFilterChange = function () {
+  updateActiveFiltersBadge();
+  debounceAnalysisSearch();
+};
+
 window.applyAnalysisFiltersModal = function () {
   closeAnalysisFiltersModal();
   updateActiveFiltersBadge();
