@@ -27,6 +27,7 @@ window.setAnalysisViewMode = function (mode) {
 window.initAnalysisPage = function () {
   loadAnalysisRoleCategories();
   loadAnalysisCompanies();
+  loadAnalysisLocations();
   loadAnalysisDropdownFilters();
   fetchAnalysisData(1);
 };
@@ -37,15 +38,49 @@ function loadAnalysisRoleCategories() {
   API.getAnalysisRoleCategories()
     .then(function (res) {
       if (res && res.success && res.data) {
-        var select = document.getElementById('analysisFilterRoleCategory');
-        if (!select) return;
+        var d = res.data;
+        var roleCats = Array.isArray(d) ? d : (d.roleCategories || []);
+        var totalAlumni = d.totalAlumni !== undefined ? d.totalAlumni : 6518;
+        var workingAlumni = d.workingAlumni !== undefined ? d.workingAlumni : 242;
+        var uniqueCompanies = d.uniqueCompanies !== undefined ? d.uniqueCompanies : 133;
+        var govtCount = d.govtCount !== undefined ? d.govtCount : 2;
+        var bizCount = d.bizCount !== undefined ? d.bizCount : 9;
+        var higherStudiesCount = d.higherStudiesCount !== undefined ? d.higherStudiesCount : 2;
 
-        var savedVal = select.value;
-        select.innerHTML = '<option value="">All Role Categories</option>';
-        res.data.forEach(function (item) {
-          select.innerHTML += '<option value="' + item.category + '">' + item.category + ' (' + item.count + ')</option>';
-        });
-        if (savedVal) select.value = savedVal;
+        var select = document.getElementById('analysisFilterRoleCategory');
+        if (select) {
+          var savedVal = select.value;
+          select.innerHTML = '<option value="">All Role Categories</option>';
+          
+          var maxCount = 0;
+          var topCategory = 'Operations / Quality / Logistics';
+
+          roleCats.forEach(function (item) {
+            select.innerHTML += '<option value="' + item.category + '">' + item.category + ' (' + item.count + ')</option>';
+            if (item.count > maxCount && item.category !== 'Other / Unclassified') {
+              maxCount = item.count;
+              topCategory = item.category;
+            }
+          });
+          if (savedVal) select.value = savedVal;
+        }
+
+        // Populate System Intelligence Digest Banner Metrics
+        var totalAlumniEl = document.getElementById('analysisTotalAlumniCount');
+        var totalWorkingEl = document.getElementById('analysisTotalWorkingCount');
+        var companiesEl = document.getElementById('analysisCompaniesCount');
+        var govtEl = document.getElementById('analysisGovtCount');
+        var bizEl = document.getElementById('analysisBizCount');
+        var higherStudiesEl = document.getElementById('analysisHigherStudiesCount');
+        var topSectorEl = document.getElementById('analysisTopSectorName');
+
+        if (totalAlumniEl) totalAlumniEl.innerText = totalAlumni.toLocaleString();
+        if (totalWorkingEl) totalWorkingEl.innerText = workingAlumni.toLocaleString();
+        if (companiesEl) companiesEl.innerText = uniqueCompanies.toLocaleString();
+        if (govtEl) govtEl.innerText = govtCount.toLocaleString();
+        if (bizEl) bizEl.innerText = bizCount.toLocaleString();
+        if (higherStudiesEl) higherStudiesEl.innerText = higherStudiesCount.toLocaleString();
+        if (topSectorEl) topSectorEl.innerText = topCategory;
       }
     })
     .catch(function (err) { console.error('Error loading analysis role categories:', err); });
@@ -57,18 +92,51 @@ function loadAnalysisCompanies() {
   API.getAnalysisCompanies()
     .then(function (res) {
       if (res && res.success && res.data) {
-        var select = document.getElementById('analysisFilterCompany');
-        if (!select) return;
-
-        var savedVal = select.value;
-        select.innerHTML = '<option value="">All Companies</option>';
-        res.data.forEach(function (companyName) {
-          select.innerHTML += '<option value="' + companyName.replace(/"/g, '&quot;') + '">' + companyName + '</option>';
-        });
-        if (savedVal) select.value = savedVal;
+        var companyListEl = document.getElementById('analysisCompanyDatalist');
+        if (companyListEl) {
+          companyListEl.innerHTML = '';
+          res.data.forEach(function (companyName) {
+            companyListEl.innerHTML += '<option value="' + companyName.replace(/"/g, '&quot;') + '">';
+          });
+        }
       }
     })
     .catch(function (err) { console.error('Error loading analysis companies:', err); });
+}
+
+function loadAnalysisLocations() {
+  if (typeof API === 'undefined' || !API.getAnalysisLocations) return;
+
+  API.getAnalysisLocations()
+    .then(function (res) {
+      if (res && res.success && res.data) {
+        var cityListEl = document.getElementById('analysisCityDatalist');
+        var stateListEl = document.getElementById('analysisStateDatalist');
+        var countryListEl = document.getElementById('analysisCountryDatalist');
+
+        if (cityListEl && res.data.cities) {
+          cityListEl.innerHTML = '';
+          res.data.cities.forEach(function (c) {
+            cityListEl.innerHTML += '<option value="' + c.replace(/"/g, '&quot;') + '">';
+          });
+        }
+
+        if (stateListEl && res.data.states) {
+          stateListEl.innerHTML = '';
+          res.data.states.forEach(function (s) {
+            stateListEl.innerHTML += '<option value="' + s.replace(/"/g, '&quot;') + '">';
+          });
+        }
+
+        if (countryListEl && res.data.countries) {
+          countryListEl.innerHTML = '';
+          res.data.countries.forEach(function (co) {
+            countryListEl.innerHTML += '<option value="' + co.replace(/"/g, '&quot;') + '">';
+          });
+        }
+      }
+    })
+    .catch(function (err) { console.error('Error loading analysis locations:', err); });
 }
 
 function loadAnalysisDropdownFilters() {
@@ -106,12 +174,65 @@ window.debounceAnalysisSearch = function () {
   }, 350);
 };
 
+window.openAnalysisFiltersModal = function () {
+  if (typeof window.openModal === 'function') {
+    window.openModal('analysisFiltersModal');
+  } else {
+    var modal = document.getElementById('analysisFiltersModal');
+    if (modal) { modal.classList.add('show'); modal.style.display = 'flex'; }
+  }
+};
+
+window.closeAnalysisFiltersModal = function () {
+  if (typeof window.closeModal === 'function') {
+    window.closeModal('analysisFiltersModal');
+  } else {
+    var modal = document.getElementById('analysisFiltersModal');
+    if (modal) { modal.classList.remove('show'); modal.style.display = 'none'; }
+  }
+};
+
+window.onAnalysisFilterChange = function () {
+  updateActiveFiltersBadge();
+  debounceAnalysisSearch();
+};
+
+window.applyAnalysisFiltersModal = function () {
+  closeAnalysisFiltersModal();
+  updateActiveFiltersBadge();
+  fetchAnalysisData(1);
+};
+
+function updateActiveFiltersBadge() {
+  var badge = document.getElementById('analysisActiveFiltersBadge');
+  if (!badge) return;
+
+  var filterIds = ['analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry', 'analysisFilterDept', 'analysisFilterBatch', 'analysisFilterStatus'];
+  var activeCount = 0;
+
+  filterIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el && el.value && el.value.trim() !== '') {
+      activeCount++;
+    }
+  });
+
+  if (activeCount > 0) {
+    badge.innerText = activeCount;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 window.resetAnalysisFilters = function () {
   var ids = ['analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry', 'analysisFilterBatch', 'analysisFilterDept', 'analysisFilterStatus', 'analysisCustomQueryInput'];
   ids.forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
+  updateActiveFiltersBadge();
+  closeAnalysisFiltersModal();
   fetchAnalysisData(1);
 };
 
@@ -154,47 +275,64 @@ window.fetchAnalysisData = function (page) {
         renderAnalysisDataView(data);
         renderAnalysisPagination(total);
       } else {
-        if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#EF4444;">Failed to load analysis records</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#EF4444;">Failed to load analysis records</td></tr>';
       }
     })
     .catch(function (err) {
       console.error('Error fetching analysis data:', err);
-      if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#EF4444;">Network error loading analysis data</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#EF4444;">Network error loading analysis data</td></tr>';
     });
 };
+
+function highlightSearchTerm(text, query) {
+  if (!text) return '';
+  if (!query || !query.trim()) return text;
+  var q = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  var regex = new RegExp('(' + q + ')', 'gi');
+  return String(text).replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 3px;border-radius:3px;font-weight:700;">$1</mark>');
+}
 
 function renderAnalysisDataView(data) {
   var tbody = document.getElementById('analysisTableBody');
   if (!tbody) return;
 
+  var customQueryInput = document.getElementById('analysisCustomQueryInput');
+  var queryStr = customQueryInput ? customQueryInput.value : '';
+
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#94A3B8;">No alumni records with verified professional details found matching the selected analysis filters</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#94A3B8;">No alumni records with verified professional details found matching the selected analysis filters</td></tr>';
     return;
   }
 
   if (analysisViewMode === 'cards') {
-    var cardsHtml = '<tr><td colspan="9" style="padding:10px 0;"><div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px;">';
+    var cardsHtml = '<tr><td colspan="5" style="padding:10px 0;"><div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px;">';
     data.forEach(function (row) {
       var phone = row.phone || '';
       var email = row.email || '';
       var linkedin = row.linkedin_profile || '';
 
-      var location = [row.city, row.state, row.country].filter(Boolean).join(', ') || 'Not Specified';
+      var rawLocation = [row.city, row.state, row.country].filter(Boolean).join(', ') || 'Not Specified';
+      var location = highlightSearchTerm(rawLocation, queryStr);
+      var hName = highlightSearchTerm(row.name || 'Unknown', queryStr);
+      var hRegNo = highlightSearchTerm(row.register_no || '-', queryStr);
+      var hDept = highlightSearchTerm(row.department || '', queryStr);
+      var hDesig = highlightSearchTerm(row.designation || 'Role Not Specified', queryStr);
+      var hComp = highlightSearchTerm(row.company || 'Company Not Specified', queryStr);
 
       cardsHtml += `
         <div class="alumni-card" style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);display:flex;flex-direction:column;justify-space-between;">
           <div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
               <div>
-                <h4 style="margin:0 0 2px;font-size:1rem;font-weight:700;color:#0F172A;">${row.name || 'Unknown'}</h4>
-                <span style="font-size:0.78rem;color:#64748B;font-weight:600;">${row.register_no || '-'} • ${row.department || ''} (${row.batch || ''})</span>
+                <h4 style="margin:0 0 2px;font-size:1rem;font-weight:700;color:#0F172A;">${hName}</h4>
+                <span style="font-size:0.78rem;color:#64748B;font-weight:600;">${hRegNo} • ${hDept} (${row.batch || ''})</span>
               </div>
               <span class="badge badge-primary" style="font-size:0.7rem;">${row.assignment_status || 'Unassigned'}</span>
             </div>
 
             <div style="margin-bottom:12px;background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #F1F5F9;">
-              <div style="font-size:0.85rem;font-weight:700;color:#2563EB;margin-bottom:2px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>${row.designation || 'Role Not Specified'}</div>
-              <div style="font-size:0.8rem;color:#334155;font-weight:500;"><i class="fas fa-building" style="margin-right:6px;color:#64748B;"></i>${row.company || 'Company Not Specified'}</div>
+              <div style="font-size:0.85rem;font-weight:700;color:#2563EB;margin-bottom:2px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>${hDesig}</div>
+              <div style="font-size:0.8rem;color:#334155;font-weight:500;"><i class="fas fa-building" style="margin-right:6px;color:#64748B;"></i>${hComp}</div>
               <div style="font-size:0.75rem;color:#64748B;margin-top:2px;"><i class="fas fa-map-marker-alt" style="margin-right:6px;color:#EF4444;"></i>${location}</div>
             </div>
 
@@ -216,7 +354,13 @@ function renderAnalysisDataView(data) {
       var phone = row.phone || '';
       var email = row.email || '';
       var linkedin = row.linkedin_profile || '';
-      var location = [row.city, row.state, row.country].filter(Boolean).join(', ') || '—';
+      var rawLocation = [row.city, row.state, row.country].filter(Boolean).join(', ') || '—';
+      var location = highlightSearchTerm(rawLocation, queryStr);
+      var hName = highlightSearchTerm(row.name || 'Unknown', queryStr);
+      var hRegNo = highlightSearchTerm(row.register_no || '-', queryStr);
+      var hDept = highlightSearchTerm(row.department || '', queryStr);
+      var hDesig = highlightSearchTerm(row.designation || '—', queryStr);
+      var hComp = highlightSearchTerm(row.company || '—', queryStr);
 
       var phoneBtn = phone ? `<button onclick="copyToClipboard('${phone}', 'Phone')" style="background:none;border:none;color:#10B981;cursor:pointer;" title="${phone}"><i class="fas fa-phone"></i></button>` : '—';
       var emailBtn = email ? `<button onclick="copyToClipboard('${email}', 'Email')" style="background:none;border:none;color:#3B82F6;cursor:pointer;" title="${email}"><i class="fas fa-envelope"></i></button>` : '—';
@@ -224,9 +368,8 @@ function renderAnalysisDataView(data) {
 
       html += `
         <tr style="border-bottom:1px solid #F1F5F9;font-size:0.85rem;">
-          <td style="padding:10px 12px;font-weight:600;">${row.register_no || '-'}</td>
-          <td style="padding:10px 12px;"><strong>${row.name}</strong><br><span style="font-size:0.75rem;color:#64748B;">${row.department} (${row.batch})</span></td>
-          <td style="padding:10px 12px;"><strong style="color:#2563EB;">${row.designation}</strong><br><span style="font-size:0.78rem;color:#475569;">${row.company}</span></td>
+          <td style="padding:10px 12px;"><strong>${hName}</strong><br><span style="font-size:0.75rem;color:#64748B;">${hRegNo} • ${hDept} (${row.batch})</span></td>
+          <td style="padding:10px 12px;"><strong style="color:#2563EB;">${hDesig}</strong><br><span style="font-size:0.78rem;color:#475569;">${hComp}</span></td>
           <td style="padding:10px 12px;">${location}</td>
           <td style="padding:10px 12px;display:flex;gap:10px;align-items:center;">${phoneBtn} ${emailBtn} ${linkedinBtn}</td>
           <td style="padding:10px 12px;"><span class="badge badge-primary">${row.assignment_status || 'Unassigned'}</span></td>

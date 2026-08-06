@@ -1,13 +1,97 @@
 const { sql, getPool } = require('../config/database');
 const searchParserService = require('../services/searchParser.service');
+const { cleanRoleAndCompany, canonicalizeLocationList, canonicalizeCompanyList } = require('../services/dataCleaner.service');
+
+/**
+ * Returns distinct companies list for analysis filter dropdown.
+ */
+async function getAnalysisCompanies({ leaderId, memberId }) {
+  const pool = await getPool();
+  const request = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const result = await request.query(`
+    SELECT DISTINCT LTRIM(RTRIM(COALESCE(pi.company, a.company))) AS company
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE COALESCE(pi.company, a.company) IS NOT NULL
+      AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
+      AND (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId)
+    ORDER BY company ASC;
+  `);
+
+  const raw = result.recordset.map(r => r.company).filter(Boolean);
+  return canonicalizeCompanyList(raw);
+}
+
+/**
+ * Returns distinct Cities, States, and Countries lists for dynamic analysis filter dropdowns.
+ */
+async function getAnalysisLocations({ leaderId, memberId }) {
+  const pool = await getPool();
+  const request = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const result = await request.query(`
+    SELECT DISTINCT
+      LTRIM(RTRIM(COALESCE(pi.current_city, a.city))) AS city,
+      LTRIM(RTRIM(COALESCE(pi.state, a.state))) AS state,
+      LTRIM(RTRIM(COALESCE(pi.country, a.country))) AS country
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId);
+  `);
+
+  const rawCities = [];
+  const rawStates = [];
+  const rawCountries = [];
+
+  result.recordset.forEach(r => {
+    if (r.city) rawCities.push(r.city);
+    if (r.state) rawStates.push(r.state);
+    if (r.country) rawCountries.push(r.country);
+  });
+
+  return {
+    cities: canonicalizeLocationList(rawCities, 'city'),
+    states: canonicalizeLocationList(rawStates, 'state'),
+    countries: canonicalizeLocationList(rawCountries, 'country')
+  };
+}
 
 const ROLE_CATEGORIES = {
-  'Software Engineer': ['software', 'developer', 'sde', 'programmer', 'full stack', 'backend', 'frontend', 'engineer', 'web', 'mobile', 'coder'],
-  'Data / AI / ML': ['data scientist', 'machine learning', 'ml engineer', 'ai engineer', 'data analyst', 'data engineer', 'big data', 'ai'],
+  'Software Engineer': ['software', 'developer', 'sde', 'programmer', 'full stack', 'backend', 'frontend', 'engineer', 'web', 'mobile', 'coder', 'system analyst', 'tech lead'],
+  'Data / AI / ML': ['data scientist', 'machine learning', 'ml engineer', 'ai engineer', 'data analyst', 'data engineer', 'big data', 'ai', 'data'],
   'HR': ['hr', 'human resource', 'talent acquisition', 'recruiter', 'people ops', 'talent'],
   'Product / Design': ['product manager', 'ux', 'ui designer', 'product owner', 'designer', 'ui/ux'],
-  'Finance / Accounting': ['finance', 'accountant', 'audit', 'chartered accountant', 'banking', 'financial'],
-  'Sales / Marketing': ['sales', 'marketing', 'business development', 'growth', 'seo', 'digital marketing']
+  'Finance / Accounting': ['finance', 'accountant', 'audit', 'chartered accountant', 'banking', 'financial', 'clerk', 'cashier'],
+  'Sales / Marketing': ['sales', 'marketing', 'business development', 'growth', 'seo', 'digital marketing'],
+  'Education / Academic': ['professor', 'assistant professor', 'associate professor', 'lecturer', 'teacher', 'hod', 'dean', 'head of dept', 'principal', 'tutor'],
+  'Healthcare / Medical': ['doctor', 'nurse', 'medical rep', 'pharmacist', 'surgeon', 'healthcare'],
+  'Operations / Quality / Logistics': ['quality', 'qc', 'operations', 'logistics', 'safety', 'compliance', 'manager', 'lead', 'coordinator'],
+  'Trades / Business': ['own business', 'business', 'builder', 'contractor', 'shop', 'owner', 'proprietor']
 };
 
 /**
@@ -17,22 +101,22 @@ function getRoleCategorySqlCondition(roleCategory, paramName = 'roleCategory') {
   if (!roleCategory) return '1=1';
 
   if (roleCategory === 'Government / Public Sector') {
-    return 'pi.is_government_job = 1';
+    return '(pi.is_government_job = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%police%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%govt%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%tnstc%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%military%\')';
   }
   if (roleCategory === 'Higher Studies') {
-    return '(pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> \'\')';
+    return '(pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> \'\' AND pi.higher_studies <> \'No\')';
   }
   if (roleCategory === 'Entrepreneur') {
-    return 'pi.is_entrepreneur = 1';
+    return '(pi.is_entrepreneur = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%own business%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%owner%\')';
   }
   if (roleCategory === 'Other / Unclassified') {
     const keywords = [];
     Object.values(ROLE_CATEGORIES).forEach(list => keywords.push(...list));
-    const notKeywordsSql = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation)) NOT LIKE '%${kw.toLowerCase()}%'`).join(' AND ');
+    const notKeywordsSql = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation, a.working_details)) NOT LIKE '%${kw.toLowerCase()}%'`).join(' AND ');
     return `(
       (pi.is_government_job IS NULL OR pi.is_government_job = 0)
       AND (pi.is_entrepreneur IS NULL OR pi.is_entrepreneur = 0)
-      AND (pi.higher_studies IS NULL OR LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) = '')
+      AND (pi.higher_studies IS NULL OR LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) = '' OR pi.higher_studies = 'No')
       AND (${notKeywordsSql})
     )`;
   }
@@ -42,7 +126,7 @@ function getRoleCategorySqlCondition(roleCategory, paramName = 'roleCategory') {
     return '1=1';
   }
 
-  const keywordConditions = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation)) LIKE '%${kw.toLowerCase()}%'`).join(' OR ');
+  const keywordConditions = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%${kw.toLowerCase()}%'`).join(' OR ');
   return `(${keywordConditions})`;
 }
 
@@ -138,23 +222,37 @@ async function getAnalysisAlumni({
   `;
 
   const result = await request.query(query);
-  const data = result.recordset;
-  const totalCount = data.length > 0 ? data[0].total_count : 0;
+  const rawData = result.recordset;
+  const totalCount = rawData.length > 0 ? rawData[0].total_count : 0;
+
+  const data = rawData.map(row => {
+    const cleaned = cleanRoleAndCompany(row.designation, row.company, row.working_details);
+    return {
+      ...row,
+      designation: cleaned.designation || row.designation || 'Not Specified',
+      company: cleaned.company || row.company || 'Not Specified'
+    };
+  });
 
   return { data, totalCount, page: pageNum, limit: limitNum };
 }
 
+
+
 /**
- * Returns distinct companies list for analysis filter dropdown.
+ * Returns distinct Cities, States, and Countries lists for dynamic analysis filter dropdowns.
  */
-async function getAnalysisCompanies({ leaderId, memberId }) {
+async function getAnalysisLocations({ leaderId, memberId }) {
   const pool = await getPool();
   const request = pool.request()
     .input('leaderId', sql.Int, leaderId || null)
     .input('memberId', sql.Int, memberId || null);
 
   const result = await request.query(`
-    SELECT DISTINCT LTRIM(RTRIM(COALESCE(pi.company, a.company))) AS company
+    SELECT DISTINCT
+      LTRIM(RTRIM(COALESCE(pi.current_city, a.city))) AS city,
+      LTRIM(RTRIM(COALESCE(pi.state, a.state))) AS state,
+      LTRIM(RTRIM(COALESCE(pi.country, a.country))) AS country
     FROM dbo.Alumni a
     LEFT JOIN (
       SELECT * FROM dbo.ProfessionalInformation
@@ -166,14 +264,25 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
       FROM dbo.AlumniAssignments
     ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
     LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
-    WHERE COALESCE(pi.company, a.company) IS NOT NULL
-      AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
-      AND (@leaderId IS NULL OR t.leader_id = @leaderId)
-      AND (@memberId IS NULL OR aa.member_id = @memberId)
-    ORDER BY company ASC;
+    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId);
   `);
 
-  return result.recordset.map(r => r.company).filter(Boolean);
+  const cities = new Set();
+  const states = new Set();
+  const countries = new Set();
+
+  result.recordset.forEach(r => {
+    if (r.city && r.city !== '--' && r.city.trim()) cities.add(r.city.trim());
+    if (r.state && r.state !== '--' && r.state.trim()) states.add(r.state.trim());
+    if (r.country && r.country !== '--' && r.country.trim()) countries.add(r.country.trim());
+  });
+
+  return {
+    cities: Array.from(cities).sort(),
+    states: Array.from(states).sort(),
+    countries: Array.from(countries).sort()
+  };
 }
 
 /**
@@ -181,6 +290,47 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
  */
 async function getAnalysisRoleCategories({ leaderId, memberId }) {
   const pool = await getPool();
+
+  // 1. Career & Employment Intelligence Metrics
+  const reqOverall = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const overallRes = await reqOverall.query(`
+    SELECT
+      COUNT(DISTINCT a.alumni_id) AS totalAlumni,
+      SUM(CASE WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '')
+                 OR (COALESCE(pi.designation, a.designation) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> '')
+                 OR (a.working_details IS NOT NULL AND LTRIM(RTRIM(CAST(a.working_details AS NVARCHAR(MAX)))) <> '')
+               THEN 1 ELSE 0 END) AS workingAlumni,
+      COUNT(DISTINCT CASE WHEN COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '' THEN COALESCE(pi.company, a.company) END) AS uniqueCompanies,
+      SUM(CASE WHEN pi.is_government_job = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%police%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%govt%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%tnstc%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%military%' THEN 1 ELSE 0 END) AS govtCount,
+      SUM(CASE WHEN pi.is_entrepreneur = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%own business%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%owner%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%proprietor%' THEN 1 ELSE 0 END) AS bizCount,
+      SUM(CASE WHEN pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> '' AND pi.higher_studies <> 'No' THEN 1 ELSE 0 END) AS higherStudiesCount
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId);
+  `);
+
+  const rowStats = overallRes.recordset[0] || {};
+  const totalAlumni = rowStats.totalAlumni || 0;
+  const workingAlumni = rowStats.workingAlumni || 0;
+  const uniqueCompanies = rowStats.uniqueCompanies || 0;
+  const govtCount = rowStats.govtCount || 0;
+  const bizCount = rowStats.bizCount || 0;
+  const higherStudiesCount = rowStats.higherStudiesCount || 0;
+
+  // 2. Sector Role Categories Counts
   const categories = [
     'Software Engineer',
     'Data / AI / ML',
@@ -188,13 +338,17 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
     'Product / Design',
     'Finance / Accounting',
     'Sales / Marketing',
+    'Education / Academic',
+    'Healthcare / Medical',
+    'Operations / Quality / Logistics',
+    'Trades / Business',
     'Government / Public Sector',
     'Higher Studies',
     'Entrepreneur',
     'Other / Unclassified'
   ];
 
-  const results = [];
+  const roleCategories = [];
 
   for (const cat of categories) {
     const request = pool.request()
@@ -227,10 +381,18 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
 
     const res = await request.query(query);
     const count = res.recordset[0] ? res.recordset[0].count : 0;
-    results.push({ category: cat, count });
+    roleCategories.push({ category: cat, count });
   }
 
-  return results;
+  return {
+    totalAlumni,
+    workingAlumni,
+    uniqueCompanies,
+    govtCount,
+    bizCount,
+    higherStudiesCount,
+    roleCategories
+  };
 }
 
 /**
@@ -238,8 +400,8 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
  * Queries: 1. DB (Alumni & ProfessionalInformation), 2. Custom LookupDictionary, 3. Global Dictionary.
  */
 async function getSuggestions({ field, query, limit = 100 }) {
-  if (!query || !field) return [];
-  const qStr = query.trim().toLowerCase();
+  if (!field) return [];
+  const qStr = (query || '').trim().toLowerCase();
   const pool = await getPool();
 
   const allowedFields = {
@@ -265,10 +427,18 @@ async function getSuggestions({ field, query, limit = 100 }) {
     ) pi ON pi.alumni_id = a.alumni_id
     WHERE ${colExpr} IS NOT NULL
       AND LTRIM(RTRIM(CAST(${colExpr} AS NVARCHAR(MAX)))) <> ''
-      AND LOWER(${colExpr}) LIKE @q
+      AND (${qStr === '' ? '1=1' : `LOWER(${colExpr}) LIKE @q`})
     ORDER BY val ASC
   `);
-  const dbMatches = dbRes.recordset.map(r => r.val).filter(Boolean);
+  let dbMatches = dbRes.recordset.map(r => r.val).filter(Boolean);
+
+  // Apply location/company canonical cleaning to dbMatches
+  const { canonicalizeLocationList, canonicalizeCompanyList } = require('../services/dataCleaner.service');
+  if (field === 'city' || field === 'state' || field === 'country') {
+    dbMatches = canonicalizeLocationList(dbMatches, field);
+  } else if (field === 'company') {
+    dbMatches = canonicalizeCompanyList(dbMatches);
+  }
 
   // 2. Fetch matches from custom user-added LookupDictionary table
   const customReq = pool.request()
@@ -278,7 +448,7 @@ async function getSuggestions({ field, query, limit = 100 }) {
     SELECT DISTINCT LTRIM(RTRIM(value)) AS val
     FROM dbo.LookupDictionary
     WHERE category = @cat
-      AND LOWER(value) LIKE @q
+      AND (${qStr === '' ? '1=1' : `LOWER(value) LIKE @q`})
     ORDER BY val ASC
   `);
   const customMatches = customRes.recordset.map(r => r.val).filter(Boolean);
@@ -287,7 +457,7 @@ async function getSuggestions({ field, query, limit = 100 }) {
   let dictionaryMatches = [];
   if (field === 'designation') {
     const { GLOBAL_ROLES } = require('../constants/globalRoles');
-    dictionaryMatches = GLOBAL_ROLES.filter(r => r.toLowerCase().includes(qStr));
+    dictionaryMatches = qStr === '' ? GLOBAL_ROLES : GLOBAL_ROLES.filter(r => r.toLowerCase().includes(qStr));
   }
 
   // Combine custom user-added values first, then DB matches, then global dictionary
@@ -322,6 +492,7 @@ async function addSuggestion({ category, value }) {
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
+  getAnalysisLocations,
   getAnalysisRoleCategories,
   getSuggestions,
   addSuggestion

@@ -1,4 +1,5 @@
 const uploadRepository = require('../repositories/upload.repository');
+const masterDataService = require('./masterData.service');
 const { spawn } = require('child_process');
 const path = require('path');
 const { logger } = require('../utils/logger');
@@ -154,8 +155,19 @@ async function processExcelImport(filePath, originalName, currentUser, selectedS
                         f === 'secondaryEmail' ? 'secondary_email' :
                         f.replace(/([A-Z])/g, '_$1').toLowerCase();
 
-        const incomingVal = row[f];
+        let incomingVal = row[f];
         const existingVal = existing[dbField];
+
+        // Master Data Normalization during Excel Import
+        if (f === 'company' && incomingVal) {
+          masterDataService.resolveAndStoreCompany(incomingVal).then(cleanC => {
+            if (cleanC) fieldsToUpdate['company'] = cleanC;
+          }).catch(() => {});
+        } else if (f === 'designation' && incomingVal) {
+          masterDataService.resolveAndStoreDesignation(incomingVal).then(cleanD => {
+            if (cleanD) fieldsToUpdate['designation'] = cleanD;
+          }).catch(() => {});
+        }
 
         if (incomingVal !== null && incomingVal !== undefined && String(incomingVal).trim() !== '') {
           if (existingVal === null || existingVal === undefined || String(existingVal).trim() === '' || String(existingVal).trim() !== String(incomingVal).trim()) {

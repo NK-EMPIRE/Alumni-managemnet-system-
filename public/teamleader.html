@@ -1393,38 +1393,110 @@
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
             </div>
           </div>
+
           <div class="form-row">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldDept" placeholder="Department" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
             </div>
+          </div>
+
+          <!-- 1. Smart Career Classification Section -->
+          <div style="background:#F8FAFC;padding:14px 16px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:16px;">
+            <div style="font-size:0.75rem;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-briefcase"></i> Career &amp; Employment Classification
+            </div>
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:12px;">
+              <div class="form-group">
+                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Employment Status</label>
+                <select id="fieldEmploymentStatus" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                  <option value="Working">Working</option>
+                  <option value="Higher Studies">Higher Studies</option>
+                  <option value="Not Working">Not Working</option>
+                  <option value="Retired">Retired</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career Type</label>
+                <select id="fieldCareerType" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                  <option value="">Select Career Type</option>
+                  <option value="Private Employee">Private Employee</option>
+                  <option value="Government Employee">Government Employee</option>
+                  <option value="Entrepreneur">Entrepreneur</option>
+                  <option value="Business Owner">Business Owner</option>
+                  <option value="Self Employed">Self Employed</option>
+                  <option value="Freelancer">Freelancer</option>
+                  <option value="Research Scholar">Research Scholar</option>
+                  <option value="Student">Student</option>
+                  <option value="Intern">Intern</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;">
+              <div class="form-group">
+                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career Category</label>
+                <select id="fieldCareerCategory" onchange="onCareerCategoryChange()" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                  <option value="">Select Career Category</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Role Category</label>
+                <select id="fieldRoleCategory" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                  <option value="">Select Role Category</option>
+                </select>
+              </div>
+            </div>
+            <!-- Conditional University Field (Higher Studies / Student / Research Scholar) -->
+            <div class="form-group" id="universityGroupContainer" style="display:none;margin-top:12px;">
+              <label style="display:block;font-size:12px;font-weight:600;color:#8B5CF6;margin-bottom:4px;"><i class="fas fa-university"></i> University / Higher Education Institution</label>
+              <input type="text" id="fieldUniversity" list="universityDatalist" placeholder="Select or type university (e.g., Anna University, IIT Madras, Stanford)..." style="width:100%;padding:9px 12px;border:1px solid #C084FC;border-radius:8px;font-size:13px;outline:none;background:#FAF5FF;" autocomplete="off">
+              <datalist id="universityDatalist"></datalist>
+            </div>
+          </div>
+
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldDesignation" placeholder="Current designation" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorDesignation" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Designation is required</div>
             </div>
-          </div>
-          <div class="form-row">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company/Institution <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldCompany" placeholder="Current company/institution" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
             </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company Address <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldCity" placeholder="Company address" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company Address is required</div>
-            </div>
           </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">State</label>
-              <input type="text" id="fieldState" placeholder="State" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+
+          <!-- 2. Cascading Location Hierarchy Section -->
+          <div style="background:#F8FAFC;padding:14px 16px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:16px;">
+            <div style="font-size:0.75rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-map-marker-alt"></i> Cascading Location Details
             </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Country</label>
-              <input type="text" id="fieldCountry" placeholder="Country" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+              <div class="form-group">
+                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">Country</label>
+                <input type="text" id="fieldCountry" list="countryDatalist" placeholder="Country" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+                <datalist id="countryDatalist"></datalist>
+              </div>
+              <div class="form-group">
+                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">State</label>
+                <input type="text" id="fieldState" list="stateDatalist" placeholder="State" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+                <datalist id="stateDatalist"></datalist>
+              </div>
+              <div class="form-group">
+                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">District</label>
+                <input type="text" id="fieldDistrict" list="districtDatalist" placeholder="District" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+                <datalist id="districtDatalist"></datalist>
+              </div>
+              <div class="form-group">
+                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">City / Address</label>
+                <input type="text" id="fieldCity" list="cityDatalist" placeholder="City" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+                <datalist id="cityDatalist"></datalist>
+                <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company Address is required</div>
+              </div>
             </div>
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
@@ -2247,6 +2319,7 @@
   <script src="js/leader.js"></script>
   <script src="js/alumniAnalysis.js"></script>
   <script src="js/typeahead.js"></script>
+  <script src="js/smartMasterData.js"></script>
   <script src="js/chatPage.js"></script>
   <script src="js/alumniAlertPanel.js"></script>
   <script src="js/chat.js"></script>
