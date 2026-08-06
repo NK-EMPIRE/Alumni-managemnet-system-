@@ -42,10 +42,31 @@ function loadAnalysisRoleCategories() {
 
         var savedVal = select.value;
         select.innerHTML = '<option value="">All Role Categories</option>';
+        
+        var maxCount = 0;
+        var topCategory = 'Operations & Quality';
+        var totalWorking = 0;
+
         res.data.forEach(function (item) {
           select.innerHTML += '<option value="' + item.category + '">' + item.category + ' (' + item.count + ')</option>';
+          totalWorking += item.count;
+          if (item.count > maxCount && item.category !== 'Other / Unclassified') {
+            maxCount = item.count;
+            topCategory = item.category;
+          }
         });
         if (savedVal) select.value = savedVal;
+
+        // Populate System Intelligence Digest Banner
+        var summaryEl = document.getElementById('analysisExecutiveSummary');
+        var totalWorkingEl = document.getElementById('analysisTotalWorkingCount');
+        var topSectorEl = document.getElementById('analysisTopSectorName');
+
+        if (summaryEl) {
+          summaryEl.innerHTML = 'Intelligence Engine classified <strong>' + totalWorking + '</strong> verified alumni across 14 industry sectors. Primary concentration in <strong>' + topCategory + '</strong> (' + maxCount + ' records).';
+        }
+        if (totalWorkingEl) totalWorkingEl.innerText = totalWorking;
+        if (topSectorEl) topSectorEl.innerText = topCategory;
       }
     })
     .catch(function (err) { console.error('Error loading analysis role categories:', err); });

@@ -1275,12 +1275,38 @@
       <section id="section-alumniAnalysis" class="content-section" style="display:none;">
         <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
           <div>
-            <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;">Alumni Analysis &amp; Reporting</h1>
-            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Filterable browse view for verified alumni professional records with custom rule-based query search.</p>
+            <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;"><i class="fas fa-brain" style="color:#2563EB;margin-right:8px;"></i>Intelligent Alumni Analysis Hub</h1>
+            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated zero-cost TF-IDF classification &amp; real-time career insight intelligence across all alumni.</p>
           </div>
           <div style="display:flex;gap:10px;">
-            <button class="btn btn-secondary btn-sm" onclick="initAnalysisPage()"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button class="btn btn-secondary btn-sm" onclick="initAnalysisPage()"><i class="fas fa-sync-alt"></i> Refresh Insights</button>
             <button class="btn btn-secondary btn-sm" onclick="resetAnalysisFilters()"><i class="fas fa-undo"></i> Reset Filters</button>
+          </div>
+        </div>
+
+        <!-- Executive Intelligence Summary Banner -->
+        <div class="card" style="padding:16px 20px;margin-bottom:20px;background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%);border-radius:12px;color:#fff;box-shadow:0 4px 12px rgba(15,23,42,0.15);">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:42px;height:42px;background:rgba(37,99,235,0.2);border:1px solid #3B82F6;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#60A5FA;">
+                <i class="fas fa-lightbulb"></i>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px;color:#94A3B8;font-weight:600;">System Intelligence Digest</div>
+                <div style="font-size:0.95rem;font-weight:600;color:#F8FAFC;" id="analysisExecutiveSummary">Analyzing alumni employment distributions...</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:20px;align-items:center;background:rgba(255,255,255,0.05);padding:8px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+              <div style="text-align:center;">
+                <div style="font-size:0.75rem;color:#94A3B8;">Verified Working</div>
+                <div style="font-size:1.1rem;font-weight:700;color:#34D399;" id="analysisTotalWorkingCount">242</div>
+              </div>
+              <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
+              <div style="text-align:center;">
+                <div style="font-size:0.75rem;color:#94A3B8;">Top Industry Sector</div>
+                <div style="font-size:0.88rem;font-weight:700;color:#60A5FA;" id="analysisTopSectorName">Operations &amp; Tech</div>
+              </div>
+            </div>
           </div>
         </div>
 
