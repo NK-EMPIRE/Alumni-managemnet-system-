@@ -1351,6 +1351,12 @@
               <span id="analysisActiveFiltersBadge" style="background:#2563EB;color:#fff;font-size:0.7rem;padding:2px 7px;border-radius:10px;display:none;">0</span>
             </button>
 
+            <!-- Full Screen Toggle Button -->
+            <button class="btn btn-outline" onclick="toggleFullScreenSpreadsheet(this)" style="height:38px;padding:0 14px;border-color:#CBD5E1;color:#1E293B;font-weight:600;display:flex;align-items:center;gap:6px;" title="View in Full Screen">
+              <i class="fas fa-expand" style="color:#2563EB;"></i>
+              <span>Full Screen</span>
+            </button>
+
             <!-- View Toggles -->
             <div style="display:flex;gap:4px;background:#F1F5F9;padding:3px;border-radius:8px;">
               <button class="btn btn-sm" id="btnAnalysisViewCards" onclick="setAnalysisViewMode('cards')" style="background:#fff;color:#2563EB;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,0.05);padding:4px 10px;"><i class="fas fa-th-large"></i> Cards</button>
@@ -1360,7 +1366,7 @@
         </div>
 
         <!-- Data View & Table -->
-        <div class="card" style="padding:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
+        <div class="card spreadsheet-card" style="padding:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
           <div class="table-responsive">
             <table class="table" style="width:100%;border-collapse:collapse;">
               <thead>

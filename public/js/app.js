@@ -558,14 +558,16 @@
   };
 
   window.toggleFullScreenSpreadsheet = function (btn) {
-    var wrapper = document.querySelector('.card.spreadsheet-card');
-    if (!wrapper && btn) {
-      wrapper = btn.closest('.card');
+    var wrapper = null;
+    if (btn && typeof btn.closest === 'function') {
+      wrapper = btn.closest('.spreadsheet-card') || btn.closest('.card') || btn.closest('.section-content');
+    }
+    if (!wrapper) {
+      wrapper = document.querySelector('.card.spreadsheet-card') || document.querySelector('.spreadsheet-card');
     }
     if (!wrapper) return;
 
-    var button = btn || document.querySelector('button[title="View in Full Screen"]');
-    var icon = button ? button.querySelector('i') : null;
+    var icon = btn ? btn.querySelector('i') : null;
 
     if (wrapper.classList.contains('spreadsheet-fullscreen')) {
       wrapper.classList.remove('spreadsheet-fullscreen');
