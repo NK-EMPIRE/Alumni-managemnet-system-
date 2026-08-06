@@ -44,8 +44,15 @@ async function ensureChannelColumn(pool) {
   }
 }
 
+const _lastSeenMap = new Map();
+
 async function updateLastSeen(pool, userId) {
   if (!userId) return;
+  const now = Date.now();
+  const lastUpdated = _lastSeenMap.get(userId) || 0;
+  if (now - lastUpdated < 15000) return;
+
+  _lastSeenMap.set(userId, now);
   try {
     const req = pool.request();
     req.input('userId', sql.Int, userId);

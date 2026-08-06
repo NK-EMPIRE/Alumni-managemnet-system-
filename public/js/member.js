@@ -499,6 +499,8 @@
         ensureOptionExists(batchEl, record.batch);
 
         document.getElementById('fieldName').value = record.name || '';
+        var regEl = document.getElementById('fieldRegisterNo');
+        if (regEl) regEl.value = record.register_no || record.registerNo || '';
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
         document.getElementById('fieldFatherName').value = record.fatherName || record.father_name || record.pi_father_name || '';
@@ -670,7 +672,9 @@
 
     // Smart Copy-Paste Parser (LinkedIn Profile Parser)
     window.parseProfileHeader = function () {
-        var val = document.getElementById('fieldSmartParser').value || '';
+        var parserEl = document.getElementById('fieldSmartParser');
+        if (!parserEl) return;
+        var val = parserEl.value || '';
         if (!val.trim()) return;
 
         // Try extracting LinkedIn URL
@@ -777,8 +781,10 @@
     }
 
     function handleSaveDraft() {
+        var originalContent = saveDraftBtn.innerHTML;
         saveDraftBtn.classList.add('loading');
         saveDraftBtn.disabled = true;
+        saveDraftBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Saving Draft...';
 
         var idx = parseInt(fieldIndex.value, 10);
         var record = alumniData.find(function (r) { return r.id === idx; });
@@ -791,6 +797,7 @@
             clearAutosave(idx);
             saveDraftBtn.classList.remove('loading');
             saveDraftBtn.disabled = false;
+            saveDraftBtn.innerHTML = originalContent;
             renderTable();
             incrementTodayCount();
             closeUpdateModal();
@@ -827,6 +834,7 @@
             }).catch(function (err) {
                 saveDraftBtn.classList.remove('loading');
                 saveDraftBtn.disabled = false;
+                saveDraftBtn.innerHTML = originalContent;
                 showToast(err.message || 'Failed to save draft.', 'error');
             });
         } else {
@@ -840,8 +848,10 @@
             return;
         }
 
+        var originalContent = submitRecordBtn.innerHTML;
         submitRecordBtn.classList.add('loading');
         submitRecordBtn.disabled = true;
+        submitRecordBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Submitting...';
 
         var idx = parseInt(fieldIndex.value, 10);
         var record = alumniData.find(function (r) { return r.id === idx; });
@@ -854,10 +864,10 @@
             clearAutosave(idx);
             submitRecordBtn.classList.remove('loading');
             submitRecordBtn.disabled = false;
+            submitRecordBtn.innerHTML = originalContent;
             renderTable();
             incrementTodayCount();
-            showToast('Record submitted successfully!', 'success');
-            closeModal();
+            closeUpdateModal();
         }
 
         if (_apiDataLoaded && record && record.id) {
@@ -907,9 +917,11 @@
             return;
         }
 
+        var originalContent = submitNextBtn ? submitNextBtn.innerHTML : '';
         if (submitNextBtn) {
             submitNextBtn.classList.add('loading');
             submitNextBtn.disabled = true;
+            submitNextBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Submitting...';
         }
 
         var idx = parseInt(fieldIndex.value, 10);
@@ -924,6 +936,7 @@
             if (submitNextBtn) {
                 submitNextBtn.classList.remove('loading');
                 submitNextBtn.disabled = false;
+                submitNextBtn.innerHTML = originalContent;
             }
             renderTable();
             incrementTodayCount();
@@ -974,6 +987,7 @@
                 if (submitNextBtn) {
                     submitNextBtn.classList.remove('loading');
                     submitNextBtn.disabled = false;
+                    submitNextBtn.innerHTML = originalContent;
                 }
                 showToast(err.message || 'Failed to submit record.', 'error');
             });
@@ -1085,6 +1099,7 @@
                 }
                 if (page === 'chat') {
                     // Show full-page WhatsApp chat section
+                    document.body.classList.add('chat-active');
                     document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
                     item.classList.add('active');
                     var dashS = document.getElementById('section-dashboard');
@@ -1098,6 +1113,7 @@
                     if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
                     return;
                 }
+                document.body.classList.remove('chat-active');
                 if (page === 'notifications') {
                     return;
                 }
@@ -1247,8 +1263,8 @@
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.batch || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.email || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.phone || '-') + '</td>' +
-                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.company || '-') + '</td>' +
-                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.designation || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.company || row.pi_company || '-') + '</td>' +
+                        '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + (row.designation || row.pi_designation || '-') + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + linkedin + '</td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);"><span class="badge ' + badgeClass + '">' + statusStr + '</span></td>' +
                         '<td style="padding:12px 16px; border-bottom:1px solid var(--border);">' + updatedDateStr + '</td>' +

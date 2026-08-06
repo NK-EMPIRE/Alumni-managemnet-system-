@@ -55,7 +55,7 @@
     switchChatChannel('global');
 
     if (!_chatPollTimer) {
-      _chatPollTimer = setInterval(pollNewChatMessages, 3000);
+      _chatPollTimer = setInterval(pollNewChatMessages, 750);
     }
     if (!_heartbeatTimer) {
       sendChatHeartbeat();
@@ -74,62 +74,68 @@
 
   function renderChatLayout(container) {
     container.innerHTML = `
-      <div class="whatsapp-app-container" style="display:flex;height:calc(100vh - 76px);width:100%;margin:0;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #CBD5E1;box-shadow:0 6px 24px rgba(0,0,0,0.08);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;position:relative;">
+      <div class="whatsapp-app-container" style="display:flex;height:calc(100vh - var(--navbar-height, 64px));width:100%;margin:0;background:#fff;border-radius:0;overflow:hidden;border:none;box-shadow:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;position:relative;">
         
         <!-- Left Sidebar: Channels & Private Chats -->
         <div class="chat-sidebar-left" style="width:340px;background:#F8FAFC;border-right:1px solid #E2E8F0;display:flex;flex-direction:column;">
           
           <!-- User Profile Header -->
-          <div style="padding:14px 16px;background:#1E293B;color:#fff;display:flex;align-items:center;justify-content:space-between;">
+          <div class="chat-profile-header" style="padding:16px 18px;background:linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:40px;height:40px;border-radius:50%;background:#2563EB;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;box-shadow:0 2px 6px rgba(37,99,235,0.4);" id="chatSelfAvatar">ME</div>
-              <div>
-                <div style="font-weight:700;font-size:0.92rem;color:#F8FAFC;" id="chatSelfName">My Profile</div>
-                <div style="font-size:0.75rem;color:#10B981;display:flex;align-items:center;gap:4px;" id="chatSelfRole">
-                  <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10B981;"></span> Online
+              <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg, #6366F1, #8B5CF6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;box-shadow:0 0 0 2px #A5B4FC, 0 4px 12px rgba(99,102,241,0.5);" id="chatSelfAvatar">ME</div>
+              <div class="chat-self-info">
+                <div style="font-weight:700;font-size:0.95rem;color:#F8FAFC;" id="chatSelfName">My Profile</div>
+                <div style="font-size:0.75rem;color:#34D399;display:flex;align-items:center;gap:5px;margin-top:2px;" id="chatSelfRole">
+                  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 8px #10B981;"></span> Online
                 </div>
               </div>
             </div>
+            <!-- Sidebar Close Toggle Button -->
+            <button onclick="event.stopPropagation(); toggleChatSidebarCollapse();" id="chatSidebarToggleBtn" title="Close Sidebar" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95rem;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+              <i class="fas fa-outdent"></i>
+            </button>
           </div>
 
           <!-- Search Bar -->
-          <div style="padding:10px 14px;background:#fff;border-bottom:1px solid #E2E8F0;">
+          <div class="chat-search-bar-container" style="padding:14px 16px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);">
             <div style="position:relative;">
-              <i class="fas fa-search" style="position:absolute;left:14px;top:11px;color:#94A3B8;font-size:0.85rem;"></i>
-              <input type="text" id="chatSearchInput" placeholder="Search channels or contacts..." oninput="filterChatChannels()" style="width:100%;padding:8px 12px 8px 36px;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:20px;font-size:0.85rem;outline:none;box-sizing:border-box;">
+              <i class="fas fa-search" style="position:absolute;left:14px;top:11px;color:#94A3B8;font-size:0.88rem;"></i>
+              <input type="text" id="chatSearchInput" placeholder="Search channels or contacts..." oninput="filterChatChannels()" style="width:100%;padding:9px 12px 9px 38px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;font-size:0.85rem;color:#fff;outline:none;box-sizing:border-box;transition:all 0.2s;" onfocus="this.style.borderColor='#818CF8';this.style.background='rgba(255,255,255,0.12)';" onblur="this.style.borderColor='rgba(255,255,255,0.12)';this.style.background='rgba(255,255,255,0.07)';">
             </div>
           </div>
 
           <!-- Channel List -->
-          <div style="flex:1;overflow-y:auto;padding:6px 0;" id="chatChannelsList">
+          <div style="flex:1;overflow-y:auto;padding:10px 0;" id="chatChannelsList">
             
-            <div class="chat-channel-item active" id="chan-global" onclick="switchChatChannel('global')" style="padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid #F1F5F9;transition:background 0.2s;">
-              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #2563EB, #1D4ED8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;flex-shrink:0;">
+            <div class="chat-channel-item active" id="chan-global" title="Global Channel" onclick="switchChatChannel('global')" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg, #3B82F6, #1D4ED8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,0.4);">
                 <i class="fas fa-globe"></i>
               </div>
               <div style="flex:1;overflow:hidden;">
-                <div style="font-weight:700;font-size:0.9rem;color:#0F172A;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-weight:700;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">
                   <span>Global Channel</span>
-                  <span style="font-size:0.7rem;color:#10B981;font-weight:600;" id="time-global">● Live</span>
+                  <span style="font-size:0.68rem;color:#10B981;font-weight:700;background:rgba(16,185,129,0.2);padding:2px 8px;border-radius:10px;" id="time-global">● Live</span>
                 </div>
-                <div style="font-size:0.78rem;color:#64748B;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">All System Members</div>
+                <div style="font-size:0.78rem;opacity:0.75;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">All System Members</div>
               </div>
             </div>
 
-            <div class="chat-channel-item" id="chan-team" onclick="switchChatChannel('team')" style="padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid #F1F5F9;transition:background 0.2s;">
-              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #10B981, #047857);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;flex-shrink:0;">
+            <div class="chat-channel-item" id="chan-team" title="My Team Channel" onclick="switchChatChannel('team')" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg, #10B981, #047857);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(16,185,129,0.4);">
                 <i class="fas fa-users"></i>
               </div>
               <div style="flex:1;overflow:hidden;">
-                <div style="font-weight:700;font-size:0.9rem;color:#0F172A;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-weight:700;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center;">
                   <span>My Team Channel</span>
-                  <span style="font-size:0.7rem;color:#64748B;" id="time-team">Team</span>
+                  <span style="font-size:0.68rem;color:#818CF8;font-weight:700;background:rgba(99,102,241,0.2);padding:2px 8px;border-radius:10px;" id="time-team">Team</span>
                 </div>
-                <div style="font-size:0.78rem;color:#64748B;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Assigned Team Communication</div>
+                <div style="font-size:0.78rem;opacity:0.75;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Assigned Team Communication</div>
               </div>
             </div>
 
-            <div style="padding:14px 16px 6px;font-size:0.72rem;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:0.6px;">Direct Messages</div>
+            <div class="chat-section-label" style="padding:16px 20px 8px;font-size:0.72rem;font-weight:800;color:#818CF8;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-comments" style="font-size:0.8rem;"></i> Direct Messages
+            </div>
             <div id="chatPrivateList">
               <div style="padding:14px 16px;color:#94A3B8;font-size:0.82rem;text-align:center;">Loading contacts...</div>
             </div>
@@ -138,35 +144,39 @@
         </div>
 
         <!-- Right Main: Active Messaging Screen -->
-        <div class="chat-main-right" style="flex:1;display:flex;flex-direction:column;background:#efeae2;position:relative;">
+        <div class="chat-main-right" style="flex:1;display:flex;flex-direction:column;background:#F8FAFC;position:relative;">
           
           <!-- Chat Header -->
-          <div style="padding:12px 20px;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;z-index:10;cursor:pointer;" id="chatHeaderBar" onclick="handleHeaderProfileClick()">
+          <div style="padding:14px 22px;background:#FFFFFF;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;z-index:10;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.02);" id="chatHeaderBar" onclick="handleHeaderProfileClick()">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:42px;height:42px;border-radius:50%;background:#2563EB;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;" id="chatHeaderIcon">
+              <!-- Sidebar Open/Close Toggle Button on Main Header -->
+              <button onclick="event.stopPropagation(); toggleChatSidebarCollapse();" id="chatMainSidebarToggleBtn" title="Toggle Channels & Contacts Sidebar" style="background:#EEF2FF;border:none;color:#4F46E5;width:38px;height:38px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;margin-right:2px;" onmouseover="this.style.background='#E0E7FF'" onmouseout="this.style.background='#EEF2FF'">
+                <i class="fas fa-bars"></i>
+              </button>
+              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #4F46E5, #3B82F6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:700;box-shadow:0 4px 12px rgba(79,70,229,0.3);" id="chatHeaderIcon">
                 <i class="fas fa-globe"></i>
               </div>
               <div>
-                <h3 style="margin:0;font-size:1rem;font-weight:700;color:#0F172A;" id="chatHeaderTitle">Global Channel</h3>
-                <div style="font-size:0.78rem;color:#64748B;margin-top:1px;" id="chatHeaderSubtitle">● All Members & Admins</div>
+                <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#0F172A;" id="chatHeaderTitle">Global Channel</h3>
+                <div style="font-size:0.78rem;color:#10B981;margin-top:2px;font-weight:600;" id="chatHeaderSubtitle">● All Members & Admins</div>
               </div>
             </div>
-            <div style="font-size:0.8rem;color:#64748B;" id="chatHeaderActionInfo"><i class="fas fa-info-circle"></i> Profile</div>
+            <div style="font-size:0.8rem;color:#4F46E5;font-weight:600;background:#EEF2FF;padding:6px 16px;border-radius:20px;" id="chatHeaderActionInfo"><i class="fas fa-info-circle"></i> View Info</div>
           </div>
 
-          <!-- Message Feed Area with WhatsApp Wallpaper Pattern -->
-          <div id="chatMessagesArea" style="flex:1;padding:16px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background-color:#efeae2;background-image:radial-gradient(#cbd5e1 1px, transparent 1px);background-size:18px 18px;">
+          <!-- Message Feed Area with Ultra-Premium Wallpaper -->
+          <div id="chatMessagesArea" class="chat-feed-wallpaper" style="flex:1;padding:20px 28px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;">
             <div style="text-align:center;color:#94A3B8;font-size:0.85rem;padding:20px;">Loading chat messages...</div>
           </div>
 
           <!-- Mention Auto-Complete Popup -->
-          <div id="mentionDropdown" style="display:none;position:absolute;bottom:75px;left:20px;background:#fff;border:1px solid #CBD5E1;border-radius:12px;box-shadow:0 12px 35px rgba(0,0,0,0.2);width:400px;max-width:90%;max-height:320px;overflow-y:auto;z-index:1000;"></div>
+          <div id="mentionDropdown" style="display:none;position:absolute;bottom:75px;left:20px;background:#fff;border:1px solid #CBD5E1;border-radius:14px;box-shadow:0 12px 35px rgba(0,0,0,0.18);width:400px;max-width:90%;max-height:320px;overflow-y:auto;z-index:1000;"></div>
 
           <!-- Input Box Area -->
-          <div style="padding:12px 20px;background:#F0F2F5;border-top:1px solid #E2E8F0;position:relative;z-index:10;">
-            <form onsubmit="handleSendWhatsAppMessage(event)" style="display:flex;gap:10px;align-items:center;">
-              <input type="text" id="chatMessageInput" placeholder="Type a message... (Use @ to mention members)" oninput="handleChatInputTyping(this)" style="flex:1;padding:12px 18px;border:1px solid #CBD5E1;border-radius:24px;outline:none;font-size:0.92rem;background:#FFFFFF;box-shadow:inset 0 1px 2px rgba(0,0,0,0.03);">
-              <button type="submit" class="btn btn-primary" style="width:46px;height:46px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;background:#00a884;border:none;box-shadow:0 2px 8px rgba(0,168,132,0.4);cursor:pointer;transition:transform 0.15s;">
+          <div style="padding:14px 24px;background:#FFFFFF;border-top:1px solid #E2E8F0;position:relative;z-index:10;box-shadow:0 -4px 20px rgba(0,0,0,0.03);" class="chat-input-bar">
+            <form onsubmit="handleSendWhatsAppMessage(event)" style="display:flex;gap:12px;align-items:center;">
+              <input type="text" id="chatMessageInput" placeholder="Type a message... (Use @ to mention members)" oninput="handleChatInputTyping(this)" style="flex:1;padding:12px 20px;border:1.5px solid #E2E8F0;border-radius:24px;outline:none;font-size:0.93rem;background:#F1F5F9;box-shadow:inset 0 1px 2px rgba(0,0,0,0.03);transition:all 0.2s;" onfocus="this.style.borderColor='#4F46E5';this.style.background='#fff';this.style.boxShadow='0 0 0 3.5px rgba(79,70,229,0.15)';" onblur="this.style.borderColor='#E2E8F0';this.style.background='#F1F5F9';this.style.boxShadow='none';">
+              <button type="submit" class="chat-send-btn" style="width:46px;height:46px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);border:none;box-shadow:0 4px 14px rgba(79,70,229,0.38);cursor:pointer;">
                 <i class="fas fa-paper-plane" style="color:#fff;font-size:1.05rem;"></i>
               </button>
             </form>
@@ -176,21 +186,21 @@
 
         <!-- WhatsApp User Profile Modal / Drawer Overlay -->
         <div id="userProfileModal" style="display:none;position:absolute;top:0;right:0;width:340px;height:100%;background:#fff;border-left:1px solid #CBD5E1;box-shadow:-6px 0 25px rgba(0,0,0,0.15);z-index:2000;flex-direction:column;transition:transform 0.3s ease-in-out;">
-          <div style="padding:16px 20px;background:#1E293B;color:#fff;display:flex;align-items:center;justify-content:space-between;">
+          <div style="padding:16px 20px;background:linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;">
             <div style="font-weight:700;font-size:0.95rem;">Member Profile</div>
             <button onclick="closeUserProfileModal()" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;">✕</button>
           </div>
           <div style="padding:24px 20px;text-align:center;flex:1;overflow-y:auto;background:#F8FAFC;">
-            <div id="modalUserAvatar" style="width:84px;height:84px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:700;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.15);">U</div>
+            <div id="modalUserAvatar" style="width:84px;height:84px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:700;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.18);">U</div>
             <h3 style="margin:0 0 6px;font-size:1.15rem;font-weight:700;color:#0F172A;" id="modalUserName">Member Name</h3>
-            <div style="display:inline-block;padding:3px 10px;border-radius:12px;background:#DBEAFE;color:#1E40AF;font-size:0.75rem;font-weight:700;margin-bottom:16px;" id="modalUserRole">Role</div>
+            <div style="display:inline-block;padding:4px 12px;border-radius:12px;background:#EEF2FF;color:#4338CA;font-size:0.75rem;font-weight:700;margin-bottom:16px;" id="modalUserRole">Role</div>
 
-            <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px;text-align:left;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-              <div style="margin-bottom:10px;">
+            <div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:18px;text-align:left;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+              <div style="margin-bottom:12px;">
                 <div style="font-size:0.72rem;font-weight:700;color:#94A3B8;text-transform:uppercase;">Department</div>
                 <div style="font-size:0.88rem;color:#1E293B;font-weight:600;" id="modalUserDept">Department Name</div>
               </div>
-              <div style="margin-bottom:10px;">
+              <div style="margin-bottom:12px;">
                 <div style="font-size:0.72rem;font-weight:700;color:#94A3B8;text-transform:uppercase;">Email Address</div>
                 <div style="font-size:0.85rem;color:#1E293B;" id="modalUserEmail">email@example.com</div>
               </div>
@@ -200,7 +210,7 @@
               </div>
             </div>
 
-            <button id="modalDmBtn" onclick="handleModalStartDm()" style="width:100%;padding:12px;border-radius:24px;background:#00a884;color:#fff;border:none;font-weight:700;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 3px 10px rgba(0,168,132,0.3);">
+            <button id="modalDmBtn" onclick="handleModalStartDm()" style="width:100%;padding:12px;border-radius:24px;background:linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);color:#fff;border:none;font-weight:700;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(79,70,229,0.35);">
               <i class="fas fa-comment-alt"></i> Direct Message
             </button>
           </div>
@@ -233,7 +243,7 @@
           if (document.getElementById('chatSelfAvatar')) document.getElementById('chatSelfAvatar').innerText = _currentUserInitial;
           if (document.getElementById('chatSelfName')) document.getElementById('chatSelfName').innerText = name;
           if (document.getElementById('chatSelfRole')) {
-            document.getElementById('chatSelfRole').innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10B981;"></span> ' + (me.role || 'User');
+            document.getElementById('chatSelfRole').innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 8px #10B981;"></span> ' + (me.role || 'User');
           }
         }
       }).catch(function (err) { console.error(err); });
@@ -291,26 +301,26 @@
       var uId = u.user_id;
       var isOnline = (u.is_online === 1 || u.is_online === true);
       var statusText = isOnline ? 'Online' : (u.role_name || 'Member');
-      var statusColor = isOnline ? '#10B981' : '#64748B';
       var gradient = getAvatarGradient(uId);
 
       html += `
-        <div class="chat-channel-item" id="chan-private_${uId}" onclick="switchChatChannel('private_${uId}', { id:${uId}, name:'${uName.replace(/'/g, "\\'")}', role:'${u.role_name || 'Member'}', department:'${u.department || ''}', email:'${u.email || ''}', last_seen:'${u.last_seen || ''}', is_online:${isOnline} })" style="padding:10px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.2s;border-bottom:1px solid #F1F5F9;">
-          <div style="position:relative;width:40px;height:40px;border-radius:50%;background:${gradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0;">
+        <div class="chat-channel-item" id="chan-private_${uId}" title="${escapeHtml(uName)} (${escapeHtml(statusText)})" onclick="switchChatChannel('private_${uId}', { id:${uId}, name:'${uName.replace(/'/g, "\\'")}', role:'${u.role_name || 'Member'}', department:'${u.department || ''}', email:'${u.email || ''}', last_seen:'${u.last_seen || ''}', is_online:${isOnline} })" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+          <div style="position:relative;width:40px;height:40px;border-radius:50%;background:${gradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,0.25);">
             ${uName.charAt(0).toUpperCase()}
-            ${isOnline ? '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:#10B981;border:2px solid #fff;"></span>' : ''}
+            ${isOnline ? '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:#10B981;border:2px solid #0F172A;box-shadow:0 0 6px #10B981;"></span>' : ''}
           </div>
           <div style="flex:1;overflow:hidden;">
-            <div style="font-weight:600;font-size:0.88rem;color:#1E293B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(uName)}</div>
-            <div style="font-size:0.75rem;color:${statusColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(statusText)}</div>
+            <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(uName)}</div>
+            <div style="font-size:0.75rem;opacity:0.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(statusText)}</div>
           </div>
         </div>
       `;
     });
     list.innerHTML = html;
     if (_activeChannel) {
+      document.querySelectorAll('.chat-channel-item').forEach(function (el) { el.classList.remove('active'); });
       var activeEl = document.getElementById('chan-' + _activeChannel);
-      if (activeEl) activeEl.style.background = '#E2E8F0';
+      if (activeEl) activeEl.classList.add('active');
     }
     filterChatChannels();
   }
@@ -319,9 +329,9 @@
     _activeChannel = channel;
     _privateTargetUser = targetUser || null;
 
-    document.querySelectorAll('.chat-channel-item').forEach(function (el) { el.style.background = 'transparent'; });
+    document.querySelectorAll('.chat-channel-item').forEach(function (el) { el.classList.remove('active'); });
     var targetEl = document.getElementById('chan-' + channel);
-    if (targetEl) targetEl.style.background = '#E2E8F0';
+    if (targetEl) targetEl.classList.add('active');
 
     var headerTitle = document.getElementById('chatHeaderTitle');
     var headerSub = document.getElementById('chatHeaderSubtitle');
@@ -465,9 +475,17 @@
       });
   }
 
+  var _lastMsgsSignature = '';
+
   function renderMessageFeed(msgs) {
     var feed = document.getElementById('chatMessagesArea');
     if (!feed) return;
+
+    var sig = _activeChannel + '_' + msgs.length + '_' + (msgs.length ? (msgs[msgs.length - 1].id || msgs[msgs.length - 1].message_id || msgs[msgs.length - 1].created_at || '') : '');
+    if (_lastMsgsSignature === sig && feed.children.length > 0 && !feed.querySelector('.optimistic-bubble')) {
+      return;
+    }
+    _lastMsgsSignature = sig;
 
     if (msgs.length === 0) {
       feed.innerHTML = '<div style="text-align:center;color:#64748B;font-size:0.85rem;padding:30px;background:rgba(255,255,255,0.75);border-radius:12px;margin:auto;">No messages yet. Send a message to start the conversation!</div>';
@@ -499,11 +517,11 @@
       var h12 = h % 12 || 12;
       var timeStr = h12 + ':' + (m2 < 10 ? '0' + m2 : m2) + ' ' + ampm;
 
-      // Read receipt status checkmark (Blue Double Tick if seen/read!)
+      // Read receipt status checkmark (Vibrant Emerald Double Tick if seen/read!)
       var isRead = (m.is_read === 1 || m.is_read === true);
       var tickIcon = isRead
-        ? '<i class="fas fa-check-double" style="color:#53bdeb;margin-left:4px;font-size:0.75rem;" title="Seen"></i>'
-        : '<i class="fas fa-check-double" style="color:#8696a0;margin-left:4px;font-size:0.75rem;" title="Delivered"></i>';
+        ? '<i class="fas fa-check-double" style="color:#34D399;margin-left:4px;font-size:0.75rem;" title="Seen"></i>'
+        : '<i class="fas fa-check-double" style="color:rgba(255,255,255,0.6);margin-left:4px;font-size:0.75rem;" title="Delivered"></i>';
 
       // WhatsApp message bubble styling with Avatars
       if (isAlumniAlert) {
@@ -513,62 +531,68 @@
         var myInit2 = _currentUserInitial || senderName.charAt(0).toUpperCase();
         if (isMe) {
           html += `
-            <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:12px;justify-content:flex-end;">
+            <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px;justify-content:flex-end;">
               <div>${cardHtml}</div>
-              <div style="width:34px;height:34px;border-radius:50%;background:${myGrad2};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.15);" title="You">${myInit2}</div>
+              <div style="width:36px;height:36px;border-radius:50%;background:${myGrad2};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.18);" title="You">${myInit2}</div>
             </div>`;
         } else {
           html += `
-            <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:12px;">
-              <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="width:34px;height:34px;border-radius:50%;background:${gradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.15);" title="Click to view profile">
+            <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px;">
+              <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="width:36px;height:36px;border-radius:50%;background:${gradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.18);" title="Click to view profile">
                 ${senderName.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div style="font-size:0.73rem;font-weight:700;color:#0284C7;margin-bottom:4px;padding:0 2px;cursor:pointer;" onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })">
-                  ${escapeHtml(senderName)} &bull; ${escapeHtml(m.sender_role || 'Member')}
+                <div style="font-size:0.75rem;font-weight:700;color:#2563EB;margin-bottom:4px;padding:0 2px;cursor:pointer;display:flex;align-items:center;gap:6px;" onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })">
+                  <span>${escapeHtml(senderName)}</span> &bull; <span style="background:#DBEAFE;color:#1E40AF;padding:1px 8px;border-radius:10px;font-size:0.68rem;">${escapeHtml(m.sender_role || 'Member')}</span>
                 </div>
                 ${cardHtml}
               </div>
             </div>`;
         }
       } else if (isMe) {
-        // ── MY NORMAL BUBBLE ──
+        // ── MY NORMAL BUBBLE (Vibrant Indigo-Blue Gradient) ──
         var myGradient = getAvatarGradient(_currentUserId || senderId);
         var myInitial = _currentUserInitial || senderName.charAt(0).toUpperCase();
         html += `
-          <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:8px;justify-content:flex-end;">
+          <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px;justify-content:flex-end;">
             <div style="display:flex;flex-direction:column;align-items:flex-end;">
-              <div style="display:inline-block;max-width:65vw;padding:7px 12px 5px;border-radius:12px 12px 2px 12px;background:#d9fdd3;color:#111B21;box-shadow:0 1px 2px rgba(11,20,26,0.12);font-size:0.9rem;line-height:1.5;word-break:break-word;">
+              <div style="display:inline-block;max-width:65vw;padding:9px 15px 7px;border-radius:18px 18px 4px 18px;background:linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);color:#FFFFFF;box-shadow:0 4px 14px rgba(79,70,229,0.28);font-size:0.92rem;line-height:1.5;word-break:break-word;">
                 <span style="display:block;">${escapeHtmlMessage(rawText)}</span>
-                <span style="display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:3px;white-space:nowrap;">
-                  <span style="font-size:0.68rem;color:#667781;">${timeStr}</span>
+                <span style="display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:4px;white-space:nowrap;">
+                  <span style="font-size:0.68rem;color:#E0E7FF;">${timeStr}</span>
                   ${tickIcon}
                 </span>
               </div>
             </div>
             <!-- Own Avatar on the right -->
-            <div style="width:34px;height:34px;border-radius:50%;background:${myGradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.15);" title="You">
+            <div style="width:36px;height:36px;border-radius:50%;background:${myGradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.18);" title="You">
               ${myInitial}
             </div>
           </div>
         `;
       } else {
-        // ── THEIR NORMAL BUBBLE ──
+        // ── THEIR NORMAL BUBBLE (Crisp White Card) ──
+        var rolePillBg = '#DBEAFE';
+        var rolePillColor = '#1E40AF';
+        var roleText = m.sender_role || 'Member';
+        if (roleText.toLowerCase().includes('leader')) { rolePillBg = '#EDE9FE'; rolePillColor = '#5B21B6'; }
+        else if (roleText.toLowerCase().includes('admin')) { rolePillBg = '#FEF3C7'; rolePillColor = '#92400E'; }
+
         html += `
-          <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:8px;">
+          <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px;">
             <!-- Sender Avatar Badge (Clickable for Profile Card) -->
-            <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="width:34px;height:34px;border-radius:50%;background:${gradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.15);" title="Click to view profile">
+            <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="width:36px;height:36px;border-radius:50%;background:${gradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.18);" title="Click to view profile">
               ${senderName.charAt(0).toUpperCase()}
             </div>
             
             <div style="display:flex;flex-direction:column;align-items:flex-start;">
-              <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="font-size:0.73rem;font-weight:700;color:#0284C7;margin-bottom:2px;padding:0 4px;cursor:pointer;white-space:nowrap;">
-                ${escapeHtml(senderName)} &bull; ${escapeHtml(m.sender_role || 'Member')}
+              <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="font-size:0.75rem;font-weight:700;color:#0F172A;margin-bottom:4px;padding:0 4px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+                <span>${escapeHtml(senderName)}</span> &bull; <span style="background:${rolePillBg};color:${rolePillColor};padding:1px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;">${escapeHtml(roleText)}</span>
               </div>
-              <div style="display:inline-block;max-width:65vw;padding:7px 12px 5px;border-radius:12px 12px 12px 2px;background:#FFFFFF;color:#111B21;box-shadow:0 1px 2px rgba(11,20,26,0.12);font-size:0.9rem;line-height:1.5;word-break:break-word;">
+              <div style="display:inline-block;max-width:65vw;padding:9px 14px 7px;border-radius:18px 18px 18px 4px;background:#FFFFFF;color:#0F172A;box-shadow:0 4px 14px rgba(15,23,42,0.06);border:1px solid #F1F5F9;font-size:0.92rem;line-height:1.5;word-break:break-word;">
                 <span style="display:block;">${escapeHtmlMessage(rawText)}</span>
-                <span style="display:flex;align-items:center;justify-content:flex-end;margin-top:3px;white-space:nowrap;">
-                  <span style="font-size:0.68rem;color:#667781;">${timeStr}</span>
+                <span style="display:flex;align-items:center;justify-content:flex-end;margin-top:4px;white-space:nowrap;">
+                  <span style="font-size:0.68rem;color:#94A3B8;">${timeStr}</span>
                 </span>
               </div>
             </div>
@@ -600,7 +624,7 @@
 
   function escapeHtmlMessage(str) {
     var safe = escapeHtml(str);
-    return safe.replace(/@([a-zA-Z0-9_\s]+)/g, '<span style="background:rgba(37,99,235,0.12);color:#1D4ED8;font-weight:700;padding:1px 5px;border-radius:4px;">@$1</span>');
+    return safe.replace(/@([a-zA-Z0-9_\s]+)/g, '<span style="background:rgba(99,102,241,0.18);color:#4338CA;font-weight:700;padding:2px 8px;border-radius:6px;box-shadow:0 1px 3px rgba(99,102,241,0.15);">@$1</span>');
   }
   /* Global store for alumni card copy data keyed by unique card id */
   window._alumniCardData = window._alumniCardData || {};
@@ -626,10 +650,10 @@
     try { d = JSON.parse(jsonStr); } catch(e) { d = { name: 'Alumni Detail' }; }
 
     var tags = [];
-    if (d.company)     tags.push('<span style="background:#DBEAFE;color:#1E40AF;padding:3px 9px;border-radius:12px;font-size:0.72rem;font-weight:600;white-space:nowrap;">Company: ' + escapeHtml(d.company) + '</span>');
-    if (d.designation) tags.push('<span style="background:#D1FAE5;color:#065F46;padding:3px 9px;border-radius:12px;font-size:0.72rem;font-weight:600;white-space:nowrap;">Role: ' + escapeHtml(d.designation) + '</span>');
-    if (d.department)  tags.push('<span style="background:#EDE9FE;color:#4C1D95;padding:3px 9px;border-radius:12px;font-size:0.72rem;font-weight:600;white-space:nowrap;">Dept: ' + escapeHtml(d.department) + '</span>');
-    if (d.batch)       tags.push('<span style="background:#FEF3C7;color:#92400E;padding:3px 9px;border-radius:12px;font-size:0.72rem;font-weight:600;white-space:nowrap;">Batch: ' + escapeHtml(d.batch) + '</span>');
+    if (d.company)     tags.push('<span style="background:#DBEAFE;color:#1E40AF;padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;white-space:nowrap;box-shadow:0 1px 3px rgba(30,64,175,0.1);">Company: ' + escapeHtml(d.company) + '</span>');
+    if (d.designation) tags.push('<span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;white-space:nowrap;box-shadow:0 1px 3px rgba(6,95,70,0.1);">Role: ' + escapeHtml(d.designation) + '</span>');
+    if (d.department)  tags.push('<span style="background:#EDE9FE;color:#4C1D95;padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;white-space:nowrap;box-shadow:0 1px 3px rgba(76,29,149,0.1);">Dept: ' + escapeHtml(d.department) + '</span>');
+    if (d.batch)       tags.push('<span style="background:#FEF3C7;color:#92400E;padding:4px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;white-space:nowrap;box-shadow:0 1px 3px rgba(146,64,14,0.1);">Batch: ' + escapeHtml(d.batch) + '</span>');
 
     var rows = [];
     if (d.company)     rows.push(['Company',     d.company]);
@@ -657,35 +681,69 @@
     window._alumniCardData[cid] = { text: copyLines.join('\n'), linkedin: d.linkedin || '' };
 
     var rowsHtml = rows.map(function(r) {
-      return '<div style="display:flex;justify-content:space-between;font-size:0.77rem;padding:4px 0;border-bottom:1px solid #F1F5F9;">' +
+      return '<div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:6px 0;border-bottom:1px solid #F1F5F9;">' +
         '<span style="color:#64748B;font-weight:600;">' + escapeHtml(r[0]) + '</span>' +
-        '<span style="color:#1E293B;font-weight:500;text-align:right;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(r[1]) + '</span>' +
+        '<span style="color:#0F172A;font-weight:600;text-align:right;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(r[1]) + '</span>' +
       '</div>';
     }).join('');
 
     var linkedinBtn = d.linkedin
-      ? '<button onclick="openAlumniLinkedin(\'' + cid + '\')" style="flex:1;padding:8px 10px;border:none;border-radius:8px;background:#0A66C2;color:#fff;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.opacity=\'0.85\'" onmouseout="this.style.opacity=\'1\'"><i class="fab fa-linkedin"></i> LinkedIn</button>'
+      ? '<button onclick="openAlumniLinkedin(\'' + cid + '\')" style="flex:1;padding:9px 12px;border:none;border-radius:10px;background:linear-gradient(135deg, #0A66C2, #004182);color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 10px rgba(10,102,194,0.3);transition:transform 0.15s;" onmouseover="this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.transform=\'none\'"><i class="fab fa-linkedin"></i> LinkedIn</button>'
       : '';
 
-    return '<div style="width:280px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">' +
-      '<div style="background:linear-gradient(135deg,#1E293B,#0F172A);padding:12px 14px;display:flex;align-items:center;gap:10px;">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0;"><i class="fas fa-user-graduate"></i></div>' +
+    return '<div style="width:300px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(15,23,42,0.12);border:1px solid #E2E8F0;">' +
+      '<div style="background:linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%);padding:14px 16px;display:flex;align-items:center;gap:12px;">' +
+        '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, #EC4899, #8B5CF6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(236,72,153,0.4);"><i class="fas fa-user-graduate"></i></div>' +
         '<div style="flex:1;min-width:0;">' +
-          '<div style="font-weight:700;font-size:0.88rem;color:#F8FAFC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(d.name || 'Alumni') + (d.regNo ? ' <span style="font-weight:400;opacity:0.65;font-size:0.8rem;">(' + escapeHtml(d.regNo) + ')</span>' : '') + '</div>' +
-          '<div style="font-size:0.7rem;color:#94A3B8;margin-top:2px;">&#127891; Alumni Detail Found</div>' +
+          '<div style="font-weight:700;font-size:0.92rem;color:#F8FAFC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(d.name || 'Alumni') + (d.regNo ? ' <span style="font-weight:400;opacity:0.75;font-size:0.8rem;">(' + escapeHtml(d.regNo) + ')</span>' : '') + '</div>' +
+          '<div style="font-size:0.72rem;color:#34D399;margin-top:2px;font-weight:600;">&#127891; Alumni Detail Found</div>' +
         '</div>' +
       '</div>' +
-      (tags.length ? '<div style="padding:10px 12px 6px;display:flex;flex-wrap:wrap;gap:6px;">' + tags.join('') + '</div>' : '') +
-      (rows.length ? '<div style="padding:4px 12px 6px;">' + rowsHtml + '</div>' : '') +
-      '<div style="padding:8px 12px 12px;display:flex;gap:8px;">' +
-        '<button onclick="copyAlumniCard(\'' + cid + '\',this)" style="flex:1;padding:8px 10px;border:1.5px solid #E2E8F0;border-radius:8px;background:#F8FAFC;color:#475569;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.background=\'#EFF6FF\'" onmouseout="this.style.background=\'#F8FAFC\'"><i class="fas fa-copy"></i> Copy</button>' +
+      (tags.length ? '<div style="padding:12px 14px 6px;display:flex;flex-wrap:wrap;gap:6px;background:#F8FAFC;">' + tags.join('') + '</div>' : '') +
+      (rows.length ? '<div style="padding:6px 14px 8px;">' + rowsHtml + '</div>' : '') +
+      '<div style="padding:10px 14px 14px;display:flex;gap:10px;">' +
+        '<button onclick="copyAlumniCard(\'' + cid + '\',this)" style="flex:1;padding:9px 12px;border:1.5px solid #CBD5E1;border-radius:10px;background:#F8FAFC;color:#334155;font-size:0.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;" onmouseover="this.style.background=\'#EEF2FF\';this.style.borderColor=\'#818CF8\';" onmouseout="this.style.background=\'#F8FAFC\';this.style.borderColor=\'#CBD5E1\';"><i class="fas fa-copy"></i> Copy</button>' +
         linkedinBtn +
       '</div>' +
-      '<div style="padding:2px 12px 8px;display:flex;align-items:center;justify-content:flex-end;gap:3px;">' +
-        '<span style="font-size:0.65rem;color:#94A3B8;">' + timeStr + '</span>' +
+      '<div style="padding:2px 14px 10px;display:flex;align-items:center;justify-content:flex-end;gap:4px;background:#FAFAFA;">' +
+        '<span style="font-size:0.68rem;color:#94A3B8;">' + timeStr + '</span>' +
         (isMe ? tickIcon : '') +
       '</div>' +
     '</div>';
+  }
+
+  function appendOptimisticMessage(msgText) {
+    var feed = document.getElementById('chatMessagesArea');
+    if (!feed) return;
+
+    var d = new Date();
+    var h = d.getHours();
+    var m2 = d.getMinutes();
+    var ampm = h >= 12 ? 'pm' : 'am';
+    var h12 = h % 12 || 12;
+    var timeStr = h12 + ':' + (m2 < 10 ? '0' + m2 : m2) + ' ' + ampm;
+    var myGradient = getAvatarGradient(_currentUserId || 0);
+    var myInitial = _currentUserInitial || 'M';
+
+    var bubbleHtml = `
+      <div class="optimistic-bubble" style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px;justify-content:flex-end;opacity:0.95;">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;">
+          <div style="display:inline-block;max-width:65vw;padding:9px 15px 7px;border-radius:18px 18px 4px 18px;background:linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);color:#FFFFFF;box-shadow:0 4px 14px rgba(79,70,229,0.28);font-size:0.92rem;line-height:1.5;word-break:break-word;">
+            <span style="display:block;">${escapeHtmlMessage(msgText)}</span>
+            <span style="display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:4px;white-space:nowrap;">
+              <span style="font-size:0.68rem;color:#E0E7FF;">${timeStr}</span>
+              <i class="fas fa-check" style="color:rgba(255,255,255,0.7);margin-left:4px;font-size:0.75rem;" title="Sending..."></i>
+            </span>
+          </div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:${myGradient};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.18);" title="You">
+          ${myInitial}
+        </div>
+      </div>
+    `;
+
+    feed.insertAdjacentHTML('beforeend', bubbleHtml);
+    feed.scrollTop = feed.scrollHeight;
   }
 
   window.handleSendWhatsAppMessage = function (e) {
@@ -695,6 +753,10 @@
 
     var msg = input.value.trim();
     input.value = '';
+
+    // Render message instantly (0ms delay!)
+    appendOptimisticMessage(msg);
+    _lastMsgsSignature = ''; // Reset signature so server response syncs cleanly
 
     var token = localStorage.getItem('token');
     if (!token) return;
@@ -776,19 +838,26 @@
     if (dropdown) dropdown.style.display = 'none';
   };
 
+  var _lastContactsPollTime = 0;
+
   function pollNewChatMessages() {
     var sectionChat = document.getElementById('section-chat');
     if (sectionChat && sectionChat.style.display !== 'none') {
       loadMessagesForCurrentChannel();
-      var token = localStorage.getItem('token');
-      if (token) {
-        fetch('/api/v1/chat/contacts', { headers: { 'Authorization': 'Bearer ' + token } })
-          .then(function (r) { return r.json(); })
-          .then(function (res) {
-            if (res && res.success && Array.isArray(res.data)) {
-              renderPrivateContacts(res.data);
-            }
-          }).catch(function () {});
+
+      var now = Date.now();
+      if (now - _lastContactsPollTime > 4000) {
+        _lastContactsPollTime = now;
+        var token = localStorage.getItem('token');
+        if (token) {
+          fetch('/api/v1/chat/contacts', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+              if (res && res.success && Array.isArray(res.data)) {
+                renderPrivateContacts(res.data);
+              }
+            }).catch(function () {});
+        }
       }
     }
   }
@@ -801,4 +870,37 @@
     });
   };
 
+  window.toggleChatSidebarCollapse = function () {
+    var sidebar = document.querySelector('.chat-sidebar-left');
+    var appContainer = document.querySelector('.whatsapp-app-container');
+    if (!sidebar) return;
+
+    var isCollapsed = sidebar.classList.toggle('collapsed');
+    if (appContainer) appContainer.classList.toggle('sidebar-collapsed', isCollapsed);
+
+    var toggleBtn = document.getElementById('chatSidebarToggleBtn');
+    var mainToggleBtn = document.getElementById('chatMainSidebarToggleBtn');
+
+    if (isCollapsed) {
+      if (toggleBtn) {
+        toggleBtn.innerHTML = '<i class="fas fa-indent"></i>';
+        toggleBtn.title = 'Open Sidebar';
+      }
+      if (mainToggleBtn) {
+        mainToggleBtn.style.background = '#6366F1';
+        mainToggleBtn.style.color = '#FFFFFF';
+        mainToggleBtn.title = 'Open Sidebar';
+      }
+    } else {
+      if (toggleBtn) {
+        toggleBtn.innerHTML = '<i class="fas fa-outdent"></i>';
+        toggleBtn.title = 'Close Sidebar';
+      }
+      if (mainToggleBtn) {
+        mainToggleBtn.style.background = '#EEF2FF';
+        mainToggleBtn.style.color = '#4338CA';
+        mainToggleBtn.title = 'Close Sidebar';
+      }
+    }
+  };
 })();

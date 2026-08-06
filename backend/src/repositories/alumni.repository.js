@@ -50,15 +50,24 @@ async function findAll({ page, limit, offset, search, department, batch, status,
     WITH AlumniCTE AS (
       SELECT
         a.alumni_id, a.register_no, a.name, a.father_name, a.gender, a.batch,
-        a.department, a.email, a.phone, a.company, a.designation,
+        a.department, a.email, a.phone,
+        COALESCE(NULLIF(a.company, ''), pi.pi_company) AS company,
+        COALESCE(NULLIF(a.designation, ''), pi.pi_designation) AS designation,
+        COALESCE(NULLIF(a.city, ''), pi.pi_city) AS city,
         a.working_details, a.linkedin_profile, a.is_updated,
-        a.updated_date, a.created_at, a.experience, a.salary, a.city, a.country,
+        a.updated_date, a.created_at, a.experience, a.salary, a.country,
         a.date_of_birth, a.address, a.state, a.secondary_phone, a.secondary_email,
         aa.status AS assignment_status, aa.assigned_date, aa.completed_date,
         aa.assignment_id, aa.team_id, aa.member_id,
         ul.first_name + ' ' + ul.last_name AS leader_name,
         um.first_name + ' ' + um.last_name AS member_name
       FROM Alumni a
+      OUTER APPLY (
+        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city
+        FROM ProfessionalInformation
+        WHERE alumni_id = a.alumni_id
+        ORDER BY updated_at DESC
+      ) pi
       LEFT JOIN (
         SELECT assignment_id, alumni_id, team_id, member_id, status,
                assigned_date, completed_date,
@@ -69,7 +78,7 @@ async function findAll({ page, limit, offset, search, department, batch, status,
       LEFT JOIN Users ul ON t.leader_id = ul.user_id
       LEFT JOIN Users um ON aa.member_id = um.user_id
       WHERE
-        (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR a.register_no LIKE @search)
+        (@search IS NULL OR a.name LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR pi.pi_company LIKE @search OR a.register_no LIKE @search)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@leaderId IS NULL OR t.leader_id = @leaderId)
@@ -305,16 +314,25 @@ async function getAssignmentsByMember(memberId, { page, limit, offset, search, d
     WITH MemberAssignments AS (
       SELECT
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
-        a.department, a.email, a.phone, a.company, a.designation,
+        a.department, a.email, a.phone,
+        COALESCE(NULLIF(a.company, ''), pi.pi_company) AS company,
+        COALESCE(NULLIF(a.designation, ''), pi.pi_designation) AS designation,
+        COALESCE(NULLIF(a.city, ''), pi.pi_city) AS city,
         a.working_details, a.linkedin_profile, a.experience,
-        a.city, a.country, a.state, a.address, a.is_updated,
+        a.country, a.state, a.address, a.is_updated,
         a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.status,
         aa.assigned_date, aa.completed_date
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
+      OUTER APPLY (
+        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city
+        FROM ProfessionalInformation
+        WHERE alumni_id = a.alumni_id
+        ORDER BY updated_at DESC
+      ) pi
       WHERE aa.member_id = @memberId
-        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR a.father_name LIKE @search)
+        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR pi.pi_company LIKE @search OR a.father_name LIKE @search)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@status IS NULL OR aa.status = @status)
@@ -347,7 +365,10 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
     WITH TeamAssignments AS (
       SELECT
         a.alumni_id, a.register_no, a.name, a.gender, a.batch,
-        a.department, a.email, a.phone, a.company, a.designation,
+        a.department, a.email, a.phone,
+        COALESCE(NULLIF(a.company, ''), pi.pi_company) AS company,
+        COALESCE(NULLIF(a.designation, ''), pi.pi_designation) AS designation,
+        COALESCE(NULLIF(a.city, ''), pi.pi_city) AS city,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.father_name, a.date_of_birth,
         aa.assignment_id, aa.team_id, aa.member_id, aa.status,
@@ -357,9 +378,15 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
       LEFT JOIN Users u ON aa.member_id = u.user_id
       INNER JOIN Teams t ON aa.team_id = t.team_id
+      OUTER APPLY (
+        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city
+        FROM ProfessionalInformation
+        WHERE alumni_id = a.alumni_id
+        ORDER BY updated_at DESC
+      ) pi
       WHERE t.leader_id = @leaderId
         AND (@memberId IS NULL OR aa.member_id = @memberId)
-        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search)
+        AND (@search IS NULL OR a.name LIKE @search OR a.register_no LIKE @search OR a.department LIKE @search OR a.company LIKE @search OR pi.pi_company LIKE @search)
         AND (@department IS NULL OR a.department = @department)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@status IS NULL OR aa.status = @status)

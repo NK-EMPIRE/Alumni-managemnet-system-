@@ -6001,16 +6001,241 @@ tbody td { padding: 11px 14px; font-size: 0.86rem; vertical-align: middle; }
   }
 }
 
+/* ============================================================
+   FULL-PAGE CHAT SECTION (PAGE-LEVEL EMBEDDED CHAT)
+   ============================================================ */
+.page-content:has(#section-chat.active),
+body:has(#section-chat.active) .page-content,
+body:has(#section-chat.active) .content-wrapper,
+body.chat-active .page-content,
+body.chat-active .content-wrapper {
+  padding: var(--navbar-height, 64px) 0 0 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+/* Hide floating launcher button when full-page chat section is open */
+body.chat-active .chat-launcher-btn,
+body:has(#section-chat.active) .chat-launcher-btn {
+  display: none !important;
+}
+
+#section-chat {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: calc(100vh - var(--navbar-height, 64px)) !important;
+}
+
+#section-chat.active {
+  display: block !important;
+}
+
 #chatPageApp {
-  min-height: calc(100vh - 76px) !important;
+  height: calc(100vh - var(--navbar-height, 64px)) !important;
+  min-height: calc(100vh - var(--navbar-height, 64px)) !important;
   padding: 0 !important;
   margin: 0 !important;
+  width: 100% !important;
 }
 
 #chatPageApp .whatsapp-app-container {
-  height: calc(100vh - 76px) !important;
+  height: calc(100vh - var(--navbar-height, 64px)) !important;
   width: 100% !important;
-  border-radius: 12px;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+/* Collapsible Mini Icon Rail Sidebar for Chat */
+.chat-sidebar-left {
+  width: 320px !important;
+  flex-shrink: 0 !important;
+  background: linear-gradient(180deg, #0F172A 0%, #1E1B4B 100%) !important;
+  border-right: 1px solid #1E293B !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.chat-sidebar-left.collapsed {
+  width: 68px !important;
+  min-width: 68px !important;
+  max-width: 68px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.chat-sidebar-left.collapsed .chat-self-info,
+.chat-sidebar-left.collapsed .chat-search-bar-container,
+.chat-sidebar-left.collapsed .chat-section-label,
+.chat-sidebar-left.collapsed .chat-channel-item > div:not(:first-child) {
+  display: none !important;
+}
+
+.chat-sidebar-left.collapsed .chat-profile-header {
+  padding: 14px 10px !important;
+  justify-content: center !important;
+}
+
+.chat-sidebar-left.collapsed .chat-channel-item {
+  padding: 10px 0 !important;
+  justify-content: center !important;
+  margin: 6px auto !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-left: none !important;
+  border-radius: 50% !important;
+}
+
+.chat-sidebar-left.collapsed .chat-channel-item.active {
+  border-left: none !important;
+  box-shadow: 0 0 0 3px #818CF8, 0 4px 14px rgba(79, 70, 229, 0.5) !important;
+}
+
+.chat-main-right {
+  flex: 1 !important;
+  background: #F8FAFC !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.chat-channel-item {
+  transition: all 0.2s ease-in-out !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 10px !important;
+  margin: 2px 10px !important;
+  padding: 10px 14px !important;
+  color: #CBD5E1 !important;
+}
+
+.chat-channel-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+  transform: translateX(2px);
+}
+
+.chat-channel-item.active {
+  background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%) !important;
+  border-left: 3px solid #818CF8 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35) !important;
+}
+
+.chat-send-btn {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%) !important;
+}
+
+.chat-send-btn:hover {
+  transform: scale(1.08) rotate(-3deg) !important;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5) !important;
+}
+
+.chat-send-btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* Ultra-Premium Chat Feed Background Wallpaper */
+.chat-feed-wallpaper {
+  background-color: #F1F5F9 !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.09) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.09) 0px, transparent 50%),
+    linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F1F5F9 100%) !important;
+  background-attachment: fixed !important;
+}
+
+body.dark-mode .chat-feed-wallpaper {
+  background-color: #0F172A !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.18) 0px, transparent 50%),
+    linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%) !important;
+}
+
+/* Glassmorphic Date Separator */
+.chat-date-chip {
+  background: linear-gradient(135deg, #FFFFFF, #F8FAFC) !important;
+  color: #475569 !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  padding: 5px 16px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
+  border: 1px solid #E2E8F0 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* User Mention Highlight */
+.chat-mention-badge {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+}
+
+.chat-mention-badge-other {
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF) !important;
+  color: #4338CA !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+}
+
+/* Dark Mode support for Chat Application */
+body.dark-mode #chatPageApp .whatsapp-app-container {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .chat-sidebar-left {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+}
+
+body.dark-mode .chat-channel-item:hover {
+  background: #1E293B !important;
+}
+
+body.dark-mode .chat-channel-item.active {
+  background: linear-gradient(135deg, #1E1B4B, #312E81) !important;
+  border-left-color: #818CF8 !important;
+}
+
+body.dark-mode .chat-main-right {
+  background: #090D16 !important;
+}
+
+body.dark-mode #chatMessagesArea {
+  background-color: #0B0F19 !important;
+  background-image: radial-gradient(#334155 1.2px, transparent 1.2px) !important;
+}
+
+body.dark-mode #chatHeaderBar {
+  background: #1E293B !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode #chatHeaderTitle {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .chat-input-bar {
+  background: #1E293B !important;
+  border-top-color: #334155 !important;
+}
+
+body.dark-mode #chatMessageInput {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
 }
 
 /* Alumni analytics toolbar */
@@ -6048,7 +6273,68 @@ tbody td { padding: 11px 14px; font-size: 0.86rem; vertical-align: middle; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-
 /* ── END PHASE 3 NOTION UI POLISH ──────────────────────────────── */
+
+/* ============================================================
+   ELEGANT MODAL FORM LAYOUT (BALANCED SPACIOUS LAYOUT)
+   ============================================================ */
+#updateModal .modal-body {
+  padding: 24px 32px !important;
+}
+
+#updateModal .update-status-row {
+  margin-bottom: 18px !important;
+}
+
+#updateModal .smart-parser-box {
+  margin-bottom: 18px !important;
+  padding: 14px 18px !important;
+}
+
+#updateModal .form-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 18px 24px !important;
+  margin-bottom: 18px !important;
+}
+
+#updateModal .form-row.form-row-3col {
+  grid-template-columns: 1.1fr 1fr 0.8fr !important;
+  gap: 18px 20px !important;
+}
+
+#updateModal .form-group {
+  margin-bottom: 0 !important;
+}
+
+#updateModal .form-group label {
+  display: block !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  margin-bottom: 6px !important;
+}
+
+#updateModal .form-group input,
+#updateModal .form-group select {
+  width: 100% !important;
+  padding: 9px 13px !important;
+  font-size: 13.5px !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  height: 40px !important;
+}
+
+#updateModal .form-group textarea {
+  width: 100% !important;
+  padding: 9px 13px !important;
+  font-size: 12.5px !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+}
+
+#updateModal .submit-row {
+  padding-top: 18px !important;
+  margin-top: 10px !important;
+}
 

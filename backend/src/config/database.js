@@ -14,28 +14,58 @@ function buildConfig() {
     requestTimeout: 60000,
     pool: {
       max: parseInt(process.env.DB_POOL_MAX, 10) || 20,
-      min: parseInt(process.env.DB_POOL_MIN, 10) || 2,
+      min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
       idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT, 10) || 30000
     },
     options: {
       encrypt: process.env.DB_ENCRYPT === 'true',
       trustServerCertificate: process.env.DB_TRUST_CERT === 'true' || process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
       enableArithAbort: true,
-      cancelTimeout: 5000
+      cancelTimeout: 5000,
+      keepAlive: true,
+      keepAliveInitialDelay: 10000
     }
   };
 }
 
-async function getPool() {
-  if (pool) return pool;
-  try {
-    pool = await sql.connect(buildConfig());
-  } catch (e) {
-    logger.error('Database connection failed:', e);
-    throw e;
+let isInitializing = false;
+
+async function getPool(retries = 3, delayMs = 1000) {
+  if (pool && pool.connected) return pool;
+  if (pool) {
+    try {
+      await pool.close();
+    } catch (_) {}
+    pool = null;
   }
-  try {
-    await pool.query(`
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      pool = await sql.connect(buildConfig());
+      pool.on('error', (err) => {
+        logger.error('SQL Pool error:', err);
+        if (pool) {
+          try { pool.close(); } catch (_) {}
+        }
+        pool = null;
+      });
+      break;
+    } catch (e) {
+      pool = null;
+      if (attempt < retries) {
+        logger.warn(`Database connection attempt ${attempt}/${retries} failed (${e.message}). Retrying in ${delayMs}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      } else {
+        logger.error(`Database connection failed after ${retries} attempts:`, e);
+        throw e;
+      }
+    }
+  }
+
+  if (!isInitializing) {
+    isInitializing = true;
+    try {
+      await pool.query(`
       IF NOT EXISTS (
         SELECT * FROM sys.columns 
         WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'must_change_password'
@@ -239,19 +269,20 @@ async function getPool() {
           EXEC('CREATE INDEX IX_Users_Team_Role ON dbo.Users(team_id, role_id)');
       END
     `);
-  } catch (e) {
-    logger.error('Database migration failed:', e);
+    } catch (e) {
+      logger.error('Database migration failed:', e);
+    } finally {
+      isInitializing = false;
+    }
   }
-  pool.on('error', (err) => {
-    logger.error('SQL Pool error:', err);
-    pool = null;
-  });
   return pool;
 }
 
 async function closePool() {
   if (pool) {
-    await pool.close();
+    try {
+      await pool.close();
+    } catch (_) {}
     pool = null;
   }
 }

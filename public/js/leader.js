@@ -588,14 +588,18 @@
         }
         if (page === 'chat') {
           // Show full-page WhatsApp chat section
+          document.body.classList.add('chat-active');
           document.querySelectorAll('.sidebar-item').forEach(function (i) { i.classList.remove('active'); });
           document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); s.style.display = 'none'; });
           document.querySelector('.sidebar-item[data-page="chat"]') && document.querySelector('.sidebar-item[data-page="chat"]').classList.add('active');
           var chatSec = document.getElementById('section-chat');
           if (chatSec) { chatSec.style.display = 'block'; chatSec.classList.add('active'); }
+          var globalHeader = document.getElementById('globalPageHeader');
+          if (globalHeader) globalHeader.style.display = 'none';
           if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
           return;
         }
+        document.body.classList.remove('chat-active');
         if (page === 'notifications') {
           return;
         }
@@ -964,8 +968,8 @@
         var nameVal = r.name || '-';
         var deptVal = r.department || '-';
         var batchVal = r.batch || '-';
-        var compVal = r.company || '-';
-        var desgVal = r.designation || '-';
+        var compVal = r.company || r.pi_company || '-';
+        var desgVal = r.designation || r.pi_designation || '-';
 
         if (searchVal) {
           var cleanQuery = searchVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -1158,6 +1162,8 @@
         ensureOptionExists(batchEl, record.batch);
 
         document.getElementById('fieldName').value = record.name || '';
+        var regEl = document.getElementById('fieldRegisterNo');
+        if (regEl) regEl.value = record.register_no || record.registerNo || '';
         deptEl.value = record.department || '';
         batchEl.value = record.batch || '';
         document.getElementById('fieldFatherName').value = record.father_name || record.pi_father_name || '';
@@ -1234,65 +1240,17 @@
       if (!el) return;
 
       var parent = el.parentNode;
-      if (!parent) return;
-
-      var existingWrapper = parent.querySelector('.field-lock-action-wrapper');
-      if (existingWrapper) existingWrapper.remove();
+      if (parent) {
+        var existingWrapper = parent.querySelector('.field-lock-action-wrapper');
+        if (existingWrapper) existingWrapper.remove();
+      }
 
       var val = el.value ? el.value.trim() : '';
       var isPreFilled = val !== '' && val !== 'No' && val !== 'Select Department' && val !== 'Select Batch';
 
-      if (isPreFilled) {
+      if (isPreFilled && !_isModalEditMode) {
         el.readOnly = true;
         if (el.tagName === 'SELECT') el.disabled = true;
-
-        var actionWrapper = document.createElement('div');
-        actionWrapper.className = 'field-lock-action-wrapper';
-        actionWrapper.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:6px;z-index:10;';
-
-        var pencilBtn = document.createElement('button');
-        pencilBtn.type = 'button';
-        pencilBtn.className = 'btn-pencil-edit';
-        pencilBtn.title = 'Click pencil to edit this field';
-        pencilBtn.style.cssText = 'background:#F1F5F9;border:1px solid #CBD5E1;color:#475569;border-radius:6px;cursor:pointer;font-size:0.78rem;padding:4px 8px;transition:all 0.2s ease;display:inline-flex;align-items:center;justify-content:center;';
-        pencilBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-
-        var saveBtn = document.createElement('button');
-        saveBtn.type = 'button';
-        saveBtn.className = 'btn-field-save';
-        saveBtn.title = 'Save this field';
-        saveBtn.style.cssText = 'display:none;background:#10B981;border:none;color:#FFFFFF;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;padding:4px 10px;transition:all 0.2s ease;box-shadow:0 2px 6px rgba(16,185,129,0.3);align-items:center;gap:4px;';
-        saveBtn.innerHTML = '<i class="fas fa-check"></i> Save';
-
-        pencilBtn.onclick = function (e) {
-          e.preventDefault();
-          el.readOnly = false;
-          el.disabled = false;
-          el.focus();
-          el.style.borderColor = '#3B82F6';
-          pencilBtn.style.display = 'none';
-          saveBtn.style.display = 'inline-flex';
-          saveBtn.style.animation = 'popIn 0.25s ease';
-        };
-
-        saveBtn.onclick = function (e) {
-          e.preventDefault();
-          el.readOnly = true;
-          if (el.tagName === 'SELECT') el.disabled = true;
-          el.style.borderColor = '';
-          saveBtn.style.display = 'none';
-          pencilBtn.style.display = 'inline-flex';
-
-          if (typeof window.showToast === 'function') window.showToast('Field updated and saved!', 'success');
-        };
-
-        actionWrapper.appendChild(pencilBtn);
-        actionWrapper.appendChild(saveBtn);
-
-        if (getComputedStyle(parent).position === 'static') {
-          parent.style.position = 'relative';
-        }
-        parent.appendChild(actionWrapper);
       } else {
         el.readOnly = false;
         el.disabled = false;
@@ -1300,7 +1258,7 @@
     });
   }
 
-  // Apply pre-filled data field locking with pencil edit icon
+  // Apply pre-filled data field locking state
   if (typeof applyPreFilledLockingLeader === 'function') applyPreFilledLockingLeader();
 
         // Auto-toggle secondary containers if values exist
@@ -1462,7 +1420,9 @@
 
   // Smart Profile Parser
   window.parseProfileHeader = function () {
-    var val = document.getElementById('fieldSmartParser').value || '';
+    var parserEl = document.getElementById('fieldSmartParser');
+    if (!parserEl) return;
+    var val = parserEl.value || '';
     if (!val.trim()) return;
 
     var linkedinRegex = /(https?:\/\/(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+)/i;
@@ -1509,7 +1469,9 @@
 
     document.getElementById('saveDraftBtn').addEventListener('click', function () {
       var draftBtn = this;
+      var originalContent = draftBtn.innerHTML;
       draftBtn.disabled = true;
+      draftBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Saving Draft...';
       var data = readFormValues();
       API.saveAlumniDraft(currentSelectedAlumniId, data).then(function (res) {
         showToast('Success', 'Draft saved successfully.', 'success');
@@ -1520,6 +1482,7 @@
         showToast('Error', err.message || 'Failed to save draft.', 'danger');
       }).finally(function () {
         draftBtn.disabled = false;
+        draftBtn.innerHTML = originalContent;
       });
     });
 
@@ -1529,7 +1492,9 @@
         return;
       }
       var submitBtn = this;
+      var originalContent = submitBtn.innerHTML;
       submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Submitting...';
       var data = readFormValues();
       API.submitAlumni(currentSelectedAlumniId, data).then(function (res) {
         showToast('Success', 'Record submitted successfully.', 'success');
@@ -1541,6 +1506,7 @@
         showToast('Error', err.message || 'Failed to submit record.', 'danger');
       }).finally(function () {
         submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
       });
     });
 
@@ -1552,7 +1518,9 @@
           return;
         }
         var submitNextBtn = this;
+        var originalContent = submitNextBtn.innerHTML;
         submitNextBtn.disabled = true;
+        submitNextBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Submitting...';
         var data = readFormValues();
         API.submitAlumni(currentSelectedAlumniId, data).then(function (res) {
           showToast('Success', 'Record submitted successfully.', 'success');
@@ -1575,6 +1543,7 @@
           showToast('Error', err.message || 'Failed to submit record.', 'danger');
         }).finally(function () {
           submitNextBtn.disabled = false;
+          submitNextBtn.innerHTML = originalContent;
         });
       });
     }

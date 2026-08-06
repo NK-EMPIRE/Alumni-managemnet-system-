@@ -1365,7 +1365,10 @@ function navigateTo(section, el) {
   } else if (section === 'attendance') {
     if (typeof window.fetchAttendanceData === 'function') window.fetchAttendanceData();
   } else if (section === 'chat') {
+    document.body.classList.add('chat-active');
     if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
+  } else {
+    document.body.classList.remove('chat-active');
   }
 
   /* Update breadcrumb */

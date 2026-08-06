@@ -1889,34 +1889,31 @@
       </div>
       <div class="modal-body">
         <form id="updateForm" novalidate>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <div class="update-status-row" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
             <span style="font-size:13px;color:#64748B;font-weight:500;">Current Status:</span>
             <span class="status-badge pending" id="modalStatusBadge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:50px;font-size:12px;font-weight:600;background:#FFFBEB;color:#92400E;"><i class="fas fa-clock"></i> Pending</span>
           </div>
-          <!-- Smart Profile Parser -->
-          <div class="form-group" style="margin-bottom: 20px; background: var(--bg-light); padding: 15px; border-radius: 8px; border: 1px dashed var(--primary-light);">
-              <label style="font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                  <i class="fab fa-linkedin"></i> Smart Paste Profile Header (LinkedIn)
-              </label>
-              <textarea id="fieldSmartParser" placeholder="Paste the LinkedIn profile summary (e.g., 'Software Engineer at Google', 'https://linkedin.com/in/username') here. The parser will automatically extract and autofill the fields below." rows="2" style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: vertical;" oninput="parseProfileHeader()"></textarea>
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+          <div class="form-row form-row-3col">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Full Name <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldName" placeholder="Enter full name" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorName" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Name is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldDept" placeholder="Department" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Register No / Roll No</label>
+              <input type="text" id="fieldRegisterNo" placeholder="Register No / Roll No" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
             </div>
-          </div>
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Batch <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldBatch" placeholder="Batch" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldDept" placeholder="Department" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
             </div>
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation <span class="required" style="color:#EF4444">*</span></label>
