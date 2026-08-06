@@ -362,6 +362,21 @@
     },
     addSuggestion: function (category, value) {
         return post('/alumni-analysis/add-suggestion', { category: category, value: value });
+    },
+    getMasterTaxonomies: function () {
+        return get('/alumni-analysis/master/taxonomies');
+    },
+    getMasterCountries: function () {
+        return get('/alumni-analysis/master/countries');
+    },
+    getMasterStates: function (countryId) {
+        return get('/alumni-analysis/master/states', { countryId: countryId });
+    },
+    getMasterDistricts: function (stateId) {
+        return get('/alumni-analysis/master/districts', { stateId: stateId });
+    },
+    getMasterCities: function (districtId, stateId) {
+        return get('/alumni-analysis/master/cities', { districtId: districtId, stateId: stateId });
     }
     };
 

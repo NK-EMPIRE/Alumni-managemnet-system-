@@ -82,11 +82,46 @@ const addSuggestion = asyncHandler(async (req, res) => {
   success(res, { value: addedVal }, 'Suggestion added successfully');
 });
 
+const masterDataService = require('../services/masterData.service');
+
+const getTaxonomies = asyncHandler(async (req, res) => {
+  const data = masterDataService.getCareerTaxonomies();
+  success(res, data, 'Taxonomies retrieved successfully');
+});
+
+const getCountries = asyncHandler(async (req, res) => {
+  const data = await masterDataService.getCountries();
+  success(res, data, 'Countries retrieved successfully');
+});
+
+const getStates = asyncHandler(async (req, res) => {
+  const { countryId } = req.query;
+  const data = await masterDataService.getStates(countryId);
+  success(res, data, 'States retrieved successfully');
+});
+
+const getDistricts = asyncHandler(async (req, res) => {
+  const { stateId } = req.query;
+  const data = await masterDataService.getDistricts(stateId);
+  success(res, data, 'Districts retrieved successfully');
+});
+
+const getCities = asyncHandler(async (req, res) => {
+  const { districtId, stateId } = req.query;
+  const data = await masterDataService.getCities(districtId, stateId);
+  success(res, data, 'Cities retrieved successfully');
+});
+
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
   getAnalysisLocations,
   getAnalysisRoleCategories,
   getSuggestions,
-  addSuggestion
+  addSuggestion,
+  getTaxonomies,
+  getCountries,
+  getStates,
+  getDistricts,
+  getCities
 };
