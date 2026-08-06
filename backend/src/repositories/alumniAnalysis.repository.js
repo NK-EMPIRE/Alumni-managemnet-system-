@@ -1,13 +1,18 @@
 const { sql, getPool } = require('../config/database');
 const searchParserService = require('../services/searchParser.service');
+const { cleanRoleAndCompany } = require('../services/dataCleaner.service');
 
 const ROLE_CATEGORIES = {
-  'Software Engineer': ['software', 'developer', 'sde', 'programmer', 'full stack', 'backend', 'frontend', 'engineer', 'web', 'mobile', 'coder'],
-  'Data / AI / ML': ['data scientist', 'machine learning', 'ml engineer', 'ai engineer', 'data analyst', 'data engineer', 'big data', 'ai'],
+  'Software Engineer': ['software', 'developer', 'sde', 'programmer', 'full stack', 'backend', 'frontend', 'engineer', 'web', 'mobile', 'coder', 'system analyst', 'tech lead'],
+  'Data / AI / ML': ['data scientist', 'machine learning', 'ml engineer', 'ai engineer', 'data analyst', 'data engineer', 'big data', 'ai', 'data'],
   'HR': ['hr', 'human resource', 'talent acquisition', 'recruiter', 'people ops', 'talent'],
   'Product / Design': ['product manager', 'ux', 'ui designer', 'product owner', 'designer', 'ui/ux'],
-  'Finance / Accounting': ['finance', 'accountant', 'audit', 'chartered accountant', 'banking', 'financial'],
-  'Sales / Marketing': ['sales', 'marketing', 'business development', 'growth', 'seo', 'digital marketing']
+  'Finance / Accounting': ['finance', 'accountant', 'audit', 'chartered accountant', 'banking', 'financial', 'clerk', 'cashier'],
+  'Sales / Marketing': ['sales', 'marketing', 'business development', 'growth', 'seo', 'digital marketing'],
+  'Education / Academic': ['professor', 'assistant professor', 'associate professor', 'lecturer', 'teacher', 'hod', 'dean', 'head of dept', 'principal', 'tutor'],
+  'Healthcare / Medical': ['doctor', 'nurse', 'medical rep', 'pharmacist', 'surgeon', 'healthcare'],
+  'Operations / Quality / Logistics': ['quality', 'qc', 'operations', 'logistics', 'safety', 'compliance', 'manager', 'lead', 'coordinator'],
+  'Trades / Business': ['own business', 'business', 'builder', 'contractor', 'shop', 'owner', 'proprietor']
 };
 
 /**
@@ -17,22 +22,22 @@ function getRoleCategorySqlCondition(roleCategory, paramName = 'roleCategory') {
   if (!roleCategory) return '1=1';
 
   if (roleCategory === 'Government / Public Sector') {
-    return 'pi.is_government_job = 1';
+    return '(pi.is_government_job = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%police%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%govt%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%tnstc%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%military%\')';
   }
   if (roleCategory === 'Higher Studies') {
-    return '(pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> \'\')';
+    return '(pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> \'\' AND pi.higher_studies <> \'No\')';
   }
   if (roleCategory === 'Entrepreneur') {
-    return 'pi.is_entrepreneur = 1';
+    return '(pi.is_entrepreneur = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%own business%\' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE \'%owner%\')';
   }
   if (roleCategory === 'Other / Unclassified') {
     const keywords = [];
     Object.values(ROLE_CATEGORIES).forEach(list => keywords.push(...list));
-    const notKeywordsSql = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation)) NOT LIKE '%${kw.toLowerCase()}%'`).join(' AND ');
+    const notKeywordsSql = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation, a.working_details)) NOT LIKE '%${kw.toLowerCase()}%'`).join(' AND ');
     return `(
       (pi.is_government_job IS NULL OR pi.is_government_job = 0)
       AND (pi.is_entrepreneur IS NULL OR pi.is_entrepreneur = 0)
-      AND (pi.higher_studies IS NULL OR LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) = '')
+      AND (pi.higher_studies IS NULL OR LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) = '' OR pi.higher_studies = 'No')
       AND (${notKeywordsSql})
     )`;
   }
@@ -42,7 +47,7 @@ function getRoleCategorySqlCondition(roleCategory, paramName = 'roleCategory') {
     return '1=1';
   }
 
-  const keywordConditions = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation)) LIKE '%${kw.toLowerCase()}%'`).join(' OR ');
+  const keywordConditions = keywords.map(kw => `LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%${kw.toLowerCase()}%'`).join(' OR ');
   return `(${keywordConditions})`;
 }
 
@@ -138,8 +143,17 @@ async function getAnalysisAlumni({
   `;
 
   const result = await request.query(query);
-  const data = result.recordset;
-  const totalCount = data.length > 0 ? data[0].total_count : 0;
+  const rawData = result.recordset;
+  const totalCount = rawData.length > 0 ? rawData[0].total_count : 0;
+
+  const data = rawData.map(row => {
+    const cleaned = cleanRoleAndCompany(row.designation, row.company, row.working_details);
+    return {
+      ...row,
+      designation: cleaned.designation || row.designation || 'Not Specified',
+      company: cleaned.company || row.company || 'Not Specified'
+    };
+  });
 
   return { data, totalCount, page: pageNum, limit: limitNum };
 }
@@ -188,6 +202,10 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
     'Product / Design',
     'Finance / Accounting',
     'Sales / Marketing',
+    'Education / Academic',
+    'Healthcare / Medical',
+    'Operations / Quality / Logistics',
+    'Trades / Business',
     'Government / Public Sector',
     'Higher Studies',
     'Entrepreneur',
