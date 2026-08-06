@@ -1,6 +1,39 @@
 const { sql, getPool } = require('../config/database');
 const searchParserService = require('../services/searchParser.service');
-const { cleanRoleAndCompany, canonicalizeLocationList } = require('../services/dataCleaner.service');
+const { cleanRoleAndCompany, canonicalizeLocationList, canonicalizeCompanyList } = require('../services/dataCleaner.service');
+
+/**
+ * Returns distinct companies list for analysis filter dropdown.
+ */
+async function getAnalysisCompanies({ leaderId, memberId }) {
+  const pool = await getPool();
+  const request = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const result = await request.query(`
+    SELECT DISTINCT LTRIM(RTRIM(COALESCE(pi.company, a.company))) AS company
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE COALESCE(pi.company, a.company) IS NOT NULL
+      AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
+      AND (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId)
+    ORDER BY company ASC;
+  `);
+
+  const raw = result.recordset.map(r => r.company).filter(Boolean);
+  return canonicalizeCompanyList(raw);
+}
 
 /**
  * Returns distinct Cities, States, and Countries lists for dynamic analysis filter dropdowns.
@@ -204,37 +237,7 @@ async function getAnalysisAlumni({
   return { data, totalCount, page: pageNum, limit: limitNum };
 }
 
-/**
- * Returns distinct companies list for analysis filter dropdown.
- */
-async function getAnalysisCompanies({ leaderId, memberId }) {
-  const pool = await getPool();
-  const request = pool.request()
-    .input('leaderId', sql.Int, leaderId || null)
-    .input('memberId', sql.Int, memberId || null);
 
-  const result = await request.query(`
-    SELECT DISTINCT LTRIM(RTRIM(COALESCE(pi.company, a.company))) AS company
-    FROM dbo.Alumni a
-    LEFT JOIN (
-      SELECT * FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
-    LEFT JOIN (
-      SELECT alumni_id, team_id, member_id,
-             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
-      FROM dbo.AlumniAssignments
-    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
-    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
-    WHERE COALESCE(pi.company, a.company) IS NOT NULL
-      AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> ''
-      AND (@leaderId IS NULL OR t.leader_id = @leaderId)
-      AND (@memberId IS NULL OR aa.member_id = @memberId)
-    ORDER BY company ASC;
-  `);
-
-  return result.recordset.map(r => r.company).filter(Boolean);
-}
 
 /**
  * Returns distinct Cities, States, and Countries lists for dynamic analysis filter dropdowns.
@@ -397,8 +400,8 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
  * Queries: 1. DB (Alumni & ProfessionalInformation), 2. Custom LookupDictionary, 3. Global Dictionary.
  */
 async function getSuggestions({ field, query, limit = 100 }) {
-  if (!query || !field) return [];
-  const qStr = query.trim().toLowerCase();
+  if (!field) return [];
+  const qStr = (query || '').trim().toLowerCase();
   const pool = await getPool();
 
   const allowedFields = {
@@ -424,10 +427,18 @@ async function getSuggestions({ field, query, limit = 100 }) {
     ) pi ON pi.alumni_id = a.alumni_id
     WHERE ${colExpr} IS NOT NULL
       AND LTRIM(RTRIM(CAST(${colExpr} AS NVARCHAR(MAX)))) <> ''
-      AND LOWER(${colExpr}) LIKE @q
+      AND (${qStr === '' ? '1=1' : `LOWER(${colExpr}) LIKE @q`})
     ORDER BY val ASC
   `);
-  const dbMatches = dbRes.recordset.map(r => r.val).filter(Boolean);
+  let dbMatches = dbRes.recordset.map(r => r.val).filter(Boolean);
+
+  // Apply location/company canonical cleaning to dbMatches
+  const { canonicalizeLocationList, canonicalizeCompanyList } = require('../services/dataCleaner.service');
+  if (field === 'city' || field === 'state' || field === 'country') {
+    dbMatches = canonicalizeLocationList(dbMatches, field);
+  } else if (field === 'company') {
+    dbMatches = canonicalizeCompanyList(dbMatches);
+  }
 
   // 2. Fetch matches from custom user-added LookupDictionary table
   const customReq = pool.request()
@@ -437,7 +448,7 @@ async function getSuggestions({ field, query, limit = 100 }) {
     SELECT DISTINCT LTRIM(RTRIM(value)) AS val
     FROM dbo.LookupDictionary
     WHERE category = @cat
-      AND LOWER(value) LIKE @q
+      AND (${qStr === '' ? '1=1' : `LOWER(value) LIKE @q`})
     ORDER BY val ASC
   `);
   const customMatches = customRes.recordset.map(r => r.val).filter(Boolean);
@@ -446,7 +457,7 @@ async function getSuggestions({ field, query, limit = 100 }) {
   let dictionaryMatches = [];
   if (field === 'designation') {
     const { GLOBAL_ROLES } = require('../constants/globalRoles');
-    dictionaryMatches = GLOBAL_ROLES.filter(r => r.toLowerCase().includes(qStr));
+    dictionaryMatches = qStr === '' ? GLOBAL_ROLES : GLOBAL_ROLES.filter(r => r.toLowerCase().includes(qStr));
   }
 
   // Combine custom user-added values first, then DB matches, then global dictionary

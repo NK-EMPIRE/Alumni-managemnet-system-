@@ -83,10 +83,48 @@ function cleanRoleAndCompany(designationRaw, companyRaw, workingDetailsRaw) {
     }
   }
 
-  // 4. TF-IDF Domain Classification
+  // 4. Sanitize hyphen-only or dummy company placeholders
+  if (company) {
+    const cClean = company.replace(/^[-–\s.,]+|[-–\s.,]+$/g, '');
+    if (!cClean || cClean.toLowerCase() === 'null' || cClean.toLowerCase() === 'no') {
+      company = '';
+    } else {
+      company = cClean;
+    }
+  }
+
+  // 5. TF-IDF Domain Classification
   const domainCategory = classifyDomainSimilarity(`${designation} ${company} ${workingDetails}`);
 
   return { designation, company, city, domainCategory };
+}
+
+/**
+ * Normalizes company name strings, filtering out dummy hyphen placeholders ('-', '--', '----', 'No').
+ */
+function normalizeCompany(str) {
+  if (!str) return '';
+  let s = String(str).trim();
+  s = s.replace(/^[-–\s.,]+|[-–\s.,]+$/g, '');
+  if (!s || s.toLowerCase() === 'null' || s.toLowerCase() === 'no' || s.length < 2) return '';
+  return s;
+}
+
+/**
+ * Canonicalizes and deduplicates company lists.
+ */
+function canonicalizeCompanyList(list) {
+  const map = new Map();
+  list.forEach(raw => {
+    const norm = normalizeCompany(raw);
+    if (norm) {
+      const key = norm.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!map.has(key)) {
+        map.set(key, norm);
+      }
+    }
+  });
+  return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -197,6 +235,8 @@ function canonicalizeLocationList(list, type) {
 module.exports = {
   cleanRoleAndCompany,
   classifyDomainSimilarity,
+  normalizeCompany,
+  canonicalizeCompanyList,
   normalizeCity,
   normalizeState,
   normalizeCountry,

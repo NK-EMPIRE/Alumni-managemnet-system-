@@ -92,15 +92,13 @@ function loadAnalysisCompanies() {
   API.getAnalysisCompanies()
     .then(function (res) {
       if (res && res.success && res.data) {
-        var select = document.getElementById('analysisFilterCompany');
-        if (!select) return;
-
-        var savedVal = select.value;
-        select.innerHTML = '<option value="">All Companies</option>';
-        res.data.forEach(function (companyName) {
-          select.innerHTML += '<option value="' + companyName.replace(/"/g, '&quot;') + '">' + companyName + '</option>';
-        });
-        if (savedVal) select.value = savedVal;
+        var companyListEl = document.getElementById('analysisCompanyDatalist');
+        if (companyListEl) {
+          companyListEl.innerHTML = '';
+          res.data.forEach(function (companyName) {
+            companyListEl.innerHTML += '<option value="' + companyName.replace(/"/g, '&quot;') + '">';
+          });
+        }
       }
     })
     .catch(function (err) { console.error('Error loading analysis companies:', err); });

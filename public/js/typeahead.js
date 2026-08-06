@@ -103,10 +103,6 @@
 
   function handleInput(inputEl, field) {
     var val = inputEl.value.trim();
-    if (!val || val.length < 1) {
-      removeActiveOverlay();
-      return;
-    }
 
     clearTimeout(suggestionDebounce);
     suggestionDebounce = setTimeout(function () {
@@ -121,7 +117,7 @@
         .catch(function (err) {
           console.error('Error fetching suggestions:', err);
         });
-    }, 200);
+    }, 150);
   }
 
   function initTypeaheadAutocomplete() {
@@ -130,6 +126,12 @@
       inputs.forEach(function (input) {
         input.setAttribute('autocomplete', 'off');
         input.addEventListener('input', function () {
+          handleInput(input, cfg.field);
+        });
+        input.addEventListener('focus', function () {
+          handleInput(input, cfg.field);
+        });
+        input.addEventListener('click', function () {
           handleInput(input, cfg.field);
         });
         input.addEventListener('blur', function () {
