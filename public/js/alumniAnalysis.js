@@ -127,12 +127,52 @@ window.debounceAnalysisSearch = function () {
   }, 350);
 };
 
+window.openAnalysisFiltersModal = function () {
+  var modal = document.getElementById('analysisFiltersModal');
+  if (modal) modal.style.display = 'flex';
+};
+
+window.closeAnalysisFiltersModal = function () {
+  var modal = document.getElementById('analysisFiltersModal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.applyAnalysisFiltersModal = function () {
+  closeAnalysisFiltersModal();
+  updateActiveFiltersBadge();
+  fetchAnalysisData(1);
+};
+
+function updateActiveFiltersBadge() {
+  var badge = document.getElementById('analysisActiveFiltersBadge');
+  if (!badge) return;
+
+  var filterIds = ['analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry', 'analysisFilterDept', 'analysisFilterBatch', 'analysisFilterStatus'];
+  var activeCount = 0;
+
+  filterIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el && el.value && el.value.trim() !== '') {
+      activeCount++;
+    }
+  });
+
+  if (activeCount > 0) {
+    badge.innerText = activeCount;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 window.resetAnalysisFilters = function () {
   var ids = ['analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry', 'analysisFilterBatch', 'analysisFilterDept', 'analysisFilterStatus', 'analysisCustomQueryInput'];
   ids.forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
+  updateActiveFiltersBadge();
+  closeAnalysisFiltersModal();
   fetchAnalysisData(1);
 };
 
