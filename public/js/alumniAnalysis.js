@@ -65,7 +65,6 @@ function loadAnalysisRoleCategories() {
         }
 
         // Populate System Intelligence Digest Banner Metrics
-        var summaryEl = document.getElementById('analysisExecutiveSummary');
         var totalAlumniEl = document.getElementById('analysisTotalAlumniCount');
         var totalWorkingEl = document.getElementById('analysisTotalWorkingCount');
         var companiesEl = document.getElementById('analysisCompaniesCount');
@@ -74,9 +73,6 @@ function loadAnalysisRoleCategories() {
         var higherStudiesEl = document.getElementById('analysisHigherStudiesCount');
         var topSectorEl = document.getElementById('analysisTopSectorName');
 
-        if (summaryEl) {
-          summaryEl.innerHTML = 'Intelligence Engine classified <strong>' + workingAlumni.toLocaleString() + '</strong> verified working alumni across <strong>' + uniqueCompanies.toLocaleString() + '</strong> distinct companies &amp; 14 industry sectors. Primary concentration in <strong>' + topCategory + '</strong> (' + maxCount + ' records).';
-        }
         if (totalAlumniEl) totalAlumniEl.innerText = totalAlumni.toLocaleString();
         if (totalWorkingEl) totalWorkingEl.innerText = workingAlumni.toLocaleString();
         if (companiesEl) companiesEl.innerText = uniqueCompanies.toLocaleString();
