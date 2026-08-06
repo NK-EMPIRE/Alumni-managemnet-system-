@@ -196,7 +196,7 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
 async function getAnalysisRoleCategories({ leaderId, memberId }) {
   const pool = await getPool();
 
-  // 1. Total Alumni & Working Alumni Counts
+  // 1. Career & Employment Intelligence Metrics
   const reqOverall = pool.request()
     .input('leaderId', sql.Int, leaderId || null)
     .input('memberId', sql.Int, memberId || null);
@@ -207,7 +207,11 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
       SUM(CASE WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '')
                  OR (COALESCE(pi.designation, a.designation) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> '')
                  OR (a.working_details IS NOT NULL AND LTRIM(RTRIM(CAST(a.working_details AS NVARCHAR(MAX)))) <> '')
-               THEN 1 ELSE 0 END) AS workingAlumni
+               THEN 1 ELSE 0 END) AS workingAlumni,
+      COUNT(DISTINCT CASE WHEN COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '' THEN COALESCE(pi.company, a.company) END) AS uniqueCompanies,
+      SUM(CASE WHEN pi.is_government_job = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%police%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%govt%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%tnstc%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%military%' THEN 1 ELSE 0 END) AS govtCount,
+      SUM(CASE WHEN pi.is_entrepreneur = 1 OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%own business%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%owner%' OR LOWER(COALESCE(pi.designation, a.designation, a.working_details)) LIKE '%proprietor%' THEN 1 ELSE 0 END) AS bizCount,
+      SUM(CASE WHEN pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> '' AND pi.higher_studies <> 'No' THEN 1 ELSE 0 END) AS higherStudiesCount
     FROM dbo.Alumni a
     LEFT JOIN (
       SELECT * FROM dbo.ProfessionalInformation
@@ -223,46 +227,15 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
       AND (@memberId IS NULL OR aa.member_id = @memberId);
   `);
 
-  const totalAlumni = overallRes.recordset[0] ? overallRes.recordset[0].totalAlumni : 0;
-  const workingAlumni = overallRes.recordset[0] ? overallRes.recordset[0].workingAlumni : 0;
+  const rowStats = overallRes.recordset[0] || {};
+  const totalAlumni = rowStats.totalAlumni || 0;
+  const workingAlumni = rowStats.workingAlumni || 0;
+  const uniqueCompanies = rowStats.uniqueCompanies || 0;
+  const govtCount = rowStats.govtCount || 0;
+  const bizCount = rowStats.bizCount || 0;
+  const higherStudiesCount = rowStats.higherStudiesCount || 0;
 
-  // 2. Assignment Status Breakdown (Completed, Draft, Pending, Unassigned)
-  const reqStatus = pool.request()
-    .input('leaderId', sql.Int, leaderId || null)
-    .input('memberId', sql.Int, memberId || null);
-
-  const statusRes = await reqStatus.query(`
-    SELECT
-      ISNULL(aa.status, 'Unassigned') AS status,
-      COUNT(DISTINCT a.alumni_id) AS count
-    FROM dbo.Alumni a
-    LEFT JOIN (
-      SELECT alumni_id, team_id, member_id, status,
-             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
-      FROM dbo.AlumniAssignments
-    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
-    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
-    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
-      AND (@memberId IS NULL OR aa.member_id = @memberId)
-    GROUP BY ISNULL(aa.status, 'Unassigned');
-  `);
-
-  const statusBreakdown = {
-    completed: 0,
-    draft: 0,
-    pending: 0,
-    unassigned: 0
-  };
-
-  statusRes.recordset.forEach(r => {
-    const st = (r.status || '').toLowerCase();
-    if (st === 'completed') statusBreakdown.completed += r.count;
-    else if (st === 'draft') statusBreakdown.draft += r.count;
-    else if (st === 'pending') statusBreakdown.pending += r.count;
-    else statusBreakdown.unassigned += r.count;
-  });
-
-  // 3. Sector Role Categories Counts
+  // 2. Sector Role Categories Counts
   const categories = [
     'Software Engineer',
     'Data / AI / ML',
@@ -319,7 +292,10 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
   return {
     totalAlumni,
     workingAlumni,
-    statusBreakdown,
+    uniqueCompanies,
+    govtCount,
+    bizCount,
+    higherStudiesCount,
     roleCategories
   };
 }

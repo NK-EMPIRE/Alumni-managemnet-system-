@@ -41,7 +41,10 @@ function loadAnalysisRoleCategories() {
         var roleCats = Array.isArray(d) ? d : (d.roleCategories || []);
         var totalAlumni = d.totalAlumni !== undefined ? d.totalAlumni : 6518;
         var workingAlumni = d.workingAlumni !== undefined ? d.workingAlumni : 242;
-        var statusBreakdown = d.statusBreakdown || { completed: 84, draft: 415, pending: 5639, unassigned: 380 };
+        var uniqueCompanies = d.uniqueCompanies !== undefined ? d.uniqueCompanies : 133;
+        var govtCount = d.govtCount !== undefined ? d.govtCount : 2;
+        var bizCount = d.bizCount !== undefined ? d.bizCount : 9;
+        var higherStudiesCount = d.higherStudiesCount !== undefined ? d.higherStudiesCount : 2;
 
         var select = document.getElementById('analysisFilterRoleCategory');
         if (select) {
@@ -65,19 +68,21 @@ function loadAnalysisRoleCategories() {
         var summaryEl = document.getElementById('analysisExecutiveSummary');
         var totalAlumniEl = document.getElementById('analysisTotalAlumniCount');
         var totalWorkingEl = document.getElementById('analysisTotalWorkingCount');
-        var completedEl = document.getElementById('analysisCompletedCount');
-        var draftEl = document.getElementById('analysisDraftCount');
-        var pendingEl = document.getElementById('analysisPendingCount');
+        var companiesEl = document.getElementById('analysisCompaniesCount');
+        var govtEl = document.getElementById('analysisGovtCount');
+        var bizEl = document.getElementById('analysisBizCount');
+        var higherStudiesEl = document.getElementById('analysisHigherStudiesCount');
         var topSectorEl = document.getElementById('analysisTopSectorName');
 
         if (summaryEl) {
-          summaryEl.innerHTML = 'Intelligence Engine classified <strong>' + workingAlumni.toLocaleString() + '</strong> verified working alumni out of <strong>' + totalAlumni.toLocaleString() + '</strong> total records across 14 industry sectors. Primary concentration in <strong>' + topCategory + '</strong> (' + maxCount + ' records).';
+          summaryEl.innerHTML = 'Intelligence Engine classified <strong>' + workingAlumni.toLocaleString() + '</strong> verified working alumni across <strong>' + uniqueCompanies.toLocaleString() + '</strong> distinct companies &amp; 14 industry sectors. Primary concentration in <strong>' + topCategory + '</strong> (' + maxCount + ' records).';
         }
         if (totalAlumniEl) totalAlumniEl.innerText = totalAlumni.toLocaleString();
         if (totalWorkingEl) totalWorkingEl.innerText = workingAlumni.toLocaleString();
-        if (completedEl) completedEl.innerText = (statusBreakdown.completed || 0).toLocaleString();
-        if (draftEl) draftEl.innerText = (statusBreakdown.draft || 0).toLocaleString();
-        if (pendingEl) pendingEl.innerText = (statusBreakdown.pending || 0).toLocaleString();
+        if (companiesEl) companiesEl.innerText = uniqueCompanies.toLocaleString();
+        if (govtEl) govtEl.innerText = govtCount.toLocaleString();
+        if (bizEl) bizEl.innerText = bizCount.toLocaleString();
+        if (higherStudiesEl) higherStudiesEl.innerText = higherStudiesCount.toLocaleString();
         if (topSectorEl) topSectorEl.innerText = topCategory;
       }
     })
