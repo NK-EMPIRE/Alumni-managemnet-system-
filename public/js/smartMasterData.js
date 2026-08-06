@@ -63,9 +63,50 @@
 
   function bindEmploymentStatusEvents() {
     var statusSelect = document.getElementById('fieldEmploymentStatus');
+    var typeSelect = document.getElementById('fieldCareerType');
+
     if (statusSelect) {
       statusSelect.addEventListener('change', function () {
         handleEmploymentStatusToggle(this.value);
+        checkUniversityVisibility();
+      });
+    }
+
+    if (typeSelect) {
+      typeSelect.addEventListener('change', function () {
+        checkUniversityVisibility();
+      });
+    }
+  }
+
+  function checkUniversityVisibility() {
+    var statusSelect = document.getElementById('fieldEmploymentStatus');
+    var typeSelect = document.getElementById('fieldCareerType');
+    var uniContainer = document.getElementById('universityGroupContainer');
+
+    if (!uniContainer) return;
+
+    var statusVal = statusSelect ? statusSelect.value : '';
+    var typeVal = typeSelect ? typeSelect.value : '';
+
+    var showUni = (statusVal === 'Higher Studies') || (typeVal === 'Student') || (typeVal === 'Research Scholar');
+
+    if (showUni) {
+      uniContainer.style.display = 'block';
+      loadUniversities();
+    } else {
+      uniContainer.style.display = 'none';
+      var uniInput = document.getElementById('fieldUniversity');
+      if (uniInput) uniInput.value = '';
+    }
+  }
+
+  function loadUniversities() {
+    if (typeof API !== 'undefined' && API.getMasterUniversities) {
+      API.getMasterUniversities('').then(function (res) {
+        if (res && res.success && res.data) {
+          populateDatalist('universityDatalist', res.data);
+        }
       });
     }
   }
@@ -210,6 +251,63 @@
       el.innerHTML += '<option value="' + item.replace(/"/g, '&quot;') + '">';
     });
   }
+
+  window.openMasterDataGovernanceModal = function () {
+    if (typeof openModal === 'function') openModal('masterDataGovernanceModal');
+    loadPendingGovernanceItems();
+  };
+
+  function loadPendingGovernanceItems() {
+    var tbody = document.getElementById('masterGovernanceTbody');
+    if (!tbody || typeof API === 'undefined' || !API.getPendingMasterItems) return;
+
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#94A3B8;">Loading pending master terms...</td></tr>';
+
+    API.getPendingMasterItems().then(function (res) {
+      if (res && res.success && res.data) {
+        if (res.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#10B981;font-weight:600;"><i class="fas fa-check-circle"></i> All submitted master terms have been reviewed!</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = '';
+        res.data.forEach(function (item) {
+          var badgeColor = item.type === 'company' ? '#2563EB' : item.type === 'designation' ? '#7C3AED' : '#0EA5E9';
+          var dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString() : '-';
+
+          tbody.innerHTML += '<tr>' +
+            '<td style="padding:10px 12px;"><span class="badge" style="background:' + badgeColor + ';color:#fff;font-size:0.7rem;text-transform:uppercase;">' + item.type + '</span></td>' +
+            '<td style="padding:10px 12px;font-weight:600;color:#1E293B;">' + item.name + '</td>' +
+            '<td style="padding:10px 12px;color:#64748B;font-size:0.85rem;">' + dateStr + '</td>' +
+            '<td style="padding:10px 12px;text-align:right;">' +
+              '<button class="btn btn-sm btn-success" onclick="approveMasterGovernanceItem(\'' + item.type + '\', ' + item.id + ')" style="padding:4px 10px;font-size:0.75rem;margin-right:6px;background:#10B981;color:#fff;border:none;border-radius:6px;cursor:pointer;"><i class="fas fa-check"></i> Approve</button>' +
+              '<button class="btn btn-sm btn-danger" onclick="rejectMasterGovernanceItem(\'' + item.type + '\', ' + item.id + ')" style="padding:4px 10px;font-size:0.75rem;background:#EF4444;color:#fff;border:none;border-radius:6px;cursor:pointer;"><i class="fas fa-times"></i> Reject</button>' +
+            '</td>' +
+          '</tr>';
+        });
+      }
+    });
+  }
+
+  window.approveMasterGovernanceItem = function (type, id) {
+    if (typeof API === 'undefined' || !API.approveMasterItem) return;
+    API.approveMasterItem(type, id).then(function (res) {
+      if (res && res.success) {
+        if (typeof showToast === 'function') showToast('Success', 'Master item approved and published!', 'success');
+        loadPendingGovernanceItems();
+      }
+    });
+  };
+
+  window.rejectMasterGovernanceItem = function (type, id) {
+    if (typeof API === 'undefined' || !API.rejectMasterItem) return;
+    API.rejectMasterItem(type, id).then(function (res) {
+      if (res && res.success) {
+        if (typeof showToast === 'function') showToast('Rejected', 'Master item rejected', 'warning');
+        loadPendingGovernanceItems();
+      }
+    });
+  };
 
   // Auto-initialize when DOM ready
   if (document.readyState === 'loading') {

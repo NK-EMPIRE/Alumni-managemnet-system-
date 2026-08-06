@@ -19,6 +19,12 @@ router.get('/master/countries', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBE
 router.get('/master/states', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getStates);
 router.get('/master/districts', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getDistricts);
 router.get('/master/cities', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getCities);
+router.get('/master/universities', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getUniversities);
+
+// Governance Auto-Learning Queue endpoints (ADMIN exclusive)
+router.get('/master/pending', authorize(ROLES.ADMIN), alumniAnalysisController.getPendingMasterItems);
+router.post('/master/approve', authorize(ROLES.ADMIN), alumniAnalysisController.approveMasterItem);
+router.post('/master/reject', authorize(ROLES.ADMIN), alumniAnalysisController.rejectMasterItem);
 
 // Autocomplete suggestions endpoint accessible to all authenticated roles for update modals
 router.get('/suggestions', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getSuggestions);

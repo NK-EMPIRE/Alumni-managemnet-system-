@@ -602,6 +602,8 @@
               <button class="btn btn-primary btn-sm" onclick="fetchRealtimeDatabaseData()"
                 style="height:36px;white-space:nowrap;" title="Fetch latest data from database"><i
                   class="fas fa-sync-alt"></i> Fetch Data</button>
+              <button class="btn btn-purple btn-sm" onclick="openMasterDataGovernanceModal()"
+                style="height:36px;color:#fff;background:#7C3AED;white-space:nowrap;" title="Review & Approve New Auto-Learned Companies, Designations, Universities"><i class="fas fa-check-double"></i> Master Data Queue</button>
               <button class="btn btn-secondary btn-sm" onclick="openExportCustomizationModal()"
                 style="height:36px;white-space:nowrap;"><i class="fas fa-download"></i> Export</button>
             </div>
@@ -1974,6 +1976,12 @@
                 </select>
               </div>
             </div>
+            <!-- Conditional University Field (Higher Studies / Student / Research Scholar) -->
+            <div class="form-group" id="universityGroupContainer" style="display:none;margin-top:12px;">
+              <label style="display:block;font-size:12px;font-weight:600;color:#8B5CF6;margin-bottom:4px;"><i class="fas fa-university"></i> University / Higher Education Institution</label>
+              <input type="text" id="fieldUniversity" list="universityDatalist" placeholder="Select or type university (e.g., Anna University, IIT Madras, Stanford)..." style="width:100%;padding:9px 12px;border:1px solid #C084FC;border-radius:8px;font-size:13px;outline:none;background:#FAF5FF;" autocomplete="off">
+              <datalist id="universityDatalist"></datalist>
+            </div>
           </div>
 
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
@@ -2510,6 +2518,41 @@
           All</button>
         <button class="btn btn-primary" onclick="closeModal('dashboardFilterModal')"><i class="fas fa-check"></i>
           Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Master Data Governance Queue Modal -->
+  <div class="modal-overlay" id="masterDataGovernanceModal">
+    <div class="modal modal-lg" style="max-width:850px;width:95vw;">
+      <div class="modal-header" style="background:#7C3AED;color:#fff;">
+        <h3 style="color:#fff;margin:0;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-check-double"></i> Master Data Governance Queue
+        </h3>
+        <button class="modal-close" onclick="closeModal('masterDataGovernanceModal')" style="color:#fff;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;max-height:70vh;overflow-y:auto;">
+        <p style="font-size:0.85rem;color:#64748B;margin-top:0;margin-bottom:15px;">
+          Review new companies, designations, and universities submitted by team members. Approved items become visible to all users across update modals and analytics.
+        </p>
+        <div class="table-responsive">
+          <table class="table" style="width:100%;border-collapse:collapse;" id="masterGovernanceTable">
+            <thead>
+              <tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0;font-size:0.8rem;color:#475569;text-transform:uppercase;">
+                <th style="padding:10px 12px;text-align:left;">Category</th>
+                <th style="padding:10px 12px;text-align:left;">Submitted Term</th>
+                <th style="padding:10px 12px;text-align:left;">Submitted Date</th>
+                <th style="padding:10px 12px;text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="masterGovernanceTbody">
+              <tr><td colspan="4" style="text-align:center;padding:24px;color:#94A3B8;">Loading pending master terms...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:14px 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('masterDataGovernanceModal')">Close</button>
       </div>
     </div>
   </div>

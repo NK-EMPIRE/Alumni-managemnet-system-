@@ -377,6 +377,18 @@
     },
     getMasterCities: function (districtId, stateId) {
         return get('/alumni-analysis/master/cities', { districtId: districtId, stateId: stateId });
+    },
+    getMasterUniversities: function (query) {
+        return get('/alumni-analysis/master/universities', { query: query });
+    },
+    getPendingMasterItems: function () {
+        return get('/alumni-analysis/master/pending');
+    },
+    approveMasterItem: function (type, id) {
+        return post('/alumni-analysis/master/approve', { type: type, id: id });
+    },
+    rejectMasterItem: function (type, id) {
+        return post('/alumni-analysis/master/reject', { type: type, id: id });
     }
     };
 

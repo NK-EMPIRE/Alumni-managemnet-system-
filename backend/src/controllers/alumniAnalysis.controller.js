@@ -1,4 +1,5 @@
 const alumniAnalysisRepo = require('../repositories/alumniAnalysis.repository');
+const masterDataService = require('../services/masterData.service');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { success, paginated } = require('../utils/response');
 
@@ -82,8 +83,6 @@ const addSuggestion = asyncHandler(async (req, res) => {
   success(res, { value: addedVal }, 'Suggestion added successfully');
 });
 
-const masterDataService = require('../services/masterData.service');
-
 const getTaxonomies = asyncHandler(async (req, res) => {
   const data = masterDataService.getCareerTaxonomies();
   success(res, data, 'Taxonomies retrieved successfully');
@@ -112,16 +111,49 @@ const getCities = asyncHandler(async (req, res) => {
   success(res, data, 'Cities retrieved successfully');
 });
 
+const getUniversities = asyncHandler(async (req, res) => {
+  const { query } = req.query;
+  const data = await masterDataService.searchUniversities(query);
+  success(res, data, 'Universities retrieved successfully');
+});
+
+const getPendingMasterItems = asyncHandler(async (req, res) => {
+  const data = await masterDataService.getPendingMasterItems();
+  success(res, data, 'Pending master items retrieved successfully');
+});
+
+const approveMasterItem = asyncHandler(async (req, res) => {
+  const { type, id } = req.body;
+  if (!type || !id) {
+    return res.status(400).json({ success: false, message: 'Type and ID are required' });
+  }
+  await masterDataService.approveMasterItem(type, id, req.user.userId);
+  success(res, null, 'Master item approved successfully');
+});
+
+const rejectMasterItem = asyncHandler(async (req, res) => {
+  const { type, id } = req.body;
+  if (!type || !id) {
+    return res.status(400).json({ success: false, message: 'Type and ID are required' });
+  }
+  await masterDataService.rejectMasterItem(type, id, req.user.userId);
+  success(res, null, 'Master item rejected successfully');
+});
+
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
-  getAnalysisLocations,
   getAnalysisRoleCategories,
+  getAnalysisLocations,
   getSuggestions,
   addSuggestion,
   getTaxonomies,
   getCountries,
   getStates,
   getDistricts,
-  getCities
+  getCities,
+  getUniversities,
+  getPendingMasterItems,
+  approveMasterItem,
+  rejectMasterItem
 };
