@@ -220,12 +220,12 @@ window.fetchAnalysisData = function (page) {
         renderAnalysisDataView(data);
         renderAnalysisPagination(total);
       } else {
-        if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#EF4444;">Failed to load analysis records</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#EF4444;">Failed to load analysis records</td></tr>';
       }
     })
     .catch(function (err) {
       console.error('Error fetching analysis data:', err);
-      if (tbody) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#EF4444;">Network error loading analysis data</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#EF4444;">Network error loading analysis data</td></tr>';
     });
 };
 
@@ -234,12 +234,12 @@ function renderAnalysisDataView(data) {
   if (!tbody) return;
 
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#94A3B8;">No alumni records with verified professional details found matching the selected analysis filters</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#94A3B8;">No alumni records with verified professional details found matching the selected analysis filters</td></tr>';
     return;
   }
 
   if (analysisViewMode === 'cards') {
-    var cardsHtml = '<tr><td colspan="9" style="padding:10px 0;"><div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px;">';
+    var cardsHtml = '<tr><td colspan="5" style="padding:10px 0;"><div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px;">';
     data.forEach(function (row) {
       var phone = row.phone || '';
       var email = row.email || '';
@@ -290,8 +290,7 @@ function renderAnalysisDataView(data) {
 
       html += `
         <tr style="border-bottom:1px solid #F1F5F9;font-size:0.85rem;">
-          <td style="padding:10px 12px;font-weight:600;">${row.register_no || '-'}</td>
-          <td style="padding:10px 12px;"><strong>${row.name}</strong><br><span style="font-size:0.75rem;color:#64748B;">${row.department} (${row.batch})</span></td>
+          <td style="padding:10px 12px;"><strong>${row.name}</strong><br><span style="font-size:0.75rem;color:#64748B;">${row.register_no || '-'} • ${row.department} (${row.batch})</span></td>
           <td style="padding:10px 12px;"><strong style="color:#2563EB;">${row.designation}</strong><br><span style="font-size:0.78rem;color:#475569;">${row.company}</span></td>
           <td style="padding:10px 12px;">${location}</td>
           <td style="padding:10px 12px;display:flex;gap:10px;align-items:center;">${phoneBtn} ${emailBtn} ${linkedinBtn}</td>
