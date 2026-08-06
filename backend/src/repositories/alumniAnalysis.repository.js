@@ -195,6 +195,74 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
  */
 async function getAnalysisRoleCategories({ leaderId, memberId }) {
   const pool = await getPool();
+
+  // 1. Total Alumni & Working Alumni Counts
+  const reqOverall = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const overallRes = await reqOverall.query(`
+    SELECT
+      COUNT(DISTINCT a.alumni_id) AS totalAlumni,
+      SUM(CASE WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '')
+                 OR (COALESCE(pi.designation, a.designation) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> '')
+                 OR (a.working_details IS NOT NULL AND LTRIM(RTRIM(CAST(a.working_details AS NVARCHAR(MAX)))) <> '')
+               THEN 1 ELSE 0 END) AS workingAlumni
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId);
+  `);
+
+  const totalAlumni = overallRes.recordset[0] ? overallRes.recordset[0].totalAlumni : 0;
+  const workingAlumni = overallRes.recordset[0] ? overallRes.recordset[0].workingAlumni : 0;
+
+  // 2. Assignment Status Breakdown (Completed, Draft, Pending, Unassigned)
+  const reqStatus = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const statusRes = await reqStatus.query(`
+    SELECT
+      ISNULL(aa.status, 'Unassigned') AS status,
+      COUNT(DISTINCT a.alumni_id) AS count
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id, status,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId)
+    GROUP BY ISNULL(aa.status, 'Unassigned');
+  `);
+
+  const statusBreakdown = {
+    completed: 0,
+    draft: 0,
+    pending: 0,
+    unassigned: 0
+  };
+
+  statusRes.recordset.forEach(r => {
+    const st = (r.status || '').toLowerCase();
+    if (st === 'completed') statusBreakdown.completed += r.count;
+    else if (st === 'draft') statusBreakdown.draft += r.count;
+    else if (st === 'pending') statusBreakdown.pending += r.count;
+    else statusBreakdown.unassigned += r.count;
+  });
+
+  // 3. Sector Role Categories Counts
   const categories = [
     'Software Engineer',
     'Data / AI / ML',
@@ -212,7 +280,7 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
     'Other / Unclassified'
   ];
 
-  const results = [];
+  const roleCategories = [];
 
   for (const cat of categories) {
     const request = pool.request()
@@ -245,10 +313,15 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
 
     const res = await request.query(query);
     const count = res.recordset[0] ? res.recordset[0].count : 0;
-    results.push({ category: cat, count });
+    roleCategories.push({ category: cat, count });
   }
 
-  return results;
+  return {
+    totalAlumni,
+    workingAlumni,
+    statusBreakdown,
+    roleCategories
+  };
 }
 
 /**

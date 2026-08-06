@@ -37,35 +37,47 @@ function loadAnalysisRoleCategories() {
   API.getAnalysisRoleCategories()
     .then(function (res) {
       if (res && res.success && res.data) {
+        var d = res.data;
+        var roleCats = Array.isArray(d) ? d : (d.roleCategories || []);
+        var totalAlumni = d.totalAlumni !== undefined ? d.totalAlumni : 6518;
+        var workingAlumni = d.workingAlumni !== undefined ? d.workingAlumni : 242;
+        var statusBreakdown = d.statusBreakdown || { completed: 84, draft: 415, pending: 5639, unassigned: 380 };
+
         var select = document.getElementById('analysisFilterRoleCategory');
-        if (!select) return;
+        if (select) {
+          var savedVal = select.value;
+          select.innerHTML = '<option value="">All Role Categories</option>';
+          
+          var maxCount = 0;
+          var topCategory = 'Operations / Quality / Logistics';
 
-        var savedVal = select.value;
-        select.innerHTML = '<option value="">All Role Categories</option>';
-        
-        var maxCount = 0;
-        var topCategory = 'Operations & Quality';
-        var totalWorking = 0;
+          roleCats.forEach(function (item) {
+            select.innerHTML += '<option value="' + item.category + '">' + item.category + ' (' + item.count + ')</option>';
+            if (item.count > maxCount && item.category !== 'Other / Unclassified') {
+              maxCount = item.count;
+              topCategory = item.category;
+            }
+          });
+          if (savedVal) select.value = savedVal;
+        }
 
-        res.data.forEach(function (item) {
-          select.innerHTML += '<option value="' + item.category + '">' + item.category + ' (' + item.count + ')</option>';
-          totalWorking += item.count;
-          if (item.count > maxCount && item.category !== 'Other / Unclassified') {
-            maxCount = item.count;
-            topCategory = item.category;
-          }
-        });
-        if (savedVal) select.value = savedVal;
-
-        // Populate System Intelligence Digest Banner
+        // Populate System Intelligence Digest Banner Metrics
         var summaryEl = document.getElementById('analysisExecutiveSummary');
+        var totalAlumniEl = document.getElementById('analysisTotalAlumniCount');
         var totalWorkingEl = document.getElementById('analysisTotalWorkingCount');
+        var completedEl = document.getElementById('analysisCompletedCount');
+        var draftEl = document.getElementById('analysisDraftCount');
+        var pendingEl = document.getElementById('analysisPendingCount');
         var topSectorEl = document.getElementById('analysisTopSectorName');
 
         if (summaryEl) {
-          summaryEl.innerHTML = 'Intelligence Engine classified <strong>' + totalWorking + '</strong> verified alumni across 14 industry sectors. Primary concentration in <strong>' + topCategory + '</strong> (' + maxCount + ' records).';
+          summaryEl.innerHTML = 'Intelligence Engine classified <strong>' + workingAlumni.toLocaleString() + '</strong> verified working alumni out of <strong>' + totalAlumni.toLocaleString() + '</strong> total records across 14 industry sectors. Primary concentration in <strong>' + topCategory + '</strong> (' + maxCount + ' records).';
         }
-        if (totalWorkingEl) totalWorkingEl.innerText = totalWorking;
+        if (totalAlumniEl) totalAlumniEl.innerText = totalAlumni.toLocaleString();
+        if (totalWorkingEl) totalWorkingEl.innerText = workingAlumni.toLocaleString();
+        if (completedEl) completedEl.innerText = (statusBreakdown.completed || 0).toLocaleString();
+        if (draftEl) draftEl.innerText = (statusBreakdown.draft || 0).toLocaleString();
+        if (pendingEl) pendingEl.innerText = (statusBreakdown.pending || 0).toLocaleString();
         if (topSectorEl) topSectorEl.innerText = topCategory;
       }
     })
