@@ -42,9 +42,9 @@ async function getAnalysisLocations({ leaderId, memberId }) {
   });
 
   return {
-    cities: canonicalizeLocationList(rawCities),
-    states: canonicalizeLocationList(rawStates),
-    countries: canonicalizeLocationList(rawCountries)
+    cities: canonicalizeLocationList(rawCities, 'city'),
+    states: canonicalizeLocationList(rawStates, 'state'),
+    countries: canonicalizeLocationList(rawCountries, 'country')
   };
 }
 
