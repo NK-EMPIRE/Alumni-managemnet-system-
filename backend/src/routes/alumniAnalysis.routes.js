@@ -10,6 +10,7 @@ router.use(authenticate);
 // Read-only analysis endpoints accessible exclusively to ADMIN
 router.get('/', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisAlumni);
 router.get('/companies', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisCompanies);
+router.get('/locations', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisLocations);
 router.get('/role-categories', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisRoleCategories);
 
 // Autocomplete suggestions endpoint accessible to all authenticated roles for update modals

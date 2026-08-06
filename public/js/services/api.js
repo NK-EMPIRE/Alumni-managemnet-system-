@@ -351,6 +351,9 @@
     getAnalysisCompanies: function () {
         return get('/alumni-analysis/companies');
     },
+    getAnalysisLocations: function () {
+        return get('/alumni-analysis/locations');
+    },
     getAnalysisRoleCategories: function () {
         return get('/alumni-analysis/role-categories');
     },

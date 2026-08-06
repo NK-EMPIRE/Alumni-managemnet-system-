@@ -2743,16 +2743,22 @@
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;">
               <div>
-                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">City <span style="font-weight:normal;color:#94A3B8;">(partial)</span></label>
-                <input type="text" id="analysisFilterCity" class="form-control" placeholder="e.g. Chennai, Karaikudi" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()">
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">City</label>
+                <select id="analysisFilterCity" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
+                  <option value="">All Cities</option>
+                </select>
               </div>
               <div>
                 <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">State</label>
-                <input type="text" id="analysisFilterState" class="form-control" placeholder="State" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()">
+                <select id="analysisFilterState" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
+                  <option value="">All States</option>
+                </select>
               </div>
               <div>
                 <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Country</label>
-                <input type="text" id="analysisFilterCountry" class="form-control" placeholder="Country" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()">
+                <select id="analysisFilterCountry" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
+                  <option value="">All Countries</option>
+                </select>
               </div>
             </div>
           </div>

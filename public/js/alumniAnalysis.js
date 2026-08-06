@@ -27,6 +27,7 @@ window.setAnalysisViewMode = function (mode) {
 window.initAnalysisPage = function () {
   loadAnalysisRoleCategories();
   loadAnalysisCompanies();
+  loadAnalysisLocations();
   loadAnalysisDropdownFilters();
   fetchAnalysisData(1);
 };
@@ -103,6 +104,47 @@ function loadAnalysisCompanies() {
       }
     })
     .catch(function (err) { console.error('Error loading analysis companies:', err); });
+}
+
+function loadAnalysisLocations() {
+  if (typeof API === 'undefined' || !API.getAnalysisLocations) return;
+
+  API.getAnalysisLocations()
+    .then(function (res) {
+      if (res && res.success && res.data) {
+        var cityEl = document.getElementById('analysisFilterCity');
+        var stateEl = document.getElementById('analysisFilterState');
+        var countryEl = document.getElementById('analysisFilterCountry');
+
+        if (cityEl && res.data.cities) {
+          var savedCity = cityEl.value;
+          cityEl.innerHTML = '<option value="">All Cities</option>';
+          res.data.cities.forEach(function (c) {
+            cityEl.innerHTML += '<option value="' + c.replace(/"/g, '&quot;') + '">' + c + '</option>';
+          });
+          if (savedCity) cityEl.value = savedCity;
+        }
+
+        if (stateEl && res.data.states) {
+          var savedState = stateEl.value;
+          stateEl.innerHTML = '<option value="">All States</option>';
+          res.data.states.forEach(function (s) {
+            stateEl.innerHTML += '<option value="' + s.replace(/"/g, '&quot;') + '">' + s + '</option>';
+          });
+          if (savedState) stateEl.value = savedState;
+        }
+
+        if (countryEl && res.data.countries) {
+          var savedCountry = countryEl.value;
+          countryEl.innerHTML = '<option value="">All Countries</option>';
+          res.data.countries.forEach(function (co) {
+            countryEl.innerHTML += '<option value="' + co.replace(/"/g, '&quot;') + '">' + co + '</option>';
+          });
+          if (savedCountry) countryEl.value = savedCountry;
+        }
+      }
+    })
+    .catch(function (err) { console.error('Error loading analysis locations:', err); });
 }
 
 function loadAnalysisDropdownFilters() {

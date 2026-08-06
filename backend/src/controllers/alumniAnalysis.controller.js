@@ -53,6 +53,20 @@ const getAnalysisRoleCategories = asyncHandler(async (req, res) => {
   success(res, categories, 'Analysis role categories retrieved successfully');
 });
 
+const getAnalysisLocations = asyncHandler(async (req, res) => {
+  let leaderId = null;
+  let memberId = null;
+
+  if (req.user.role === 'LEADER') {
+    leaderId = req.user.userId;
+  } else if (req.user.role === 'MEMBER') {
+    memberId = req.user.userId;
+  }
+
+  const locations = await alumniAnalysisRepo.getAnalysisLocations({ leaderId, memberId });
+  success(res, locations, 'Analysis locations retrieved successfully');
+});
+
 const getSuggestions = asyncHandler(async (req, res) => {
   const { field, query } = req.query;
   const suggestions = await alumniAnalysisRepo.getSuggestions({ field, query });
@@ -71,6 +85,7 @@ const addSuggestion = asyncHandler(async (req, res) => {
 module.exports = {
   getAnalysisAlumni,
   getAnalysisCompanies,
+  getAnalysisLocations,
   getAnalysisRoleCategories,
   getSuggestions,
   addSuggestion
