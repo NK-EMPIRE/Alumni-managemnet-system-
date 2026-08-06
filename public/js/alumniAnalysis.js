@@ -128,13 +128,21 @@ window.debounceAnalysisSearch = function () {
 };
 
 window.openAnalysisFiltersModal = function () {
-  var modal = document.getElementById('analysisFiltersModal');
-  if (modal) modal.style.display = 'flex';
+  if (typeof window.openModal === 'function') {
+    window.openModal('analysisFiltersModal');
+  } else {
+    var modal = document.getElementById('analysisFiltersModal');
+    if (modal) { modal.classList.add('show'); modal.style.display = 'flex'; }
+  }
 };
 
 window.closeAnalysisFiltersModal = function () {
-  var modal = document.getElementById('analysisFiltersModal');
-  if (modal) modal.style.display = 'none';
+  if (typeof window.closeModal === 'function') {
+    window.closeModal('analysisFiltersModal');
+  } else {
+    var modal = document.getElementById('analysisFiltersModal');
+    if (modal) { modal.classList.remove('show'); modal.style.display = 'none'; }
+  }
 };
 
 window.onAnalysisFilterChange = function () {
@@ -229,9 +237,20 @@ window.fetchAnalysisData = function (page) {
     });
 };
 
+function highlightSearchTerm(text, query) {
+  if (!text) return '';
+  if (!query || !query.trim()) return text;
+  var q = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  var regex = new RegExp('(' + q + ')', 'gi');
+  return String(text).replace(regex, '<mark style="background:#FEF08A;color:#854D0E;padding:0 3px;border-radius:3px;font-weight:700;">$1</mark>');
+}
+
 function renderAnalysisDataView(data) {
   var tbody = document.getElementById('analysisTableBody');
   if (!tbody) return;
+
+  var customQueryInput = document.getElementById('analysisCustomQueryInput');
+  var queryStr = customQueryInput ? customQueryInput.value : '';
 
   if (data.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#94A3B8;">No alumni records with verified professional details found matching the selected analysis filters</td></tr>';
@@ -245,22 +264,28 @@ function renderAnalysisDataView(data) {
       var email = row.email || '';
       var linkedin = row.linkedin_profile || '';
 
-      var location = [row.city, row.state, row.country].filter(Boolean).join(', ') || 'Not Specified';
+      var rawLocation = [row.city, row.state, row.country].filter(Boolean).join(', ') || 'Not Specified';
+      var location = highlightSearchTerm(rawLocation, queryStr);
+      var hName = highlightSearchTerm(row.name || 'Unknown', queryStr);
+      var hRegNo = highlightSearchTerm(row.register_no || '-', queryStr);
+      var hDept = highlightSearchTerm(row.department || '', queryStr);
+      var hDesig = highlightSearchTerm(row.designation || 'Role Not Specified', queryStr);
+      var hComp = highlightSearchTerm(row.company || 'Company Not Specified', queryStr);
 
       cardsHtml += `
         <div class="alumni-card" style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);display:flex;flex-direction:column;justify-space-between;">
           <div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
               <div>
-                <h4 style="margin:0 0 2px;font-size:1rem;font-weight:700;color:#0F172A;">${row.name || 'Unknown'}</h4>
-                <span style="font-size:0.78rem;color:#64748B;font-weight:600;">${row.register_no || '-'} • ${row.department || ''} (${row.batch || ''})</span>
+                <h4 style="margin:0 0 2px;font-size:1rem;font-weight:700;color:#0F172A;">${hName}</h4>
+                <span style="font-size:0.78rem;color:#64748B;font-weight:600;">${hRegNo} • ${hDept} (${row.batch || ''})</span>
               </div>
               <span class="badge badge-primary" style="font-size:0.7rem;">${row.assignment_status || 'Unassigned'}</span>
             </div>
 
             <div style="margin-bottom:12px;background:#F8FAFC;padding:10px;border-radius:8px;border:1px solid #F1F5F9;">
-              <div style="font-size:0.85rem;font-weight:700;color:#2563EB;margin-bottom:2px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>${row.designation || 'Role Not Specified'}</div>
-              <div style="font-size:0.8rem;color:#334155;font-weight:500;"><i class="fas fa-building" style="margin-right:6px;color:#64748B;"></i>${row.company || 'Company Not Specified'}</div>
+              <div style="font-size:0.85rem;font-weight:700;color:#2563EB;margin-bottom:2px;"><i class="fas fa-briefcase" style="margin-right:6px;"></i>${hDesig}</div>
+              <div style="font-size:0.8rem;color:#334155;font-weight:500;"><i class="fas fa-building" style="margin-right:6px;color:#64748B;"></i>${hComp}</div>
               <div style="font-size:0.75rem;color:#64748B;margin-top:2px;"><i class="fas fa-map-marker-alt" style="margin-right:6px;color:#EF4444;"></i>${location}</div>
             </div>
 
@@ -282,7 +307,13 @@ function renderAnalysisDataView(data) {
       var phone = row.phone || '';
       var email = row.email || '';
       var linkedin = row.linkedin_profile || '';
-      var location = [row.city, row.state, row.country].filter(Boolean).join(', ') || '—';
+      var rawLocation = [row.city, row.state, row.country].filter(Boolean).join(', ') || '—';
+      var location = highlightSearchTerm(rawLocation, queryStr);
+      var hName = highlightSearchTerm(row.name || 'Unknown', queryStr);
+      var hRegNo = highlightSearchTerm(row.register_no || '-', queryStr);
+      var hDept = highlightSearchTerm(row.department || '', queryStr);
+      var hDesig = highlightSearchTerm(row.designation || '—', queryStr);
+      var hComp = highlightSearchTerm(row.company || '—', queryStr);
 
       var phoneBtn = phone ? `<button onclick="copyToClipboard('${phone}', 'Phone')" style="background:none;border:none;color:#10B981;cursor:pointer;" title="${phone}"><i class="fas fa-phone"></i></button>` : '—';
       var emailBtn = email ? `<button onclick="copyToClipboard('${email}', 'Email')" style="background:none;border:none;color:#3B82F6;cursor:pointer;" title="${email}"><i class="fas fa-envelope"></i></button>` : '—';
@@ -290,8 +321,8 @@ function renderAnalysisDataView(data) {
 
       html += `
         <tr style="border-bottom:1px solid #F1F5F9;font-size:0.85rem;">
-          <td style="padding:10px 12px;"><strong>${row.name}</strong><br><span style="font-size:0.75rem;color:#64748B;">${row.register_no || '-'} • ${row.department} (${row.batch})</span></td>
-          <td style="padding:10px 12px;"><strong style="color:#2563EB;">${row.designation}</strong><br><span style="font-size:0.78rem;color:#475569;">${row.company}</span></td>
+          <td style="padding:10px 12px;"><strong>${hName}</strong><br><span style="font-size:0.75rem;color:#64748B;">${hRegNo} • ${hDept} (${row.batch})</span></td>
+          <td style="padding:10px 12px;"><strong style="color:#2563EB;">${hDesig}</strong><br><span style="font-size:0.78rem;color:#475569;">${hComp}</span></td>
           <td style="padding:10px 12px;">${location}</td>
           <td style="padding:10px 12px;display:flex;gap:10px;align-items:center;">${phoneBtn} ${emailBtn} ${linkedinBtn}</td>
           <td style="padding:10px 12px;"><span class="badge badge-primary">${row.assignment_status || 'Unassigned'}</span></td>
