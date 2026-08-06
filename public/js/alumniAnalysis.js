@@ -112,35 +112,29 @@ function loadAnalysisLocations() {
   API.getAnalysisLocations()
     .then(function (res) {
       if (res && res.success && res.data) {
-        var cityEl = document.getElementById('analysisFilterCity');
-        var stateEl = document.getElementById('analysisFilterState');
-        var countryEl = document.getElementById('analysisFilterCountry');
+        var cityListEl = document.getElementById('analysisCityDatalist');
+        var stateListEl = document.getElementById('analysisStateDatalist');
+        var countryListEl = document.getElementById('analysisCountryDatalist');
 
-        if (cityEl && res.data.cities) {
-          var savedCity = cityEl.value;
-          cityEl.innerHTML = '<option value="">All Cities</option>';
+        if (cityListEl && res.data.cities) {
+          cityListEl.innerHTML = '';
           res.data.cities.forEach(function (c) {
-            cityEl.innerHTML += '<option value="' + c.replace(/"/g, '&quot;') + '">' + c + '</option>';
+            cityListEl.innerHTML += '<option value="' + c.replace(/"/g, '&quot;') + '">';
           });
-          if (savedCity) cityEl.value = savedCity;
         }
 
-        if (stateEl && res.data.states) {
-          var savedState = stateEl.value;
-          stateEl.innerHTML = '<option value="">All States</option>';
+        if (stateListEl && res.data.states) {
+          stateListEl.innerHTML = '';
           res.data.states.forEach(function (s) {
-            stateEl.innerHTML += '<option value="' + s.replace(/"/g, '&quot;') + '">' + s + '</option>';
+            stateListEl.innerHTML += '<option value="' + s.replace(/"/g, '&quot;') + '">';
           });
-          if (savedState) stateEl.value = savedState;
         }
 
-        if (countryEl && res.data.countries) {
-          var savedCountry = countryEl.value;
-          countryEl.innerHTML = '<option value="">All Countries</option>';
+        if (countryListEl && res.data.countries) {
+          countryListEl.innerHTML = '';
           res.data.countries.forEach(function (co) {
-            countryEl.innerHTML += '<option value="' + co.replace(/"/g, '&quot;') + '">' + co + '</option>';
+            countryListEl.innerHTML += '<option value="' + co.replace(/"/g, '&quot;') + '">';
           });
-          if (savedCountry) countryEl.value = savedCountry;
         }
       }
     })

@@ -89,7 +89,74 @@ function cleanRoleAndCompany(designationRaw, companyRaw, workingDetailsRaw) {
   return { designation, company, city, domainCategory };
 }
 
+/**
+ * Normalizes location strings (City, State, Country) by removing pin codes, noise prefixes,
+ * stripping special characters, and converting to proper Title Case.
+ */
+function normalizeLocation(str) {
+  if (!str) return '';
+  let s = String(str).trim();
+
+  // Strip pincodes, postal codes e.g. "SIVAGANGA-630201" -> "SIVAGANGA"
+  s = s.replace(/[-–]\s*\d{5,6}\b/g, '');
+  s = s.replace(/\b\d{5,6}\b/g, '');
+
+  // Strip noise symbols
+  s = s.replace(/^[-\s,.=]+|[-\s,.=]+$/g, '');
+
+  if (!s || s === '--' || s.toLowerCase() === 'null') return '';
+
+  // Standardize spaces and case
+  s = s.replace(/\s+/g, ' ');
+  const cleanAlpha = s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  // Canonical dictionary lookup
+  if (cleanAlpha.includes('tamilnadu') || cleanAlpha === 'tn') return 'Tamil Nadu';
+  if (cleanAlpha.includes('karnataka') || cleanAlpha === 'ka') return 'Karnataka';
+  if (cleanAlpha.includes('andhrapradesh') || cleanAlpha === 'ap') return 'Andhra Pradesh';
+  if (cleanAlpha.includes('kerala') || cleanAlpha === 'kl') return 'Kerala';
+  if (cleanAlpha.includes('maharashtra') || cleanAlpha === 'mh' || cleanAlpha === 'mumbai') return 'Maharashtra';
+  if (cleanAlpha.includes('madhyapradesh') || cleanAlpha === 'mp') return 'Madhya Pradesh';
+  if (cleanAlpha.includes('jharkhand')) return 'Jharkhand';
+  if (cleanAlpha.includes('rajasthan')) return 'Rajasthan';
+  if (cleanAlpha.includes('odisha') || cleanAlpha.includes('orissa')) return 'Odisha';
+  if (cleanAlpha.includes('pondicherry') || cleanAlpha.includes('puducherry')) return 'Puducherry';
+  if (cleanAlpha.includes('andaman')) return 'Andaman & Nicobar';
+  if (cleanAlpha.includes('singapore')) return 'Singapore';
+  if (cleanAlpha.includes('unitedstates') || cleanAlpha === 'us' || cleanAlpha === 'usa') return 'United States';
+  if (cleanAlpha.includes('saudi') || cleanAlpha.includes('saudhi') || cleanAlpha === 'makkah') return 'Saudi Arabia';
+  if (cleanAlpha.includes('abudhabi') || cleanAlpha.includes('qatar') || cleanAlpha.includes('muscut')) return s;
+
+  // Generic Title Case conversion
+  return s.split(' ').map(word => {
+    if (word.length <= 2 && word === word.toUpperCase()) return word;
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+/**
+ * Deduplicates and canonicalizes a list of location strings.
+ */
+function canonicalizeLocationList(list) {
+  const map = new Map();
+
+  list.forEach(raw => {
+    const norm = normalizeLocation(raw);
+    if (norm && norm.length >= 2) {
+      // Key by strict lower-case alphanumeric to eliminate "Tamil Nadu", "TAMIL NADU", "TamilNadu" dupes
+      const key = norm.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!map.has(key)) {
+        map.set(key, norm);
+      }
+    }
+  });
+
+  return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+}
+
 module.exports = {
   cleanRoleAndCompany,
-  classifyDomainSimilarity
+  classifyDomainSimilarity,
+  normalizeLocation,
+  canonicalizeLocationList
 };

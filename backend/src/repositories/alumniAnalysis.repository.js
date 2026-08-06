@@ -1,6 +1,52 @@
 const { sql, getPool } = require('../config/database');
 const searchParserService = require('../services/searchParser.service');
-const { cleanRoleAndCompany } = require('../services/dataCleaner.service');
+const { cleanRoleAndCompany, canonicalizeLocationList } = require('../services/dataCleaner.service');
+
+/**
+ * Returns distinct Cities, States, and Countries lists for dynamic analysis filter dropdowns.
+ */
+async function getAnalysisLocations({ leaderId, memberId }) {
+  const pool = await getPool();
+  const request = pool.request()
+    .input('leaderId', sql.Int, leaderId || null)
+    .input('memberId', sql.Int, memberId || null);
+
+  const result = await request.query(`
+    SELECT DISTINCT
+      LTRIM(RTRIM(COALESCE(pi.current_city, a.city))) AS city,
+      LTRIM(RTRIM(COALESCE(pi.state, a.state))) AS state,
+      LTRIM(RTRIM(COALESCE(pi.country, a.country))) AS country
+    FROM dbo.Alumni a
+    LEFT JOIN (
+      SELECT * FROM dbo.ProfessionalInformation
+      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
+    ) pi ON pi.alumni_id = a.alumni_id
+    LEFT JOIN (
+      SELECT alumni_id, team_id, member_id,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
+      FROM dbo.AlumniAssignments
+    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+    LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+    WHERE (@leaderId IS NULL OR t.leader_id = @leaderId)
+      AND (@memberId IS NULL OR aa.member_id = @memberId);
+  `);
+
+  const rawCities = [];
+  const rawStates = [];
+  const rawCountries = [];
+
+  result.recordset.forEach(r => {
+    if (r.city) rawCities.push(r.city);
+    if (r.state) rawStates.push(r.state);
+    if (r.country) rawCountries.push(r.country);
+  });
+
+  return {
+    cities: canonicalizeLocationList(rawCities),
+    states: canonicalizeLocationList(rawStates),
+    countries: canonicalizeLocationList(rawCountries)
+  };
+}
 
 const ROLE_CATEGORIES = {
   'Software Engineer': ['software', 'developer', 'sde', 'programmer', 'full stack', 'backend', 'frontend', 'engineer', 'web', 'mobile', 'coder', 'system analyst', 'tech lead'],

@@ -2742,23 +2742,20 @@
               <i class="fas fa-map-marker-alt"></i> Location &amp; Region
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;">
-              <div>
+              <div style="position:relative;">
                 <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">City</label>
-                <select id="analysisFilterCity" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
-                  <option value="">All Cities</option>
-                </select>
+                <input type="text" id="analysisFilterCity" list="analysisCityDatalist" class="form-control" placeholder="Select or type city..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
+                <datalist id="analysisCityDatalist"></datalist>
               </div>
-              <div>
+              <div style="position:relative;">
                 <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">State</label>
-                <select id="analysisFilterState" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
-                  <option value="">All States</option>
-                </select>
+                <input type="text" id="analysisFilterState" list="analysisStateDatalist" class="form-control" placeholder="Select or type state..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
+                <datalist id="analysisStateDatalist"></datalist>
               </div>
-              <div>
+              <div style="position:relative;">
                 <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Country</label>
-                <select id="analysisFilterCountry" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
-                  <option value="">All Countries</option>
-                </select>
+                <input type="text" id="analysisFilterCountry" list="analysisCountryDatalist" class="form-control" placeholder="Select or type country..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
+                <datalist id="analysisCountryDatalist"></datalist>
               </div>
             </div>
           </div>
