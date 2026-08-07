@@ -8,6 +8,8 @@ router.use(authenticate);
 
 router.get('/messages', chatController.getMessages);
 router.post('/messages', chatController.sendMessage);
+router.put('/messages/:messageId', chatController.updateMessage);
+router.delete('/messages/:messageId', chatController.deleteMessage);
 router.delete('/messages', chatController.clearMessages);
 
 router.get('/mention-users', chatController.getMentionUsers);

@@ -5997,43 +5997,77 @@ tbody td { padding: 11px 14px; font-size: 0.86rem; vertical-align: middle; }
 }
 .content-section.active { animation: notionFadeIn 0.22s var(--ease) forwards; }
 
-/* Chat section sizing & full-bleed coverage of unwanted whitespace */
-#section-chat {
-  min-height: calc(100vh - 76px) !important;
-  padding: 0 !important;
-  margin: -12px -32px -32px -32px !important;
-}
-
+/* Chat section sizing & clean full-page embedding */
+#section-chat,
 .content-wrapper #section-chat {
-  margin: -28px -32px -28px -32px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
 }
 
 @media (max-width: 1024px) {
-  #section-chat {
-    margin: -10px -20px -28px -20px !important;
+  #section-chat,
+  .content-wrapper #section-chat {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 @media (max-width: 768px) {
-  #section-chat {
-    margin: -8px -16px -24px -16px !important;
+  #section-chat,
+  .content-wrapper #section-chat {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 /* ============================================================
    FULL-PAGE CHAT SECTION (PAGE-LEVEL EMBEDDED CHAT)
    ============================================================ */
+/* ============================================================
+   FULL-PAGE CHAT SECTION (PAGE-LEVEL EMBEDDED CHAT)
+   ============================================================ */
+body.chat-active {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+body.chat-active .main-content {
+  margin-left: 260px !important;
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.sidebar-collapsed.chat-active .main-content {
+  margin-left: var(--sidebar-collapsed, 70px) !important;
+}
+
+body.chat-active .topbar {
+  flex-shrink: 0 !important;
+}
+
 .page-content:has(#section-chat.active),
 body:has(#section-chat.active) .page-content,
 body:has(#section-chat.active) .content-wrapper,
 body.chat-active .page-content,
 body.chat-active .content-wrapper {
-  padding: var(--navbar-height, 64px) 0 0 0 !important;
+  padding: 0 !important;
   margin: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
-  height: 100vh !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Hide floating launcher button when full-page chat section is open */
@@ -6046,36 +6080,60 @@ body:has(#section-chat.active) .chat-launcher-btn {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
-  height: calc(100vh - var(--navbar-height, 64px)) !important;
+  max-width: 100% !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 #section-chat.active {
-  display: block !important;
+  display: flex !important;
 }
 
 #chatPageApp {
-  height: calc(100vh - var(--navbar-height, 64px)) !important;
-  min-height: calc(100vh - var(--navbar-height, 64px)) !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
   padding: 0 !important;
   margin: 0 !important;
   width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 #chatPageApp .whatsapp-app-container {
-  height: calc(100vh - var(--navbar-height, 64px)) !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
   width: 100% !important;
+  max-width: 100% !important;
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
   margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
 }
 
 /* Collapsible Mini Icon Rail Sidebar for Chat */
 .chat-sidebar-left {
-  width: 320px !important;
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
   flex-shrink: 0 !important;
-  background: linear-gradient(180deg, #0F172A 0%, #1E1B4B 100%) !important;
-  border-right: 1px solid #1E293B !important;
+  background: #F8FAFC !important;
+  border-right: 1px solid #E2E8F0 !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -6120,8 +6178,13 @@ body:has(#section-chat.active) .chat-launcher-btn {
 
 .chat-main-right {
   flex: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   background: #F8FAFC !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
 }
 
 .chat-channel-item {
@@ -6130,20 +6193,20 @@ body:has(#section-chat.active) .chat-launcher-btn {
   border-radius: 10px !important;
   margin: 2px 10px !important;
   padding: 10px 14px !important;
-  color: #CBD5E1 !important;
+  color: #334155 !important;
 }
 
 .chat-channel-item:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #FFFFFF !important;
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
   transform: translateX(2px);
 }
 
 .chat-channel-item.active {
-  background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%) !important;
-  border-left: 3px solid #818CF8 !important;
-  color: #FFFFFF !important;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35) !important;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%) !important;
+  border-left: 4px solid #4F46E5 !important;
+  color: #4338CA !important;
+  box-shadow: none !important;
 }
 
 .chat-send-btn {

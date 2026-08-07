@@ -72,11 +72,41 @@ async function heartbeat(req, res, next) {
   }
 }
 
+async function updateMessage(req, res, next) {
+  try {
+    const { messageId } = req.params;
+    const { messageText } = req.body;
+    const result = await chatService.editMessage({ reqUser: req.user, messageId, messageText });
+    return success(res, result, 'Message updated successfully');
+  } catch (err) {
+    if (err.message && (err.message.includes('Unauthorized') || err.message.includes('not found') || err.message.includes('empty'))) {
+      return error(res, err.message, err.message.includes('Unauthorized') ? 403 : 400);
+    }
+    next(err);
+  }
+}
+
+async function deleteMessage(req, res, next) {
+  try {
+    const { messageId } = req.params;
+    await chatService.deleteSingleMessage({ reqUser: req.user, messageId });
+    return success(res, null, 'Message deleted successfully');
+  } catch (err) {
+    if (err.message && (err.message.includes('Unauthorized') || err.message.includes('not found'))) {
+      return error(res, err.message, err.message.includes('Unauthorized') ? 403 : 400);
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   getMessages,
   sendMessage,
   clearMessages,
   getMentionUsers,
   getContacts,
-  heartbeat
+  heartbeat,
+  updateMessage,
+  deleteMessage
 };
+
