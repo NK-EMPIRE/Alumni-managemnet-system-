@@ -45,7 +45,7 @@ async function getDbSummary() {
   // 4. Completion breakdown & Unassigned count
   const assignRes = await pool.request().query(`
     SELECT
-      SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending,
+      SUM(CASE WHEN status IN ('Pending', 'Draft', 'ASSIGNED_TO_LEADER') THEN 1 ELSE 0 END) AS pending,
       SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed
     FROM AlumniAssignments
   `);
@@ -93,7 +93,7 @@ async function getDbDetail({ type }) {
       whereClause = `(a.${field} IS NULL OR RTRIM(CAST(a.${field} AS NVARCHAR(MAX))) = '')`;
     }
   } else if (type === 'pending') {
-    whereClause = `aa.status = 'Pending'`;
+    whereClause = `(aa.status IN ('Pending', 'Draft', 'ASSIGNED_TO_LEADER'))`;
   } else if (type === 'completed') {
     whereClause = `aa.status = 'Completed'`;
   } else if (type === 'unassigned') {

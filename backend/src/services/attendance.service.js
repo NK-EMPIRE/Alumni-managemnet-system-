@@ -1,10 +1,8 @@
 const { sql, getPool } = require('../config/database');
 
-// IST offset = UTC+5:30
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-
-function toIST(utcDate) {
-  return new Date(utcDate.getTime() + IST_OFFSET_MS);
+function getISTDate(date = new Date()) {
+  const istStr = date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+  return new Date(istStr);
 }
 
 function isTuesday(date) {
@@ -12,16 +10,12 @@ function isTuesday(date) {
 }
 
 /**
- * Called on every login. Records attendance if today is Tuesday and within window.
- * Window: 13:15 – 14:45 IST
- * Present: 13:15 – 13:30 IST
- * Late:    13:30 – 14:45 IST
- * Outside window: do nothing
+ * Called on every login. Records attendance if today is Tuesday in IST.
+ * Present: Login on or before 1:30 PM (13:30 IST)
+ * Late:    Login after 1:30 PM (13:30 IST)
  */
 async function recordLoginAttendance(userId, role) {
-  // Track all active users including ADMIN, LEADER, MEMBER
-  const nowUTC = new Date();
-  const nowIST = toIST(nowUTC);
+  const nowIST = getISTDate();
 
   if (!isTuesday(nowIST)) return;
 
@@ -29,20 +23,19 @@ async function recordLoginAttendance(userId, role) {
   const minutes = nowIST.getMinutes();
   const totalMinutes = hours * 60 + minutes;
 
-  const windowStart = 13 * 60 + 15; // 13:15
-  const onTimeEnd   = 13 * 60 + 30; // 13:30
-  const windowEnd   = 14 * 60 + 45; // 14:45
+  // On-time cut-off: 1:30 PM (13:30 IST = 810 minutes)
+  const status = totalMinutes <= (13 * 60 + 30) ? 'Present' : 'Late';
 
-  if (totalMinutes < windowStart || totalMinutes > windowEnd) return;
-
-  const status = totalMinutes <= onTimeEnd ? 'Present' : 'Late';
-  const attendanceDate = nowIST.toISOString().slice(0, 10); // YYYY-MM-DD
+  const yyyy = nowIST.getFullYear();
+  const mm = String(nowIST.getMonth() + 1).padStart(2, '0');
+  const dd = String(nowIST.getDate()).padStart(2, '0');
+  const attendanceDate = `${yyyy}-${mm}-${dd}`;
 
   const pool = await getPool();
   await pool.request()
     .input('userId', sql.Int, userId)
-    .input('attendanceDate', sql.Date, new Date(attendanceDate))
-    .input('loginTime', sql.DateTime2, nowUTC)
+    .input('attendanceDate', sql.Date, attendanceDate)
+    .input('loginTime', sql.DateTime2, new Date())
     .input('status', sql.VarChar(10), status)
     .query(`
       IF NOT EXISTS (

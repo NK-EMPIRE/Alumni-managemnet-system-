@@ -100,6 +100,14 @@ router.patch(
   alumniController.reopenAlumni
 );
 
+router.get(
+  '/:alumniId/history',
+  param('alumniId').isInt().toInt(),
+  validate,
+  authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER),
+  alumniController.getAlumniHistory
+);
+
 router.post(
   '/:alumniId/professional-info',
   param('alumniId').isInt().toInt(),

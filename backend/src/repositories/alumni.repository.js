@@ -39,8 +39,8 @@ async function findAll({ page, limit, offset, search, department, batch, status,
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
-    .input('leaderId', sql.Int, leaderId || null)
-    .input('memberId', sql.Int, memberId || null)
+    .input('leaderId', sql.Int, leaderId ? parseInt(leaderId, 10) : null)
+    .input('memberId', sql.Int, memberId ? parseInt(memberId, 10) : null)
     .input('dateFrom', sql.NVarChar(30), dateFrom || null)
     .input('dateTo', sql.NVarChar(30), dateTo || null);
 
@@ -239,6 +239,9 @@ async function createProfessionalInfo(data) {
 
     const updateReq = transaction.request();
     updateReq.input('alumniId', sql.Int, data.alumni_id);
+    updateReq.input('name', sql.NVarChar(150), data.name || null);
+    updateReq.input('department', sql.NVarChar(50), data.department || null);
+    updateReq.input('batch', sql.NVarChar(10), data.batch || null);
     updateReq.input('company', sql.NVarChar(200), data.company);
     updateReq.input('designation', sql.NVarChar(200), data.designation);
     updateReq.input('email', sql.NVarChar(150), data.email);
@@ -250,12 +253,15 @@ async function createProfessionalInfo(data) {
     updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
     updateReq.input('fatherName', sql.NVarChar(150), data.father_name || null);
     updateReq.input('address', sql.NVarChar(500), data.address || null);
-    updateReq.input('city', sql.NVarChar(100), data.current_city || null);
+    updateReq.input('city', sql.NVarChar(100), data.current_city || data.city || null);
     updateReq.input('state', sql.NVarChar(100), data.state || null);
     updateReq.input('country', sql.NVarChar(100), data.country || null);
     await updateReq.query(`
       UPDATE Alumni
-      SET company = @company,
+      SET name = COALESCE(@name, name),
+          department = COALESCE(@department, department),
+          batch = COALESCE(@batch, batch),
+          company = @company,
           designation = @designation,
           email = @email,
           phone = @phone,
@@ -539,6 +545,75 @@ async function reopenAlumniRecord(alumniId) {
   }
 }
 
+async function getAlumniHistoryByAlumniId(alumniId) {
+  const pool = await getPool();
+  const cleanId = parseInt(alumniId, 10);
+  if (!cleanId) return [];
+
+  const req = pool.request().input('alumniId', sql.Int, cleanId);
+
+  try {
+    const result = await req.query(`
+      SELECT
+        aa.assignment_id,
+        aa.alumni_id,
+        aa.team_id,
+        aa.member_id,
+        CAST(ISNULL(aa.status, 'Pending') AS NVARCHAR(50)) AS status,
+        aa.assigned_date AS created_at,
+        aa.completed_date,
+        CAST('Assignment Event' AS NVARCHAR(100)) AS action,
+        CAST(ISNULL(ul.first_name + ' ' + ul.last_name, 'System') AS NVARCHAR(200)) AS leader_name,
+        CAST(ISNULL(um.first_name + ' ' + um.last_name, 'Unassigned') AS NVARCHAR(200)) AS member_name
+      FROM dbo.AlumniAssignments aa
+      LEFT JOIN dbo.Teams t ON t.team_id = aa.team_id
+      LEFT JOIN dbo.Users ul ON ul.user_id = t.leader_id
+      LEFT JOIN dbo.Users um ON um.user_id = aa.member_id
+      WHERE aa.alumni_id = @alumniId
+
+      UNION ALL
+
+      SELECT
+        pi.info_id AS assignment_id,
+        pi.alumni_id,
+        CAST(NULL AS INT) AS team_id,
+        pi.updated_by AS member_id,
+        CAST('Updated' AS NVARCHAR(50)) AS status,
+        pi.updated_at AS created_at,
+        pi.updated_at AS completed_date,
+        CAST('Professional Profile Update' AS NVARCHAR(100)) AS action,
+        CAST('N/A' AS NVARCHAR(200)) AS leader_name,
+        CAST(ISNULL(u.first_name + ' ' + u.last_name, 'Admin/Member') AS NVARCHAR(200)) AS member_name
+      FROM dbo.ProfessionalInformation pi
+      LEFT JOIN dbo.Users u ON u.user_id = pi.updated_by
+      WHERE pi.alumni_id = @alumniId
+
+      UNION ALL
+
+      SELECT
+        a.alumni_id AS assignment_id,
+        a.alumni_id,
+        CAST(NULL AS INT) AS team_id,
+        CAST(NULL AS INT) AS member_id,
+        CAST('Record Created' AS NVARCHAR(50)) AS status,
+        a.created_at AS created_at,
+        a.created_at AS completed_date,
+        CAST('Alumni Record Created' AS NVARCHAR(100)) AS action,
+        CAST('System' AS NVARCHAR(200)) AS leader_name,
+        CAST('System Admin / Import' AS NVARCHAR(200)) AS member_name
+      FROM dbo.Alumni a
+      WHERE a.alumni_id = @alumniId
+
+      ORDER BY created_at DESC;
+    `);
+
+    return result.recordset || [];
+  } catch (err) {
+    console.error('Error fetching alumni history for ID ' + cleanId + ':', err);
+    return [];
+  }
+}
+
 module.exports = {
   findAll,
   findById,
@@ -554,5 +629,6 @@ module.exports = {
   updateAssignmentStatus,
   reopenAlumniRecord,
   getStats,
-  getAssignmentHistory
+  getAssignmentHistory,
+  getAlumniHistoryByAlumniId
 };

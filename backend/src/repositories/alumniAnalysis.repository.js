@@ -134,7 +134,7 @@ function getRoleCategorySqlCondition(roleCategory, paramName = 'roleCategory') {
  * Main Analysis listing query with filters, role-scoping, and fuzzy city matching.
  */
 async function getAnalysisAlumni({
-  roleCategory, company, city, state, country, batch, department, status,
+  roleCategory, company, designation, city, state, country, batch, department, status,
   customQuery, page = 1, limit = 20, leaderId, memberId
 }) {
   const pageNum = parseInt(page, 10) || 1;
@@ -145,10 +145,11 @@ async function getAnalysisAlumni({
   const request = pool.request()
     .input('offset', sql.Int, offset)
     .input('limit', sql.Int, limitNum)
-    .input('company', sql.NVarChar(200), company || null)
+    .input('company', sql.NVarChar(200), company ? `%${company}%` : null)
+    .input('designation', sql.NVarChar(200), designation ? `%${designation}%` : null)
     .input('city', sql.NVarChar(200), city ? `%${city}%` : null)
-    .input('state', sql.NVarChar(100), state || null)
-    .input('country', sql.NVarChar(100), country || null)
+    .input('state', sql.NVarChar(100), state ? `%${state}%` : null)
+    .input('country', sql.NVarChar(100), country ? `%${country}%` : null)
     .input('batch', sql.NVarChar(10), batch || null)
     .input('department', sql.NVarChar(50), department || null)
     .input('status', sql.NVarChar(30), status || null)
@@ -191,20 +192,16 @@ async function getAnalysisAlumni({
       LEFT JOIN dbo.Users ul ON ul.user_id = t.leader_id
       LEFT JOIN dbo.Users um ON um.user_id = aa.member_id
       WHERE
-        (
-          (COALESCE(pi.company, a.company) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.company, a.company) AS NVARCHAR(MAX)))) <> '')
-          OR (COALESCE(pi.designation, a.designation) IS NOT NULL AND LTRIM(RTRIM(CAST(COALESCE(pi.designation, a.designation) AS NVARCHAR(MAX)))) <> '')
-          OR (a.working_details IS NOT NULL AND LTRIM(RTRIM(CAST(a.working_details AS NVARCHAR(MAX)))) <> '')
-        )
-        AND (@leaderId IS NULL OR t.leader_id = @leaderId)
+        (@leaderId IS NULL OR t.leader_id = @leaderId)
         AND (@memberId IS NULL OR aa.member_id = @memberId)
-        AND (@company IS NULL OR COALESCE(pi.company, a.company) = @company)
+        AND (@company IS NULL OR COALESCE(pi.company, a.company) LIKE @company)
+        AND (@designation IS NULL OR COALESCE(pi.designation, a.designation) LIKE @designation)
         AND (@city IS NULL OR COALESCE(pi.current_city, a.city) LIKE @city OR a.address LIKE @city)
-        AND (@state IS NULL OR COALESCE(pi.state, a.state) = @state)
-        AND (@country IS NULL OR COALESCE(pi.country, a.country) = @country)
+        AND (@state IS NULL OR COALESCE(pi.state, a.state) LIKE @state)
+        AND (@country IS NULL OR COALESCE(pi.country, a.country) LIKE @country)
         AND (@batch IS NULL OR a.batch = @batch)
         AND (@department IS NULL OR a.department = @department)
-        AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
+        AND (@status IS NULL OR (@status = 'Unassigned' AND (aa.status IS NULL OR aa.status = 'Unassigned')) OR aa.status = @status)
         AND (
           @customQuery IS NULL
           OR a.name LIKE @customQuery

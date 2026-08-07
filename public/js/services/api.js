@@ -185,6 +185,9 @@
     reopenAssignment: function (id, reason) {
         return patch('/alumni/' + id + '/reopen', { reason: reason || 'Undone by user' });
     },
+    getAlumniHistory: function (id) {
+        return get('/alumni/' + id + '/history');
+    },
 
     uploadImport: function (formData) {
         return fetch(BASE_URL + '/upload/import', {
@@ -230,6 +233,17 @@
     },
     rollbackImport: function (importId) {
         return post('/upload/rollback/' + importId, {});
+    },
+
+    // Location Cascading
+    getCountries: function () {
+        return get('/location/countries');
+    },
+    getStates: function (countryParam) {
+        return get('/location/states', { countryName: countryParam });
+    },
+    getCities: function (countryParam, stateParam) {
+        return get('/location/cities', { countryName: countryParam, stateName: stateParam });
     },
 
     // Round robin assignment

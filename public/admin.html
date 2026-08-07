@@ -806,7 +806,6 @@
             <div style="display:flex;align-items:center;gap:10px;">
               <select id="progressLeaderSelect"
                 style="padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;cursor:pointer;min-width:240px;">
-                <option value="">- Select Team Leader -</option>
               </select>
             </div>
           </div>
@@ -934,30 +933,6 @@
             </button>
             <div id="fileName" style="margin-top:12px;font-size:0.85rem;color:#10B981;display:none;"></div>
           </div>
-          <div id="importPreviewContainer"
-            style="display:none;margin-top:24px;border-top:1px solid var(--border);padding-top:24px;">
-            <h3 style="font-size:1.1rem;font-weight:600;color:#1E293B;margin-bottom:12px;">Import Preview</h3>
-            <div class="table-container"
-              style="max-height:500px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;">
-              <table class="table" style="width:100%;font-size:0.85rem;">
-                <thead>
-                  <tr style="background:var(--bg-light);position:sticky;top:0;">
-                    <th style="padding:10px 12px;text-align:left;">S.No</th>
-                    <th style="padding:10px 12px;text-align:left;">Reg No</th>
-                    <th style="padding:10px 12px;text-align:left;">Name</th>
-                    <th style="padding:10px 12px;text-align:left;">Dept</th>
-                    <th style="padding:10px 12px;text-align:left;">Batch</th>
-                    <th style="padding:10px 12px;text-align:left;">Action</th>
-                    <th style="padding:10px 12px;text-align:left;">Reason/Fields</th>
-                  </tr>
-                </thead>
-                <tbody id="importPreviewBody"></tbody>
-              </table>
-            </div>
-            <div id="importPreviewStatus"
-              style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;display:none;font-weight:500;">
-            </div>
-          </div>
 
           <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
             <button class="btn btn-primary" id="importBtn" disabled>
@@ -1070,8 +1045,8 @@
 
         <!-- Audit Log Table -->
         <div class="card" style="padding:24px;">
-          <div class="table-container">
-            <table class="table">
+          <div class="table-container" style="overflow-x:auto;width:100%;">
+            <table class="table" style="width:100%;">
               <thead>
                 <tr>
                   <th>#</th>
@@ -1081,7 +1056,7 @@
                   <th>Action</th>
                   <th>Target</th>
                   <th>IP Address</th>
-                  <th>Status</th>
+                  <th style="text-align:center;">Status</th>
                 </tr>
               </thead>
               <tbody id="auditLogBody">
@@ -1287,7 +1262,7 @@
         </div>
 
         <!-- Executive Intelligence Summary Banner -->
-        <div class="card" style="padding:16px 20px;margin-bottom:20px;background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%);border-radius:12px;color:#fff;box-shadow:0 4px 12px rgba(15,23,42,0.15);">
+        <div class="card" style="padding:16px 20px;margin-bottom:20px;background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%);border-radius:12px;color:#fff;box-shadow:0 4px 12px rgba(15,23,42,0.15);flex-shrink:0;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
             <div style="display:flex;align-items:center;gap:12px;">
               <div style="width:42px;height:42px;background:rgba(37,99,235,0.2);border:1px solid #3B82F6;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#60A5FA;">
@@ -1337,7 +1312,7 @@
         </div>
 
         <!-- Unified Filter & Search Bar (Minimal Control Bar) -->
-        <div class="card" style="padding:14px 18px;margin-bottom:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div class="card" style="padding:14px 18px;margin-bottom:20px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;flex-shrink:0;">
           <!-- Quick Search -->
           <div style="flex:1;min-width:260px;position:relative;">
             <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:0.85rem;"></i>
@@ -1400,7 +1375,6 @@
             <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated login attendance tracking every Tuesday (Window: 1:15 PM – 2:45 PM IST). Present (1:15-1:30 PM) | Late (1:30-2:45 PM) | Absent (No Login).</p>
           </div>
           <div style="display:flex;gap:10px;">
-            <button class="btn btn-warning btn-sm" onclick="triggerMarkAbsent()"><i class="fas fa-user-times"></i> Mark Absentees for Selected Date</button>
             <button class="btn btn-secondary btn-sm" onclick="fetchAttendanceData()"><i class="fas fa-sync-alt"></i> Refresh</button>
           </div>
         </div>
@@ -1409,9 +1383,7 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:20px;">
           <div class="card" style="padding:16px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;">
             <label class="form-label" style="font-size:0.8rem;font-weight:600;color:#475569;">Select Tuesday Date</label>
-            <select id="attDateSelect" class="form-control" onchange="fetchAttendanceData()">
-              <option value="">Latest Tuesday</option>
-            </select>
+            <input type="date" id="attDateSelect" class="form-control" onchange="onTuesdayDateChange()" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;padding:6px 10px;border:1px solid #CBD5E1;background:#fff;outline:none;">
           </div>
           <div class="card" style="padding:16px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;color:#065F46;">
             <div style="font-size:0.8rem;font-weight:600;text-transform:uppercase;">Present (On-Time 1:15 - 1:30 PM)</div>
@@ -2003,24 +1975,19 @@
             <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
               <div class="form-group">
                 <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">Country</label>
-                <input type="text" id="fieldCountry" list="countryDatalist" placeholder="Country" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+                <input type="text" id="fieldCountry" list="countryDatalist" class="form-control" placeholder="Type country (e.g. India)..." style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" onclick="this.select()" autocomplete="off">
                 <datalist id="countryDatalist"></datalist>
               </div>
               <div class="form-group">
                 <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">State</label>
-                <input type="text" id="fieldState" list="stateDatalist" placeholder="State" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+                <input type="text" id="fieldState" list="stateDatalist" class="form-control" placeholder="Type state (e.g. Tamil Nadu)..." style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" onclick="this.select()" autocomplete="off" disabled>
                 <datalist id="stateDatalist"></datalist>
               </div>
-              <div class="form-group">
-                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">District</label>
-                <input type="text" id="fieldDistrict" list="districtDatalist" placeholder="District" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
-                <datalist id="districtDatalist"></datalist>
-              </div>
-              <div class="form-group">
-                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">City / Address</label>
-                <input type="text" id="fieldCity" list="cityDatalist" placeholder="City" style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" autocomplete="off">
+              <div class="form-group" style="grid-column: span 2;">
+                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">City / District</label>
+                <input type="text" id="fieldCity" list="cityDatalist" class="form-control" placeholder="Type city (e.g. Chennai)..." style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" onclick="this.select()" autocomplete="off" disabled>
                 <datalist id="cityDatalist"></datalist>
-                <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company Address is required</div>
+                <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City / Address is required</div>
               </div>
             </div>
           </div>
@@ -2803,7 +2770,7 @@
     </div>
 
     <!-- ─── UNIFIED ALUMNI ANALYSIS FILTERS MODAL ─── -->
-    <div class="modal-overlay" id="analysisFiltersModal" style="position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-overlay" id="analysisFiltersModal" style="position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:100050 !important;align-items:center;justify-content:center;padding:16px;">
       <div class="modal-container" style="background:#FFFFFF;border-radius:16px;width:100%;max-width:680px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);overflow:hidden;border:1px solid #E2E8F0;animation:fadeIn 0.2s ease-out;">
         
         <!-- Modal Header -->
@@ -2824,57 +2791,9 @@
 
         <!-- Modal Body -->
         <div style="padding:24px;max-height:75vh;overflow-y:auto;">
-          <!-- 1. Industry & Employment Section -->
+          <!-- 1. Academic Batch & Assignment Section (FIRST) -->
           <div style="margin-bottom:20px;">
             <div style="font-size:0.8rem;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-briefcase"></i> Industry &amp; Employment
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;">
-              <div>
-                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Role Category</label>
-                <select id="analysisFilterRoleCategory" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
-                  <option value="">All Role Categories</option>
-                </select>
-              </div>
-              <div style="position:relative;">
-                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Company / Institution</label>
-                <input type="text" id="analysisFilterCompany" list="analysisCompanyDatalist" class="form-control" placeholder="Select or type company..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
-                <datalist id="analysisCompanyDatalist"></datalist>
-              </div>
-            </div>
-          </div>
-
-          <hr style="border:none;border-top:1px solid #F1F5F9;margin:20px 0;">
-
-          <!-- 2. Geographic Location Section -->
-          <div style="margin-bottom:20px;">
-            <div style="font-size:0.8rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-map-marker-alt"></i> Location &amp; Region
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;">
-              <div style="position:relative;">
-                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">City</label>
-                <input type="text" id="analysisFilterCity" list="analysisCityDatalist" class="form-control" placeholder="Select or type city..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
-                <datalist id="analysisCityDatalist"></datalist>
-              </div>
-              <div style="position:relative;">
-                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">State</label>
-                <input type="text" id="analysisFilterState" list="analysisStateDatalist" class="form-control" placeholder="Select or type state..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
-                <datalist id="analysisStateDatalist"></datalist>
-              </div>
-              <div style="position:relative;">
-                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Country</label>
-                <input type="text" id="analysisFilterCountry" list="analysisCountryDatalist" class="form-control" placeholder="Select or type country..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
-                <datalist id="analysisCountryDatalist"></datalist>
-              </div>
-            </div>
-          </div>
-
-          <hr style="border:none;border-top:1px solid #F1F5F9;margin:20px 0;">
-
-          <!-- 3. Academic & Status Section -->
-          <div>
-            <div style="font-size:0.8rem;font-weight:700;color:#8B5CF6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
               <i class="fas fa-graduation-cap"></i> Academic Batch &amp; Assignment
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;">
@@ -2902,6 +2821,58 @@
               </div>
             </div>
           </div>
+
+          <hr style="border:none;border-top:1px solid #F1F5F9;margin:20px 0;">
+
+          <!-- 2. Professional & Career Analysis Section (SECOND) -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:0.8rem;font-weight:700;color:#8B5CF6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-briefcase"></i> Professional &amp; Career Analysis
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;">
+              <div>
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Role Category</label>
+                <select id="analysisFilterRoleCategory" class="form-control" style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onchange="onAnalysisFilterChange()">
+                  <option value="">All Role Categories</option>
+                </select>
+              </div>
+              <div style="position:relative;">
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Company / Institution</label>
+                <input type="text" id="analysisFilterCompany" list="analysisCompanyDatalist" class="form-control" placeholder="Select or type company..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" onclick="this.select()" autocomplete="off">
+                <datalist id="analysisCompanyDatalist"></datalist>
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Designation / Title</label>
+                <input type="text" id="analysisFilterDesignation" class="form-control" placeholder="Filter by designation..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" oninput="onAnalysisFilterChange()" autocomplete="off">
+              </div>
+            </div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid #F1F5F9;margin:20px 0;">
+
+          <!-- 3. Geographic Location Section (THIRD) -->
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-map-marker-alt"></i> Location &amp; Region
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;">
+              <div style="position:relative;">
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">Country</label>
+                <input type="text" id="analysisFilterCountry" list="analysisCountryDatalist" class="form-control" placeholder="Type country (e.g. India)..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onclick="this.select()" autocomplete="off">
+                <datalist id="analysisCountryDatalist"></datalist>
+              </div>
+              <div style="position:relative;">
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">State</label>
+                <input type="text" id="analysisFilterState" list="analysisStateDatalist" class="form-control" placeholder="Type state (e.g. Tamil Nadu)..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onclick="this.select()" autocomplete="off" disabled>
+                <datalist id="analysisStateDatalist"></datalist>
+              </div>
+              <div style="position:relative;">
+                <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#334155;margin-bottom:6px;">City / District</label>
+                <input type="text" id="analysisFilterCity" list="analysisCityDatalist" class="form-control" placeholder="Type city (e.g. Chennai)..." style="width:100%;height:38px;font-size:0.85rem;border-radius:8px;" onclick="this.select()" autocomplete="off" disabled>
+                <datalist id="analysisCityDatalist"></datalist>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Modal Footer -->
@@ -2919,6 +2890,7 @@
     <script src="js/app.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/services/api.js"></script>
+    <script src="js/locationCascade.js"></script>
     <script>
       window.Toast = window.Toast || {
         success: function (t, m) { /* Completely removed green popups */ },

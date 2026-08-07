@@ -82,6 +82,15 @@ const reopenAlumni = asyncHandler(async (req, res) => {
   success(res, result, 'Alumni record reopened successfully');
 });
 
+const getAlumniHistory = asyncHandler(async (req, res) => {
+  const alumniId = parseInt(req.params.alumniId, 10);
+  if (!alumniId) {
+    return res.status(400).json({ success: false, message: 'Invalid Alumni ID' });
+  }
+  const history = await alumniService.getAlumniHistory(alumniId);
+  success(res, history, 'Alumni history retrieved successfully');
+});
+
 module.exports = {
   getAlumni,
   getAlumniById,
@@ -93,5 +102,6 @@ module.exports = {
   getStats,
   getFilters,
   saveDraft,
-  reopenAlumni
+  reopenAlumni,
+  getAlumniHistory
 };

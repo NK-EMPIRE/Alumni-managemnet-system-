@@ -1170,9 +1170,13 @@
         document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
         document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
         document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
-        document.getElementById('fieldCity').value = record.current_city || '';
-        document.getElementById('fieldState').value = record.state || '';
-        document.getElementById('fieldCountry').value = record.country || '';
+        if (window._leaderLocationCascade) {
+          window._leaderLocationCascade.setValues(record.country, record.state, record.current_city || record.city);
+        } else {
+          document.getElementById('fieldCity').value = record.current_city || '';
+          document.getElementById('fieldState').value = record.state || '';
+          document.getElementById('fieldCountry').value = record.country || '';
+        }
         document.getElementById('fieldEmail').value = record.email || record.pi_email || '';
         document.getElementById('fieldPhone').value = record.phone || record.pi_phone || '';
         document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
@@ -3511,3 +3515,8 @@ window.undoAlumniSubmission = function () {
   window.confirmUndoSubmission(window.currentSelectedAlumniId, recordName);
 };
 
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof initLocationCascade === 'function') {
+    window._leaderLocationCascade = initLocationCascade('fieldCountry', 'fieldState', 'fieldCity');
+  }
+});

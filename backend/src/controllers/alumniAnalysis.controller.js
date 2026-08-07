@@ -5,7 +5,7 @@ const { success, paginated } = require('../utils/response');
 
 const getAnalysisAlumni = asyncHandler(async (req, res) => {
   const {
-    roleCategory, company, city, state, country, batch, department, status,
+    roleCategory, company, designation, city, state, country, batch, department, status,
     customQuery, page, limit
   } = req.query;
 
@@ -19,7 +19,7 @@ const getAnalysisAlumni = asyncHandler(async (req, res) => {
   }
 
   const result = await alumniAnalysisRepo.getAnalysisAlumni({
-    roleCategory, company, city, state, country, batch, department, status,
+    roleCategory, company, designation, city, state, country, batch, department, status,
     customQuery, page, limit, leaderId, memberId
   });
 

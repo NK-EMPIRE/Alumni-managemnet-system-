@@ -175,11 +175,15 @@ window.debounceAnalysisSearch = function () {
 };
 
 window.openAnalysisFiltersModal = function () {
-  if (typeof window.openModal === 'function') {
-    window.openModal('analysisFiltersModal');
-  } else {
-    var modal = document.getElementById('analysisFiltersModal');
-    if (modal) { modal.classList.add('show'); modal.style.display = 'flex'; }
+  var modal = document.getElementById('analysisFiltersModal');
+  if (modal) {
+    modal.style.zIndex = '100050';
+    if (typeof window.openModal === 'function') {
+      window.openModal('analysisFiltersModal');
+    } else {
+      modal.classList.add('show');
+      modal.style.display = 'flex';
+    }
   }
 };
 
@@ -207,7 +211,7 @@ function updateActiveFiltersBadge() {
   var badge = document.getElementById('analysisActiveFiltersBadge');
   if (!badge) return;
 
-  var filterIds = ['analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry', 'analysisFilterDept', 'analysisFilterBatch', 'analysisFilterStatus'];
+  var filterIds = ['analysisFilterDept', 'analysisFilterBatch', 'analysisFilterStatus', 'analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterDesignation', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry'];
   var activeCount = 0;
 
   filterIds.forEach(function (id) {
@@ -226,11 +230,19 @@ function updateActiveFiltersBadge() {
 }
 
 window.resetAnalysisFilters = function () {
-  var ids = ['analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry', 'analysisFilterBatch', 'analysisFilterDept', 'analysisFilterStatus', 'analysisCustomQueryInput'];
+  var ids = ['analysisFilterDept', 'analysisFilterBatch', 'analysisFilterStatus', 'analysisFilterRoleCategory', 'analysisFilterCompany', 'analysisFilterDesignation', 'analysisCustomQueryInput'];
   ids.forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
+  if (window._analysisFilterLocationCascade) {
+    window._analysisFilterLocationCascade.reset();
+  } else {
+    ['analysisFilterCity', 'analysisFilterState', 'analysisFilterCountry'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
   updateActiveFiltersBadge();
   closeAnalysisFiltersModal();
   fetchAnalysisData(1);
@@ -241,6 +253,7 @@ window.fetchAnalysisData = function (page) {
 
   var roleCategory = document.getElementById('analysisFilterRoleCategory') ? document.getElementById('analysisFilterRoleCategory').value : '';
   var company = document.getElementById('analysisFilterCompany') ? document.getElementById('analysisFilterCompany').value : '';
+  var designation = document.getElementById('analysisFilterDesignation') ? document.getElementById('analysisFilterDesignation').value : '';
   var city = document.getElementById('analysisFilterCity') ? document.getElementById('analysisFilterCity').value : '';
   var state = document.getElementById('analysisFilterState') ? document.getElementById('analysisFilterState').value : '';
   var country = document.getElementById('analysisFilterCountry') ? document.getElementById('analysisFilterCountry').value : '';
@@ -254,6 +267,7 @@ window.fetchAnalysisData = function (page) {
     limit: analysisRowsPerPage,
     roleCategory: roleCategory || undefined,
     company: company || undefined,
+    designation: designation || undefined,
     city: city || undefined,
     state: state || undefined,
     country: country || undefined,
@@ -411,3 +425,45 @@ window.copyToClipboard = function (text, label) {
     alert(text);
   });
 };
+
+window.toggleFullScreenSpreadsheet = function (btn) {
+  var section = btn ? btn.closest('.content-section') : null;
+  if (!section) {
+    var activeSec = document.querySelector('.content-section[style*="display: block"], .content-section:not([style*="display: none"])');
+    section = activeSec || document.getElementById('section-analysis') || document.getElementById('section-spreadsheet');
+  }
+  if (!section) return;
+
+  var isFull = section.classList.contains('spreadsheet-fullscreen');
+
+  if (!isFull) {
+    section.classList.add('spreadsheet-fullscreen');
+    document.body.style.overflow = 'hidden';
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-compress" style="color:#2563EB;"></i> <span>Exit Full Screen</span>';
+      btn.title = 'Exit Full Screen';
+    }
+  } else {
+    section.classList.remove('spreadsheet-fullscreen');
+    document.body.style.overflow = '';
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-expand" style="color:#2563EB;"></i> <span>Full Screen</span>';
+      btn.title = 'View in Full Screen';
+    }
+  }
+};
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    var fullElem = document.querySelector('.spreadsheet-fullscreen');
+    if (fullElem) {
+      fullElem.classList.remove('spreadsheet-fullscreen');
+      document.body.style.overflow = '';
+      var fullBtns = document.querySelectorAll('button[onclick*="toggleFullScreenSpreadsheet"]');
+      fullBtns.forEach(function (btn) {
+        btn.innerHTML = '<i class="fas fa-expand" style="color:#2563EB;"></i> <span>Full Screen</span>';
+        btn.title = 'View in Full Screen';
+      });
+    }
+  }
+});

@@ -22,6 +22,7 @@ const notificationRoutes = require('./notification.routes');
 const attendanceRoutes = require('./attendance.routes');
 const alumniCategoryRoutes = require('./alumniCategory.routes');
 const alumniAnalysisRoutes = require('./alumniAnalysis.routes');
+const locationRoutes = require('./location.routes');
 
 
 const router = Router();
@@ -48,8 +49,8 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/import', uploadRoutes);
-router.use('/assignments', assignmentRoutes);
 router.use('/assignments/reassign', reassignRoutes);
+router.use('/assignments', assignmentRoutes);
 router.use('/audit-logs', auditRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/health', healthRoutes);
@@ -60,5 +61,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/alumni-category', alumniCategoryRoutes);
 router.use('/alumni-analysis', alumniAnalysisRoutes);
+router.use('/location', locationRoutes);
 
 module.exports = router;

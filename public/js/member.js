@@ -523,9 +523,13 @@
         document.getElementById('fieldDesignation').value = record.designation || '';
         var distEl = document.getElementById('fieldDistrict');
         if (distEl) distEl.value = record.district || '';
-        document.getElementById('fieldCity').value = record.city || record.current_city || '';
-        document.getElementById('fieldState').value = record.state || '';
-        document.getElementById('fieldCountry').value = record.country || '';
+        if (window._memberLocationCascade) {
+          window._memberLocationCascade.setValues(record.country, record.state, record.city || record.current_city);
+        } else {
+          document.getElementById('fieldCity').value = record.city || record.current_city || '';
+          document.getElementById('fieldState').value = record.state || '';
+          document.getElementById('fieldCountry').value = record.country || '';
+        }
         document.getElementById('fieldEmail').value = record.email || '';
         document.getElementById('fieldPhone').value = record.phone || '';
         document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
@@ -2388,3 +2392,9 @@ window.submitEmailCampaignLaunch = function () {
         if (launchBtn) { launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Launch Campaign'; }
     });
 };
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof initLocationCascade === 'function') {
+        window._memberLocationCascade = initLocationCascade('fieldCountry', 'fieldState', 'fieldCity');
+    }
+});

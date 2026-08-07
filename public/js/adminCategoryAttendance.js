@@ -352,25 +352,55 @@ window.exportCategoryData = function () {
 var attCurrentPage = 1;
 var attRowsPerPage = 20;
 
-window.fetchAttendanceData = function () {
-  // Populate available Tuesday dates dropdown
-  API.getAttendanceDates().then(function (res) {
-    if (res && res.success && Array.isArray(res.data)) {
-      var select = document.getElementById('attDateSelect');
-      if (select) {
-        var currentVal = select.value;
-        var html = '<option value="">Latest Tuesday</option>';
-        res.data.forEach(function (d) {
-          var dateStr = typeof d === 'string' ? d.slice(0, 10) : new Date(d).toISOString().slice(0, 10);
-          html += '<option value="' + dateStr + '">' + dateStr + '</option>';
-        });
-        select.innerHTML = html;
-        if (currentVal) select.value = currentVal;
+function getLatestTuesdayDateStr() {
+  var d = new Date();
+  var day = d.getDay();
+  var diff = 2 - day;
+  if (day < 2) diff = diff - 7;
+  d.setDate(d.getDate() + diff);
+  var yyyy = d.getFullYear();
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return yyyy + '-' + mm + '-' + dd;
+}
+
+window.onTuesdayDateChange = function () {
+  var input = document.getElementById('attDateSelect');
+  if (!input || !input.value) return;
+
+  var parts = input.value.split('-');
+  if (parts.length === 3) {
+    var selected = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    var day = selected.getDay();
+    if (day !== 2) {
+      var diff = 2 - day;
+      if (day === 0) diff = -5;
+      else if (day === 1) diff = 1;
+      else if (day > 2) diff = 2 - day;
+
+      selected.setDate(selected.getDate() + diff);
+
+      var yyyy = selected.getFullYear();
+      var mm = String(selected.getMonth() + 1).padStart(2, '0');
+      var dd = String(selected.getDate()).padStart(2, '0');
+      var tuesdayStr = yyyy + '-' + mm + '-' + dd;
+
+      input.value = tuesdayStr;
+      if (window.Toast && typeof window.Toast.warning === 'function') {
+        window.Toast.warning('Tuesday Only', 'Selection adjusted to Tuesday (' + tuesdayStr + ')');
       }
     }
-  }).catch(function (err) { console.error('Error fetching attendance dates:', err); });
+  }
 
-  var selectedDate = document.getElementById('attDateSelect') ? document.getElementById('attDateSelect').value : '';
+  fetchAttendanceData();
+};
+
+window.fetchAttendanceData = function () {
+  var dateInput = document.getElementById('attDateSelect');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = getLatestTuesdayDateStr();
+  }
+  var selectedDate = dateInput ? dateInput.value : '';
 
   API.getAttendanceSummary(selectedDate).then(function (res) {
     if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {

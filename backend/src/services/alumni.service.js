@@ -197,13 +197,16 @@ async function saveDraft(alumniId, data, currentUser) {
   try {
     await alumniRepository.createProfessionalInfo({
       alumni_id: parseInt(alumniId),
-      company: data.company || alumni.company || null,
-      designation: data.designation || alumni.designation || null,
-      current_city: data.current_city || null,
-      state: data.state || null,
-      country: data.country || null,
-      email: data.email || alumni.email || null,
-      phone: data.phone || alumni.phone || null,
+      name: data.name !== undefined ? data.name : alumni.name,
+      department: data.department !== undefined ? data.department : alumni.department,
+      batch: data.batch !== undefined ? data.batch : alumni.batch,
+      company: data.company !== undefined ? data.company : alumni.company,
+      designation: data.designation !== undefined ? data.designation : alumni.designation,
+      current_city: data.current_city !== undefined ? data.current_city : (data.city !== undefined ? data.city : alumni.city),
+      state: data.state !== undefined ? data.state : alumni.state,
+      country: data.country !== undefined ? data.country : alumni.country,
+      email: data.email !== undefined ? data.email : alumni.email,
+      phone: data.phone !== undefined ? data.phone : alumni.phone,
       linkedin_url: data.linkedin_url || data.linkedin_profile || alumni.linkedin_profile || null,
       higher_studies: data.higher_studies || null,
       is_entrepreneur: data.is_entrepreneur === true || data.is_entrepreneur === 'Yes' ? 1 : 0,
@@ -321,6 +324,10 @@ async function reopenAlumni(alumniId, currentUser) {
   return { alumniId, status: 'Draft' };
 }
 
+async function getAlumniHistory(alumniId) {
+  return alumniRepository.getAlumniHistoryByAlumniId(alumniId);
+}
+
 module.exports = {
   getAlumni,
   getAlumniById,
@@ -333,5 +340,6 @@ module.exports = {
   getFilters,
   saveDraft,
   submitAndComplete,
-  reopenAlumni
+  reopenAlumni,
+  getAlumniHistory
 };
