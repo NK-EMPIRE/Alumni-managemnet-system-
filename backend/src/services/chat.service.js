@@ -396,12 +396,76 @@ async function heartbeat(userId) {
   return true;
 }
 
+async function editMessage({ reqUser, messageId, messageText }) {
+  if (!reqUser || !reqUser.userId) throw new Error('Authentication required');
+  if (!messageId) throw new Error('Message ID is required');
+  if (!messageText || !messageText.trim()) throw new Error('Message text cannot be empty');
+
+  const pool = await getPool();
+  await ensureChannelColumn(pool);
+
+  const checkReq = pool.request();
+  checkReq.input('messageId', sql.Int, parseInt(messageId, 10));
+  const checkRes = await checkReq.query(`SELECT user_id FROM dbo.WorkspaceMessages WHERE message_id = @messageId`);
+  if (!checkRes.recordset || checkRes.recordset.length === 0) {
+    throw new Error('Message not found');
+  }
+
+  const msgAuthorId = checkRes.recordset[0].user_id;
+  if (parseInt(msgAuthorId, 10) !== parseInt(reqUser.userId, 10)) {
+    throw new Error('Unauthorized: You can only edit your own messages');
+  }
+
+  const updateReq = pool.request();
+  updateReq.input('messageId', sql.Int, parseInt(messageId, 10));
+  updateReq.input('messageText', sql.NVarChar(sql.MAX), messageText.trim());
+  await updateReq.query(`UPDATE dbo.WorkspaceMessages SET message_text = @messageText WHERE message_id = @messageId`);
+
+  return { message_id: parseInt(messageId, 10), message_text: messageText.trim() };
+}
+
+async function deleteSingleMessage({ reqUser, messageId }) {
+  if (!reqUser || !reqUser.userId) throw new Error('Authentication required');
+  if (!messageId) throw new Error('Message ID is required');
+
+  const pool = await getPool();
+  await ensureChannelColumn(pool);
+
+  const checkReq = pool.request();
+  checkReq.input('messageId', sql.Int, parseInt(messageId, 10));
+  const checkRes = await checkReq.query(`SELECT user_id FROM dbo.WorkspaceMessages WHERE message_id = @messageId`);
+  if (!checkRes.recordset || checkRes.recordset.length === 0) {
+    throw new Error('Message not found');
+  }
+
+  const msgAuthorId = checkRes.recordset[0].user_id;
+  const userRole = (reqUser && reqUser.role) ? String(reqUser.role).toUpperCase() : '';
+  const isAdmin = userRole.includes('ADMIN');
+
+  if (parseInt(msgAuthorId, 10) !== parseInt(reqUser.userId, 10) && !isAdmin) {
+    throw new Error('Unauthorized: You can only delete your own messages');
+  }
+
+  const delNotifReq = pool.request();
+  delNotifReq.input('messageId', sql.Int, parseInt(messageId, 10));
+  await delNotifReq.query(`UPDATE dbo.Notifications SET source_message_id = NULL WHERE source_message_id = @messageId`);
+
+  const delReq = pool.request();
+  delReq.input('messageId', sql.Int, parseInt(messageId, 10));
+  await delReq.query(`DELETE FROM dbo.WorkspaceMessages WHERE message_id = @messageId`);
+
+  return true;
+}
+
 module.exports = {
   getMessages,
   sendMessage,
   clearMessages,
   getMentionUsers,
   getContacts,
-  heartbeat
+  heartbeat,
+  editMessage,
+  deleteSingleMessage
 };
+
 
