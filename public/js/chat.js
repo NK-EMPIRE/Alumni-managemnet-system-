@@ -100,6 +100,10 @@
         if (pName === '/' || pName.endsWith('/index.html') || pName.endsWith('/')) {
             return;
         }
+        // Skip floating widget on pages that embed the full-page chat
+        if (document.getElementById('chatPageApp')) {
+            return;
+        }
         _initialized = true;
         var token = localStorage.getItem('token');
         var userRole = '';
@@ -163,7 +167,7 @@
             background: 'linear-gradient(135deg,#3b82f6,#2563eb)',
             color: '#fff', border: 'none', fontSize: '24px',
             boxShadow: '0 8px 24px rgba(37,99,235,.4)',
-            cursor: 'pointer', zIndex: '2147483647',
+            cursor: 'pointer', zIndex: '10500',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'transform .2s, box-shadow .2s',
             fontFamily: 'sans-serif'
@@ -188,7 +192,7 @@
         css(backdrop, {
             position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
             background: 'rgba(5,10,20,.65)', backdropFilter: 'blur(4px)',
-            zIndex: '2147483645', opacity: '0', pointerEvents: 'none',
+            zIndex: '10498', opacity: '0', pointerEvents: 'none',
             transition: 'opacity .3s'
         });
         document.body.appendChild(backdrop);
@@ -198,7 +202,7 @@
         css(panel, {
             position: 'fixed', top: '0', right: '0',
             width: '480px', maxWidth: '100vw', height: '100vh',
-            background: DK.bg, zIndex: '2147483646',
+            background: DK.bg, zIndex: '10499',
             display: 'none', flexDirection: 'column',
             boxShadow: 'none', visibility: 'hidden',
             transform: 'translateX(100%)',

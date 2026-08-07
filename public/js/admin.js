@@ -1372,6 +1372,8 @@ function navigateTo(section, el) {
   }
   window.scrollTo({ top: 0, behavior: 'instant' });
 
+  document.body.classList.remove('chat-active');
+
   if (section === 'audit') {
     fetchLatestAuditLogs(populateAuditLogTable);
   } else if (section === 'viewAlumni') {
@@ -1385,8 +1387,6 @@ function navigateTo(section, el) {
   } else if (section === 'chat') {
     document.body.classList.add('chat-active');
     if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
-  } else {
-    document.body.classList.remove('chat-active');
   }
 
   /* Update breadcrumb */

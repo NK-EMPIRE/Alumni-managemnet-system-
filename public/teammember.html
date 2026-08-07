@@ -1,1830 +1,2205 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Team Member Dashboard - Alumni Professional Details Update Management System">
-    <title>Team Member Dashboard - APIUMS | Alumni Professional Information Update Management System</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563EB'/><path d='M50 20 L80 40 L50 60 L20 40 Z' fill='%23FFFFFF'/><path d='M35 53 L35 70 Q50 82 65 70 L65 53' stroke='%23FFFFFF' stroke-width='6' fill='none'/></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/libs/fontawesome/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Team Member Dashboard - Alumni Professional Details Update Management System">
+  <title>Team Member Dashboard - APIUMS | Alumni Professional Information Update Management System</title>
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563EB'/><path d='M50 20 L80 40 L50 60 L20 40 Z' fill='%23FFFFFF'/><path d='M35 53 L35 70 Q50 82 65 70 L65 53' stroke='%23FFFFFF' stroke-width='6' fill='none'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/libs/fontawesome/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/export_modal.css">
   <link rel="stylesheet" href="css/chat.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        :root {
-            --primary: #2563EB;
-            --primary-dark: #1D4ED8;
-            --primary-light: #DBEAFE;
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --purple: #7C3AED;
-            --bg-dark: #0F172A;
-            --bg-sidebar: #0F172A;
-            --bg-white: #FFFFFF;
-            --bg-light: #F8FAFC;
-            --text-primary: #1E293B;
-            --text-secondary: #64748B;
-            --text-dark: #1E293B;
-            --text-muted: #64748B;
-            --text-light: #94A3B8;
-            --border: #E2E8F0;
-            --border-color: #E2E8F0;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow: 0 10px 40px rgba(0,0,0,0.08);
-            --shadow-hover: 0 20px 60px rgba(0,0,0,0.12);
-            --radius: 12px;
-            --radius-sm: 8px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-speed: 0.3s;
-        }
-        body {
-            background: var(--bg-light);
-            min-height: 100vh;
-            display: flex;
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
 
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 260px;
-            height: 100vh;
-            background: var(--bg-sidebar);
-            z-index: 1000;
-            transition: var(--transition);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
-        }
-        .sidebar-brand {
-            padding: 24px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .sidebar-brand .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary), var(--purple));
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .sidebar-brand h2 {
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-        .sidebar-brand span {
-            color: var(--primary-light);
-            font-size: 11px;
-            font-weight: 400;
-            display: block;
-        }
-        .nav-section {
-            padding: 16px 16px 8px;
-            color: rgba(255,255,255,0.35);
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-        }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 20px;
-            margin: 2px 12px;
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            border-radius: var(--radius-sm);
-            transition: var(--transition);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .nav-item:hover {
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-        }
-        .nav-item.active {
-            background: rgba(37,99,235,0.15);
-            color: #93C5FD;
-            box-shadow: none;
-            border-left: 3px solid var(--primary);
-            margin-left: 0;
-            padding-left: 17px;
-        }
-        .content-section:has(.spreadsheet-fullscreen),
-        section:has(.spreadsheet-fullscreen) {
-            z-index: 99999 !important;
-            position: relative !important;
-        }
-        .spreadsheet-fullscreen {
-            position: fixed !important;
-            inset: 0 !important;
-            z-index: 999999 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            margin: 0 !important;
-            border-radius: 0 !important;
-            background: #ffffff !important;
-            padding: 15px !important;
-        }
-        .nav-item i {
-            width: 20px;
-            text-align: center;
-            font-size: 16px;
-        }
-        .nav-item .badge {
-            margin-left: auto;
-            background: rgba(255,255,255,0.15);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
+    :root {
+      --primary: #2563EB;
+      --primary-dark: #1D4ED8;
+      --primary-light: #DBEAFE;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --purple: #7C3AED;
+      --bg-dark: #0F172A;
+      --bg-sidebar: #0F172A;
+      --bg-white: #FFFFFF;
+      --bg-light: #F8FAFC;
+      --text-primary: #1E293B;
+      --text-secondary: #64748B;
+      --text-dark: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --border-color: #E2E8F0;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-speed: 0.3s;
+    }
 
-        .main-content {
-            margin-left: 260px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow-y: auto;
-        }
+    body {
+      background: var(--bg-light);
+      min-height: 100vh;
+      display: flex;
+    }
 
-        .topbar {
-            background: var(--bg-white);
-            padding: 0 28px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 500;
-        }
-        .topbar-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .topbar-left h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0;
-        }
-        .topbar-left h1 span {
-            color: var(--primary);
-            font-weight: 300;
-        }
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
 
-        .topbar-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: transparent;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            font-size: 16px;
-        }
-        .topbar-btn:hover {
-            background: var(--bg-light);
-            color: var(--text-dark);
-        }
-        .topbar-btn .notif-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--danger);
-            border-radius: 50%;
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            border: 2px solid #fff;
-        }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-light);
+      border-radius: 10px;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 260px;
+      height: 100vh;
+      background: var(--bg-sidebar);
+      z-index: 1000;
+      transition: var(--transition);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .sidebar-brand .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand h2 {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .sidebar-brand span {
+      color: var(--primary-light);
+      font-size: 11px;
+      font-weight: 400;
+      display: block;
+    }
+
+    .nav-section {
+      padding: 16px 16px 8px;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      margin: 2px 12px;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav-item.active {
+      background: rgba(37, 99, 235, 0.15);
+      color: #93C5FD;
+      box-shadow: none;
+      border-left: 3px solid var(--primary);
+      margin-left: 0;
+      padding-left: 17px;
+    }
+
+    .content-section:has(.spreadsheet-fullscreen),
+    section:has(.spreadsheet-fullscreen) {
+      z-index: 99999 !important;
+      position: relative !important;
+    }
+
+    .spreadsheet-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 999999 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+      padding: 15px !important;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .nav-item .badge {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .topbar {
+      background: var(--bg-white);
+      padding: 0 28px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 500;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-left h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .topbar-left h1 span {
+      color: var(--primary);
+      font-weight: 300;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .topbar-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      font-size: 16px;
+    }
+
+    .topbar-btn:hover {
+      background: var(--bg-light);
+      color: var(--text-dark);
+    }
+
+    .topbar-btn .notif-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: 2px solid #fff;
+    }
 
 
-        .content-wrapper {
-            padding: 28px 32px;
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .content-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+    .content-wrapper {
+      padding: 28px 32px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .page-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-        .page-header h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-        .page-header p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-light);
-        }
-        .breadcrumb a {
-            color: var(--primary);
-            text-decoration: none;
-        }
+    .content-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .cards-row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-        .stat-card {
-            background: var(--bg-white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 22px 24px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
-        }
-        .stat-card .card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-bottom: 14px;
-        }
-        .stat-card .card-icon.blue { background: #DBEAFE; color: var(--primary); }
-        .stat-card .card-icon.green { background: #D1FAE5; color: var(--success); }
-        .stat-card .card-icon.orange { background: #FEF3C7; color: var(--warning); }
-        .stat-card .card-icon.purple { background: #EDE9FE; color: var(--purple); }
-        .stat-card .card-icon.amber { background: #FEF3C7; color: #D97706; }
-        .stat-card .card-value {
-            font-size: 30px;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1.2;
-        }
-        .stat-card .card-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .stat-card .card-trend {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 20px;
-        }
-        .stat-card .card-trend.up { background: #D1FAE5; color: var(--success); }
-        .stat-card .card-trend.down { background: #FEE2E2; color: var(--danger); }
-        .stat-card .card-trend.neutral { background: #F3F4F6; color: var(--text-secondary); }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
 
-        .table-container {
-            background: var(--bg-white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-        }
-        .table-header {
-            padding: 18px 22px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        .table-header h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-        .table-header .table-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .filter-select {
-            padding: 8px 12px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            color: var(--text-dark);
-            background: var(--bg-white);
-            cursor: pointer;
-            outline: none;
-            transition: var(--transition);
-            min-width: 120px;
-        }
-        .filter-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-        }
-        .filter-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-        }
-        .table-search {
-            padding: 11px 16px 11px 42px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            outline: none;
-            background: var(--bg-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 14px center no-repeat;
-            transition: var(--transition);
-            width: 200px;
-        }
-        .table-search:focus {
-            border-color: var(--primary);
-            background-color: var(--bg-white);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-        }
-        .table-wrapper {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        thead {
-            background: var(--bg-light);
-        }
-        thead th {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-            border-bottom: 1px solid var(--border);
-        }
-        tbody tr {
-            transition: var(--transition);
-        }
-        tbody tr:nth-child(even) {
-            background: #FAFBFC;
-        }
-        tbody tr:hover {
-            background: #F1F5F9;
-        }
-        tbody td {
-            padding: 12px 16px;
-            font-size: 0.85rem;
-            color: var(--text-dark);
-            vertical-align: middle;
-            border-bottom: 1px solid var(--border);
-        }
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status-badge.completed {
-            background: #D1FAE5;
-            color: #059669;
-        }
-        .status-badge.pending {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-        .status-badge.draft {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-        .status-badge i {
-            font-size: 10px;
-        }
-        .btn-update {
-            padding: 7px 18px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #fff;
-            border: none;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-update:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
-        }
-        .btn-update:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+    .page-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
 
-        .table-footer {
-            padding: 14px 22px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-top: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 10px;
-            background: var(--bg-light);
-        }
-        .table-footer .info {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .pagination button {
-            width: 36px;
-            height: 36px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            background: #fff;
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .pagination button:hover:not(:disabled) {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-        .pagination button.active {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .page-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
 
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15,23,42,0.5);
-            backdrop-filter: blur(6px);
-            z-index: 100000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal-overlay.show {
-            display: flex;
-        }
-        .modal {
-            background: #fff;
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 860px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            animation: modalIn 0.3s ease;
-        }
-        @keyframes modalIn {
-            from { transform: translateY(20px) scale(0.96); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        .modal-header {
-            padding: 20px 28px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 1;
-            border-radius: var(--radius) var(--radius) 0 0;
-        }
-        .modal-header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .modal-header-left .avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .modal-header-left .info h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        .modal-header-left .info span {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: transparent;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 16px;
-        }
-        .modal-close:hover {
-            background: var(--bg-light);
-            color: var(--text-dark);
-        }
-        .modal-body {
-            padding: 24px 28px;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px 24px;
-            margin-bottom: 16px;
-        }
-        .form-group {
-            position: relative;
-        }
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-            letter-spacing: 0.3px;
-        }
-        .form-group label .required {
-            color: var(--danger);
-            margin-left: 2px;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            color: var(--text-dark);
-            background: var(--bg-white);
-            outline: none;
-            transition: var(--transition);
-            font-family: 'Poppins', sans-serif;
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary);
-            background: var(--bg-white);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-        }
-        .form-group input.error,
-        .form-group select.error {
-            border-color: var(--danger);
-            box-shadow: 0 0 0 4px rgba(239,68,68,0.08);
-        }
-        .form-group .error-text {
-            font-size: 11px;
-            color: var(--danger);
-            margin-top: 3px;
-            display: none;
-        }
-        .form-group .error-text.show {
-            display: block;
-        }
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .btn-outline, #saveDraftBtn {
-            background: transparent;
-            color: var(--primary, #2563EB) !important;
-            border: 1.5px solid var(--primary, #2563EB);
-            transition: all 0.2s ease;
-        }
-        .btn-outline:hover, .btn-outline:focus, .btn-outline:active,
-        #saveDraftBtn:hover, #saveDraftBtn:focus, #saveDraftBtn:active {
-            background: var(--primary, #2563EB) !important;
-            color: #FFFFFF !important;
-            border-color: var(--primary, #2563EB) !important;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
-        }
-        .btn-outline:hover *, .btn-outline:focus *, .btn-outline:active *,
-        #saveDraftBtn:hover *, #saveDraftBtn:focus *, #saveDraftBtn:active * {
-            color: #FFFFFF !important;
-        }
-        .btn-undo-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #FFFBEB;
-            color: #D97706;
-            border: 1px solid #FCD34D;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        .btn-undo-icon:hover {
-            background: #F59E0B;
-            color: #FFFFFF;
-            border-color: #F59E0B;
-            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
-            transform: scale(1.08);
-        }
-        body.dark-mode .btn-undo-icon {
-            background: rgba(245, 158, 11, 0.18);
-            color: #FBBF24;
-            border-color: rgba(245, 158, 11, 0.35);
-        }
-        body.dark-mode .btn-undo-icon:hover {
-            background: #F59E0B;
-            color: #FFFFFF;
-        }
-        .submit-row {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 12px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-            margin-top: 8px;
-        }
-        .btn {
-            padding: 10px 28px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Poppins', sans-serif;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #fff;
-        }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
-        }
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .btn-secondary {
-            background: var(--bg-white);
-            color: var(--text-dark);
-            border: 1px solid var(--border);
-        }
-        .btn-secondary:hover {
-            background: var(--bg-light);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .btn .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            display: none;
-        }
-        .btn-outline .spinner {
-            border: 2px solid var(--border-color);
-            border-top-color: var(--primary);
-        }
-        .btn.loading .spinner {
-            display: inline-block;
-        }
-        .btn.loading .btn-text {
-            display: none;
-        }
-        .btn.loading .btn-loading-text {
-            display: inline;
-        }
-        .btn .btn-loading-text {
-            display: none;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-light);
+    }
 
-        .toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .toast {
-            padding: 14px 20px;
-            border-radius: var(--radius-sm);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-            animation: toastIn 0.4s ease;
-            min-width: 300px;
-        }
-        .toast.success { background: var(--success); }
-        .toast.error { background: var(--danger); }
-        .toast.warning { background: var(--warning); }
-        .toast i { font-size: 18px; }
-        @keyframes toastIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .toast.removing {
-            animation: toastOut 0.3s ease forwards;
-        }
-        @keyframes toastOut {
-            to { transform: translateX(100%); opacity: 0; }
-        }
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+    }
 
-        .notif-dropdown {
-            display: none;
-            position: absolute;
-            top: 56px;
-            right: 0;
-            left: auto;
-            width: 360px;
-            background: #fff;
-            border-radius: var(--radius);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color);
-            z-index: 100;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .notif-dropdown.active {
-            display: block;
-        }
-        .notif-dropdown-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .notif-dropdown-header h4 {
-            font-size: 14px;
-            font-weight: 700;
-        }
-        .notif-dropdown-header button {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .notif-item {
-            padding: 14px 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            border-bottom: 1px solid #F3F4F6;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-        .notif-item:hover {
-            background: var(--bg-light);
-        }
-        .notif-item .notif-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        .notif-item .notif-icon.blue { background: #DBEAFE; color: var(--primary); }
-        .notif-item .notif-icon.green { background: #D1FAE5; color: var(--success); }
-        .notif-item .notif-icon.orange { background: #FEF3C7; color: var(--warning); }
-        .notif-item .notif-text {
-            flex: 1;
-        }
-        .notif-item .notif-text p {
-            font-size: 13px;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-        .notif-item .notif-text span {
-            font-size: 11px;
-            color: var(--text-light);
-        }
-        .notif-item .notif-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            flex-shrink: 0;
-            margin-top: 4px;
-        }
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
 
-        .higher-studies-details {
-            display: none;
-        }
-        .higher-studies-details.active {
-            display: block;
-        }
+    .stat-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
 
-        @media (max-width: 1200px) {
-            .cards-row {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-        @media (max-width: 768px) {
-            .cards-row {
-                grid-template-columns: 1fr;
-            }
-            .topbar {
-                padding: 0 16px;
-            }
-            .content-wrapper {
-                padding: 16px;
-            }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    }
 
-        }
-        
-        /* Sidebar Collapse support */
-        body.sidebar-collapsed .sidebar {
-            width: 72px !important;
-        }
-        body.sidebar-collapsed .main-content {
-            margin-left: 72px !important;
-        }
-        body.sidebar-collapsed .sidebar-item-text,
-        body.sidebar-collapsed .nav-item-text,
-        body.sidebar-collapsed .nav-section,
-        body.sidebar-collapsed .sidebar-brand-text {
-            display: none !important;
-        }
-        body.sidebar-collapsed .sidebar-brand {
-            justify-content: center !important;
-            padding: 24px 0 !important;
-        }
-        body.sidebar-collapsed .nav-item {
-            justify-content: center !important;
-            padding: 12px 0 !important;
-        }
-        body.sidebar-collapsed .nav-item i {
-            margin-right: 0 !important;
-            font-size: 1.25rem !important;
-        }
-        body.sidebar-collapsed .nav-item .badge {
-            display: none !important;
-        }
-        body.sidebar-collapsed .sidebar-brand-left {
-            display: none !important;
-        }
+    .stat-card .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
 
-        /* ── DARK MODE OVERRIDES (FIX WHITE ELEMENTS AND TOUCH/FOCUS REFLECTIONS) ── */
+    .stat-card .card-icon.blue {
+      background: #DBEAFE;
+      color: var(--primary);
+    }
 
-        /* Fix inline-styled modal nav pill (← 6/31 →) */
-        body.dark-mode .modal-nav-group {
-            background: #0F172A !important;
-            border-color: #334155 !important;
-        }
-        body.dark-mode #modalNavCounter {
-            color: #CBD5E1 !important;
-        }
-        body.dark-mode #modalTitle {
-            color: #F8FAFC !important;
-        }
-        body.dark-mode #modalSubtitle {
-            color: #94A3B8 !important;
-        }
-        body.dark-mode .modal-header {
-            background-color: #1E293B !important;
-        }
-        body.dark-mode .modal-body,
-        body.dark-mode .modal-footer {
-            background-color: #1E293B !important;
-        }
+    .stat-card .card-icon.green {
+      background: #D1FAE5;
+      color: var(--success);
+    }
 
-        /* Fix hardcoded inline background colors */
-        body.dark-mode [style*="background:#F8FAFC"],
-        body.dark-mode [style*="background: #F8FAFC"],
-        body.dark-mode [style*="background:#EEF2F6"],
-        body.dark-mode [style*="background:#F1F5F9"],
-        body.dark-mode [style*="background:#fff"],
-        body.dark-mode [style*="background: #fff"] {
-            background-color: #1E293B !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    .stat-card .card-icon.orange {
+      background: #FEF3C7;
+      color: var(--warning);
+    }
 
-        /* Fix hardcoded inline text colors */
-        body.dark-mode [style*="color:#1E293B"],
-        body.dark-mode [style*="color: #1E293B"],
-        body.dark-mode [style*="color:#475569"],
-        body.dark-mode [style*="color:#0F172A"] {
-            color: #F8FAFC !important;
-        }
-        body.dark-mode [style*="color:#64748B"],
-        body.dark-mode [style*="color: #64748B"] {
-            color: #94A3B8 !important;
-        }
+    .stat-card .card-icon.purple {
+      background: #EDE9FE;
+      color: var(--purple);
+    }
 
-        body.dark-mode .table-container {
-            background: #1E293B !important;
-            border: 1px solid #334155 !important;
-            box-shadow: none !important;
-        }
+    .stat-card .card-icon.amber {
+      background: #FEF3C7;
+      color: #D97706;
+    }
 
-        body.dark-mode .table-header h3 {
-            color: #F8FAFC !important;
-        }
+    .stat-card .card-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
 
-        body.dark-mode .table-search {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    .stat-card .card-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
 
-        body.dark-mode .table-search:focus {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: var(--primary) !important;
-        }
+    .stat-card .card-trend {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
 
-        body.dark-mode .filter-select {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    .stat-card .card-trend.up {
+      background: #D1FAE5;
+      color: var(--success);
+    }
 
-        body.dark-mode .filter-select option,
-        body.dark-mode .form-select option {
-            background-color: #1E293B !important;
-            color: #F8FAFC !important;
-        }
+    .stat-card .card-trend.down {
+      background: #FEE2E2;
+      color: var(--danger);
+    }
 
-        body.dark-mode .filter-select:focus {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: var(--primary) !important;
-        }
+    .stat-card .card-trend.neutral {
+      background: #F3F4F6;
+      color: var(--text-secondary);
+    }
 
-        body.dark-mode .table-footer select,
-        body.dark-mode .btn-secondary {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    .table-container {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
 
-        body.dark-mode .btn-secondary:hover {
-            background-color: #1E293B !important;
-        }
+    .table-header {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
 
-        body.dark-mode .table-footer {
-            border-top-color: #334155 !important;
-            color: #94A3B8 !important;
-        }
+    .table-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
 
-        body.dark-mode #rowsPerPageSelect {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    .table-header .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-        body.dark-mode #rowsPerPageSelect option {
-            background-color: #1E293B !important;
-            color: #F8FAFC !important;
-        }
+    .filter-select {
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      color: var(--text-dark);
+      background: var(--bg-white);
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition);
+      min-width: 120px;
+    }
 
-        body.dark-mode .pagination button {
-            background: #1E293B !important;
-            color: #CBD5E1 !important;
-            border-color: #334155 !important;
-        }
+    .filter-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
 
-        body.dark-mode .pagination button:hover:not(:disabled) {
-            background: var(--primary) !important;
-            color: #fff !important;
-            border-color: var(--primary) !important;
-        }
+    .filter-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
 
-        body.dark-mode .pagination button.active {
-            background: var(--primary) !important;
-            color: #fff !important;
-            border-color: var(--primary) !important;
-        }
+    .table-search {
+      padding: 11px 16px 11px 42px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      outline: none;
+      background: var(--bg-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 14px center no-repeat;
+      transition: var(--transition);
+      width: 200px;
+    }
 
-        body.dark-mode .pagination button:disabled {
-            background: #0F172A !important;
-            color: #475569 !important;
-            border-color: #334155 !important;
-            opacity: 0.5 !important;
-        }
+    .table-search:focus {
+      border-color: var(--primary);
+      background-color: var(--bg-white);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
 
-        body.dark-mode .form-group input,
-        body.dark-mode .form-group select,
-        body.dark-mode .form-group textarea {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    .table-wrapper {
+      overflow-x: auto;
+    }
 
-        body.dark-mode .form-group input:focus,
-        body.dark-mode .form-group select:focus,
-        body.dark-mode .form-group textarea:focus {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: var(--primary) !important;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-        body.dark-mode .form-control {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: #334155 !important;
-        }
+    thead {
+      background: var(--bg-light);
+    }
 
-        body.dark-mode .form-control:focus {
-            background-color: #0F172A !important;
-            color: #F8FAFC !important;
-            border-color: var(--primary) !important;
-        }
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
 
-        body.dark-mode .form-control option {
-            background-color: #1E293B !important;
-            color: #F8FAFC !important;
-        }
+    tbody tr {
+      transition: var(--transition);
+    }
 
-        body.dark-mode .tabs {
-            border-bottom-color: #334155 !important;
-        }
+    tbody tr:nth-child(even) {
+      background: #FAFBFC;
+    }
 
-        body.dark-mode .tab-item {
-            color: #94A3B8 !important;
-        }
+    tbody tr:hover {
+      background: #F1F5F9;
+    }
 
-        body.dark-mode .tab-item.active {
-            color: var(--primary) !important;
-        }
+    tbody td {
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border);
+    }
 
-        body.dark-mode .stat-card .card-trend.up {
-            background: rgba(16, 185, 129, 0.15) !important;
-            color: #10B981 !important;
-        }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+    }
 
-        body.dark-mode .stat-card .card-trend.down {
-            background: rgba(239, 68, 68, 0.15) !important;
-            color: #EF4444 !important;
-        }
+    .status-badge.completed {
+      background: #D1FAE5;
+      color: #059669;
+    }
 
-        body.dark-mode .stat-card .card-trend.neutral {
-            background: rgba(148, 163, 184, 0.15) !important;
-            color: #94A3B8 !important;
-        }
-    </style>
+    .status-badge.pending {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .status-badge.draft {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .status-badge i {
+      font-size: 10px;
+    }
+
+    .btn-update {
+      padding: 7px 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-update:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-update:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .table-footer {
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--bg-light);
+    }
+
+    .table-footer .info {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pagination button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .pagination button.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(6px);
+      z-index: 100000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 860px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        transform: translateY(20px) scale(0.96);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .modal-header-left .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .modal-header-left .info h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-header-left .info span {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 16px;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-light);
+      color: var(--text-dark);
+    }
+
+    .modal-body {
+      padding: 24px 28px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 24px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group label .required {
+      color: var(--danger);
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      color: var(--text-dark);
+      background: var(--bg-white);
+      outline: none;
+      transition: var(--transition);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary);
+      background: var(--bg-white);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .form-group input.error,
+    .form-group select.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+    }
+
+    .form-group .error-text {
+      font-size: 11px;
+      color: var(--danger);
+      margin-top: 3px;
+      display: none;
+    }
+
+    .form-group .error-text.show {
+      display: block;
+    }
+
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .btn-outline,
+    #saveDraftBtn {
+      background: transparent;
+      color: var(--primary, #2563EB) !important;
+      border: 1.5px solid var(--primary, #2563EB);
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover,
+    .btn-outline:focus,
+    .btn-outline:active,
+    #saveDraftBtn:hover,
+    #saveDraftBtn:focus,
+    #saveDraftBtn:active {
+      background: var(--primary, #2563EB) !important;
+      color: #FFFFFF !important;
+      border-color: var(--primary, #2563EB) !important;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-outline:hover *,
+    .btn-outline:focus *,
+    .btn-outline:active *,
+    #saveDraftBtn:hover *,
+    #saveDraftBtn:focus *,
+    #saveDraftBtn:active * {
+      color: #FFFFFF !important;
+    }
+
+    .btn-undo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #FFFBEB;
+      color: #D97706;
+      border: 1px solid #FCD34D;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-undo-icon:hover {
+      background: #F59E0B;
+      color: #FFFFFF;
+      border-color: #F59E0B;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+      transform: scale(1.08);
+    }
+
+    body.dark-mode .btn-undo-icon {
+      background: rgba(245, 158, 11, 0.18);
+      color: #FBBF24;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    body.dark-mode .btn-undo-icon:hover {
+      background: #F59E0B;
+      color: #FFFFFF;
+    }
+
+    .submit-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 8px;
+    }
+
+    .btn {
+      padding: 10px 28px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: var(--bg-white);
+      color: var(--text-dark);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .btn-outline .spinner {
+      border: 2px solid var(--border-color);
+      border-top-color: var(--primary);
+    }
+
+    .btn.loading .spinner {
+      display: inline-block;
+    }
+
+    .btn.loading .btn-text {
+      display: none;
+    }
+
+    .btn.loading .btn-loading-text {
+      display: inline;
+    }
+
+    .btn .btn-loading-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      animation: toastIn 0.4s ease;
+      min-width: 300px;
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    .toast.warning {
+      background: var(--warning);
+    }
+
+    .toast i {
+      font-size: 18px;
+    }
+
+    @keyframes toastIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.removing {
+      animation: toastOut 0.3s ease forwards;
+    }
+
+    @keyframes toastOut {
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    .notif-dropdown {
+      display: none;
+      position: absolute;
+      top: 56px;
+      right: 0;
+      left: auto;
+      width: 360px;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border-color);
+      z-index: 100;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .notif-dropdown.active {
+      display: block;
+    }
+
+    .notif-dropdown-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .notif-dropdown-header h4 {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .notif-dropdown-header button {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .notif-item {
+      padding: 14px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border-bottom: 1px solid #F3F4F6;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .notif-item:hover {
+      background: var(--bg-light);
+    }
+
+    .notif-item .notif-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .notif-item .notif-icon.blue {
+      background: #DBEAFE;
+      color: var(--primary);
+    }
+
+    .notif-item .notif-icon.green {
+      background: #D1FAE5;
+      color: var(--success);
+    }
+
+    .notif-item .notif-icon.orange {
+      background: #FEF3C7;
+      color: var(--warning);
+    }
+
+    .notif-item .notif-text {
+      flex: 1;
+    }
+
+    .notif-item .notif-text p {
+      font-size: 13px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .notif-item .notif-text span {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .notif-item .notif-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .higher-studies-details {
+      display: none;
+    }
+
+    .higher-studies-details.active {
+      display: block;
+    }
+
+    @media (max-width: 1200px) {
+      .cards-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .cards-row {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .content-wrapper {
+        padding: 16px;
+      }
+
+    }
+
+    /* Sidebar Collapse support */
+    body.sidebar-collapsed .sidebar {
+      width: 72px !important;
+    }
+
+    body.sidebar-collapsed .main-content {
+      margin-left: 72px !important;
+    }
+
+    body.sidebar-collapsed .sidebar-item-text,
+    body.sidebar-collapsed .nav-item-text,
+    body.sidebar-collapsed .nav-section,
+    body.sidebar-collapsed .sidebar-brand-text {
+      display: none !important;
+    }
+
+    body.sidebar-collapsed .sidebar-brand {
+      justify-content: center !important;
+      padding: 24px 0 !important;
+    }
+
+    body.sidebar-collapsed .nav-item {
+      justify-content: center !important;
+      padding: 12px 0 !important;
+    }
+
+    body.sidebar-collapsed .nav-item i {
+      margin-right: 0 !important;
+      font-size: 1.25rem !important;
+    }
+
+    body.sidebar-collapsed .nav-item .badge {
+      display: none !important;
+    }
+
+    body.sidebar-collapsed .sidebar-brand-left {
+      display: none !important;
+    }
+
+    /* ── DARK MODE OVERRIDES (FIX WHITE ELEMENTS AND TOUCH/FOCUS REFLECTIONS) ── */
+
+    /* Fix inline-styled modal nav pill (← 6/31 →) */
+    body.dark-mode .modal-nav-group {
+      background: #0F172A !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode #modalNavCounter {
+      color: #CBD5E1 !important;
+    }
+
+    body.dark-mode #modalTitle {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode #modalSubtitle {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .modal-header {
+      background-color: #1E293B !important;
+    }
+
+    body.dark-mode .modal-body,
+    body.dark-mode .modal-footer {
+      background-color: #1E293B !important;
+    }
+
+    /* Fix hardcoded inline background colors */
+    body.dark-mode [style*="background:#F8FAFC"],
+    body.dark-mode [style*="background: #F8FAFC"],
+    body.dark-mode [style*="background:#EEF2F6"],
+    body.dark-mode [style*="background:#F1F5F9"],
+    body.dark-mode [style*="background:#fff"],
+    body.dark-mode [style*="background: #fff"] {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    /* Fix hardcoded inline text colors */
+    body.dark-mode [style*="color:#1E293B"],
+    body.dark-mode [style*="color: #1E293B"],
+    body.dark-mode [style*="color:#475569"],
+    body.dark-mode [style*="color:#0F172A"] {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode [style*="color:#64748B"],
+    body.dark-mode [style*="color: #64748B"] {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .table-container {
+      background: #1E293B !important;
+      border: 1px solid #334155 !important;
+      box-shadow: none !important;
+    }
+
+    body.dark-mode .table-header h3 {
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .table-search {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .table-search:focus {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: var(--primary) !important;
+    }
+
+    body.dark-mode .filter-select {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .filter-select option,
+    body.dark-mode .form-select option {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .filter-select:focus {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: var(--primary) !important;
+    }
+
+    body.dark-mode .table-footer select,
+    body.dark-mode .btn-secondary {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .btn-secondary:hover {
+      background-color: #1E293B !important;
+    }
+
+    body.dark-mode .table-footer {
+      border-top-color: #334155 !important;
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode #rowsPerPageSelect {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode #rowsPerPageSelect option {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .pagination button {
+      background: #1E293B !important;
+      color: #CBD5E1 !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .pagination button:hover:not(:disabled) {
+      background: var(--primary) !important;
+      color: #fff !important;
+      border-color: var(--primary) !important;
+    }
+
+    body.dark-mode .pagination button.active {
+      background: var(--primary) !important;
+      color: #fff !important;
+      border-color: var(--primary) !important;
+    }
+
+    body.dark-mode .pagination button:disabled {
+      background: #0F172A !important;
+      color: #475569 !important;
+      border-color: #334155 !important;
+      opacity: 0.5 !important;
+    }
+
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group select,
+    body.dark-mode .form-group textarea {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .form-group input:focus,
+    body.dark-mode .form-group select:focus,
+    body.dark-mode .form-group textarea:focus {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: var(--primary) !important;
+    }
+
+    body.dark-mode .form-control {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .form-control:focus {
+      background-color: #0F172A !important;
+      color: #F8FAFC !important;
+      border-color: var(--primary) !important;
+    }
+
+    body.dark-mode .form-control option {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+    }
+
+    body.dark-mode .tabs {
+      border-bottom-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-item {
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .tab-item.active {
+      color: var(--primary) !important;
+    }
+
+    body.dark-mode .stat-card .card-trend.up {
+      background: rgba(16, 185, 129, 0.15) !important;
+      color: #10B981 !important;
+    }
+
+    body.dark-mode .stat-card .card-trend.down {
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: #EF4444 !important;
+    }
+
+    body.dark-mode .stat-card .card-trend.neutral {
+      background: rgba(148, 163, 184, 0.15) !important;
+      color: #94A3B8 !important;
+    }
+  </style>
 </head>
+
 <body>
   <div id="loadingScreen" class="loading-screen">
     <div class="spinner spinner-lg"></div>
     <p class="loading-text">Loading Member Dashboard...</p>
   </div>
 
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 20px;">
-      <div class="sidebar-brand" style="display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; background: transparent; cursor:pointer;" onclick="document.querySelector('.nav-item[data-page=dashboard]').click()">
-            <div class="sidebar-brand-icon" style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink: 0;">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-            <h2 class="sidebar-brand-text" style="color:#fff;font-size:16px;font-weight:700;line-height:1.3; margin: 0;">AlumniMS</h2>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header"
+      style="display: flex; align-items: center; justify-content: space-between; padding: 24px 20px;">
+      <div class="sidebar-brand"
+        style="display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; background: transparent; cursor:pointer;"
+        onclick="document.querySelector('.nav-item[data-page=dashboard]').click()">
+        <div class="sidebar-brand-icon"
+          style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink: 0;">
+          <i class="fas fa-graduation-cap"></i>
         </div>
-        <button class="sidebar-toggle" id="sidebarToggle" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: var(--transition);">
-            <i class="fas fa-bars"></i>
-        </button>
+        <h2 class="sidebar-brand-text" style="color:#fff;font-size:16px;font-weight:700;line-height:1.3; margin: 0;">
+          AlumniMS</h2>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle"
+        style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: var(--transition);">
+        <i class="fas fa-bars"></i>
+      </button>
     </div>
     <div class="nav-section"><span class="nav-section-text">Main Menu</span></div>
     <a class="nav-item active" data-page="dashboard">
-        <i class="fas fa-th-large"></i> <span class="nav-item-text">Dashboard</span>
+      <i class="fas fa-th-large"></i> <span class="nav-item-text">Dashboard</span>
     </a>
     <a class="nav-item" data-page="preview">
-        <i class="fas fa-file-invoice"></i> <span class="nav-item-text">Preview Sheet</span>
+      <i class="fas fa-file-invoice"></i> <span class="nav-item-text">Preview Sheet</span>
     </a>
     <a class="nav-item" data-page="replies" onclick="openAlumniRepliesModal(); return false;" href="#">
-        <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary" id="pendingRepliesCountBadge" style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
+      <i class="fas fa-inbox"></i> <span class="nav-item-text">Alumni Replies</span> <span class="badge badge-primary"
+        id="pendingRepliesCountBadge"
+        style="display:none;margin-left:auto;padding:2px 7px;border-radius:10px;font-size:0.7rem;background:#2563EB;color:#fff;">0</span>
     </a>
     <a class="nav-item" data-page="chat" href="#">
-        <i class="fas fa-comments"></i> <span class="nav-item-text">Chat</span>
+      <i class="fas fa-comments"></i> <span class="nav-item-text">Chat</span>
     </a>
     <a class="nav-item" data-page="settings">
-        <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
+      <i class="fas fa-cog"></i> <span class="nav-item-text">Settings</span>
     </a>
-    <div class="sidebar-footer" style="margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
-        <div class="sidebar-user" id="sidebarUser">
-            <div class="sidebar-user-avatar" id="sidebarUserAvatar">TM</div>
-            <div class="sidebar-user-info">
-                <div class="sidebar-user-name" id="sidebarUserName">Team Member</div>
-                <div class="sidebar-user-role">Team Member</div>
-            </div>
+    <div class="sidebar-footer"
+      style="margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+      <div class="sidebar-user" id="sidebarUser">
+        <div class="sidebar-user-avatar" id="sidebarUserAvatar">TM</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Team Member</div>
+          <div class="sidebar-user-role">Team Member</div>
         </div>
-        <a class="nav-item nav-item-logout" data-page="logout" onclick="API.logout()" style="color:#EF4444 !important;font-weight:600;margin-top:10px;background:rgba(239,68,68,0.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;">
-            <i class="fas fa-sign-out-alt" style="color:#EF4444;"></i> <span class="nav-item-text">Logout</span>
-        </a>
+      </div>
+      <a class="nav-item nav-item-logout" data-page="logout" onclick="API.logout()"
+        style="color:#EF4444 !important;font-weight:600;margin-top:10px;background:rgba(239,68,68,0.12);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <i class="fas fa-sign-out-alt" style="color:#EF4444;"></i> <span class="nav-item-text">Logout</span>
+      </a>
     </div>
-</div>
+  </div>
 
-<div class="main-content">
+  <div class="main-content">
     <div class="topbar">
-        <div class="topbar-left" style="display:flex;justify-content:space-between;align-items:center;flex:1;">
-            <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;">Welcome, <span id="memberName">Rahul</span></h1>
-            <div id="dashboardLiveClockContainer" style="margin-left:auto;margin-right:20px;">
-              <div style="background:var(--bg-white, #fff);border:1px solid var(--border);border-radius:10px;padding:6px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:10px;">
-                <i class="far fa-clock" style="font-size:1.2rem;color:var(--primary);"></i>
-                <div>
-                  <div id="hdrClockDate" style="font-size:0.8rem;font-weight:600;color:var(--text-dark);">-</div>
-                  <div id="hdrClockTime" style="font-size:0.72rem;color:var(--text-secondary);font-weight:500;">-</div>
-                </div>
-              </div>
+      <div class="topbar-left" style="display:flex;justify-content:space-between;align-items:center;flex:1;">
+        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;">Welcome, <span id="memberName">Rahul</span></h1>
+        <div id="dashboardLiveClockContainer" style="margin-left:auto;margin-right:20px;">
+          <div
+            style="background:var(--bg-white, #fff);border:1px solid var(--border);border-radius:10px;padding:6px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:10px;">
+            <i class="far fa-clock" style="font-size:1.2rem;color:var(--primary);"></i>
+            <div>
+              <div id="hdrClockDate" style="font-size:0.8rem;font-weight:600;color:var(--text-dark);">-</div>
+              <div id="hdrClockTime" style="font-size:0.72rem;color:var(--text-secondary);font-weight:500;">-</div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar-right" style="display:flex;align-items:center;gap:12px;">
+        <!-- Today's Tasks Modal Button -->
+        <button class="topbar-btn" onclick="openTodayTasksModal()" title="Today's Tasks & Auto Summary"
+          style="background:none;border:none;color:#10B981;cursor:pointer;font-size:1.1rem;position:relative;">
+          <i class="fas fa-tasks"></i>
+          <span id="todayTasksDot"
+            style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#EF4444;border-radius:50%;display:none;"></span>
+        </button>
+
+        <!-- Quick Tour / Welcome Tutorial Button -->
+        <button class="topbar-btn" onclick="startIntelligentProductTour()" title="Start Interactive Product Tour"
+          style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;">
+          <i class="fas fa-magic"></i>
+        </button>
+
+        <!-- Notification Dropdown -->
+        <div style="position:relative;">
+          <button class="topbar-btn" id="notifBtn" onclick="toggleNotifications(event)" title="Notifications"
+            style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;position:relative;">
+            <i class="fas fa-bell"></i>
+            <span id="notifCount" class="notification-count"
+              style="display:none;position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown"
+            style="width:340px; right:0; left:auto !important; display:none; position:absolute; top:100%; z-index:1000; background:#fff; border:1px solid #E2E8F0; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:10px;">
+            <div class="notif-dropdown-header"
+              style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #E2E8F0;margin-bottom:8px;">
+              <h4 style="margin:0;font-size:0.9rem;color:#1E293B;">Notifications</h4>
+              <button onclick="clearAllNotifications()"
+                style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear
+                All</button>
+            </div>
+            <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
+          </div>
         </div>
 
-        <div class="topbar-right" style="display:flex;align-items:center;gap:12px;">
-            <!-- Today's Tasks Modal Button -->
-            <button class="topbar-btn" onclick="openTodayTasksModal()" title="Today's Tasks & Auto Summary" style="background:none;border:none;color:#10B981;cursor:pointer;font-size:1.1rem;position:relative;">
-              <i class="fas fa-tasks"></i>
-              <span id="todayTasksDot" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#EF4444;border-radius:50%;display:none;"></span>
-            </button>
-
-            <!-- Quick Tour / Welcome Tutorial Button -->
-            <button class="topbar-btn" onclick="startIntelligentProductTour()" title="Start Interactive Product Tour" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;">
-              <i class="fas fa-magic"></i>
-            </button>
-
-            <!-- Notification Dropdown -->
-            <div style="position:relative;">
-                <button class="topbar-btn" id="notifBtn" onclick="toggleNotifications(event)" title="Notifications" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.15rem;position:relative;">
-                    <i class="fas fa-bell"></i>
-                    <span id="notifCount" class="notification-count" style="display:none;position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
-                </button>
-                <div class="notif-dropdown" id="notifDropdown" style="width:340px; right:0; left:auto !important; display:none; position:absolute; top:100%; z-index:1000; background:#fff; border:1px solid #E2E8F0; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:10px;">
-                    <div class="notif-dropdown-header" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #E2E8F0;margin-bottom:8px;">
-                        <h4 style="margin:0;font-size:0.9rem;color:#1E293B;">Notifications</h4>
-                        <button onclick="clearAllNotifications()" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;font-weight:500;padding:2px 8px;">Clear All</button>
-                    </div>
-                    <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
-                </div>
-            </div>
-
-        </div>
+      </div>
     </div>
 
     <div class="content-wrapper">
-        <div id="section-dashboard" class="content-section active">
-            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-                <div>
-                    <h2>Team Member Dashboard</h2>
-                    <p>Manage and update alumni professional details efficiently</p>
-                </div>
-                <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; background: var(--bg-white); border: 1px solid var(--border); padding: 8px 16px; border-radius: 30px; box-shadow: var(--shadow-sm); line-height: 1; margin: 5px 0; box-sizing: border-box !important;">
-                    <i class="fas fa-user-tie" style="color: var(--primary);"></i> Team Leader: <span id="memberLeaderName" style="font-weight: 600; color: var(--text-primary);">Loading...</span>
-                </div>
-            </div>
-
-            <div class="cards-row">
-                <div class="stat-card">
-                    <div class="card-icon blue"><i class="fas fa-folder-open"></i></div>
-                    <div class="card-value" id="assignedCount">0</div>
-                    <div class="card-label">Assigned Records</div>
-                </div>
-                <div class="stat-card">
-                    <div class="card-icon green"><i class="fas fa-check-double"></i></div>
-                    <div class="card-value" id="completedCount">0</div>
-                    <div class="card-label">Completed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="card-icon amber"><i class="fas fa-pen"></i></div>
-                    <div class="card-value" id="draftCount">0</div>
-                    <div class="card-label">Drafts</div>
-                </div>
-                <div class="stat-card">
-                    <div class="card-icon orange"><i class="fas fa-hourglass-half"></i></div>
-                    <div class="card-value" id="remainingCount">0</div>
-                    <div class="card-label">Remaining</div>
-                </div>
-                <div class="stat-card">
-                    <div class="card-icon purple"><i class="fas fa-calendar-day"></i></div>
-                    <div class="card-value" id="todayCount">0</div>
-                    <div class="card-label">Today's Updates</div>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <div class="table-header">
-                    <h3><i class="fas fa-list" style="margin-right:8px;color:var(--primary);"></i> Alumni Records</h3>
-                    <div class="table-actions">
-                        <input type="text" class="table-search" id="tableSearch" placeholder="Search records..." style="width: 240px; min-width: 200px;">
-                        <button class="btn btn-secondary btn-sm" onclick="openFilterModal()" style="height:36px;font-size:0.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dark);cursor:pointer;">
-                            <i class="fas fa-filter" style="color:var(--primary);"></i> Filters <span id="activeFilterBadge" class="badge badge-primary" style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;background:var(--primary);color:#fff;">0</span>
-                        </button>
-                </div>
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>S.No</th>
-                            <th>Alumni Name</th>
-                            <th>Department</th>
-                            <th>Batch</th>
-                            <th>Company/Institution</th>
-                            <th>Designation</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recordsBody"></tbody>
-                </table>
-            </div>
-             <div class="table-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-                 <div style="display:flex;align-items:center;gap:8px;">
-                     <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
-                     <select class="form-control" id="rowsPerPageSelect" style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid var(--border-color);border-radius:6px;background:#fff;outline:none;">
-                         <option value="5">5</option>
-                         <option value="10">10</option>
-                         <option value="25">25</option>
-                         <option value="50" selected>50</option>
-                         <option value="100">100</option>
-                         <option value="250">250</option>
-                         <option value="500">500</option>
-                         <option value="1000">1000</option>
-                         <option value="2500">2500</option>
-                         <option value="5000">5000</option>
-                     </select>
-                 </div>
-                 <div class="info" id="tableInfo">Showing 0 of 0 entries</div>
-                 <div class="pagination" id="pagination"></div>
-             </div>
-        </div>
-    </div> <!-- Close section-dashboard -->
-
-    <div id="section-preview" class="content-section" style="display:none; padding: 20px;">
-        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <div>
-                <h2>Alumni Records Sheet View</h2>
-                <p>Full-screen spreadsheet view of your assigned alumni records.</p>
-            </div>
+      <div id="section-dashboard" class="content-section active">
+        <div class="page-header"
+          style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h2>Team Member Dashboard</h2>
+            <p>Manage and update alumni professional details efficiently</p>
+          </div>
+          <div
+            style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; background: var(--bg-white); border: 1px solid var(--border); padding: 8px 16px; border-radius: 30px; box-shadow: var(--shadow-sm); line-height: 1; margin: 5px 0; box-sizing: border-box !important;">
+            <i class="fas fa-user-tie" style="color: var(--primary);"></i> Team Leader: <span id="memberLeaderName"
+              style="font-weight: 600; color: var(--text-primary);">Loading...</span>
+          </div>
         </div>
 
-        <div class="card spreadsheet-card" style="background:#fff;padding:20px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;display:flex;flex-direction:column;">
-            <div class="table-header" style="border-bottom:none;padding-bottom:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:0;">
-                <h3 style="font-size:1.1rem;font-weight:600;color:var(--text-dark);margin:0;"><i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>Spreadsheet View</h3>
-                    <div class="table-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
-                        <input type="text" class="table-search" id="previewSearch" placeholder="Search records..." style="width:240px;min-width:200px;" oninput="onPreviewFilterChange()">
-                        <button class="btn btn-secondary btn-sm" onclick="openFilterModal()" style="height:36px;font-size:0.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dark);cursor:pointer;">
-                            <i class="fas fa-filter" style="color:var(--primary);"></i> Filters
-                        </button>
-                        <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)" style="height:36px;white-space:nowrap;" title="View in Full Screen"><i class="fas fa-expand"></i> Full Screen</button>
-                </div>
-            </div>
-
-            <div class="table-container" style="overflow-x:auto;position:relative;border:1px solid var(--border);border-radius:8px;">
-                <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;" id="previewSpreadsheetTable">
-                    <thead>
-                        <tr style="background:var(--bg-light);position:sticky;top:0;z-index:10;border-bottom:2px solid var(--border);">
-                            <th class="sticky-col" style="padding:12px 16px;text-align:left;left:0;z-index:4;">S.No</th>
-                            <th style="padding:12px 16px;text-align:left;">Name</th>
-                            <th style="padding:12px 16px;text-align:left;">Register No</th>
-                            <th style="padding:12px 16px;text-align:left;">Father's Name</th>
-                            <th style="padding:12px 16px;text-align:left;">Date of Birth</th>
-                            <th style="padding:12px 16px;text-align:left;">Department</th>
-                            <th style="padding:12px 16px;text-align:left;">Batch</th>
-                            <th style="padding:12px 16px;text-align:left;">Email</th>
-                            <th style="padding:12px 16px;text-align:left;">Phone</th>
-                            <th style="padding:12px 16px;text-align:left;">Company/Institution</th>
-                            <th style="padding:12px 16px;text-align:left;">Designation</th>
-                            <th style="padding:12px 16px;text-align:left;">LinkedIn/Facebook URL</th>
-                            <th style="padding:12px 16px;text-align:left;">Current Status</th>
-                            <th style="padding:12px 16px;text-align:left;">Updated Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="previewSpreadsheetBody">
-                        <tr><td colspan="14" style="text-align:center;padding:24px;color:var(--text-secondary);"><span class="spinner spinner-sm"></span> Loading records...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="table-footer" style="display:flex;justify-content:space-between;align-items:center;padding-top:15px;margin-top:15px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:0.85rem;color:var(--text-secondary);">Show</span>
-                    <select class="filter-select" id="previewLimit" style="padding:4px 8px;font-size:0.85rem;width:100px;" onchange="onPreviewFilterChange()">
-                        <option value="10">10</option>
-                        <option value="25" selected>25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="250">250</option>
-                        <option value="500">500</option>
-                        <option value="1000">1000</option>
-                        <option value="2500">2500</option>
-                        <option value="5000">5000</option>
-                    </select>
-                    <span style="font-size:0.85rem;color:var(--text-secondary);">entries</span>
-                </div>
-                <div style="font-size:0.85rem;color:var(--text-secondary);" id="previewTableInfo">Showing 0 of 0 entries</div>
-                <div class="pagination" id="previewPagination" style="display:flex;gap:6px;"></div>
-            </div>
+        <div class="cards-row">
+          <div class="stat-card">
+            <div class="card-icon blue"><i class="fas fa-folder-open"></i></div>
+            <div class="card-value" id="assignedCount">0</div>
+            <div class="card-label">Assigned Records</div>
+          </div>
+          <div class="stat-card">
+            <div class="card-icon green"><i class="fas fa-check-double"></i></div>
+            <div class="card-value" id="completedCount">0</div>
+            <div class="card-label">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="card-icon amber"><i class="fas fa-pen"></i></div>
+            <div class="card-value" id="draftCount">0</div>
+            <div class="card-label">Drafts</div>
+          </div>
+          <div class="stat-card">
+            <div class="card-icon orange"><i class="fas fa-hourglass-half"></i></div>
+            <div class="card-value" id="remainingCount">0</div>
+            <div class="card-label">Remaining</div>
+          </div>
+          <div class="stat-card">
+            <div class="card-icon purple"><i class="fas fa-calendar-day"></i></div>
+            <div class="card-value" id="todayCount">0</div>
+            <div class="card-label">Today's Updates</div>
+          </div>
         </div>
-    </div>
 
-    <div id="section-settings" class="content-section" style="display:none;">
+        <div class="table-container">
+          <div class="table-header">
+            <h3><i class="fas fa-list" style="margin-right:8px;color:var(--primary);"></i> Alumni Records</h3>
+            <div class="table-actions">
+              <input type="text" class="table-search" id="tableSearch" placeholder="Search records..."
+                style="width: 240px; min-width: 200px;">
+              <button class="btn btn-secondary btn-sm" onclick="openFilterModal()"
+                style="height:36px;font-size:0.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dark);cursor:pointer;">
+                <i class="fas fa-filter" style="color:var(--primary);"></i> Filters <span id="activeFilterBadge"
+                  class="badge badge-primary"
+                  style="display:none;margin-left:4px;padding:2px 6px;border-radius:10px;font-size:0.7rem;background:var(--primary);color:#fff;">0</span>
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Alumni Name</th>
+                  <th>Department</th>
+                  <th>Batch</th>
+                  <th>Company/Institution</th>
+                  <th>Designation</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recordsBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer"
+            style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">Records per page:</label>
+              <select class="form-control" id="rowsPerPageSelect"
+                style="width:auto;padding:4px 8px;font-size:0.8rem;border:1px solid var(--border-color);border-radius:6px;background:#fff;outline:none;">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2500">2500</option>
+                <option value="5000">5000</option>
+              </select>
+            </div>
+            <div class="info" id="tableInfo">Showing 0 of 0 entries</div>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+      </div> <!-- Close section-dashboard -->
+
+      <div id="section-preview" class="content-section" style="display:none; padding: 20px;">
+        <div class="page-header"
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div>
+            <h2>Alumni Records Sheet View</h2>
+            <p>Full-screen spreadsheet view of your assigned alumni records.</p>
+          </div>
+        </div>
+
+        <div class="card spreadsheet-card"
+          style="background:#fff;padding:20px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;display:flex;flex-direction:column;">
+          <div class="table-header"
+            style="border-bottom:none;padding-bottom:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:0;">
+            <h3 style="font-size:1.1rem;font-weight:600;color:var(--text-dark);margin:0;"><i class="fas fa-table"
+                style="color:var(--primary);margin-right:8px;"></i>Spreadsheet View</h3>
+            <div class="table-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
+              <input type="text" class="table-search" id="previewSearch" placeholder="Search records..."
+                style="width:240px;min-width:200px;" oninput="onPreviewFilterChange()">
+              <button class="btn btn-secondary btn-sm" onclick="openFilterModal()"
+                style="height:36px;font-size:0.8rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dark);cursor:pointer;">
+                <i class="fas fa-filter" style="color:var(--primary);"></i> Filters
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)"
+                style="height:36px;white-space:nowrap;" title="View in Full Screen"><i class="fas fa-expand"></i> Full
+                Screen</button>
+            </div>
+          </div>
+
+          <div class="table-container"
+            style="overflow-x:auto;position:relative;border:1px solid var(--border);border-radius:8px;">
+            <table class="table spreadsheet-table" style="border-collapse:separate;border-spacing:0;width:100%;"
+              id="previewSpreadsheetTable">
+              <thead>
+                <tr
+                  style="background:var(--bg-light);position:sticky;top:0;z-index:10;border-bottom:2px solid var(--border);">
+                  <th class="sticky-col" style="padding:12px 16px;text-align:left;left:0;z-index:4;">S.No</th>
+                  <th style="padding:12px 16px;text-align:left;">Name</th>
+                  <th style="padding:12px 16px;text-align:left;">Register No</th>
+                  <th style="padding:12px 16px;text-align:left;">Father's Name</th>
+                  <th style="padding:12px 16px;text-align:left;">Date of Birth</th>
+                  <th style="padding:12px 16px;text-align:left;">Department</th>
+                  <th style="padding:12px 16px;text-align:left;">Batch</th>
+                  <th style="padding:12px 16px;text-align:left;">Email</th>
+                  <th style="padding:12px 16px;text-align:left;">Phone</th>
+                  <th style="padding:12px 16px;text-align:left;">Company/Institution</th>
+                  <th style="padding:12px 16px;text-align:left;">Designation</th>
+                  <th style="padding:12px 16px;text-align:left;">LinkedIn/Facebook URL</th>
+                  <th style="padding:12px 16px;text-align:left;">Current Status</th>
+                  <th style="padding:12px 16px;text-align:left;">Updated Date</th>
+                </tr>
+              </thead>
+              <tbody id="previewSpreadsheetBody">
+                <tr>
+                  <td colspan="14" style="text-align:center;padding:24px;color:var(--text-secondary);"><span
+                      class="spinner spinner-sm"></span> Loading records...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer"
+            style="display:flex;justify-content:space-between;align-items:center;padding-top:15px;margin-top:15px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:0.85rem;color:var(--text-secondary);">Show</span>
+              <select class="filter-select" id="previewLimit" style="padding:4px 8px;font-size:0.85rem;width:100px;"
+                onchange="onPreviewFilterChange()">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2500">2500</option>
+                <option value="5000">5000</option>
+              </select>
+              <span style="font-size:0.85rem;color:var(--text-secondary);">entries</span>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);" id="previewTableInfo">Showing 0 of 0 entries
+            </div>
+            <div class="pagination" id="previewPagination" style="display:flex;gap:6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-settings" class="content-section" style="display:none;">
         <div class="page-header">
-            <div>
-                <h2>Settings</h2>
-                <p>Manage your account settings and preferences.</p>
-            </div>
+          <div>
+            <h2>Settings</h2>
+            <p>Manage your account settings and preferences.</p>
+          </div>
         </div>
-        <div class="card" style="background:#fff;padding:24px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:28px;">
-          <div class="tabs" id="settingsTabs" style="display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid #E5E7EB;padding-bottom:10px;">
-            <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">General</button>
-            <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)" style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Security</button>
+        <div class="card"
+          style="background:#fff;padding:24px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:28px;">
+          <div class="tabs" id="settingsTabs"
+            style="display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid #E5E7EB;padding-bottom:10px;">
+            <button class="tab-item active" data-tab="general" onclick="switchSettingsTab('general',this)"
+              style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">General</button>
+            <button class="tab-item" data-tab="security" onclick="switchSettingsTab('security',this)"
+              style="font-weight:500;padding:6px 12px;border:none;background:none;cursor:pointer;">Security</button>
           </div>
           <div class="tab-content active" id="tab-general">
             <div class="form-group" style="margin-bottom:16px;">
-              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Your Name</label>
-              <input class="form-control" type="text" id="settingsName" value="Rahul" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+              <label
+                style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Your
+                Name</label>
+              <input class="form-control" type="text" id="settingsName" value="Rahul"
+                style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
             </div>
             <div class="form-group" style="margin-bottom:16px;">
-              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Email Address</label>
-              <input class="form-control" type="email" id="settingsEmail" value="member@test.com" style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+              <label
+                style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Email
+                Address</label>
+              <input class="form-control" type="email" id="settingsEmail" value="member@test.com"
+                style="max-width:400px;width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
             </div>
-            <button class="btn btn-primary" onclick="saveMemberProfile()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+            <button class="btn btn-primary" onclick="saveMemberProfile()"
+              style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
               <i class="fas fa-save"></i> Save Settings
             </button>
           </div>
           <div class="tab-content" id="tab-security" style="display:none;">
             <div class="form-group" style="margin-bottom:16px;">
-              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Current Password</label>
+              <label
+                style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Current
+                Password</label>
               <div style="position:relative; max-width:400px;">
-                <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
-                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsOldPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
+                <input class="form-control" type="password" id="settingsOldPass" placeholder="Enter current password"
+                  style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+                <button type="button" class="password-toggle"
+                  onclick="togglePasswordVisibility('settingsOldPass', this)"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
                   <i class="far fa-eye"></i>
                 </button>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:16px;">
-              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">New Password</label>
+              <label
+                style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">New
+                Password</label>
               <div style="position:relative; max-width:400px;">
-                <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
-                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsNewPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
+                <input class="form-control" type="password" id="settingsNewPass" placeholder="Enter new password"
+                  style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+                <button type="button" class="password-toggle"
+                  onclick="togglePasswordVisibility('settingsNewPass', this)"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
                   <i class="far fa-eye"></i>
                 </button>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:16px;">
-              <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Confirm Password</label>
+              <label
+                style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:6px;color:var(--text-secondary);">Confirm
+                Password</label>
               <div style="position:relative; max-width:400px;">
-                <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
-                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('settingsConfirmPass', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
+                <input class="form-control" type="password" id="settingsConfirmPass" placeholder="Confirm new password"
+                  style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border-color);border-radius:6px;background:#F9FAFB;">
+                <button type="button" class="password-toggle"
+                  onclick="togglePasswordVisibility('settingsConfirmPass', this)"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:3;">
                   <i class="far fa-eye"></i>
                 </button>
               </div>
             </div>
-            <button class="btn btn-primary" onclick="saveMemberPassword()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+            <button class="btn btn-primary" onclick="saveMemberPassword()"
+              style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
               <i class="fas fa-save"></i> Update Password
             </button>
           </div>
         </div>
-    </div> <!-- section-settings end -->
+      </div> <!-- section-settings end -->
 
-    <!-- Full-Page WhatsApp Chat Section -->
-    <div id="section-chat" class="content-section" style="display:none;padding:0;">
-      <div id="chatPageApp"></div>
-    </div>
+      <!-- Full-Page WhatsApp Chat Section -->
+      <div id="section-chat" class="content-section" style="display:none;padding:0;">
+        <div id="chatPageApp"></div>
+      </div>
 
-</div> <!-- end content-wrapper -->
+    </div> <!-- end content-wrapper -->
 
-<div class="modal-overlay" id="updateModal" style="overflow-x:visible;">
-    <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;overflow:visible;">
-        <button type="button" class="floating-modal-nav-btn left-nav-btn" id="modalNavPrevBtn" onclick="navigateModalRecord(-1)" title="Previous Record"><i class="fas fa-chevron-left"></i></button>
-        <button type="button" class="floating-modal-nav-btn right-nav-btn" id="modalNavNextBtn" onclick="navigateModalRecord(1)" title="Next Record"><i class="fas fa-chevron-right"></i></button>
+    <div class="modal-overlay" id="updateModal" style="overflow-x:visible;">
+      <div class="modal modal-xl" style="max-width:900px;width:95vw;position:relative;overflow:visible;">
+        <button type="button" class="floating-modal-nav-btn left-nav-btn" id="modalNavPrevBtn"
+          onclick="navigateModalRecord(-1)" title="Previous Record"><i class="fas fa-chevron-left"></i></button>
+        <button type="button" class="floating-modal-nav-btn right-nav-btn" id="modalNavNextBtn"
+          onclick="navigateModalRecord(1)" title="Next Record"><i class="fas fa-chevron-right"></i></button>
         <div class="modal-header">
-            <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
-                <div class="avatar" id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">A</div>
-                <div class="info">
-                    <h3 id="modalTitle" style="font-size:16px;font-weight:700;color:#1E293B">Update Profile</h3>
-                    <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
-                </div>
+          <div class="modal-header-left" style="display:flex;align-items:center;gap:14px">
+            <div class="avatar" id="modalAvatar"
+              style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px">
+              A</div>
+            <div class="info">
+              <h3 id="modalTitle" style="font-size:16px;font-weight:700;color:#1E293B">Update Profile</h3>
+              <span id="modalSubtitle" style="font-size:12px;color:#64748B">Alumni Professional Details</span>
             </div>
-            <div style="display:flex;align-items:center;gap:12px;">
-                <button type="button" id="modalTopEditBtn" onclick="toggleModalFieldsEditMode()" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#2563EB;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;" title="Click pencil to unlock pre-filled fields for editing">
-                    <i class="fas fa-pencil-alt"></i>
-                </button>
-                <span id="modalNavCounter" style="font-size:12px;font-weight:600;color:#475569;background:#F1F5F9;padding:4px 10px;border-radius:12px;border:1px solid #CBD5E1;">1 / 1</span>
-                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
-            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button type="button" id="modalTopEditBtn" onclick="toggleModalFieldsEditMode()"
+              style="background:#EFF6FF;border:1px solid #BFDBFE;color:#2563EB;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;"
+              title="Click pencil to unlock pre-filled fields for editing">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <span id="modalNavCounter"
+              style="font-size:12px;font-weight:600;color:#475569;background:#F1F5F9;padding:4px 10px;border-radius:12px;border:1px solid #CBD5E1;">1
+              / 1</span>
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+          </div>
         </div>
         <div class="modal-body">
-            <form id="updateForm" novalidate>
-                <div class="update-status-row" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-                    <span style="font-size:13px;color:var(--text-secondary);font-weight:500;">Current Status:</span>
-                    <span class="status-badge pending" id="modalStatusBadge"><i class="fas fa-clock"></i> Pending</span>
+          <form id="updateForm" novalidate>
+            <div class="update-status-row"
+              style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+              <span style="font-size:13px;color:var(--text-secondary);font-weight:500;">Current Status:</span>
+              <span class="status-badge pending" id="modalStatusBadge"><i class="fas fa-clock"></i> Pending</span>
+            </div>
+            <div class="form-row form-row-3col"
+              style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;margin-bottom:16px;">
+              <div class="form-group">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" id="fieldName" placeholder="Enter full name">
+                <div class="error-text" id="errorName">Name is required</div>
+              </div>
+              <div class="form-group">
+                <label>Department <span class="required">*</span></label>
+                <input type="text" id="fieldDept" placeholder="Department" readonly>
+                <div class="error-text" id="errorDept">Department is required</div>
+              </div>
+              <div class="form-group">
+                <label>Batch <span class="required">*</span></label>
+                <input type="text" id="fieldBatch" placeholder="Batch" readonly>
+                <div class="error-text" id="errorBatch">Batch is required</div>
+              </div>
+            </div>
+            <!-- 1. Smart Career Classification Section -->
+            <div
+              style="background:#F8FAFC;padding:14px 16px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:16px;">
+              <div
+                style="font-size:0.75rem;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-briefcase"></i> Career &amp; Employment Classification
+              </div>
+              <div class="form-row"
+                style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:12px;">
+                <div class="form-group">
+                  <label
+                    style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Employment
+                    Status</label>
+                  <select id="fieldEmploymentStatus"
+                    style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                    <option value="Working">Working</option>
+                    <option value="Higher Studies">Higher Studies</option>
+                    <option value="Not Working">Not Working</option>
+                    <option value="Retired">Retired</option>
+                    <option value="Unknown">Unknown</option>
+                  </select>
                 </div>
-                <div class="form-row form-row-3col" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;margin-bottom:16px;">
-                    <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
-                        <input type="text" id="fieldName" placeholder="Enter full name">
-                        <div class="error-text" id="errorName">Name is required</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Department <span class="required">*</span></label>
-                        <input type="text" id="fieldDept" placeholder="Department" readonly>
-                        <div class="error-text" id="errorDept">Department is required</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Batch <span class="required">*</span></label>
-                        <input type="text" id="fieldBatch" placeholder="Batch" readonly>
-                        <div class="error-text" id="errorBatch">Batch is required</div>
-                    </div>
+                <div class="form-group">
+                  <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career
+                    Type</label>
+                  <select id="fieldCareerType"
+                    style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                    <option value="">Select Career Type</option>
+                    <option value="Private Employee">Private Employee</option>
+                    <option value="Government Employee">Government Employee</option>
+                    <option value="Entrepreneur">Entrepreneur</option>
+                    <option value="Business Owner">Business Owner</option>
+                    <option value="Self Employed">Self Employed</option>
+                    <option value="Freelancer">Freelancer</option>
+                    <option value="Research Scholar">Research Scholar</option>
+                    <option value="Student">Student</option>
+                    <option value="Intern">Intern</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
-          <!-- 1. Smart Career Classification Section -->
-          <div style="background:#F8FAFC;padding:14px 16px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:16px;">
-            <div style="font-size:0.75rem;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-briefcase"></i> Career &amp; Employment Classification
-            </div>
-            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:12px;">
-              <div class="form-group">
-                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Employment Status</label>
-                <select id="fieldEmploymentStatus" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
-                  <option value="Working">Working</option>
-                  <option value="Higher Studies">Higher Studies</option>
-                  <option value="Not Working">Not Working</option>
-                  <option value="Retired">Retired</option>
-                  <option value="Unknown">Unknown</option>
-                </select>
               </div>
-              <div class="form-group">
-                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career Type</label>
-                <select id="fieldCareerType" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
-                  <option value="">Select Career Type</option>
-                  <option value="Private Employee">Private Employee</option>
-                  <option value="Government Employee">Government Employee</option>
-                  <option value="Entrepreneur">Entrepreneur</option>
-                  <option value="Business Owner">Business Owner</option>
-                  <option value="Self Employed">Self Employed</option>
-                  <option value="Freelancer">Freelancer</option>
-                  <option value="Research Scholar">Research Scholar</option>
-                  <option value="Student">Student</option>
-                  <option value="Intern">Intern</option>
-                  <option value="Other">Other</option>
-                </select>
+              <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;">
+                <div class="form-group">
+                  <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career
+                    Category</label>
+                  <select id="fieldCareerCategory" onchange="onCareerCategoryChange()"
+                    style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                    <option value="">Select Career Category</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Role
+                    Category</label>
+                  <select id="fieldRoleCategory"
+                    style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+                    <option value="">Select Role Category</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Conditional University Field (Higher Studies / Student / Research Scholar) -->
+              <div class="form-group" id="universityGroupContainer" style="display:none;margin-top:12px;">
+                <label style="display:block;font-size:12px;font-weight:600;color:#8B5CF6;margin-bottom:4px;"><i
+                    class="fas fa-university"></i> University / Higher Education Institution</label>
+                <input type="text" id="fieldUniversity" list="universityDatalist"
+                  placeholder="Select or type university (e.g., Anna University, IIT Madras, Stanford)..."
+                  style="width:100%;padding:9px 12px;border:1px solid #C084FC;border-radius:8px;font-size:13px;outline:none;background:#FAF5FF;"
+                  autocomplete="off">
+                <datalist id="universityDatalist"></datalist>
               </div>
             </div>
-            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;">
-              <div class="form-group">
-                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career Category</label>
-                <select id="fieldCareerCategory" onchange="onCareerCategoryChange()" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
-                  <option value="">Select Career Category</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Role Category</label>
-                <select id="fieldRoleCategory" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
-                  <option value="">Select Role Category</option>
-                </select>
-              </div>
-            </div>
-            <!-- Conditional University Field (Higher Studies / Student / Research Scholar) -->
-            <div class="form-group" id="universityGroupContainer" style="display:none;margin-top:12px;">
-              <label style="display:block;font-size:12px;font-weight:600;color:#8B5CF6;margin-bottom:4px;"><i class="fas fa-university"></i> University / Higher Education Institution</label>
-              <input type="text" id="fieldUniversity" list="universityDatalist" placeholder="Select or type university (e.g., Anna University, IIT Madras, Stanford)..." style="width:100%;padding:9px 12px;border:1px solid #C084FC;border-radius:8px;font-size:13px;outline:none;background:#FAF5FF;" autocomplete="off">
-              <datalist id="universityDatalist"></datalist>
-            </div>
-          </div>
 
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldDesignation" placeholder="Current designation" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorDesignation" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Designation is required</div>
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:16px">
+              <div class="form-group">
+                <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Designation
+                  <span class="required" style="color:#EF4444">*</span></label>
+                <input type="text" id="fieldDesignation" placeholder="Current designation"
+                  style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <div class="error-text" id="errorDesignation"
+                  style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Designation is required</div>
+              </div>
+              <div class="form-group">
+                <label
+                  style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company/Institution
+                  <span class="required" style="color:#EF4444">*</span></label>
+                <input type="text" id="fieldCompany" placeholder="Current company/institution"
+                  style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+                <div class="error-text" id="errorCompany"
+                  style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Company/Institution <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldCompany" placeholder="Current company/institution" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorCompany" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Company is required</div>
-            </div>
-          </div>
 
-          <!-- 2. Cascading Location Hierarchy Section -->
-          <div style="background:#F8FAFC;padding:14px 16px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:16px;">
-            <div style="font-size:0.75rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-map-marker-alt"></i> Cascading Location Details
+            <!-- 2. Cascading Location Hierarchy Section -->
+            <div
+              style="background:#F8FAFC;padding:14px 16px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:16px;">
+              <div
+                style="font-size:0.75rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-map-marker-alt"></i> Cascading Location Details
+              </div>
+              <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+                <div class="form-group">
+                  <label
+                    style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">Country</label>
+                  <input type="text" id="fieldCountry" list="countryDatalist" class="form-control"
+                    placeholder="Type country (e.g. India)..."
+                    style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;"
+                    onclick="this.select()" autocomplete="off">
+                  <datalist id="countryDatalist"></datalist>
+                </div>
+                <div class="form-group">
+                  <label
+                    style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">State</label>
+                  <input type="text" id="fieldState" list="stateDatalist" class="form-control"
+                    placeholder="Type state (e.g. Tamil Nadu)..."
+                    style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;"
+                    onclick="this.select()" autocomplete="off" disabled>
+                  <datalist id="stateDatalist"></datalist>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                  <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">City /
+                    District</label>
+                  <input type="text" id="fieldCity" list="cityDatalist" class="form-control"
+                    placeholder="Type city (e.g. Chennai)..."
+                    style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;"
+                    onclick="this.select()" autocomplete="off" disabled>
+                  <datalist id="cityDatalist"></datalist>
+                  <div class="error-text" id="errorCity"
+                    style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City / Address is required</div>
+                </div>
+              </div>
             </div>
-            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+            <div class="form-row">
               <div class="form-group">
-                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">Country</label>
-                <input type="text" id="fieldCountry" list="countryDatalist" class="form-control" placeholder="Type country (e.g. India)..." style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" onclick="this.select()" autocomplete="off">
-                <datalist id="countryDatalist"></datalist>
+                <label>Father's Name</label>
+                <input type="text" id="fieldFatherName" placeholder="Enter father's name">
               </div>
               <div class="form-group">
-                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">State</label>
-                <input type="text" id="fieldState" list="stateDatalist" class="form-control" placeholder="Type state (e.g. Tamil Nadu)..." style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" onclick="this.select()" autocomplete="off" disabled>
-                <datalist id="stateDatalist"></datalist>
-              </div>
-              <div class="form-group" style="grid-column: span 2;">
-                <label style="display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;">City / District</label>
-                <input type="text" id="fieldCity" list="cityDatalist" class="form-control" placeholder="Type city (e.g. Chennai)..." style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;" onclick="this.select()" autocomplete="off" disabled>
-                <datalist id="cityDatalist"></datalist>
-                <div class="error-text" id="errorCity" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City / Address is required</div>
+                <label>Date of Birth</label>
+                <input type="text" id="fieldDOB" placeholder="DD-MM-YYYY">
               </div>
             </div>
-          </div>
->>>>>>> 9c8ace087c08737723ae9a04767626c6606a93b1
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Father's Name</label>
-                        <input type="text" id="fieldFatherName" placeholder="Enter father's name">
-                    </div>
-                    <div class="form-group">
-                        <label>Date of Birth</label>
-                        <input type="text" id="fieldDOB" placeholder="DD-MM-YYYY">
-                    </div>
+            <div class="form-row" style="flex-direction: column; gap: 16px;">
+              <div class="form-group" style="width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                  <label style="margin: 0;">Email <span
+                      style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone
+                      required)</span></label>
+                  <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)"
+                    style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;"
+                    title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                 </div>
-                <div class="form-row" style="flex-direction: column; gap: 16px;">
-                    <div class="form-group" style="width: 100%;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label style="margin: 0;">Email <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone required)</span></label>
-                            <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
-                        </div>
-                        <input type="email" id="fieldEmail" placeholder="email@example.com">
-                        <div class="error-text" id="errorEmail">At least one contact (Email or Phone) is required</div>
-                    </div>
-                    <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; width: 100%;">
-                        <label>Secondary Email</label>
-                        <input type="email" id="fieldSecondaryEmail" placeholder="secondary@example.com">
-                    </div>
+                <input type="email" id="fieldEmail" placeholder="email@example.com">
+                <div class="error-text" id="errorEmail">At least one contact (Email or Phone) is required</div>
+              </div>
+              <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; width: 100%;">
+                <label>Secondary Email</label>
+                <input type="email" id="fieldSecondaryEmail" placeholder="secondary@example.com">
+              </div>
+            </div>
+            <div class="form-row" style="flex-direction: column; gap: 16px;">
+              <div class="form-group" style="width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                  <label style="margin: 0;">Phone <span
+                      style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone
+                      required)</span></label>
+                  <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)"
+                    style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;"
+                    title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                 </div>
-                <div class="form-row" style="flex-direction: column; gap: 16px;">
-                    <div class="form-group" style="width: 100%;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label style="margin: 0;">Phone <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone required)</span></label>
-                            <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
-                        </div>
-                        <input type="text" id="fieldPhone" placeholder="Phone number">
-                        <div class="error-text" id="errorPhone">At least one contact (Email or Phone) is required</div>
-                    </div>
-                    <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; width: 100%;">
-                        <label>Secondary Phone</label>
-                        <input type="text" id="fieldSecondaryPhone" placeholder="Secondary Phone number">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>LinkedIn/Facebook URL</label>
-                        <input type="url" id="fieldLinkedin" placeholder="https://linkedin.com/in/username or https://facebook.com/username">
-                    </div>
-                    <div class="form-group">
-                        <label>Government Job</label>
-                        <select id="fieldGovtJob">
-                            <option value="">Select</option>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                        </select>
-                    </div>
-                </div>
-                <input type="hidden" id="fieldIndex" value="">
-                <div class="submit-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-outline" id="saveDraftBtn">
-                        <span class="spinner"></span>
-                        <span class="btn-text">Save Draft</span>
-                        <span class="btn-loading-text">Saving...</span>
-                    </button>
-                    <button type="button" class="btn btn-primary" id="submitRecordBtn">
-                        <span class="spinner"></span>
-                        <span class="btn-text">Submit Record</span>
-                        <span class="btn-loading-text">Submitting...</span>
-                    </button>
-                    <button type="button" class="btn btn-success" id="submitNextBtn" style="background-color: var(--success); border-color: var(--success); color: #fff;">
-                        <span class="spinner"></span>
-                        <span class="btn-text"><i class="fas fa-arrow-right"></i> Submit & Next</span>
-                        <span class="btn-loading-text">Submitting...</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
-                </div>
-            </form>
+                <input type="text" id="fieldPhone" placeholder="Phone number">
+                <div class="error-text" id="errorPhone">At least one contact (Email or Phone) is required</div>
+              </div>
+              <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; width: 100%;">
+                <label>Secondary Phone</label>
+                <input type="text" id="fieldSecondaryPhone" placeholder="Secondary Phone number">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>LinkedIn/Facebook URL</label>
+                <input type="url" id="fieldLinkedin"
+                  placeholder="https://linkedin.com/in/username or https://facebook.com/username">
+              </div>
+              <div class="form-group">
+                <label>Government Job</label>
+                <select id="fieldGovtJob">
+                  <option value="">Select</option>
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+            </div>
+            <input type="hidden" id="fieldIndex" value="">
+            <div class="submit-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline" id="saveDraftBtn">
+                <span class="spinner"></span>
+                <span class="btn-text">Save Draft</span>
+                <span class="btn-loading-text">Saving...</span>
+              </button>
+              <button type="button" class="btn btn-primary" id="submitRecordBtn">
+                <span class="spinner"></span>
+                <span class="btn-text">Submit Record</span>
+                <span class="btn-loading-text">Submitting...</span>
+              </button>
+              <button type="button" class="btn btn-success" id="submitNextBtn"
+                style="background-color: var(--success); border-color: var(--success); color: #fff;">
+                <span class="spinner"></span>
+                <span class="btn-text"><i class="fas fa-arrow-right"></i> Submit & Next</span>
+                <span class="btn-loading-text">Submitting...</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
-</div>
 
-<div class="toast-container" id="toastContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
 
-<!-- Success Popup for Password Update -->
-<div class="modal-overlay" id="passwordSuccessModal" onclick="if(event.target===this)closePasswordSuccessModal()">
-    <div class="modal" style="max-width:420px;text-align:center;padding:40px 32px;">
+    <!-- Success Popup for Password Update -->
+    <div class="modal-overlay" id="passwordSuccessModal" onclick="if(event.target===this)closePasswordSuccessModal()">
+      <div class="modal" style="max-width:420px;text-align:center;padding:40px 32px;">
         <div style="font-size:56px;color:#10B981;margin-bottom:16px;">
-            <i class="fas fa-check-circle"></i>
+          <i class="fas fa-check-circle"></i>
         </div>
         <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Password Updated!</h3>
-        <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your password has been changed successfully.</p>
-        <button class="btn btn-primary" onclick="closePasswordSuccessModal()" style="padding:10px 32px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
-            <i class="fas fa-check"></i> OK
+        <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your password has been changed
+          successfully.</p>
+        <button class="btn btn-primary" onclick="closePasswordSuccessModal()"
+          style="padding:10px 32px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">
+          <i class="fas fa-check"></i> OK
         </button>
-    </div>
-</div>
-
-<!-- Filter Modal -->
-<div class="modal-overlay" id="ssFilterModal" onclick="if(event.target===this)closeFilterModal()">
-    <div class="modal" style="max-width:550px;width:90vw;">
-      <div class="modal-header">
-        <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Filters</h3>
-        <button class="modal-close" onclick="closeFilterModal()">&times;</button>
-      </div>
-      <div class="modal-body" style="padding:20px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div>
-            <label class="form-label">Department</label>
-            <select class="form-control form-select" id="filterDept" onchange="applyModalFilters()">
-              <option value="">All Departments</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Batch / Year</label>
-            <select class="form-control form-select" id="filterBatch" onchange="applyModalFilters()">
-              <option value="">All Batches</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">From Date</label>
-            <input type="date" id="filterDateFrom" class="form-control" onchange="applyModalFilters()">
-          </div>
-          <div>
-            <label class="form-label">To Date</label>
-            <input type="date" id="filterDateTo" class="form-control" onchange="applyModalFilters()">
-          </div>
-          <div style="grid-column:span 2;">
-            <label class="form-label">Status</label>
-            <select class="form-control form-select" id="filterStatus" onchange="applyModalFilters()">
-              <option value="">All Status</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-              <option value="Draft">Draft</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
-        <button class="btn btn-secondary" onclick="clearModalFilters()"><i class="fas fa-undo"></i> Clear All</button>
-        <button class="btn btn-primary" onclick="closeFilterModal()"><i class="fas fa-check"></i> Apply Filters</button>
       </div>
     </div>
-</div>
 
-<!-- System Welcome Tour & Shortcuts Modal -->
-<div class="modal-overlay" id="welcomeTourModalGuide">
-
-        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt" style="color:var(--warning);margin-right:6px;"></i>Key Features</h5>
-        <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
-          <li><strong>Global Date Filter:</strong> Filter your assigned records using the top-right navbar calendar dropdown.</li>
-          <li><strong>Update & Submit:</strong> Update alumni employment details and click <em>Submit & Next</em> to quickly process your queue.</li>
-          <li><strong>Draft Auto-Save:</strong> Save incomplete entries as drafts to return to them anytime.</li>
-        </ul>
-
-        <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard" style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
-        <div class="shortcut-grid">
-          <div class="shortcut-card">
-            <kbd>Ctrl</kbd> + <kbd>K</kbd>
-            <div class="shortcut-desc">Focus Table Search</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Esc</kbd>
-            <div class="shortcut-desc">Close Active Modal</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Ctrl</kbd> + <kbd>S</kbd>
-            <div class="shortcut-desc">Save / Submit Record</div>
-          </div>
-          <div class="shortcut-card">
-            <kbd>Alt</kbd> + <kbd>E</kbd>
-            <div class="shortcut-desc">Export Records</div>
+    <!-- Filter Modal -->
+    <div class="modal-overlay" id="ssFilterModal" onclick="if(event.target===this)closeFilterModal()">
+      <div class="modal" style="max-width:550px;width:90vw;">
+        <div class="modal-header">
+          <h3><i class="fas fa-filter" style="color:var(--primary);margin-right:8px;"></i>Filters</h3>
+          <button class="modal-close" onclick="closeFilterModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div>
+              <label class="form-label">Department</label>
+              <select class="form-control form-select" id="filterDept" onchange="applyModalFilters()">
+                <option value="">All Departments</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Batch / Year</label>
+              <select class="form-control form-select" id="filterBatch" onchange="applyModalFilters()">
+                <option value="">All Batches</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">From Date</label>
+              <input type="date" id="filterDateFrom" class="form-control" onchange="applyModalFilters()">
+            </div>
+            <div>
+              <label class="form-label">To Date</label>
+              <input type="date" id="filterDateTo" class="form-control" onchange="applyModalFilters()">
+            </div>
+            <div style="grid-column:span 2;">
+              <label class="form-label">Status</label>
+              <select class="form-control form-select" id="filterStatus" onchange="applyModalFilters()">
+                <option value="">All Status</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </div>
           </div>
         </div>
+        <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:space-between;">
+          <button class="btn btn-secondary" onclick="clearModalFilters()"><i class="fas fa-undo"></i> Clear All</button>
+          <button class="btn btn-primary" onclick="closeFilterModal()"><i class="fas fa-check"></i> Apply
+            Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Welcome Tour & Shortcuts Modal -->
+    <div class="modal-overlay" id="welcomeTourModalGuide">
+
+      <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt"
+          style="color:var(--warning);margin-right:6px;"></i>Key Features</h5>
+      <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
+        <li><strong>Global Date Filter:</strong> Filter your assigned records using the top-right navbar calendar
+          dropdown.</li>
+        <li><strong>Update & Submit:</strong> Update alumni employment details and click <em>Submit & Next</em> to
+          quickly process your queue.</li>
+        <li><strong>Draft Auto-Save:</strong> Save incomplete entries as drafts to return to them anytime.</li>
+      </ul>
+
+      <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-keyboard"
+          style="color:var(--primary);margin-right:6px;"></i>Keyboard Shortcuts</h5>
+      <div class="shortcut-grid">
+        <div class="shortcut-card">
+          <kbd>Ctrl</kbd> + <kbd>K</kbd>
+          <div class="shortcut-desc">Focus Table Search</div>
+        </div>
+        <div class="shortcut-card">
+          <kbd>Esc</kbd>
+          <div class="shortcut-desc">Close Active Modal</div>
+        </div>
+        <div class="shortcut-card">
+          <kbd>Ctrl</kbd> + <kbd>S</kbd>
+          <div class="shortcut-desc">Save / Submit Record</div>
+        </div>
+        <div class="shortcut-card">
+          <kbd>Alt</kbd> + <kbd>E</kbd>
+          <div class="shortcut-desc">Export Records</div>
+        </div>
+      </div>
       <div class="modal-footer" style="padding:14px 20px;text-align:right;">
         <button class="btn btn-primary" onclick="closeModal('welcomeTourModal')">Got it, Let's Start!</button>
       </div>
@@ -1859,10 +2234,12 @@
       <div style="padding:20px 24px;max-height:70vh;overflow-y:auto;">
         <!-- Filter Controls inside Export Modal -->
         <div class="export-section-title">
-          <span><i class="fas fa-filter" style="color:var(--primary);margin-right:6px;"></i> Customize Export Filters</span>
-          <a href="javascript:void(0)" onclick="resetExportModalFilters()" style="font-size:0.8rem;color:#64748B;text-decoration:none;">Reset Filters</a>
+          <span><i class="fas fa-filter" style="color:var(--primary);margin-right:6px;"></i> Customize Export
+            Filters</span>
+          <a href="javascript:void(0)" onclick="resetExportModalFilters()"
+            style="font-size:0.8rem;color:#64748B;text-decoration:none;">Reset Filters</a>
         </div>
-        
+
         <div class="export-filter-grid">
           <div>
             <label class="form-label" style="font-size:0.8rem;">Department</label>
@@ -1890,10 +2267,13 @@
 
         <!-- Column Selector -->
         <div class="export-section-title">
-          <span><i class="fas fa-columns" style="color:var(--primary);margin-right:6px;"></i> Select Export Columns</span>
+          <span><i class="fas fa-columns" style="color:var(--primary);margin-right:6px;"></i> Select Export
+            Columns</span>
           <div style="font-size:0.8rem;font-weight:normal;display:flex;gap:12px;">
-            <a href="javascript:void(0)" onclick="selectAllExportCols(true)" style="color:var(--primary);text-decoration:none;">Select All</a>
-            <a href="javascript:void(0)" onclick="selectAllExportCols(false)" style="color:#64748B;text-decoration:none;">Clear All</a>
+            <a href="javascript:void(0)" onclick="selectAllExportCols(true)"
+              style="color:var(--primary);text-decoration:none;">Select All</a>
+            <a href="javascript:void(0)" onclick="selectAllExportCols(false)"
+              style="color:#64748B;text-decoration:none;">Clear All</a>
           </div>
         </div>
         <div class="export-cols-grid" id="exportColsContainer">
@@ -1901,9 +2281,11 @@
         </div>
       </div>
 
-      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+      <div
+        style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
         <button class="btn btn-secondary" onclick="closeModal('exportCustomizationModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="startExportDownloadProcess()" style="padding:10px 24px;font-weight:600;">
+        <button class="btn btn-primary" onclick="startExportDownloadProcess()"
+          style="padding:10px 24px;font-weight:600;">
           <i class="fas fa-download"></i> Start Export Download
         </button>
       </div>
@@ -1917,12 +2299,14 @@
         <i class="fas fa-cloud-download-alt"></i>
       </div>
       <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;" id="exportProgressTitle">Generating Export...</h3>
-      <p style="font-size:0.85rem;color:#64748B;margin:0;" id="exportProgressSubtitle">Fetching alumni records from database...</p>
-      
+      <p style="font-size:0.85rem;color:#64748B;margin:0;" id="exportProgressSubtitle">Fetching alumni records from
+        database...</p>
+
       <div class="export-progress-bar-bg">
         <div class="export-progress-bar-fill" id="exportProgressBarFill"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748B;font-weight:600;" id="exportProgressStats">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748B;font-weight:600;"
+        id="exportProgressStats">
         <span id="exportProgressPercent">0%</span>
         <span id="exportProgressCount">0 / 0 records</span>
       </div>
@@ -1932,44 +2316,59 @@
   <!-- TODAY'S TASKS MODAL -->
   <div class="modal-overlay" id="todayTasksModal">
     <div class="modal" style="max-width:540px;width:92vw;border-radius:16px;overflow:hidden;">
-      <div class="modal-header" style="background:linear-gradient(135deg, #10B981, #059669);color:#fff;padding:18px 24px;">
-        <h3 style="color:#fff;margin:0;font-size:1.15rem;font-weight:700;"><i class="fas fa-check-double" style="margin-right:8px;"></i>Today's Work Summary & Tasks</h3>
+      <div class="modal-header"
+        style="background:linear-gradient(135deg, #10B981, #059669);color:#fff;padding:18px 24px;">
+        <h3 style="color:#fff;margin:0;font-size:1.15rem;font-weight:700;"><i class="fas fa-check-double"
+            style="margin-right:8px;"></i>Today's Work Summary & Tasks</h3>
         <button class="modal-close" onclick="closeModal('todayTasksModal')" style="color:#fff;">&times;</button>
       </div>
       <div class="modal-body" style="padding:20px 24px;">
-        <div id="todayContextBanner" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:500;margin-bottom:16px;line-height:1.5;">
-          <i class="fas fa-lightbulb" style="margin-right:6px;color:#059669;"></i><span id="todayContextText">Loading your daily summary...</span>
+        <div id="todayContextBanner"
+          style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:500;margin-bottom:16px;line-height:1.5;">
+          <i class="fas fa-lightbulb" style="margin-right:6px;color:#059669;"></i><span id="todayContextText">Loading
+            your daily summary...</span>
         </div>
-        <h4 style="font-size:0.85rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Action Items Checklist</h4>
+        <h4
+          style="font-size:0.85rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+          Action Items Checklist</h4>
         <div id="todayTasksList" style="display:flex;flex-direction:column;gap:10px;">
           <div style="text-align:center;padding:20px;color:#94A3B8;">Loading tasks...</div>
         </div>
       </div>
-      <div style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+      <div
+        style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:0.8rem;color:#64748B;" id="todayTaskProgressCount">0 tasks remaining</span>
-        <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')" style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
+        <button class="btn btn-primary btn-sm" onclick="closeModal('todayTasksModal')"
+          style="padding:8px 16px;border-radius:8px;font-weight:600;">Got It!</button>
       </div>
     </div>
   </div>
 
   <!-- UNDO CONFIRMATION MODAL -->
   <div class="modal-overlay" id="undoConfirmModal" style="display:none;">
-    <div class="modal" style="max-width:440px;width:92vw;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+    <div class="modal"
+      style="max-width:440px;width:92vw;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
       <div class="modal-header" style="background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:16px 20px;">
-        <h3 style="color:#B45309;margin:0;font-size:1.1rem;font-weight:700;"><i class="fas fa-undo" style="margin-right:8px;color:#F59E0B;"></i>Confirm Undo Submission</h3>
+        <h3 style="color:#B45309;margin:0;font-size:1.1rem;font-weight:700;"><i class="fas fa-undo"
+            style="margin-right:8px;color:#F59E0B;"></i>Confirm Undo Submission</h3>
         <button class="modal-close" onclick="closeUndoModal()" style="color:#B45309;">&times;</button>
       </div>
       <div class="modal-body" style="padding:20px;">
         <p style="font-size:0.9rem;color:var(--text-dark);margin:0 0 12px;line-height:1.5;">
-          Are you sure you want to undo submission for <strong id="undoTargetName" style="color:#2563EB;">this record</strong>?
+          Are you sure you want to undo submission for <strong id="undoTargetName" style="color:#2563EB;">this
+            record</strong>?
         </p>
-        <div style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:10px 14px;border-radius:8px;font-size:0.82rem;line-height:1.4;">
-          <i class="fas fa-info-circle" style="margin-right:4px;"></i> This record will automatically revert to <strong>Draft</strong> status so you can continue editing it.
+        <div
+          style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:10px 14px;border-radius:8px;font-size:0.82rem;line-height:1.4;">
+          <i class="fas fa-info-circle" style="margin-right:4px;"></i> This record will automatically revert to
+          <strong>Draft</strong> status so you can continue editing it.
         </div>
       </div>
-      <div style="padding:14px 20px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+      <div
+        style="padding:14px 20px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
         <button class="btn btn-secondary btn-sm" onclick="closeUndoModal()">Cancel</button>
-        <button class="btn btn-warning btn-sm" id="confirmUndoBtn" onclick="executeUndoSubmission()" style="background:#F59E0B;color:#fff;border:none;font-weight:600;">
+        <button class="btn btn-warning btn-sm" id="confirmUndoBtn" onclick="executeUndoSubmission()"
+          style="background:#F59E0B;color:#fff;border:none;font-weight:600;">
           <i class="fas fa-undo"></i> Undo & Change to Draft
         </button>
       </div>
@@ -1978,73 +2377,100 @@
 
   <!-- WELCOME TUTORIAL & DEMO TOUR MODAL -->
   <div class="modal-overlay" id="welcomeTourModal">
-    <div class="modal" style="max-width:580px;width:92vw;border-radius:18px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);">
-      <div style="background:linear-gradient(135deg, #2563EB, #4F46E5);color:#fff;padding:28px 24px 20px;text-align:center;position:relative;">
-        <button onclick="closeModal('welcomeTourModal')" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
-        <div style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
+    <div class="modal"
+      style="max-width:580px;width:92vw;border-radius:18px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);">
+      <div
+        style="background:linear-gradient(135deg, #2563EB, #4F46E5);color:#fff;padding:28px 24px 20px;text-align:center;position:relative;">
+        <button onclick="closeModal('welcomeTourModal')"
+          style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
+        <div
+          style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
           🎓
         </div>
-        <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to AlumniMS! 👋</h2>
-        <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your interactive guide to system features and recent updates.</p>
+        <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to AlumniMS!
+          👋</h2>
+        <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your
+          interactive guide to system features and recent updates.</p>
       </div>
       <div class="modal-body" style="padding:24px;">
         <div id="tourStepContent" style="font-size:0.92rem;color:#334155;line-height:1.6;min-height:110px;">
           <!-- Populated dynamically by tour script -->
         </div>
         <!-- Motivation Quote Banner -->
-        <div style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;" id="tourMotivationBanner">
+        <div
+          style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;"
+          id="tourMotivationBanner">
           "Success is the sum of small efforts repeated day in and day out. Work smoothly and have a wonderful day! 😊"
         </div>
       </div>
-      <div style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div
+        style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#64748B;cursor:pointer;">
           <input type="checkbox" id="dontShowTourCheckbox" style="accent-color:#2563EB;" /> Don't show again on login
         </label>
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-secondary btn-sm" id="tourPrevBtn" onclick="navigateTourStep(-1)" style="display:none;">Back</button>
-          <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)" style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right" style="margin-left:4px;"></i></button>
+          <button class="btn btn-secondary btn-sm" id="tourPrevBtn" onclick="navigateTourStep(-1)"
+            style="display:none;">Back</button>
+          <button class="btn btn-primary btn-sm" id="tourNextBtn" onclick="navigateTourStep(1)"
+            style="padding:8px 18px;font-weight:600;">Next Step <i class="fas fa-arrow-right"
+              style="margin-left:4px;"></i></button>
         </div>
       </div>
     </div>
   </div>
   <!-- Alumni Replies Inbox Modal -->
-  <div class="modal-overlay" id="alumniRepliesModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
-    <div class="modal-content" style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
-      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+  <div class="modal-overlay" id="alumniRepliesModal"
+    style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content"
+      style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header"
+        style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+          <div
+            style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
             <i class="fas fa-inbox" style="font-size:1.1rem;"></i>
           </div>
           <div>
             <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Alumni Email Replies Inbox</h3>
-            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Replies received from alumni detail update requests</p>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Replies received from alumni detail update
+              requests</p>
           </div>
         </div>
-        <button class="modal-close" onclick="closeModal('alumniRepliesModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+        <button class="modal-close" onclick="closeModal('alumniRepliesModal')"
+          style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
       </div>
-      <div class="modal-body" style="padding:20px 24px;max-height:60vh;overflow-y:auto;" id="alumniRepliesListContainer">
+      <div class="modal-body" style="padding:20px 24px;max-height:60vh;overflow-y:auto;"
+        id="alumniRepliesListContainer">
         <p style="text-align:center;color:#64748B;padding:20px;">Loading alumni replies...</p>
       </div>
-      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;">
+      <div class="modal-footer"
+        style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;">
         <button class="btn btn-secondary btn-sm" onclick="closeModal('alumniRepliesModal')">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Email Campaign Preview Modal -->
-  <div class="modal-overlay" id="emailCampaignModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
-    <div class="modal-content" style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
-      <div class="modal-header" style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
+  <div class="modal-overlay" id="emailCampaignModal"
+    style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    <div class="modal-content"
+      style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
+      <div class="modal-header"
+        style="padding:18px 24px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+          <div
+            style="width:38px;height:38px;background:#DBEAFE;color:#2563EB;border-radius:10px;display:flex;align-items:center;justify-content:center;">
             <i class="fas fa-paper-plane" style="font-size:1.1rem;"></i>
           </div>
           <div>
-            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Request Details (n8n Email Campaign)</h3>
-            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Preview assigned alumni recipients and personalized email template</p>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:#1E293B;">Request Details (n8n Email Campaign)
+            </h3>
+            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748B;">Preview assigned alumni recipients and
+              personalized email template</p>
           </div>
         </div>
-        <button class="modal-close" onclick="closeModal('emailCampaignModal')" style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
+        <button class="modal-close" onclick="closeModal('emailCampaignModal')"
+          style="border:none;background:transparent;color:#64748B;font-size:1.2rem;cursor:pointer;">&times;</button>
       </div>
       <div class="modal-body" style="padding:20px 24px;">
         <div id="campaignSetupState">
@@ -2053,15 +2479,20 @@
               <span style="font-size:0.85rem;font-weight:600;color:#1E40AF;">Target Assigned Recipients</span>
               <span class="badge badge-primary" id="campaignRecipientBadge">Loading...</span>
             </div>
-            <p style="margin:0;font-size:0.78rem;color:#1E3A8A;line-height:1.4;">Automated emails will be queued via n8n with individual trackable Reply-To tags (`alumnims+{assignmentId}@mountzion.ac.in`) to capture incoming replies.</p>
+            <p style="margin:0;font-size:0.78rem;color:#1E3A8A;line-height:1.4;">Automated emails will be queued via n8n
+              with individual trackable Reply-To tags (`alumnims+{assignmentId}@mountzion.ac.in`) to capture incoming
+              replies.</p>
           </div>
 
           <!-- Section Switcher Tabs -->
           <div style="display:flex;gap:10px;border-bottom:1px solid #E2E8F0;margin-bottom:14px;padding-bottom:8px;">
-            <button type="button" id="tabBtnCampaignRecipients" onclick="switchCampaignTab('recipients')" style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#2563EB;border-bottom:2px solid #2563EB;padding:4px 8px;cursor:pointer;">
-              <i class="fas fa-users" style="margin-right:4px;"></i> Target Alumni List (<span id="campaignRecipientsCountTag">0</span>)
+            <button type="button" id="tabBtnCampaignRecipients" onclick="switchCampaignTab('recipients')"
+              style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#2563EB;border-bottom:2px solid #2563EB;padding:4px 8px;cursor:pointer;">
+              <i class="fas fa-users" style="margin-right:4px;"></i> Target Alumni List (<span
+                id="campaignRecipientsCountTag">0</span>)
             </button>
-            <button type="button" id="tabBtnCampaignTemplate" onclick="switchCampaignTab('template')" style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#64748B;padding:4px 8px;cursor:pointer;">
+            <button type="button" id="tabBtnCampaignTemplate" onclick="switchCampaignTab('template')"
+              style="border:none;background:none;font-size:0.85rem;font-weight:600;color:#64748B;padding:4px 8px;cursor:pointer;">
               <i class="fas fa-envelope-open-text" style="margin-right:4px;"></i> Email Template Preview
             </button>
           </div>
@@ -2079,7 +2510,10 @@
                   </tr>
                 </thead>
                 <tbody id="campaignRecipientsPreviewTableBody">
-                  <tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading alumni records...</td></tr>
+                  <tr>
+                    <td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i
+                        class="fas fa-spinner fa-spin"></i> Loading alumni records...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -2088,19 +2522,32 @@
           <!-- Tab 2: Live Email Template Preview -->
           <div id="campaignTabTemplate" style="display:none;">
             <div style="margin-bottom:10px;">
-              <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Email Subject</label>
-              <input type="text" readonly value="Request for Professional Information Update - Mount Zion College of Engineering and Technology" style="width:100%;padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:0.82rem;background:#F8FAFC;color:#334155;">
+              <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Email
+                Subject</label>
+              <input type="text" readonly
+                value="Request for Professional Information Update - Mount Zion College of Engineering and Technology"
+                style="width:100%;padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:0.82rem;background:#F8FAFC;color:#334155;">
             </div>
 
-            <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Rendered Email Body Preview</label>
-            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:14px;font-size:0.82rem;color:#334155;line-height:1.5;" id="campaignEmailLivePreviewBox">
-              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:8px;margin-bottom:10px;font-size:0.75rem;color:#64748B;">
-                <span><strong>To:</strong> <span id="previewToEmail" style="color:#2563EB;">alumni@mountzion.ac.in</span></span>
-                <span><strong>Reply-To:</strong> <span id="previewReplyToTag" style="color:#2563EB;">alumnims+ID@mountzion.ac.in</span></span>
+            <label style="font-size:0.78rem;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Rendered
+              Email Body Preview</label>
+            <div
+              style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:14px;font-size:0.82rem;color:#334155;line-height:1.5;"
+              id="campaignEmailLivePreviewBox">
+              <div
+                style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E2E8F0;padding-bottom:8px;margin-bottom:10px;font-size:0.75rem;color:#64748B;">
+                <span><strong>To:</strong> <span id="previewToEmail"
+                    style="color:#2563EB;">alumni@mountzion.ac.in</span></span>
+                <span><strong>Reply-To:</strong> <span id="previewReplyToTag"
+                    style="color:#2563EB;">alumnims+ID@mountzion.ac.in</span></span>
               </div>
-              <p style="margin:0 0 8px;">Dear <strong id="previewAlumniName" style="color:#2563EB;">Alumnus</strong>,</p>
-              <p style="margin:0 0 8px;">We hope this email finds you well. Please update your current professional details (Company, Designation, City, Country, and LinkedIn URL) with your alma mater using your student portal.</p>
-              <p style="margin:0;color:#64748B;font-size:0.78rem;">Best regards,<br><strong>Mount Zion Alumni Relations Team</strong></p>
+              <p style="margin:0 0 8px;">Dear <strong id="previewAlumniName" style="color:#2563EB;">Alumnus</strong>,
+              </p>
+              <p style="margin:0 0 8px;">We hope this email finds you well. Please update your current professional
+                details (Company, Designation, City, Country, and LinkedIn URL) with your alma mater using your student
+                portal.</p>
+              <p style="margin:0;color:#64748B;font-size:0.78rem;">Best regards,<br><strong>Mount Zion Alumni Relations
+                  Team</strong></p>
             </div>
           </div>
         </div>
@@ -2108,12 +2555,15 @@
         <div id="campaignProgressState" style="display:none;text-align:center;padding:10px 0;">
           <h4 style="margin:0 0 10px;font-size:1rem;color:#1E293B;">Campaign Dispatched & Processing</h4>
           <div style="width:100%;background:#E2E8F0;border-radius:8px;height:12px;overflow:hidden;margin-bottom:14px;">
-            <div id="campaignProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#2563EB,#3B82F6);transition:width 0.4s ease;"></div>
+            <div id="campaignProgressBar"
+              style="width:0%;height:100%;background:linear-gradient(90deg,#2563EB,#3B82F6);transition:width 0.4s ease;">
+            </div>
           </div>
           <p id="campaignProgressStats" style="font-size:0.85rem;color:#64748B;margin:0;">Sent: 0 / Failed: 0</p>
         </div>
       </div>
-      <div class="modal-footer" style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+      <div class="modal-footer"
+        style="padding:14px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
         <button class="btn btn-secondary btn-sm" onclick="closeModal('emailCampaignModal')">Cancel</button>
         <button class="btn btn-primary btn-sm" id="launchCampaignSubmitBtn" onclick="submitEmailCampaignLaunch()">
           <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign
@@ -2123,28 +2573,29 @@
   </div>
 
 
-<script src="js/app.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/services/api.js"></script>
-<script src="js/locationCascade.js"></script>
-<script src="js/dynamic-tour.js"></script>
-<script>
+  <script src="js/app.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/services/api.js"></script>
+  <script src="js/locationCascade.js"></script>
+  <script src="js/dynamic-tour.js"></script>
+  <script>
     window.Toast = window.Toast || {
-      success: function(t, m) { /* Completely removed green popups */ },
-      warning: function(t, m) { window.showToast(t, m, 'warning'); },
-      info: function(t, m) { /* Completely removed info popups */ },
-      danger: function(t, m) { window.showToast(t, m, 'danger'); },
-      error: function(t, m) { window.showToast(t, m, 'danger'); }
+      success: function (t, m) { /* Completely removed green popups */ },
+      warning: function (t, m) { window.showToast(t, m, 'warning'); },
+      info: function (t, m) { /* Completely removed info popups */ },
+      danger: function (t, m) { window.showToast(t, m, 'danger'); },
+      error: function (t, m) { window.showToast(t, m, 'danger'); }
     };
     var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
-</script>
-<script src="js/member.js?v=2.0.0"></script>
-<script src="js/typeahead.js"></script>
-<script src="js/smartMasterData.js"></script>
-<script src="js/chatPage.js"></script>
-<script src="js/alumniAlertPanel.js"></script>
-<script src="js/chat.js"></script>
+  </script>
+  <script src="js/member.js?v=2.0.0"></script>
+  <script src="js/typeahead.js"></script>
+  <script src="js/smartMasterData.js"></script>
+  <script src="js/chatPage.js"></script>
+  <script src="js/alumniAlertPanel.js"></script>
+  <script src="js/chat.js"></script>
 
 </body>
+
 </html>

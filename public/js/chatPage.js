@@ -827,7 +827,7 @@
               </div>
               <div>
                 <div style="font-size:0.72rem;font-weight:700;color:#2563EB;margin-bottom:3px;padding:0 2px;cursor:pointer;display:flex;align-items:center;gap:5px;" onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })">
-                  <span>${escapeHtml(senderName)}</span> &bull; <span style="background:#DBEAFE;color:#1E40AF;padding:1px 6px;border-radius:8px;font-size:0.65rem;">${escapeHtml(m.sender_role || 'Member')}</span>
+                  <span>${escapeHtml(senderName)}</span> &bull; <span class="chat-role-pill chat-role-${(m.sender_role || 'member').toLowerCase().includes('leader') ? 'leader' : ((m.sender_role || 'member').toLowerCase().includes('admin') ? 'admin' : 'member')}" style="background:#DBEAFE;color:#1E40AF;padding:1px 6px;border-radius:8px;font-size:0.65rem;">${escapeHtml(m.sender_role || 'Member')}</span>
                 </div>
                 ${cardHtml}
                 ${reactionsHtml}
@@ -860,8 +860,9 @@
         var rolePillBg = '#DBEAFE';
         var rolePillColor = '#1E40AF';
         var roleText = m.sender_role || 'Member';
-        if (roleText.toLowerCase().includes('leader')) { rolePillBg = '#EDE9FE'; rolePillColor = '#5B21B6'; }
-        else if (roleText.toLowerCase().includes('admin')) { rolePillBg = '#FEF3C7'; rolePillColor = '#92400E'; }
+        var roleKey = 'member';
+        if (roleText.toLowerCase().includes('leader')) { rolePillBg = '#EDE9FE'; rolePillColor = '#5B21B6'; roleKey = 'leader'; }
+        else if (roleText.toLowerCase().includes('admin')) { rolePillBg = '#FEF3C7'; rolePillColor = '#92400E'; roleKey = 'admin'; }
 
         html += `
           <div class="chat-msg-wrapper" style="justify-content:flex-start;">
@@ -871,7 +872,7 @@
             
             <div style="display:flex;flex-direction:column;align-items:flex-start;">
               <div onclick="openUserProfileModal({ id:${senderId}, name:'${senderName.replace(/'/g, "\\'")}', role:'${m.sender_role || 'Member'}', department:'${m.sender_department || ''}', email:'${m.sender_email || ''}' })" style="font-size:0.72rem;font-weight:700;color:#0F172A;margin-bottom:3px;padding:0 3px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;">
-                <span>${escapeHtml(senderName)}</span> &bull; <span style="background:${rolePillBg};color:${rolePillColor};padding:1px 6px;border-radius:8px;font-size:0.65rem;font-weight:700;">${escapeHtml(roleText)}</span>
+                <span>${escapeHtml(senderName)}</span> &bull; <span class="chat-role-pill chat-role-${roleKey}" style="background:${rolePillBg};color:${rolePillColor};padding:1px 6px;border-radius:8px;font-size:0.65rem;font-weight:700;">${escapeHtml(roleText)}</span>
               </div>
               <div style="display:inline-block;max-width:65vw;padding:8px 13px 6px;border-radius:16px 16px 16px 4px;background:#FFFFFF;color:#0F172A;box-shadow:0 3px 10px rgba(15,23,42,0.05);border:1px solid #F1F5F9;font-size:0.88rem;line-height:1.45;word-break:break-word;">
                 <div id="msg-text-${msgIdKey}" data-raw-text="${escapeHtml(rawText)}"><span style="display:block;white-space:pre-wrap;">${escapeHtmlMessage(rawText)}</span></div>
@@ -943,12 +944,14 @@
     if (d.department)  tags.push('<span style="background:#EDE9FE;color:#4C1D95;padding:3px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;white-space:nowrap;">Dept: ' + escapeHtml(d.department) + '</span>');
     if (d.batch)       tags.push('<span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;white-space:nowrap;">Batch: ' + escapeHtml(d.batch) + '</span>');
 
+    var loc = d.location || [d.city, d.state, d.country].filter(Boolean).join(', ');
+
     var rows = [];
     if (d.company)     rows.push(['Company',     d.company]);
     if (d.designation) rows.push(['Role / Title', d.designation]);
     if (d.department)  rows.push(['Department',   d.department]);
     if (d.regNo)       rows.push(['Reg No',       d.regNo]);
-    if (d.location)    rows.push(['Location',     d.location]);
+    if (loc)           rows.push(['Location',     loc]);
     if (d.phone)       rows.push(['Phone',        d.phone]);
     if (d.email)       rows.push(['Email',        d.email]);
     if (d.notes)       rows.push(['Notes',        d.notes]);
@@ -959,7 +962,7 @@
     if (d.batch)       copyLines.push('Batch: '        + d.batch);
     if (d.company)     copyLines.push('Company: '      + d.company);
     if (d.designation) copyLines.push('Designation: '  + d.designation);
-    if (d.location)    copyLines.push('Location: '     + d.location);
+    if (loc)           copyLines.push('Location: '     + loc);
     if (d.phone)       copyLines.push('Phone: '        + d.phone);
     if (d.email)       copyLines.push('Email: '        + d.email);
     if (d.linkedin)    copyLines.push('LinkedIn: '     + d.linkedin);

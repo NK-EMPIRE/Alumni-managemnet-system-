@@ -24,7 +24,7 @@
     border: none !important;
     box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5), 0 8px 10px -6px rgba(37, 99, 235, 0.3) !important;
     cursor: pointer !important;
-    z-index: 999999 !important;
+    z-index: 10500 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -65,7 +65,7 @@
     border-bottom-left-radius: 12px !important;
     box-shadow: none !important;
     cursor: pointer !important;
-    z-index: 999998 !important;
+    z-index: 10497 !important;
     align-items: center !important;
     gap: 8px !important;
     font-weight: 600 !important;
@@ -90,7 +90,7 @@
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    z-index: 999997 !important;
+    z-index: 10498 !important;
     opacity: 0 !important;
     pointer-events: none !important;
     transition: opacity 0.3s ease !important;
@@ -111,7 +111,7 @@
     height: 100vh !important;
     background: var(--chat-bg) !important;
     box-shadow: none !important;
-    z-index: 999999 !important;
+    z-index: 10499 !important;
     display: none !important;
     visibility: hidden !important;
     flex-direction: column !important;

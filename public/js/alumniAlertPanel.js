@@ -79,6 +79,11 @@
 
     var token = localStorage.getItem('token'); if (!token) return;
 
+    var country = get('aaf_country');
+    var state = get('aaf_state');
+    var city = get('aaf_city');
+    var locationStr = [city, state, country].filter(Boolean).join(', ');
+
     // Build structured payload encoded as special marker so chat can render card
     var payload = {
       name:        name,
@@ -87,7 +92,10 @@
       batch:       get('aaf_batch'),
       company:     get('aaf_company'),
       designation: get('aaf_desig'),
-      location:    get('aaf_location'),
+      country:     country,
+      state:       state,
+      city:        city,
+      location:    locationStr,
       phone:       get('aaf_phone'),
       email:       get('aaf_email'),
       linkedin:    get('aaf_linkedin'),
@@ -109,9 +117,12 @@
     .then(function(res) {
       if (res && res.success) {
         // Clear form
-        ['aaf_name','aaf_regno','aaf_dept','aaf_batch','aaf_company','aaf_desig','aaf_location','aaf_phone','aaf_email','aaf_linkedin','aaf_notes'].forEach(function(id) {
+        ['aaf_name','aaf_regno','aaf_dept','aaf_batch','aaf_company','aaf_desig','aaf_phone','aaf_email','aaf_linkedin','aaf_notes'].forEach(function(id) {
           var el = document.getElementById(id); if (el) el.value = '';
         });
+        if (window._aafLocationCascade) {
+          window._aafLocationCascade.reset();
+        }
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to Global Chat'; }
         // Close panel
         var p = document.getElementById('alumniAlertSidePanel');
@@ -193,7 +204,24 @@
 
         field('aaf_company', 'Company / Organisation', 'e.g. Infosys') +
         field('aaf_desig',   'Designation / Role',    'e.g. Software Engineer') +
-        field('aaf_location','Location',               'e.g. Bangalore') +
+
+        '<div style="background:#F1F5F9;padding:12px;border-radius:10px;border:1px solid #E2E8F0;margin-bottom:14px;">' +
+          '<div style="font-size:0.72rem;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">' +
+            '<i class="fas fa-map-marker-alt"></i> Cascading Location Details' +
+          '</div>' +
+          '<div style="' + groupStyle + '">' +
+            '<label style="' + labelStyle + '">Country</label>' +
+            '<select id="aaf_country" style="' + fieldStyle + '"></select>' +
+          '</div>' +
+          '<div style="' + groupStyle + '">' +
+            '<label style="' + labelStyle + '">State</label>' +
+            '<select id="aaf_state" style="' + fieldStyle + '"></select>' +
+          '</div>' +
+          '<div>' +
+            '<label style="' + labelStyle + '">City / District</label>' +
+            '<select id="aaf_city" style="' + fieldStyle + '"></select>' +
+          '</div>' +
+        '</div>' +
 
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
           field('aaf_phone', 'Phone',  'e.g. +91 9800000000', 'tel') +
@@ -220,6 +248,10 @@
       '</div>';
 
     document.body.appendChild(p);
+
+    if (typeof initLocationCascade === 'function') {
+      window._aafLocationCascade = initLocationCascade('aaf_country', 'aaf_state', 'aaf_city');
+    }
 
     // Close on outside click
     document.addEventListener('click', function(e) {

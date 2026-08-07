@@ -3679,6 +3679,29 @@ body.dark-mode .modal-footer {
   background-color: #1E293B !important;
 }
 
+/* ── Attendance & Alumni Analysis Dark Mode Overrides ── */
+body.dark-mode .attendance-section,
+body.dark-mode .analysis-section {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+}
+
+/* Ensure charts render with dark background */
+body.dark-mode .chartjs-render-monitor canvas {
+  background-color: #1E293B !important;
+}
+
+/* Attendance table rows */
+body.dark-mode .attendance-table tbody tr {
+  background-color: #1E293B !important;
+}
+
+/* Attendance table header */
+body.dark-mode .attendance-table thead th {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
 body.dark-mode .toast {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
@@ -6087,12 +6110,11 @@ body:has(#section-chat.active) .chat-launcher-btn {
   max-height: 100% !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  display: flex !important;
-  flex-direction: column !important;
 }
 
 #section-chat.active {
   display: flex !important;
+  flex-direction: column !important;
 }
 
 #chatPageApp {
@@ -6318,6 +6340,620 @@ body.dark-mode #chatMessageInput {
   background: #0F172A !important;
   color: #F8FAFC !important;
   border-color: #334155 !important;
+}
+
+/* Dark mode fixes for full-page chat sidebar / contacts / profile */
+body.dark-mode .chat-sidebar-left .chat-channel-item {
+  color: #CBD5E1 !important;
+}
+body.dark-mode .chat-sidebar-left .chat-channel-item:hover {
+  color: #F8FAFC !important;
+}
+body.dark-mode .chat-sidebar-left .chat-channel-item.active {
+  color: #F8FAFC !important;
+}
+body.dark-mode #chatSearchInput {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #F1F5F9 !important;
+}
+body.dark-mode #chatSearchInput::placeholder {
+  color: #94A3B8 !important;
+}
+body.dark-mode #chatPrivateList {
+  color: #CBD5E1 !important;
+}
+body.dark-mode #mentionDropdown {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+  color: #E2E8F0 !important;
+}
+body.dark-mode #userProfileModal {
+  background: #0F172A !important;
+  border-left-color: #334155 !important;
+}
+body.dark-mode #userProfileModal [id^="modalUser"] {
+  color: #F1F5F9 !important;
+}
+
+/* Dark mode: Alumni Analysis & Attendance pages (inline white surfaces) */
+body.dark-mode #section-alumniAnalysis .card[style*="background:#fff"],
+body.dark-mode #section-attendance .card[style*="background:#fff"],
+body.dark-mode #section-alumniCategory .card[style*="background:#fff"] {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+  box-shadow: none !important;
+  color: #E2E8F0 !important;
+}
+body.dark-mode #section-alumniAnalysis .card input,
+body.dark-mode #section-alumniAnalysis .card select,
+body.dark-mode #section-attendance .card input,
+body.dark-mode #section-attendance .card select {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #F1F5F9 !important;
+}
+body.dark-mode #section-alumniAnalysis .table thead tr,
+body.dark-mode #section-attendance .table thead tr {
+  background: #1E293B !important;
+  border-bottom-color: #334155 !important;
+  color: #CBD5E1 !important;
+}
+body.dark-mode #section-alumniAnalysis .table,
+body.dark-mode #section-attendance .table {
+  color: #E2E8F0 !important;
+}
+/* Force dark-on-white inline text to be light in dark mode for these tables */
+body.dark-mode #section-alumniAnalysis .table td,
+body.dark-mode #section-alumniAnalysis .table th,
+body.dark-mode #section-attendance .table td,
+body.dark-mode #section-attendance .table th {
+  color: #E2E8F0 !important;
+}
+body.dark-mode #section-attendance .card .form-label {
+  color: #CBD5E1 !important;
+}
+
+/* ============================================================
+   COMPREHENSIVE DARK MODE FIXES - CHAT, ALUMNI ANALYSIS & ATTENDANCE
+   Override hardcoded inline light-mode colors in HTML & JS-rendered content
+   ============================================================ */
+
+/* ── CHAT PAGE: Received message bubbles ── */
+body.dark-mode .chat-msg-wrapper div[style*="background:#FFFFFF"],
+body.dark-mode .chat-msg-wrapper div[style*="background:#fff"] {
+  background: #1E293B !important;
+  color: #E2E8F0 !important;
+  border-color: #334155 !important;
+}
+
+/* ── CHAT PAGE: Sender name labels & Role Badges ── */
+body.dark-mode .chat-msg-wrapper div[style*="color:#0F172A"],
+body.dark-mode .chat-msg-wrapper div[style*="color:#2563EB"] {
+  color: #60A5FA !important;
+}
+
+body.dark-mode .chat-msg-wrapper div[style*="color:#0F172A"] > span:first-child,
+body.dark-mode .chat-msg-wrapper div[style*="color:#2563EB"] > span:first-child {
+  color: #F8FAFC !important;
+}
+
+/* Member role badge in dark mode */
+body.dark-mode .chat-role-pill.chat-role-member,
+body.dark-mode .chat-msg-wrapper span[style*="background:#DBEAFE"],
+body.dark-mode .chat-msg-wrapper span[style*="background: #DBEAFE"] {
+  background: rgba(59, 130, 246, 0.22) !important;
+  color: #93C5FD !important;
+  border: 1px solid rgba(147, 197, 253, 0.3) !important;
+}
+
+/* Leader role badge in dark mode */
+body.dark-mode .chat-role-pill.chat-role-leader,
+body.dark-mode .chat-msg-wrapper span[style*="background:#EDE9FE"],
+body.dark-mode .chat-msg-wrapper span[style*="background: #EDE9FE"] {
+  background: rgba(139, 92, 246, 0.25) !important;
+  color: #C4B5FD !important;
+  border: 1px solid rgba(196, 181, 253, 0.3) !important;
+}
+
+/* Admin role badge in dark mode */
+body.dark-mode .chat-role-pill.chat-role-admin,
+body.dark-mode .chat-msg-wrapper span[style*="background:#FEF3C7"],
+body.dark-mode .chat-msg-wrapper span[style*="background: #FEF3C7"] {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #FDE68A !important;
+  border: 1px solid rgba(253, 230, 138, 0.3) !important;
+}
+
+/* ── CHAT PAGE: Message text in received bubbles ── */
+body.dark-mode .chat-msg-wrapper span[style*="color:#0F172A"] {
+  color: #E2E8F0 !important;
+}
+
+/* ── CHAT PAGE: Input bar ── */
+body.dark-mode .chat-input-bar,
+body.dark-mode div[style*="background:#FFFFFF"][style*="border-top"] {
+  background: #1E293B !important;
+  border-top-color: #334155 !important;
+}
+
+/* ── CHAT PAGE: Chat textarea ── */
+body.dark-mode .chat-textarea {
+  background: #0F172A !important;
+  color: #F1F5F9 !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .chat-textarea:focus {
+  border-color: #6366F1 !important;
+  background: #0B0F19 !important;
+  box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.25) !important;
+}
+body.dark-mode .chat-textarea::placeholder {
+  color: #64748B !important;
+}
+
+/* ── CHAT PAGE: Chat header subtitle ── */
+body.dark-mode #chatHeaderSubtitle {
+  color: #34D399 !important;
+}
+body.dark-mode #chatHeaderActionInfo {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #A5B4FC !important;
+}
+
+/* ── CHAT PAGE: Header toggle button ── */
+body.dark-mode #chatMainSidebarToggleBtn {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #A5B4FC !important;
+}
+body.dark-mode #chatMainSidebarToggleBtn:hover {
+  background: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* ── CHAT PAGE: Date separator chips ── */
+body.dark-mode .chat-date-chip,
+body.dark-mode span[style*="background:#FFFFFF"][style*="border-radius:10px"] {
+  background: #1E293B !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+
+/* ── CHAT PAGE: Mention dropdown ── */
+body.dark-mode #mentionDropdown {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+body.dark-mode #mentionDropdown div[style*="background:#F8FAFC"] {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode #mentionDropdown .mention-item {
+  border-bottom-color: #1E293B !important;
+}
+body.dark-mode #mentionDropdown .mention-item div[style*="color:#0F172A"] {
+  color: #F1F5F9 !important;
+}
+body.dark-mode #mentionDropdown .mention-item div[style*="color:#64748B"] {
+  color: #94A3B8 !important;
+}
+body.dark-mode .mention-item:hover {
+  background: #1E293B !important;
+}
+body.dark-mode .mention-item.active-nav {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-left-color: #818CF8 !important;
+}
+
+/* ── CHAT PAGE: User Profile Modal ── */
+body.dark-mode #userProfileModal {
+  background: #0F172A !important;
+  border-left-color: #334155 !important;
+}
+body.dark-mode #userProfileModal div[style*="background:#F8FAFC"] {
+  background: #0B0F19 !important;
+}
+body.dark-mode #userProfileModal div[style*="background:#fff"],
+body.dark-mode #userProfileModal div[style*="background:#FFFFFF"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+body.dark-mode #userProfileModal h3[style*="color:#0F172A"],
+body.dark-mode #userProfileModal div[style*="color:#0F172A"],
+body.dark-mode #modalUserName {
+  color: #F1F5F9 !important;
+}
+body.dark-mode #userProfileModal div[style*="color:#1E293B"] {
+  color: #CBD5E1 !important;
+}
+
+/* ── CHAT PAGE: Empty state / loading messages ── */
+body.dark-mode #chatMessagesArea div[style*="background:rgba(255,255,255"] {
+  background: rgba(30, 41, 59, 0.85) !important;
+  color: #94A3B8 !important;
+}
+
+/* ── CHAT PAGE: Scroll-to-bottom button ── */
+body.dark-mode .chat-scroll-bottom-btn {
+  background: #1E293B !important;
+  color: #A5B4FC !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .chat-scroll-bottom-btn:hover {
+  background: #4F46E5 !important;
+  color: #FFFFFF !important;
+  border-color: #4F46E5 !important;
+}
+
+/* ── CHAT PAGE: Sidebar search area border ── */
+body.dark-mode .chat-search-bar-container {
+  border-bottom-color: #1E293B !important;
+}
+
+/* ── CHAT PAGE: Section label (Direct Messages header) ── */
+body.dark-mode .chat-section-label {
+  color: #818CF8 !important;
+}
+
+/* ── CHAT PAGE: Sidebar channel text colors ── */
+body.dark-mode .chat-sidebar-left div[style*="font-weight:700"][style*="font-size:0.84rem"] {
+  color: #E2E8F0 !important;
+}
+body.dark-mode .chat-sidebar-left div[style*="opacity:0.75"] {
+  color: #64748B !important;
+}
+
+/* ── CHAT PAGE: Alumni card popups in chat ── */
+body.dark-mode .chat-msg-wrapper div[style*="border-radius:14px"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .chat-msg-wrapper div[style*="border-radius:14px"] div[style*="background:#F8FAFC"] {
+  background: #0F172A !important;
+}
+body.dark-mode .chat-msg-wrapper div[style*="border-radius:14px"] div[style*="background:#FAFAFA"] {
+  background: #1E293B !important;
+}
+body.dark-mode .chat-msg-wrapper div[style*="border-radius:14px"] span[style*="color:#0F172A"] {
+  color: #F8FAFC !important;
+}
+body.dark-mode .chat-msg-wrapper div[style*="border-radius:14px"] span[style*="color:#64748B"] {
+  color: #94A3B8 !important;
+}
+body.dark-mode .chat-msg-wrapper div[style*="border-radius:14px"] div[style*="border-bottom:1px solid #F1F5F9"] {
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode .chat-msg-wrapper button[style*="background:#F8FAFC"],
+body.dark-mode .chat-msg-wrapper button[style*="background: #F8FAFC"] {
+  background: #0F172A !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+
+/* ── ALUMNI ALERT SIDE PANEL (Alumni Detail Found) - DARK MODE ── */
+body.dark-mode #alumniAlertSidePanel {
+  background: #0F172A !important;
+  border-left-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode #alumniAlertSidePanel div[style*="background:#FEF3C7"] {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+body.dark-mode #alumniAlertSidePanel div[style*="background:#FEF3C7"] p {
+  color: #FDE68A !important;
+}
+
+body.dark-mode #alumniAlertSidePanel div[style*="background:#F1F5F9"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #alumniAlertSidePanel label {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode #alumniAlertSidePanel input,
+body.dark-mode #alumniAlertSidePanel select,
+body.dark-mode #alumniAlertSidePanel textarea {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #alumniAlertSidePanel input:focus,
+body.dark-mode #alumniAlertSidePanel select:focus,
+body.dark-mode #alumniAlertSidePanel textarea:focus {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+body.dark-mode #alumniAlertSidePanel div[style*="background:#fff"] {
+  background: #1E293B !important;
+  border-top-color: #334155 !important;
+}
+
+/* ── CHAT PAGE: Edit message textarea ── */
+body.dark-mode textarea[id^="edit-input-"] {
+  background: #0F172A !important;
+  color: #F1F5F9 !important;
+  border-color: #818CF8 !important;
+}
+body.dark-mode button[onclick^="cancelEditChatMessage"] {
+  background: #1E293B !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+
+/* ── CHAT PAGE: Reaction popover ── */
+body.dark-mode .chat-reaction-popover {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .chat-reaction-pill {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+  color: #CBD5E1 !important;
+}
+body.dark-mode .chat-reaction-pill.user-reacted {
+  background: rgba(99, 102, 241, 0.2) !important;
+  border-color: #818CF8 !important;
+  color: #A5B4FC !important;
+}
+
+/* ── CHAT PAGE: Message action buttons ── */
+body.dark-mode .chat-msg-action-btn {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #94A3B8 !important;
+}
+body.dark-mode .chat-msg-action-btn.edit-btn:hover {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #A5B4FC !important;
+  border-color: #818CF8 !important;
+}
+body.dark-mode .chat-msg-action-btn.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #FCA5A5 !important;
+  border-color: #FCA5A5 !important;
+}
+
+/* ── CHAT PAGE: Reaction button on hover ── */
+body.dark-mode .chat-msg-reaction-btn {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #94A3B8 !important;
+}
+body.dark-mode .chat-msg-reaction-btn:hover {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #A5B4FC !important;
+  border-color: #818CF8 !important;
+}
+
+/* ============================================================
+   ALUMNI ANALYSIS SECTION - DARK MODE
+   ============================================================ */
+
+/* ── Page header buttons ── */
+body.dark-mode #section-alumniAnalysis .btn-outline,
+body.dark-mode #section-alumniAnalysis button[style*="color:#1E293B"] {
+  color: #CBD5E1 !important;
+  border-color: #475569 !important;
+}
+body.dark-mode #section-alumniAnalysis .btn-outline:hover {
+  background: #334155 !important;
+  color: #F1F5F9 !important;
+}
+
+/* ── Filter bar card ── */
+body.dark-mode #section-alumniAnalysis .card[style*="background:#fff"][style*="display:flex"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+/* ── View toggle buttons container ── */
+body.dark-mode #section-alumniAnalysis div[style*="background:#F1F5F9"][style*="border-radius:8px"] {
+  background: #0F172A !important;
+}
+body.dark-mode #section-alumniAnalysis #btnAnalysisViewCards,
+body.dark-mode #section-alumniAnalysis #btnAnalysisViewTable {
+  color: #CBD5E1 !important;
+}
+body.dark-mode #section-alumniAnalysis #btnAnalysisViewCards[style*="background:#fff"] {
+  background: #334155 !important;
+  color: #A5B4FC !important;
+}
+
+/* ── Spreadsheet / data table card ── */
+body.dark-mode #section-alumniAnalysis .spreadsheet-card,
+body.dark-mode #section-alumniAnalysis .card[style*="background:#fff"][style*="border-radius:12px"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+/* ── Table header row ── */
+body.dark-mode #section-alumniAnalysis .table thead tr,
+body.dark-mode #section-alumniAnalysis .table thead tr[style*="background:#F8FAFC"] {
+  background: #0F172A !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode #section-alumniAnalysis .table thead th {
+  color: #94A3B8 !important;
+}
+
+/* ── Table body rows ── */
+body.dark-mode #section-alumniAnalysis .table tbody tr {
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode #section-alumniAnalysis .table tbody tr:hover {
+  background: rgba(30, 41, 59, 0.5) !important;
+}
+body.dark-mode #section-alumniAnalysis .table td {
+  color: #E2E8F0 !important;
+}
+body.dark-mode #section-alumniAnalysis .table td strong {
+  color: #F1F5F9 !important;
+}
+body.dark-mode #section-alumniAnalysis .table td span[style*="color:#64748B"],
+body.dark-mode #section-alumniAnalysis .table td span[style*="color:#475569"] {
+  color: #94A3B8 !important;
+}
+body.dark-mode #section-alumniAnalysis .table td strong[style*="color:#2563EB"] {
+  color: #60A5FA !important;
+}
+
+/* ── Alumni cards (dynamic JS rendered) ── */
+body.dark-mode #section-alumniAnalysis .alumni-card,
+body.dark-mode #section-alumniAnalysis div[style*="background:#fff"][style*="border-radius:12px"][style*="padding:16px"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+body.dark-mode #section-alumniAnalysis .alumni-card h4[style*="color:#0F172A"],
+body.dark-mode #section-alumniAnalysis div[style*="padding:16px"] h4[style*="color:#0F172A"] {
+  color: #F1F5F9 !important;
+}
+body.dark-mode #section-alumniAnalysis .alumni-card span[style*="color:#64748B"],
+body.dark-mode #section-alumniAnalysis div[style*="padding:16px"] span[style*="color:#64748B"] {
+  color: #94A3B8 !important;
+}
+
+/* ── Alumni card inner detail box ── */
+body.dark-mode #section-alumniAnalysis div[style*="background:#F8FAFC"][style*="border-radius:8px"] {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+}
+body.dark-mode #section-alumniAnalysis div[style*="color:#334155"] {
+  color: #CBD5E1 !important;
+}
+
+/* ── Alumni card contact links ── */
+body.dark-mode #section-alumniAnalysis a[style*="color:#0F172A"] {
+  color: #CBD5E1 !important;
+}
+
+/* ── Alumni card footer / status ── */
+body.dark-mode #section-alumniAnalysis div[style*="border-top:1px solid #F1F5F9"] {
+  border-top-color: #334155 !important;
+}
+body.dark-mode #section-alumniAnalysis span[style*="color:#94A3B8"] strong[style*="color:#1E293B"] {
+  color: #E2E8F0 !important;
+}
+
+/* ── Pagination info text ── */
+body.dark-mode #analysisPaginationInfo,
+body.dark-mode #attPaginationInfo {
+  color: #94A3B8 !important;
+}
+body.dark-mode #analysisPaginationBtns .btn,
+body.dark-mode #attPaginationBtns .btn {
+  color: #CBD5E1 !important;
+  border-color: #475569 !important;
+}
+body.dark-mode #analysisPaginationBtns .btn:hover,
+body.dark-mode #attPaginationBtns .btn:hover {
+  background: #334155 !important;
+  color: #F1F5F9 !important;
+}
+body.dark-mode #analysisPaginationBtns span,
+body.dark-mode #attPaginationBtns span {
+  color: #CBD5E1 !important;
+}
+
+/* ── Table border-top separator in pagination area ── */
+body.dark-mode #section-alumniAnalysis div[style*="border-top:1px solid #E2E8F0"],
+body.dark-mode #section-attendance div[style*="border-top:1px solid #E2E8F0"] {
+  border-top-color: #334155 !important;
+}
+
+/* ── Search highlight marks ── */
+body.dark-mode #section-alumniAnalysis mark {
+  background: #854D0E !important;
+  color: #FEF08A !important;
+}
+
+/* ============================================================
+   ATTENDANCE SECTION - DARK MODE
+   ============================================================ */
+
+/* ── Date select card ── */
+body.dark-mode #section-attendance .card[style*="background:#fff"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+/* ── Date input ── */
+body.dark-mode #attDateSelect {
+  background: #0F172A !important;
+  color: #F1F5F9 !important;
+  border-color: #334155 !important;
+}
+
+/* ── Summary stat cards (keep their distinctive colors but darken) ── */
+body.dark-mode #section-attendance .card[style*="background:#ECFDF5"] {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #34D399 !important;
+}
+body.dark-mode #section-attendance .card[style*="background:#FFFBEB"] {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #FBBF24 !important;
+}
+body.dark-mode #section-attendance .card[style*="background:#FEF2F2"] {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #FCA5A5 !important;
+}
+
+/* ── Attendance table heading text ── */
+body.dark-mode #section-attendance h3[style*="color:#1E293B"] {
+  color: #F1F5F9 !important;
+}
+
+/* ── Table header row ── */
+body.dark-mode #section-attendance .table thead tr,
+body.dark-mode #section-attendance .table thead tr[style*="background:#F8FAFC"] {
+  background: #0F172A !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode #section-attendance .table thead th {
+  color: #94A3B8 !important;
+}
+
+/* ── Table body rows ── */
+body.dark-mode #section-attendance .table tbody tr {
+  border-bottom-color: #334155 !important;
+}
+body.dark-mode #section-attendance .table tbody tr:hover {
+  background: rgba(30, 41, 59, 0.5) !important;
+}
+
+/* ── Table cell text ── */
+body.dark-mode #section-attendance .table td {
+  color: #E2E8F0 !important;
+}
+body.dark-mode #section-attendance .table td[style*="color:#1E293B"] {
+  color: #F1F5F9 !important;
+}
+body.dark-mode #section-attendance .table td[style*="color:#64748B"] {
+  color: #94A3B8 !important;
+}
+
+/* ── Filter select dropdowns ── */
+body.dark-mode #attFilterStatus,
+body.dark-mode #attFilterRole {
+  background: #0F172A !important;
+  color: #F1F5F9 !important;
+  border-color: #334155 !important;
+}
+
+/* ── Filter select options ── */
+body.dark-mode #attFilterStatus option,
+body.dark-mode #attFilterRole option {
+  background: #1E293B !important;
+  color: #F1F5F9 !important;
 }
 
 /* Alumni analytics toolbar */
@@ -6565,4 +7201,76 @@ body.dark-mode #chatMessageInput {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ── DARK MODE FOR CUSTOM SEARCHABLE SELECT (CASCADING LOCATION DROPDOWNS) ── */
+body.dark-mode .custom-searchable-select .select-trigger {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .custom-searchable-select.open .select-trigger,
+body.dark-mode .custom-searchable-select .select-trigger:focus {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+body.dark-mode .custom-searchable-select.disabled .select-trigger {
+  background: #1E293B !important;
+  color: #64748B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-arrow {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-dropdown {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .custom-searchable-select .select-search-wrap {
+  background: #1E293B !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-search-icon {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-search-input {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-search-input:focus {
+  border-color: #3B82F6 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-options-list {
+  background: #0F172A !important;
+}
+
+body.dark-mode .custom-searchable-select .select-option {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode .custom-searchable-select .select-option:hover,
+body.dark-mode .custom-searchable-select .select-option.highlighted {
+  background: #1E293B !important;
+  color: #60A5FA !important;
+}
+
+body.dark-mode .custom-searchable-select .select-option.selected {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+body.dark-mode .custom-searchable-select .select-no-results {
+  color: #64748B !important;
+}
+
 
