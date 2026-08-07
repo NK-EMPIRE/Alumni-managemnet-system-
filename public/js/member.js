@@ -505,8 +505,24 @@
         batchEl.value = record.batch || '';
         document.getElementById('fieldFatherName').value = record.fatherName || record.father_name || record.pi_father_name || '';
         document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
+
+        // Populate Smart Master Data Fields
+        var empStatusEl = document.getElementById('fieldEmploymentStatus');
+        if (empStatusEl) empStatusEl.value = record.employment_status || 'Working';
+        var cTypeEl = document.getElementById('fieldCareerType');
+        if (cTypeEl) cTypeEl.value = record.career_type || '';
+        var cCatEl = document.getElementById('fieldCareerCategory');
+        if (cCatEl) cCatEl.value = record.career_category || '';
+        if (typeof onCareerCategoryChange === 'function') onCareerCategoryChange();
+        var rCatEl = document.getElementById('fieldRoleCategory');
+        if (rCatEl) rCatEl.value = record.role_category || '';
+        var uniEl = document.getElementById('fieldUniversity');
+        if (uniEl) uniEl.value = record.university || '';
+
         document.getElementById('fieldCompany').value = record.company || '';
         document.getElementById('fieldDesignation').value = record.designation || '';
+        var distEl = document.getElementById('fieldDistrict');
+        if (distEl) distEl.value = record.district || '';
         document.getElementById('fieldCity').value = record.city || record.current_city || '';
         document.getElementById('fieldState').value = record.state || '';
         document.getElementById('fieldCountry').value = record.country || '';
@@ -656,8 +672,14 @@
         record.father_name = getVal('fieldFatherName') || record.father_name;
         record.fatherName = record.father_name;
         record.date_of_birth = getVal('fieldDOB') || record.date_of_birth;
+        record.employment_status = getVal('fieldEmploymentStatus') || record.employment_status || 'Working';
+        record.career_type = getVal('fieldCareerType') || record.career_type;
+        record.career_category = getVal('fieldCareerCategory') || record.career_category;
+        record.role_category = getVal('fieldRoleCategory') || record.role_category;
+        record.university = getVal('fieldUniversity') || record.university;
         record.company = getVal('fieldCompany') || record.company;
         record.designation = getVal('fieldDesignation') || record.designation;
+        record.district = getVal('fieldDistrict') || record.district;
         record.city = getVal('fieldCity') || record.city;
         record.state = getVal('fieldState') || record.state;
         record.country = getVal('fieldCountry') || record.country;
