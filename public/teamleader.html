@@ -638,6 +638,22 @@
     }
 
     /* Floating Modal Nav & Smart Parser Box */
+    .content-section:has(.spreadsheet-fullscreen),
+    section:has(.spreadsheet-fullscreen) {
+      z-index: 99999 !important;
+      position: relative !important;
+    }
+    .spreadsheet-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 999999 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+      padding: 15px !important;
+    }
     body.dark-mode .floating-modal-nav-btn {
       background-color: #1E293B !important;
       color: #F8FAFC !important;
@@ -1377,28 +1393,21 @@
             <span class="status-badge pending" id="modalStatusBadge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:50px;font-size:12px;font-weight:600;background:#FFFBEB;color:#92400E;"><i class="fas fa-clock"></i> Pending</span>
             <button type="button" class="btn-undo-icon" id="undoSubmitBtn" style="display:none;" onclick="undoAlumniSubmission()" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>
           </div>
-          <div class="form-row form-row-3col">
+          <div class="form-row form-row-3col" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;margin-bottom:16px;">
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Full Name <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldName" placeholder="Enter full name" style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorName" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Name is required</div>
             </div>
             <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Register No / Roll No</label>
-              <input type="text" id="fieldRegisterNo" placeholder="Register No / Roll No" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
+              <input type="text" id="fieldDept" placeholder="Department" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
+              <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
             </div>
             <div class="form-group">
               <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Batch <span class="required" style="color:#EF4444">*</span></label>
               <input type="text" id="fieldBatch" placeholder="Batch" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
               <div class="error-text" id="errorBatch" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Batch is required</div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:5px">Department <span class="required" style="color:#EF4444">*</span></label>
-              <input type="text" id="fieldDept" placeholder="Department" readonly style="width:100%;padding:10px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#F8FAFC">
-              <div class="error-text" id="errorDept" style="font-size:11px;color:#EF4444;margin-top:3px;display:none">Department is required</div>
             </div>
           </div>
 
