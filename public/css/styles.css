@@ -6070,8 +6070,17 @@ body.sidebar-collapsed.chat-active .main-content {
   margin-left: var(--sidebar-collapsed, 70px) !important;
 }
 
-body.chat-active .topbar {
+body.chat-active .topbar,
+body.chat-active .top-bar,
+body.chat-active .top-header,
+body.chat-active .top-navbar,
+body.chat-active #topNavbar {
   flex-shrink: 0 !important;
+}
+
+body.chat-active footer,
+body:has(#section-chat.active) footer {
+  display: none !important;
 }
 
 .page-content:has(#section-chat.active),
@@ -6085,8 +6094,8 @@ body.chat-active .content-wrapper {
   max-width: 100% !important;
   flex: 1 !important;
   min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
+  height: calc(100vh - 60px) !important;
+  max-height: 100% !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
   display: flex !important;
@@ -7272,5 +7281,80 @@ body.dark-mode .custom-searchable-select .select-option.selected {
 body.dark-mode .custom-searchable-select .select-no-results {
   color: #64748B !important;
 }
+
+/* ============================================================
+   ENTERPRISE UI POLISH & COMPLEXITY REDUCTION
+   ============================================================ */
+
+/* 1. Sleek Cards & Container Cards */
+.card, .stat-card, .alumni-card, .dashboard-card {
+  border-radius: 12px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.card:hover, .stat-card:hover, .alumni-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 2. Simplified Clean Inputs & Select Dropdowns */
+.form-control, input[type="text"], input[type="email"], input[type="password"], select, textarea {
+  border-radius: 8px !important;
+  font-family: inherit !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.form-control:focus, input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* 3. Modern Sleek Badges */
+.badge {
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* 4. Decluttered Table Layouts */
+.table thead th {
+  text-transform: uppercase !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.6px !important;
+  font-weight: 700 !important;
+  padding: 12px 14px !important;
+}
+
+.table tbody td {
+  padding: 12px 14px !important;
+  vertical-align: middle !important;
+}
+
+/* 5. Smooth Scrollbars Across Application */
+::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1 !important;
+  border-radius: 10px !important;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: #334155 !important;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #475569 !important;
+}
+
 
 

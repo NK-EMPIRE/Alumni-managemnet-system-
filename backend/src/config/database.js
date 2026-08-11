@@ -268,6 +268,16 @@ async function getPool(retries = 3, delayMs = 1000) {
       BEGIN
           EXEC('CREATE INDEX IX_Users_Team_Role ON dbo.Users(team_id, role_id)');
       END
+
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.ProfessionalInformation') AND name = 'IX_ProfInfo_Alumni_Info')
+      BEGIN
+          EXEC('CREATE INDEX IX_ProfInfo_Alumni_Info ON dbo.ProfessionalInformation(alumni_id, info_id DESC)');
+      END
+
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'IX_Alumni_Company_Desig')
+      BEGIN
+          EXEC('CREATE INDEX IX_Alumni_Company_Desig ON dbo.Alumni(company, designation)');
+      END
     `);
     } catch (e) {
       logger.error('Database migration failed:', e);

@@ -15,9 +15,11 @@ async function getAnalysisCompanies({ leaderId, memberId }) {
     SELECT DISTINCT LTRIM(RTRIM(COALESCE(pi.company, a.company))) AS company
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT * FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
+      SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+             is_government_job, is_entrepreneur, higher_studies, other_occupation,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+      FROM dbo.ProfessionalInformation
+    ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
     LEFT JOIN (
       SELECT alumni_id, team_id, member_id,
              ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -51,9 +53,11 @@ async function getAnalysisLocations({ leaderId, memberId }) {
       LTRIM(RTRIM(COALESCE(pi.country, a.country))) AS country
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT * FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
+      SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+             is_government_job, is_entrepreneur, higher_studies, other_occupation,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+      FROM dbo.ProfessionalInformation
+    ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
     LEFT JOIN (
       SELECT alumni_id, team_id, member_id,
              ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -180,9 +184,11 @@ async function getAnalysisAlumni({
         COUNT(*) OVER() AS total_count
       FROM dbo.Alumni a
       LEFT JOIN (
-        SELECT * FROM dbo.ProfessionalInformation
-        WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-      ) pi ON pi.alumni_id = a.alumni_id
+        SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+               is_government_job, is_entrepreneur, higher_studies, other_occupation,
+               ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+        FROM dbo.ProfessionalInformation
+      ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
       LEFT JOIN (
         SELECT alumni_id, team_id, member_id, status,
                ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -208,6 +214,9 @@ async function getAnalysisAlumni({
           OR a.register_no LIKE @customQuery
           OR COALESCE(pi.company, a.company) LIKE @customQuery
           OR COALESCE(pi.designation, a.designation) LIKE @customQuery
+          OR COALESCE(pi.current_city, a.city) LIKE @customQuery
+          OR COALESCE(pi.state, a.state) LIKE @customQuery
+          OR COALESCE(pi.country, a.country) LIKE @customQuery
           OR a.department LIKE @customQuery
           OR a.working_details LIKE @customQuery
         )
@@ -252,9 +261,11 @@ async function getAnalysisLocations({ leaderId, memberId }) {
       LTRIM(RTRIM(COALESCE(pi.country, a.country))) AS country
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT * FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
+      SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+             is_government_job, is_entrepreneur, higher_studies, other_occupation,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+      FROM dbo.ProfessionalInformation
+    ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
     LEFT JOIN (
       SELECT alumni_id, team_id, member_id,
              ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -283,7 +294,7 @@ async function getAnalysisLocations({ leaderId, memberId }) {
 }
 
 /**
- * Returns fixed role category list with live matching counts.
+ * Returns fixed role category list with live matching counts (Parallelized queries).
  */
 async function getAnalysisRoleCategories({ leaderId, memberId }) {
   const pool = await getPool();
@@ -306,9 +317,11 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
       SUM(CASE WHEN pi.higher_studies IS NOT NULL AND LTRIM(RTRIM(CAST(pi.higher_studies AS NVARCHAR(MAX)))) <> '' AND pi.higher_studies <> 'No' THEN 1 ELSE 0 END) AS higherStudiesCount
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT * FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
+      SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+             is_government_job, is_entrepreneur, higher_studies, other_occupation,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+      FROM dbo.ProfessionalInformation
+    ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
     LEFT JOIN (
       SELECT alumni_id, team_id, member_id,
              ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -327,7 +340,7 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
   const bizCount = rowStats.bizCount || 0;
   const higherStudiesCount = rowStats.higherStudiesCount || 0;
 
-  // 2. Sector Role Categories Counts
+  // 2. Sector Role Categories Counts (Executed in Parallel)
   const categories = [
     'Software Engineer',
     'Data / AI / ML',
@@ -345,9 +358,7 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
     'Other / Unclassified'
   ];
 
-  const roleCategories = [];
-
-  for (const cat of categories) {
+  const categoryPromises = categories.map(async (cat) => {
     const request = pool.request()
       .input('leaderId', sql.Int, leaderId || null)
       .input('memberId', sql.Int, memberId || null);
@@ -357,9 +368,11 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
       SELECT COUNT(DISTINCT a.alumni_id) AS count
       FROM dbo.Alumni a
       LEFT JOIN (
-        SELECT * FROM dbo.ProfessionalInformation
-        WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-      ) pi ON pi.alumni_id = a.alumni_id
+        SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+               is_government_job, is_entrepreneur, higher_studies, other_occupation,
+               ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+        FROM dbo.ProfessionalInformation
+      ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
       LEFT JOIN (
         SELECT alumni_id, team_id, member_id,
                ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -378,8 +391,10 @@ async function getAnalysisRoleCategories({ leaderId, memberId }) {
 
     const res = await request.query(query);
     const count = res.recordset[0] ? res.recordset[0].count : 0;
-    roleCategories.push({ category: cat, count });
-  }
+    return { category: cat, count };
+  });
+
+  const roleCategories = await Promise.all(categoryPromises);
 
   return {
     totalAlumni,
@@ -419,9 +434,11 @@ async function getSuggestions({ field, query, limit = 100 }) {
     SELECT DISTINCT LTRIM(RTRIM(${colExpr})) AS val
     FROM dbo.Alumni a
     LEFT JOIN (
-      SELECT * FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
+      SELECT alumni_id, company, designation, current_city, state, country, email, phone, linkedin_url,
+             is_government_job, is_entrepreneur, higher_studies, other_occupation,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+      FROM dbo.ProfessionalInformation
+    ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
     WHERE ${colExpr} IS NOT NULL
       AND LTRIM(RTRIM(CAST(${colExpr} AS NVARCHAR(MAX)))) <> ''
       AND (${qStr === '' ? '1=1' : `LOWER(${colExpr}) LIKE @q`})

@@ -593,7 +593,7 @@
           document.querySelectorAll('.content-section').forEach(function (s) { s.classList.remove('active'); s.style.display = 'none'; });
           document.querySelector('.sidebar-item[data-page="chat"]') && document.querySelector('.sidebar-item[data-page="chat"]').classList.add('active');
           var chatSec = document.getElementById('section-chat');
-          if (chatSec) { chatSec.style.display = 'block'; chatSec.classList.add('active'); }
+          if (chatSec) { chatSec.style.display = 'flex'; chatSec.classList.add('active'); }
           var globalHeader = document.getElementById('globalPageHeader');
           if (globalHeader) globalHeader.style.display = 'none';
           if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();

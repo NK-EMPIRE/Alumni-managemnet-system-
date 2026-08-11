@@ -13,105 +13,70 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
     .input('status', sql.NVarChar(30), status || null)
     .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
-  // Designations / Roles
-  const desigResult = await createRequest().query(`
-    SELECT
-      ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified') AS designation,
-      COUNT(DISTINCT a.alumni_id) AS count
-    FROM dbo.Alumni a
+  const profJoinSql = `
     LEFT JOIN (
-      SELECT alumni_id, designation, company, current_city, is_government_job, is_entrepreneur, higher_studies, other_occupation
+      SELECT alumni_id, designation, company, current_city, state, country, is_government_job, is_entrepreneur, higher_studies, other_occupation,
+             ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
       FROM dbo.ProfessionalInformation
-      WHERE info_id IN (
-        SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id
-      )
-    ) pi ON pi.alumni_id = a.alumni_id
-    LEFT JOIN (
-      SELECT alumni_id, status, ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
-      FROM dbo.AlumniAssignments
-    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
-    WHERE (@department IS NULL OR a.department = @department)
-      AND (@batch IS NULL OR a.batch = @batch)
-      AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
-      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL OR a.designation IS NOT NULL OR a.company IS NOT NULL)
-    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified')
-    ORDER BY count DESC;
-  `);
+    ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
+  `;
 
-  // Companies
-  const companyResult = await createRequest().query(`
-    SELECT
-      ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified') AS company,
-      COUNT(DISTINCT a.alumni_id) AS count
-    FROM dbo.Alumni a
-    LEFT JOIN (
-      SELECT alumni_id, company, designation, current_city, is_government_job
-      FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
+  const assignJoinSql = `
     LEFT JOIN (
       SELECT alumni_id, status, ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
       FROM dbo.AlumniAssignments
     ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
-    WHERE (@department IS NULL OR a.department = @department)
-      AND (@batch IS NULL OR a.batch = @batch)
-      AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
-      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL OR a.designation IS NOT NULL OR a.company IS NOT NULL)
-    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified')
-    ORDER BY count DESC;
-  `);
+  `;
 
-  // Cities / Company Addresses
-  const cityResult = await createRequest().query(`
-    SELECT
-      ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified') AS city,
-      COUNT(DISTINCT a.alumni_id) AS count
-    FROM dbo.Alumni a
-    LEFT JOIN (
-      SELECT alumni_id, designation, company, current_city, is_government_job
-      FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
-    LEFT JOIN (
-      SELECT alumni_id, status, ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
-      FROM dbo.AlumniAssignments
-    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
+  const whereSql = `
     WHERE (@department IS NULL OR a.department = @department)
       AND (@batch IS NULL OR a.batch = @batch)
       AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
       AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL OR a.designation IS NOT NULL OR a.company IS NOT NULL)
-    GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified')
-    ORDER BY count DESC;
-  `);
+  `;
 
-  // Profession types
-  const professionResult = await createRequest().query(`
-    SELECT
-      CASE
-        WHEN pi.is_government_job = 1 THEN 'Government'
-        WHEN pi.is_entrepreneur = 1 THEN 'Business / Entrepreneur'
-        WHEN pi.higher_studies IS NOT NULL AND pi.higher_studies <> '' THEN 'Higher Studies'
-        WHEN LOWER(ISNULL(pi.other_occupation,'')) LIKE '%freelance%' THEN 'Freelance'
-        WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> '') THEN 'Private Sector'
-        ELSE 'Unknown / Other'
-      END AS profession_type,
-      COUNT(DISTINCT a.alumni_id) AS count
-    FROM dbo.Alumni a
-    LEFT JOIN (
-      SELECT alumni_id, designation, company, is_government_job, is_entrepreneur, higher_studies, other_occupation
-      FROM dbo.ProfessionalInformation
-      WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-    ) pi ON pi.alumni_id = a.alumni_id
-    LEFT JOIN (
-      SELECT alumni_id, status, ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
-      FROM dbo.AlumniAssignments
-    ) aa ON aa.alumni_id = a.alumni_id AND aa.rn = 1
-    WHERE (@department IS NULL OR a.department = @department)
-      AND (@batch IS NULL OR a.batch = @batch)
-      AND (@status IS NULL OR (@status = 'Unassigned' AND aa.status IS NULL) OR aa.status = @status)
-      AND (@onlyUpdated = 0 OR a.is_updated = 1 OR pi.designation IS NOT NULL OR pi.company IS NOT NULL OR a.designation IS NOT NULL OR a.company IS NOT NULL)
-    GROUP BY
-      CASE
+  const [desigResult, companyResult, cityResult, professionResult, deptResult, batchResult] = await Promise.all([
+    // Designations / Roles
+    createRequest().query(`
+      SELECT ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified') AS designation,
+             COUNT(DISTINCT a.alumni_id) AS count
+      FROM dbo.Alumni a ${profJoinSql} ${assignJoinSql} ${whereSql}
+      GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.designation, a.designation))), ''), 'Not Specified')
+      ORDER BY count DESC;
+    `),
+
+    // Companies
+    createRequest().query(`
+      SELECT ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified') AS company,
+             COUNT(DISTINCT a.alumni_id) AS count
+      FROM dbo.Alumni a ${profJoinSql} ${assignJoinSql} ${whereSql}
+      GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.company, a.company))), ''), 'Not Specified')
+      ORDER BY count DESC;
+    `),
+
+    // Cities
+    createRequest().query(`
+      SELECT ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified') AS city,
+             COUNT(DISTINCT a.alumni_id) AS count
+      FROM dbo.Alumni a ${profJoinSql} ${assignJoinSql} ${whereSql}
+      GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(COALESCE(pi.current_city, a.city))), ''), 'Not Specified')
+      ORDER BY count DESC;
+    `),
+
+    // Profession types
+    createRequest().query(`
+      SELECT
+        CASE
+          WHEN pi.is_government_job = 1 THEN 'Government'
+          WHEN pi.is_entrepreneur = 1 THEN 'Business / Entrepreneur'
+          WHEN pi.higher_studies IS NOT NULL AND pi.higher_studies <> '' THEN 'Higher Studies'
+          WHEN LOWER(ISNULL(pi.other_occupation,'')) LIKE '%freelance%' THEN 'Freelance'
+          WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> '') THEN 'Private Sector'
+          ELSE 'Unknown / Other'
+        END AS profession_type,
+        COUNT(DISTINCT a.alumni_id) AS count
+      FROM dbo.Alumni a ${profJoinSql} ${assignJoinSql} ${whereSql}
+      GROUP BY CASE
         WHEN pi.is_government_job = 1 THEN 'Government'
         WHEN pi.is_entrepreneur = 1 THEN 'Business / Entrepreneur'
         WHEN pi.higher_studies IS NOT NULL AND pi.higher_studies <> '' THEN 'Higher Studies'
@@ -119,23 +84,47 @@ async function getCategoryGroups({ department, batch, status, onlyUpdated }) {
         WHEN (COALESCE(pi.company, a.company) IS NOT NULL AND COALESCE(pi.company, a.company) <> '') THEN 'Private Sector'
         ELSE 'Unknown / Other'
       END
-    ORDER BY count DESC;
-  `);
+      ORDER BY count DESC;
+    `),
+
+    // Departments
+    createRequest().query(`
+      SELECT ISNULL(NULLIF(LTRIM(RTRIM(a.department)), ''), 'Not Specified') AS department,
+             COUNT(DISTINCT a.alumni_id) AS count
+      FROM dbo.Alumni a ${profJoinSql} ${assignJoinSql} ${whereSql}
+      GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(a.department)), ''), 'Not Specified')
+      ORDER BY count DESC;
+    `),
+
+    // Batches
+    createRequest().query(`
+      SELECT ISNULL(NULLIF(LTRIM(RTRIM(a.batch)), ''), 'Not Specified') AS batch,
+             COUNT(DISTINCT a.alumni_id) AS count
+      FROM dbo.Alumni a ${profJoinSql} ${assignJoinSql} ${whereSql}
+      GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(a.batch)), ''), 'Not Specified')
+      ORDER BY count DESC;
+    `)
+  ]);
 
   return {
     designations: desigResult.recordset,
     companies: companyResult.recordset,
     cities: cityResult.recordset,
-    professionTypes: professionResult.recordset
+    professions: professionResult.recordset,
+    departments: deptResult.recordset,
+    batches: batchResult.recordset
   };
 }
 
 /**
- * Get paginated alumni list filtered by category fields with full contact details.
+ * Get paginated list of alumni for a specific category detail view.
  */
-async function getCategoryAlumni({ designation, company, city, professionType, department, batch, status, search, onlyUpdated, page = 1, limit = 20 }) {
-  const pageNum = parseInt(page, 10);
-  const limitNum = parseInt(limit, 10);
+async function getCategoryAlumni({
+  designation, company, city, profType, department, batch, status,
+  search, onlyUpdated, page = 1, limit = 20
+}) {
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 20;
   const offset = (pageNum - 1) * limitNum;
 
   const pool = await getPool();
@@ -145,15 +134,15 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
     .input('designation', sql.NVarChar(200), designation || null)
     .input('company', sql.NVarChar(200), company || null)
     .input('city', sql.NVarChar(100), city || null)
+    .input('profType', sql.NVarChar(50), profType || null)
     .input('department', sql.NVarChar(50), department || null)
     .input('batch', sql.NVarChar(10), batch || null)
     .input('status', sql.NVarChar(30), status || null)
     .input('search', sql.NVarChar(200), search ? `%${search}%` : null)
-    .input('profType', sql.NVarChar(50), professionType || null)
     .input('onlyUpdated', sql.Bit, onlyUpdated ? 1 : 0);
 
-  const result = await request.query(`
-    WITH CatCTE AS (
+  const query = `
+    WITH CategoryCTE AS (
       SELECT
         a.alumni_id, a.register_no, a.name, a.department, a.batch,
         COALESCE(pi.email, a.email) AS email,
@@ -161,10 +150,8 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
         a.secondary_email, a.secondary_phone,
         COALESCE(pi.designation, a.designation) AS designation,
         COALESCE(pi.company, a.company) AS company,
-        COALESCE(pi.current_city, a.city) AS current_city,
-        a.state, a.country,
+        COALESCE(pi.current_city, a.city) AS city,
         COALESCE(pi.linkedin_url, a.linkedin_profile) AS linkedin_profile,
-        pi.is_government_job, pi.is_entrepreneur, pi.higher_studies, pi.other_occupation,
         a.working_details, a.experience, a.is_updated,
         ISNULL(aa.status, 'Unassigned') AS assignment_status,
         ul.first_name + ' ' + ul.last_name AS leader_name,
@@ -180,9 +167,11 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
         COUNT(*) OVER() AS total_count
       FROM dbo.Alumni a
       LEFT JOIN (
-        SELECT * FROM dbo.ProfessionalInformation
-        WHERE info_id IN (SELECT MAX(info_id) FROM dbo.ProfessionalInformation GROUP BY alumni_id)
-      ) pi ON pi.alumni_id = a.alumni_id
+        SELECT alumni_id, designation, company, current_city, state, country, email, phone, linkedin_url,
+               is_government_job, is_entrepreneur, higher_studies, other_occupation,
+               ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY info_id DESC) AS rn
+        FROM dbo.ProfessionalInformation
+      ) pi ON pi.alumni_id = a.alumni_id AND pi.rn = 1
       LEFT JOIN (
         SELECT alumni_id, team_id, member_id, status,
                ROW_NUMBER() OVER (PARTITION BY alumni_id ORDER BY assigned_date DESC) AS rn
@@ -222,11 +211,12 @@ async function getCategoryAlumni({ designation, company, city, professionType, d
           )
         )
     )
-    SELECT * FROM CatCTE
+    SELECT * FROM CategoryCTE
     ORDER BY name ASC
     OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY;
-  `);
+  `;
 
+  const result = await request.query(query);
   const data = result.recordset;
   const totalCount = data.length > 0 ? data[0].total_count : 0;
   return { data, totalCount, page: pageNum, limit: limitNum };

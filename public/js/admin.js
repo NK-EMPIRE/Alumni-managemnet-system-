@@ -1367,7 +1367,7 @@ function navigateTo(section, el) {
   sections.forEach(function (s) { s.classList.remove('active'); s.style.display = 'none'; });
   var target = document.getElementById('section-' + section);
   if (target) {
-    target.style.display = 'block';
+    target.style.display = (section === 'chat') ? 'flex' : 'block';
     target.classList.add('active');
   }
   window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1386,6 +1386,7 @@ function navigateTo(section, el) {
     if (typeof window.fetchAttendanceData === 'function') window.fetchAttendanceData();
   } else if (section === 'chat') {
     document.body.classList.add('chat-active');
+    if (target) target.style.display = 'flex';
     if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
   }
 

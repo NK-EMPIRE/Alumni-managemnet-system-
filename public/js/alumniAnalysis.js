@@ -29,6 +29,19 @@ window.initAnalysisPage = function () {
   loadAnalysisCompanies();
   loadAnalysisLocations();
   loadAnalysisDropdownFilters();
+  if (typeof initLocationCascade === 'function' && !window._analysisFilterLocationCascade) {
+    var cEl = document.getElementById('analysisFilterCountry');
+    var sEl = document.getElementById('analysisFilterState');
+    var ctEl = document.getElementById('analysisFilterCity');
+    if (cEl && sEl && ctEl) {
+      window._analysisFilterLocationCascade = initLocationCascade('analysisFilterCountry', 'analysisFilterState', 'analysisFilterCity', {
+        isFilter: true,
+        onCountryChange: function () { window.onAnalysisFilterChange(); },
+        onStateChange: function () { window.onAnalysisFilterChange(); },
+        onCityChange: function () { window.onAnalysisFilterChange(); }
+      });
+    }
+  }
   fetchAnalysisData(1);
 };
 
@@ -283,9 +296,28 @@ window.fetchAnalysisData = function (page) {
   API.getAlumniAnalysis(params)
     .then(function (res) {
       if (res && (res.success || res.data)) {
-        var d = res.data !== undefined ? res.data : res;
-        var data = (d && d.records) ? d.records : (Array.isArray(d) ? d : []);
-        var total = (d && d.pagination) ? d.pagination.total : data.length;
+        var payload = res.data || res;
+        var data = [];
+        var total = 0;
+
+        if (Array.isArray(payload)) {
+          data = payload;
+          total = data.length;
+        } else if (payload && Array.isArray(payload.records)) {
+          data = payload.records;
+          total = (payload.pagination && payload.pagination.total !== undefined)
+            ? payload.pagination.total
+            : data.length;
+        } else if (payload && Array.isArray(payload.data)) {
+          data = payload.data;
+          total = (payload.pagination && payload.pagination.total !== undefined)
+            ? payload.pagination.total
+            : (payload.totalCount !== undefined ? payload.totalCount : data.length);
+        } else if (Array.isArray(res.records)) {
+          data = res.records;
+          total = (res.pagination && res.pagination.total !== undefined) ? res.pagination.total : data.length;
+        }
+
         renderAnalysisDataView(data);
         renderAnalysisPagination(total);
       } else {
@@ -309,6 +341,7 @@ function highlightSearchTerm(text, query) {
 function renderAnalysisDataView(data) {
   var tbody = document.getElementById('analysisTableBody');
   if (!tbody) return;
+  if (!Array.isArray(data)) data = [];
 
   var customQueryInput = document.getElementById('analysisCustomQueryInput');
   var queryStr = customQueryInput ? customQueryInput.value : '';

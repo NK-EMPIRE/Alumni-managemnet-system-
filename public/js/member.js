@@ -1135,7 +1135,10 @@
                     if (setS) setS.style.display = 'none';
                     if (preS) preS.style.display = 'none';
                     var chatSec = document.getElementById('section-chat');
-                    if (chatSec) chatSec.style.display = 'block';
+                    if (chatSec) {
+                        chatSec.style.display = 'flex';
+                        chatSec.classList.add('active');
+                    }
                     if (typeof window.initWhatsAppChatPage === 'function') window.initWhatsAppChatPage();
                     return;
                 }
@@ -1153,7 +1156,10 @@
                 var previewSection = document.getElementById('section-preview');
                 var chatSection = document.getElementById('section-chat');
 
-                if (chatSection) chatSection.style.display = 'none';
+                if (chatSection) {
+                    chatSection.classList.remove('active');
+                    chatSection.style.display = 'none';
+                }
 
                 if (page === 'dashboard') {
                     if (dashboardSection) dashboardSection.style.display = 'block';
