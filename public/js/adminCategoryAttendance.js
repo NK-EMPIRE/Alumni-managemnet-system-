@@ -461,11 +461,11 @@ function renderAttendanceTable(data) {
 
     var statusBadge = '';
     if (row.status === 'Present') {
-      statusBadge = '<span class="badge badge-success" style="background:#10B981;color:#fff;padding:6px 12px;border-radius:20px;font-weight:600;"><i class="fas fa-check-circle"></i> Present (On-Time)</span>';
+      statusBadge = '<span class="badge badge-success" style="background:#10B981;color:#fff;padding:6px 12px;border-radius:20px;font-weight:600;"><i class="fas fa-check-circle"></i> Present (On-Time 1:15 - 1:30 PM)</span>';
     } else if (row.status === 'Late') {
-      statusBadge = '<span class="badge badge-warning" style="background:#F59E0B;color:#fff;padding:6px 12px;border-radius:20px;font-weight:600;"><i class="fas fa-clock"></i> Late (Delayed)</span>';
+      statusBadge = '<span class="badge badge-warning" style="background:#F59E0B;color:#fff;padding:6px 12px;border-radius:20px;font-weight:600;"><i class="fas fa-clock"></i> Late (Delayed 1:30 - 2:45 PM)</span>';
     } else {
-      statusBadge = '<span class="badge badge-danger" style="background:#EF4444;color:#fff;padding:6px 12px;border-radius:20px;font-weight:600;"><i class="fas fa-times-circle"></i> Absent</span>';
+      statusBadge = '<span class="badge badge-danger" style="background:#EF4444;color:#fff;padding:6px 12px;border-radius:20px;font-weight:600;"><i class="fas fa-times-circle"></i> Absent (No Login in Window)</span>';
     }
 
     html += '<tr>';

@@ -10,9 +10,11 @@ function isTuesday(date) {
 }
 
 /**
- * Called on every login. Records attendance if today is Tuesday in IST.
- * Present: Login on or before 1:30 PM (13:30 IST)
- * Late:    Login after 1:30 PM (13:30 IST)
+ * Called on every login. Records attendance ONLY if today is Tuesday in IST and time is within 1:15 PM – 2:45 PM IST.
+ * - Present (On-Time: 1:15 PM – 1:30 PM IST)
+ * - Late (Delayed: 1:30 PM – 2:45 PM IST)
+ * - Absent (No Login in Window: marked automatically when window closes or via markAbsentees)
+ * Logins before 1:15 PM IST or after 2:45 PM IST or on non-Tuesdays are NOT recorded on login.
  */
 async function recordLoginAttendance(userId, role) {
   const nowIST = getISTDate();
@@ -23,8 +25,18 @@ async function recordLoginAttendance(userId, role) {
   const minutes = nowIST.getMinutes();
   const totalMinutes = hours * 60 + minutes;
 
-  // On-time cut-off: 1:30 PM (13:30 IST = 810 minutes)
-  const status = totalMinutes <= (13 * 60 + 30) ? 'Present' : 'Late';
+  const WINDOW_START = 13 * 60 + 15; // 1:15 PM IST = 795 mins
+  const ONTIME_CUTOFF = 13 * 60 + 30; // 1:30 PM IST = 810 mins
+  const WINDOW_END = 14 * 60 + 45;   // 2:45 PM IST = 885 mins
+
+  // Attendance MUST take ONLY during the Tuesday window (1:15 PM - 2:45 PM), NOT before and NOT after
+  if (totalMinutes < WINDOW_START || totalMinutes > WINDOW_END) {
+    return;
+  }
+
+  // Present: On-Time 1:15 - 1:30 PM
+  // Late: Delayed 1:30 - 2:45 PM
+  const status = totalMinutes <= ONTIME_CUTOFF ? 'Present' : 'Late';
 
   const yyyy = nowIST.getFullYear();
   const mm = String(nowIST.getMonth() + 1).padStart(2, '0');
@@ -50,21 +62,40 @@ async function recordLoginAttendance(userId, role) {
 }
 
 /**
+ * Automatically mark absentees for a Tuesday if its window has passed (past date or after 2:45 PM IST today).
+ */
+async function autoMarkIfWindowClosed(dateStr) {
+  if (!dateStr) return;
+  try {
+    const dateFormatted = typeof dateStr === 'string' ? dateStr.slice(0, 10) : new Date(dateStr).toISOString().slice(0, 10);
+    const nowIST = getISTDate();
+    const yyyy = nowIST.getFullYear();
+    const mm = String(nowIST.getMonth() + 1).padStart(2, '0');
+    const dd = String(nowIST.getDate()).padStart(2, '0');
+    const todayISTStr = `${yyyy}-${mm}-${dd}`;
+
+    const totalMinutes = nowIST.getHours() * 60 + nowIST.getMinutes();
+    const WINDOW_END = 14 * 60 + 45; // 2:45 PM IST = 885 mins
+
+    if (dateFormatted < todayISTStr || (dateFormatted === todayISTStr && totalMinutes > WINDOW_END)) {
+      await markAbsentees(dateFormatted);
+    }
+  } catch (err) {
+    // Ignore background auto-marking check errors
+  }
+}
+
+/**
  * Mark all active users (ADMIN, LEADER, MEMBER) who have NO record for the given Tuesday as Absent.
  * @param {string} dateStr - YYYY-MM-DD (must be a Tuesday)
  */
 async function markAbsentees(dateStr) {
   const pool = await getPool();
 
-  // Validate it's a Tuesday
-  const d = new Date(dateStr);
-  const istD = toIST(d);
-  if (!isTuesday(istD) && !isTuesday(d)) {
-    // Still allow admin to force-mark for any date
-  }
+  const targetDateStr = typeof dateStr === 'string' ? dateStr.slice(0, 10) : new Date(dateStr).toISOString().slice(0, 10);
 
   const result = await pool.request()
-    .input('targetDate', sql.Date, new Date(dateStr))
+    .input('targetDate', sql.Date, new Date(targetDateStr))
     .query(`
       INSERT INTO dbo.Attendance (user_id, attendance_date, login_time, status, marked_by)
       SELECT u.user_id, @targetDate, NULL, 'Absent', 'system'
@@ -83,6 +114,10 @@ async function markAbsentees(dateStr) {
  * Get paginated attendance report.
  */
 async function getReport({ page = 1, limit = 50, date, userId, status, role }) {
+  if (date) {
+    await autoMarkIfWindowClosed(date);
+  }
+
   const pageNum = parseInt(page, 10);
   const limitNum = parseInt(limit, 10);
   const offset = (pageNum - 1) * limitNum;
@@ -133,6 +168,10 @@ async function getReport({ page = 1, limit = 50, date, userId, status, role }) {
  * Get attendance summary (counts per date).
  */
 async function getSummary(date) {
+  if (date) {
+    await autoMarkIfWindowClosed(date);
+  }
+
   const pool = await getPool();
   const request = pool.request()
     .input('filterDate', sql.Date, date ? new Date(date) : null);
