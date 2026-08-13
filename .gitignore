@@ -22,3 +22,5 @@ backend/logs/application.log
 backend\logs
 /application.logs
 /error.logs
+
+*.txt

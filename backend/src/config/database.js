@@ -256,7 +256,7 @@ async function getPool(retries = 3, delayMs = 1000) {
 
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'IX_Users_Email')
       BEGIN
-          EXEC('CREATE INDEX IX_Users_Email ON dbo.Users(email)');
+          CREATE INDEX IX_Users_Email ON dbo.Users(email);
       END
 
       IF EXISTS (
@@ -271,7 +271,7 @@ async function getPool(retries = 3, delayMs = 1000) {
 
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.ProfessionalInformation') AND name = 'IX_ProfInfo_Alumni_Info')
       BEGIN
-          EXEC('CREATE INDEX IX_ProfInfo_Alumni_Info ON dbo.ProfessionalInformation(alumni_id, info_id DESC)');
+          CREATE INDEX IX_ProfInfo_Alumni_Info ON dbo.ProfessionalInformation(alumni_id, info_id DESC);
       END
 
       IF NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID('dbo.Alumni') AND name = 'IX_Alumni_Company_Desig')
@@ -281,8 +281,6 @@ async function getPool(retries = 3, delayMs = 1000) {
     `);
     } catch (e) {
       logger.error('Database migration failed:', e);
-    } finally {
-      isInitializing = false;
     }
   }
   return pool;

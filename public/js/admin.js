@@ -889,11 +889,15 @@ function populateTLRankings() {
 function initProgressWatch() {
   var sel = document.getElementById('progressLeaderSelect');
   if (!sel) return;
-  sel.addEventListener('change', function () {
-    var lid = this.value;
-    if (lid) loadTeamProgressData(lid);
+  var dateInput = document.getElementById('progressDateInput');
+  function reload() {
+    var lid = sel.value;
+    var date = dateInput ? dateInput.value : '';
+    if (lid) loadTeamProgressData(lid, date || null);
     else document.getElementById('teamProgressPanel').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;">Select a team leader to view progress.</p>';
-  });
+  }
+  sel.addEventListener('change', reload);
+  if (dateInput) dateInput.addEventListener('change', reload);
 }
 
 function populateProgressLeaderDropdown() {
@@ -923,16 +927,17 @@ function populateProgressLeaderDropdown() {
 
   sel.selectedIndex = 0;
   if (sel.value) {
-    loadTeamProgressData(sel.value);
+    var dateInput = document.getElementById('progressDateInput');
+    loadTeamProgressData(sel.value, dateInput ? dateInput.value || null : null);
   }
 }
 
-function loadTeamProgressData(leaderId) {
+function loadTeamProgressData(leaderId, date) {
   var panel = document.getElementById('teamProgressPanel');
   if (!panel) return;
   panel.innerHTML = '<div style="text-align:center;padding:32px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--primary);"></i><p style="margin-top:10px;color:var(--text-muted);">Loading...</p></div>';
 
-  API.getLeaderStats(leaderId).then(function (res) {
+  API.getLeaderStats(leaderId, date).then(function (res) {
     if (!res || !res.success || !res.data) {
       panel.innerHTML = '<p style="color:var(--danger);text-align:center;padding:24px;">Failed to load team data.</p>';
       return;
@@ -941,13 +946,23 @@ function loadTeamProgressData(leaderId) {
     var pct = d.completionPercentage || 0;
     var members = d.teamMembers || [];
 
+    var dateBadge = '';
+    if (date) {
+      var formatted = '';
+      try {
+        var parts = date.split('-');
+        formatted = new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) { formatted = date; }
+      dateBadge = '<span style="display:inline-block;padding:4px 12px;font-size:0.72rem;font-weight:600;border-radius:20px;background:var(--primary);color:#fff;margin-bottom:14px;"><i class="fas fa-calendar-day" style="margin-right:5px;"></i>' + formatted + '</span>';
+    }
+
     // Sort team leader to the top
     members.sort(function (a, b) {
       return (b.isLeader ? 1 : 0) - (a.isLeader ? 1 : 0);
     });
 
     // Leader card
-    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px;">';
+    var html = dateBadge + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px;">';
     html += mkStatBox('Total Assigned', d.totalAssigned || 0, '#3B82F6');
     html += mkStatBox('Completed', d.completed || 0, '#10B981');
     html += mkStatBox('Pending', d.pending || 0, '#F59E0B');
@@ -1613,7 +1628,7 @@ function setupClickOutside() {
    24. MODAL CONTROLS
    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 window.openModal = function (id) {
-  var modal = document.getElementById(id);
+  var modal = typeof id === 'string' ? document.getElementById(id) : id;
   if (!modal) return;
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -1626,12 +1641,21 @@ window.openModal = function (id) {
 };
 
 window.closeModal = function (id) {
-  var modal = document.getElementById(id);
+  var modal = typeof id === 'string' ? document.getElementById(id) : id;
   if (!modal) return;
   modal.classList.remove('show');
   document.body.style.overflow = '';
   clearAllErrors(modal);
 }
+
+/* Close modal on close buttons (data-close) */
+document.addEventListener('click', function (e) {
+  var closeBtn = e.target && e.target.closest ? e.target.closest('[data-close]') : null;
+  if (closeBtn) {
+    var overlayId = closeBtn.getAttribute('data-close');
+    if (overlayId) closeModal(overlayId);
+  }
+});
 
 /* Close modal on overlay click */
 document.addEventListener('click', function (e) {
@@ -3153,7 +3177,7 @@ function populateAuditActionFilter() {
   actions.forEach(function (a) {
     select.innerHTML += '<option value="' + a + '">' + a.charAt(0).toUpperCase() + a.slice(1) + '</option>';
   });
-  if (currentVal && Array.from(select.options).some(function(opt){ return opt.value === currentVal; })) {
+  if (currentVal && Array.from(select.options).some(function (opt) { return opt.value === currentVal; })) {
     select.value = currentVal;
   } else {
     select.value = 'all';
@@ -3868,6 +3892,39 @@ window.resetSpreadsheetFilters = function () {
 
 var currentSelectedAlumniIdAdmin = null;
 
+var _isAdminModalEditMode = true;
+window.toggleModalFieldsEditMode = function () {
+  _isAdminModalEditMode = !_isAdminModalEditMode;
+  var topEditBtn = document.getElementById('modalTopEditBtn');
+  var fieldIds = [
+    'fieldName', 'fieldDept', 'fieldBatch', 'fieldFatherName', 'fieldDOB',
+    'fieldCompany', 'fieldDesignation', 'fieldCity', 'fieldState', 'fieldCountry',
+    'fieldEmail', 'fieldPhone', 'fieldSecondaryEmail', 'fieldSecondaryPhone',
+    'fieldLinkedin', 'fieldGovtJob', 'fieldEmploymentStatus', 'fieldCareerType'
+  ];
+
+  fieldIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (_isAdminModalEditMode) {
+      el.readOnly = false;
+      el.disabled = false;
+      el.removeAttribute('readonly');
+      el.removeAttribute('disabled');
+      el.style.background = '#FFFFFF';
+    } else {
+      el.readOnly = true;
+      if (el.tagName === 'SELECT') el.disabled = true;
+      el.style.background = '#F8FAFC';
+    }
+  });
+
+  if (topEditBtn) {
+    topEditBtn.style.background = _isAdminModalEditMode ? '#2563EB' : '#EFF6FF';
+    topEditBtn.style.color = _isAdminModalEditMode ? '#FFFFFF' : '#2563EB';
+  }
+};
+
 window.openUpdateModalAdmin = function (alumniId) {
   currentSelectedAlumniIdAdmin = alumniId;
 
@@ -3896,6 +3953,12 @@ window.openUpdateModalAdmin = function (alumniId) {
     setVal('fieldSecondaryPhone', rec.secondary_phone);
     setVal('fieldLinkedin', rec.linkedin_profile || rec.linkedin_url || rec.linkedin);
     setVal('fieldGovtJob', (rec.is_government_job || rec.is_govt_job) ? 'Yes' : 'No');
+    setVal('fieldEmploymentStatus', rec.employment_status || 'Working');
+    setVal('fieldCareerType', rec.career_type || '');
+
+    // Enable fields for Admin editing
+    _isAdminModalEditMode = false;
+    toggleModalFieldsEditMode();
 
     if (window._adminLocationCascade) {
       window._adminLocationCascade.setValues(rec.country, rec.state, rec.current_city || rec.city);
@@ -3946,7 +4009,7 @@ window.openAssignmentHistoryDrawer = function (alumniId, alumniName) {
         var dateStr = item.created_at || item.assigned_date ? new Date(item.created_at || item.assigned_date).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '-';
         var badgeColor = item.action === 'Alumni Record Created' ? '#64748B' : (item.action === 'Professional Profile Update' ? '#10B981' : '#2563EB');
         var statusBadge = '<span class="badge" style="font-size:0.75rem;padding:2px 8px;background:' + badgeColor + ';color:#fff;">' + (item.status || 'Active') + '</span>';
-        
+
         html += '<div style="padding:12px 14px;border:1px solid #E2E8F0;border-radius:10px;background:#F8FAFC;box-shadow:0 1px 2px rgba(0,0,0,0.03);">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
           '<strong style="font-size:0.85rem;color:#1E293B;"><i class="fas fa-history" style="color:' + badgeColor + ';margin-right:6px;"></i>' + (item.action || 'Activity') + '</strong>' +
@@ -4233,7 +4296,7 @@ window.renderSpreadsheetTable = function (data) {
 
     setTimeout(function () {
       if (barFill) { barFill.style.width = '55%'; percentText.textContent = '55%'; subtitleText.textContent = 'Updating stats & record views...'; }
-      
+
       Promise.all([
         typeof fetchSpreadsheetData === 'function' ? fetchSpreadsheetData() : Promise.resolve(),
         typeof loadDashboardData === 'function' ? loadDashboardData() : Promise.resolve(),
@@ -4445,7 +4508,7 @@ window.populateExportModalFilterOptions = function () {
           batchSel.innerHTML = bOpts;
         }
       }
-    }).catch(function () {});
+    }).catch(function () { });
   }
 };
 
@@ -4532,7 +4595,7 @@ window.reassignLoadTeam = function (selectedDept) {
           });
           deptFilterEl.innerHTML = opts;
         }
-      }).catch(function (e) {});
+      }).catch(function (e) { });
 
       data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
@@ -4775,14 +4838,27 @@ function readAdminFormValues() {
     secondary_email: document.getElementById('fieldSecondaryEmail') ? document.getElementById('fieldSecondaryEmail').value : '',
     secondary_phone: document.getElementById('fieldSecondaryPhone') ? document.getElementById('fieldSecondaryPhone').value : '',
     linkedin_profile: document.getElementById('fieldLinkedin') ? document.getElementById('fieldLinkedin').value : '',
-    is_government_job: document.getElementById('fieldGovtJob') ? (document.getElementById('fieldGovtJob').value === 'Yes') : false
+    is_government_job: document.getElementById('fieldGovtJob') ? (document.getElementById('fieldGovtJob').value === 'Yes') : false,
+    employment_status: document.getElementById('fieldEmploymentStatus') ? document.getElementById('fieldEmploymentStatus').value : '',
+    career_type: document.getElementById('fieldCareerType') ? document.getElementById('fieldCareerType').value : ''
   };
 }
 
 function validateAdminForm() {
   var isValid = true;
-  var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity'];
+  var empStatusEl = document.getElementById('fieldEmploymentStatus');
+  var isNotWorking = empStatusEl && empStatusEl.value === 'Not Working';
+
+  var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation'];
   required.forEach(function (id) {
+    if (isNotWorking && (id === 'fieldCompany' || id === 'fieldDesignation')) {
+      var el = document.getElementById(id);
+      var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
+      if (el) el.classList.remove('error');
+      if (err) err.style.display = 'none';
+      return;
+    }
+
     var el = document.getElementById(id);
     var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
     if (!el || !el.value || el.value.trim() === '') {
@@ -4800,21 +4876,10 @@ function validateAdminForm() {
   var emailErr = document.getElementById('errorEmail');
   var phoneErr = document.getElementById('errorPhone');
 
-  var emailVal = emailEl && emailEl.value ? emailEl.value.trim() : '';
-  var phoneVal = phoneEl && phoneEl.value ? phoneEl.value.trim() : '';
-
-  if (!emailVal && !phoneVal) {
-    if (emailEl) emailEl.classList.add('error');
-    if (phoneEl) phoneEl.classList.add('error');
-    if (emailErr) emailErr.style.display = 'block';
-    if (phoneErr) phoneErr.style.display = 'block';
-    isValid = false;
-  } else {
-    if (emailEl) emailEl.classList.remove('error');
-    if (phoneEl) phoneEl.classList.remove('error');
-    if (emailErr) emailErr.style.display = 'none';
-    if (phoneErr) phoneErr.style.display = 'none';
-  }
+  if (emailEl) emailEl.classList.remove('error');
+  if (phoneEl) phoneEl.classList.remove('error');
+  if (emailErr) emailErr.style.display = 'none';
+  if (phoneErr) phoneErr.style.display = 'none';
 
   return isValid;
 }
@@ -4857,7 +4922,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       var data = readAdminFormValues();
       API.updateAlumni(currentSelectedAlumniIdAdmin, data).then(function () {
-        return API.submitProfessionalInfo(currentSelectedAlumniIdAdmin, data).catch(function () {});
+        return API.submitAlumni(currentSelectedAlumniIdAdmin, data).catch(function () { });
       }).then(function (res) {
         Toast.success('Update Record', 'Alumni record updated successfully.');
         closeModal('updateModal');
@@ -4877,7 +4942,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       var data = readAdminFormValues();
       API.updateAlumni(currentSelectedAlumniIdAdmin, data).then(function () {
-        return API.submitProfessionalInfo(currentSelectedAlumniIdAdmin, data).catch(function () {});
+        return API.submitAlumni(currentSelectedAlumniIdAdmin, data).catch(function () { });
       }).then(function (res) {
         Toast.success('Update Record', 'Alumni record updated successfully.');
         fetchSpreadsheetData();
@@ -5025,7 +5090,7 @@ window.reassignLoadTeam = function (selectedDept) {
           });
           deptFilterEl.innerHTML = opts;
         }
-      }).catch(function (e) {});
+      }).catch(function (e) { });
 
       data.members.forEach(function (m) {
         if (m.user_id !== srcId) {
@@ -5268,5 +5333,17 @@ window.notifyAllDbHealth = function () {
   });
 };
 
-
+window.copyAlumniAndFather = function (name, father, btnEl) {
+    var targetEl = btnEl || (window.event ? window.event.currentTarget : null);
+    var textStr = 'Alumni: ' + name + (father ? ' | Father: ' + father : '');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(textStr).then(function () {
+        if (typeof window.showCopiedPopup === 'function') {
+          window.showCopiedPopup(targetEl, 'Copied Alumni & Father Name!');
+        } else if (typeof Toast !== 'undefined' && Toast.success) {
+          Toast.success('Copied', textStr);
+        }
+      });
+    }
+  };
 

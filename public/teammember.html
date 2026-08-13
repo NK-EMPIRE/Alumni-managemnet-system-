@@ -164,20 +164,23 @@
 
     .content-section:has(.spreadsheet-fullscreen),
     section:has(.spreadsheet-fullscreen) {
-      z-index: 99999 !important;
+      z-index: 9990 !important;
       position: relative !important;
     }
 
     .spreadsheet-fullscreen {
       position: fixed !important;
       inset: 0 !important;
-      z-index: 999999 !important;
+      z-index: 9990 !important;
       width: 100vw !important;
       height: 100vh !important;
       margin: 0 !important;
       border-radius: 0 !important;
       background: #ffffff !important;
       padding: 15px !important;
+    }
+    .modal-overlay {
+      z-index: 999999 !important;
     }
 
     .nav-item i {
@@ -1926,24 +1929,6 @@
                   </select>
                 </div>
               </div>
-              <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;">
-                <div class="form-group">
-                  <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Career
-                    Category</label>
-                  <select id="fieldCareerCategory" onchange="onCareerCategoryChange()"
-                    style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
-                    <option value="">Select Career Category</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label style="display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:4px;">Role
-                    Category</label>
-                  <select id="fieldRoleCategory"
-                    style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;background:#fff;">
-                    <option value="">Select Role Category</option>
-                  </select>
-                </div>
-              </div>
               <!-- Conditional University Field (Higher Studies / Student / Research Scholar) -->
               <div class="form-group" id="universityGroupContainer" style="display:none;margin-top:12px;">
                 <label style="display:block;font-size:12px;font-weight:600;color:#8B5CF6;margin-bottom:4px;"><i
@@ -1999,7 +1984,7 @@
                   <input type="text" id="fieldState" list="stateDatalist" class="form-control"
                     placeholder="Type state (e.g. Tamil Nadu)..."
                     style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;"
-                    onclick="this.select()" autocomplete="off" disabled>
+                    onclick="this.select()" autocomplete="off">
                   <datalist id="stateDatalist"></datalist>
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
@@ -2008,7 +1993,7 @@
                   <input type="text" id="fieldCity" list="cityDatalist" class="form-control"
                     placeholder="Type city (e.g. Chennai)..."
                     style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;outline:none;background:#fff;"
-                    onclick="this.select()" autocomplete="off" disabled>
+                    onclick="this.select()" autocomplete="off">
                   <datalist id="cityDatalist"></datalist>
                   <div class="error-text" id="errorCity"
                     style="font-size:11px;color:#EF4444;margin-top:3px;display:none">City / Address is required</div>
@@ -2028,15 +2013,13 @@
             <div class="form-row" style="flex-direction: column; gap: 16px;">
               <div class="form-group" style="width: 100%;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                  <label style="margin: 0;">Email <span
-                      style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone
-                      required)</span></label>
+                  <label style="margin: 0;">Email</label>
                   <button type="button" onclick="toggleSecondaryField('fieldSecondaryEmailContainer', this)"
                     style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;"
                     title="Add Secondary Email"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                 </div>
                 <input type="email" id="fieldEmail" placeholder="email@example.com">
-                <div class="error-text" id="errorEmail">At least one contact (Email or Phone) is required</div>
+                <div class="error-text" id="errorEmail" style="display:none"></div>
               </div>
               <div class="form-group" id="fieldSecondaryEmailContainer" style="display: none; width: 100%;">
                 <label>Secondary Email</label>
@@ -2046,15 +2029,13 @@
             <div class="form-row" style="flex-direction: column; gap: 16px;">
               <div class="form-group" style="width: 100%;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                  <label style="margin: 0;">Phone <span
-                      style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Either Email or Phone
-                      required)</span></label>
+                  <label style="margin: 0;">Phone</label>
                   <button type="button" onclick="toggleSecondaryField('fieldSecondaryPhoneContainer', this)"
                     style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;"
                     title="Add Secondary Phone"><i class="fas fa-plus-circle"></i> Add Secondary</button>
                 </div>
                 <input type="text" id="fieldPhone" placeholder="Phone number">
-                <div class="error-text" id="errorPhone">At least one contact (Email or Phone) is required</div>
+                <div class="error-text" id="errorPhone" style="display:none"></div>
               </div>
               <div class="form-group" id="fieldSecondaryPhoneContainer" style="display: none; width: 100%;">
                 <label>Secondary Phone</label>
@@ -2169,9 +2150,14 @@
 
     <!-- System Welcome Tour & Shortcuts Modal -->
     <div class="modal-overlay" id="welcomeTourModalGuide">
-
-      <h5 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt"
-          style="color:var(--warning);margin-right:6px;"></i>Key Features</h5>
+      <div class="modal" style="max-width:550px;width:90vw;">
+        <div class="modal-header">
+          <h3><i class="fas fa-magic" style="color:var(--primary);margin-right:8px;"></i>Platform Guide</h3>
+          <button class="modal-close" onclick="closeModal('welcomeTourModalGuide')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:20px;">
+          <h5 style="margin:0 0 8px;font-size:0.95rem;color:var(--text-dark);"><i class="fas fa-bolt"
+              style="color:var(--warning);margin-right:6px;"></i>Key Features</h5>
       <ul style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;padding-left:20px;margin-bottom:16px;">
         <li><strong>Global Date Filter:</strong> Filter your assigned records using the top-right navbar calendar
           dropdown.</li>
@@ -2200,8 +2186,9 @@
           <div class="shortcut-desc">Export Records</div>
         </div>
       </div>
+      </div>
       <div class="modal-footer" style="padding:14px 20px;text-align:right;">
-        <button class="btn btn-primary" onclick="closeModal('welcomeTourModal')">Got it, Let's Start!</button>
+        <button class="btn btn-primary" onclick="closeModal('welcomeTourModalGuide')">Got it, Let's Start!</button>
       </div>
     </div>
   </div>
@@ -2345,7 +2332,7 @@
   </div>
 
   <!-- UNDO CONFIRMATION MODAL -->
-  <div class="modal-overlay" id="undoConfirmModal" style="display:none;">
+  <div class="modal-overlay" id="undoConfirmModal" style="z-index: 10000000 !important;">
     <div class="modal"
       style="max-width:440px;width:92vw;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
       <div class="modal-header" style="background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:16px 20px;">
@@ -2452,7 +2439,7 @@
 
   <!-- Email Campaign Preview Modal -->
   <div class="modal-overlay" id="emailCampaignModal"
-    style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99900;align-items:center;justify-content:center;padding:16px;">
+    style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:999999;align-items:center;justify-content:center;padding:16px;">
     <div class="modal-content"
       style="width:100%;max-width:680px;background:#fff;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideUp 0.3s ease;">
       <div class="modal-header"
@@ -2589,7 +2576,7 @@
     var Toast = window.Toast;
     if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
   </script>
-  <script src="js/member.js?v=2.0.0"></script>
+  <script src="js/member.js?v=2.1.0"></script>
   <script src="js/typeahead.js"></script>
   <script src="js/smartMasterData.js"></script>
   <script src="js/chatPage.js"></script>

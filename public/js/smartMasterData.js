@@ -14,7 +14,7 @@
     loadTaxonomies();
     bindEmploymentStatusEvents();
     bindFounderDetectionEvents();
-    bindCascadingLocationEvents();
+    // bindCascadingLocationEvents() removed to prevent conflict with locationCascade.js
   };
 
   function loadTaxonomies() {

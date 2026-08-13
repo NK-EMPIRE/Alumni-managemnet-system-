@@ -74,17 +74,58 @@
         optionsList.appendChild(opt);
       });
 
-      if (q && count === 0) {
-        var noRes = document.createElement('div');
-        noRes.className = 'select-no-results';
-        noRes.textContent = 'No matching results';
-        optionsList.appendChild(noRes);
+      if (q) {
+        var customOpt = document.createElement('div');
+        customOpt.className = 'select-option highlighted';
+        customOpt.textContent = 'Use "' + filterQuery + '"';
+        customOpt.addEventListener('click', function (e) {
+          e.stopPropagation();
+          selectValue(filterQuery);
+        });
+        optionsList.appendChild(customOpt);
       }
     }
 
-    function selectValue(val) {
+    function isNativeSelect() {
+      return element && element.tagName && String(element.tagName).toLowerCase() === 'select' && 'options' in element;
+    }
+
+    function ensureNativeOption(val) {
+      if (!val || !isNativeSelect()) return;
+      var found = Array.prototype.some.call(element.options, function (o) { return o.value === val; });
+      if (!found) {
+        var opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        element.appendChild(opt);
+      }
+    }
+
+    function syncNativeOptions(items) {
+      if (!isNativeSelect()) return;
+      element.innerHTML = '';
+      (Array.isArray(items) ? items : []).forEach(function (item) {
+        var val = typeof item === 'string' ? item : item.name;
+        if (!val) return;
+        var opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        element.appendChild(opt);
+      });
+      if (_selectedVal) {
+        ensureNativeOption(_selectedVal);
+        element.value = _selectedVal;
+      }
+    }
+
+    function setNativeValue(val) {
       _selectedVal = val || '';
+      ensureNativeOption(_selectedVal);
       element.value = _selectedVal;
+    }
+
+    function selectValue(val) {
+      setNativeValue(val);
       valueSpan.textContent = _selectedVal || _placeholder;
       wrapper.classList.remove('open');
       element.dispatchEvent(new Event('change', { bubbles: true }));
@@ -93,7 +134,11 @@
 
     trigger.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (wrapper.classList.contains('disabled')) return;
+      if (element.disabled) {
+        wrapper.classList.add('disabled');
+        return;
+      }
+      wrapper.classList.remove('disabled');
 
       document.querySelectorAll('.custom-searchable-select.open').forEach(function (el) {
         if (el !== wrapper) el.classList.remove('open');
@@ -126,19 +171,25 @@
       setItems: function (items, placeholder) {
         _items = Array.isArray(items) ? items : [];
         if (placeholder) _placeholder = placeholder;
-        valueSpan.textContent = element.value || _placeholder;
+        if (!_selectedVal) valueSpan.textContent = _placeholder;
+        syncNativeOptions(_items);
         renderList(searchInput.value);
       },
       setValue: function (val) {
-        _selectedVal = val || '';
-        element.value = _selectedVal;
+        setNativeValue(val);
         valueSpan.textContent = _selectedVal || _placeholder;
         renderList('');
       },
+      setPlaceholder: function (ph) {
+        if (ph) {
+          _placeholder = ph;
+          if (!_selectedVal) valueSpan.textContent = _placeholder;
+        }
+      },
       setDisabled: function (bool) {
-        if (bool) wrapper.classList.add('disabled');
-        else wrapper.classList.remove('disabled');
         element.disabled = !!bool;
+        if (element.disabled) wrapper.classList.add('disabled');
+        else wrapper.classList.remove('disabled');
       }
     };
   }
@@ -156,15 +207,16 @@
     var statePlaceholder = isFilter ? 'All States' : 'Select State';
     var cityPlaceholder = isFilter ? 'All Cities / Districts' : 'Select District / City';
 
+    var initialCountry = (countryEl.value || '').trim();
     var countryCtrl = createSearchableSelect(countryEl, countryPlaceholder);
-    var stateCtrl = stateEl ? createSearchableSelect(stateEl, isFilter ? 'All States' : 'Select Country First') : null;
-    var cityCtrl = cityEl ? createSearchableSelect(cityEl, isFilter ? 'All Cities / Districts' : 'Select State First') : null;
+    var stateCtrl = stateEl ? createSearchableSelect(stateEl, initialCountry ? statePlaceholder : (isFilter ? 'All States' : 'Select Country First')) : null;
+    var cityCtrl = cityEl ? createSearchableSelect(cityEl, initialCountry ? cityPlaceholder : (isFilter ? 'All Cities / Districts' : 'Select Country First')) : null;
 
-    if (stateCtrl) stateCtrl.setDisabled(true);
-    if (cityCtrl) cityCtrl.setDisabled(true);
+    if (stateCtrl) stateCtrl.setDisabled(!initialCountry);
+    if (cityCtrl) cityCtrl.setDisabled(!initialCountry);
 
-    var _lastCountryVal = '';
-    var _lastStateVal = '';
+    var _lastCountryVal = initialCountry;
+    var _lastStateVal = stateEl ? (stateEl.value || '').trim() : '';
 
     function loadCountries(selectedCountry) {
       countryCtrl.setItems([], 'Loading Countries...');
@@ -192,6 +244,7 @@
       _lastCountryVal = countryVal || '';
 
       if (!countryVal) {
+        stateCtrl.setPlaceholder(isFilter ? 'All States' : 'Select Country First');
         stateCtrl.setItems([], isFilter ? 'All States' : 'Select Country First');
         stateCtrl.setValue('');
         stateCtrl.setDisabled(true);
@@ -199,6 +252,7 @@
         return Promise.resolve();
       }
 
+      stateCtrl.setPlaceholder(statePlaceholder);
       stateCtrl.setItems([], 'Loading States...');
       stateCtrl.setDisabled(false);
 
@@ -209,7 +263,7 @@
         } else {
           stateCtrl.setItems(states, statePlaceholder);
         }
-        stateCtrl.setDisabled(false);
+        stateCtrl.setDisabled(stateEl ? stateEl.disabled : false);
 
         if (selectedState) {
           stateCtrl.setValue(selectedState);
@@ -217,7 +271,7 @@
         }
       }).catch(function () {
         stateCtrl.setItems([], 'Error loading states');
-        stateCtrl.setDisabled(false);
+        stateCtrl.setDisabled(stateEl ? stateEl.disabled : false);
       });
     }
 
@@ -225,41 +279,58 @@
       if (!cityCtrl) return Promise.resolve();
       _lastStateVal = stateVal || '';
 
-      if (!countryVal || !stateVal) {
-        cityCtrl.setItems([], isFilter ? 'All Cities / Districts' : 'Select State First');
+      if (!countryVal) {
+        cityCtrl.setPlaceholder(isFilter ? 'All Cities / Districts' : 'Select Country First');
+        cityCtrl.setItems([], isFilter ? 'All Cities / Districts' : 'Select Country First');
         cityCtrl.setValue('');
         cityCtrl.setDisabled(true);
         return Promise.resolve();
       }
 
+      cityCtrl.setPlaceholder(cityPlaceholder);
       cityCtrl.setItems([], 'Loading Cities...');
       cityCtrl.setDisabled(false);
 
-      return API.getCities(countryVal, stateVal).then(function (res) {
+      return API.getCities(countryVal, stateVal || '').then(function (res) {
         var cities = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         if (cities.length === 0) {
           cityCtrl.setItems([], isFilter ? 'All Cities / Districts' : 'No cities available');
         } else {
           cityCtrl.setItems(cities, cityPlaceholder);
         }
-        cityCtrl.setDisabled(false);
+        cityCtrl.setDisabled(cityEl ? cityEl.disabled : false);
 
         if (selectedCity) {
           cityCtrl.setValue(selectedCity);
         }
       }).catch(function () {
         cityCtrl.setItems([], 'Error loading cities');
-        cityCtrl.setDisabled(false);
+        cityCtrl.setDisabled(cityEl ? cityEl.disabled : false);
       });
     }
 
     countryEl.addEventListener('change', function () {
       var val = countryEl.value.trim();
-      if (val !== _lastCountryVal) {
-        _lastCountryVal = val;
+      _lastCountryVal = val;
+      _lastStateVal = '';
+      if (stateCtrl) {
+        stateCtrl.setPlaceholder(val ? statePlaceholder : (isFilter ? 'All States' : 'Select Country First'));
+        stateCtrl.setValue('');
+        stateCtrl.setItems([], val ? 'Loading States...' : (isFilter ? 'All States' : 'Select Country First'));
+        stateCtrl.setDisabled(!val);
+      }
+      if (cityCtrl) {
+        cityCtrl.setPlaceholder(val ? cityPlaceholder : (isFilter ? 'All Cities / Districts' : 'Select Country First'));
+        cityCtrl.setValue('');
+        cityCtrl.setItems([], val ? cityPlaceholder : (isFilter ? 'All Cities / Districts' : 'Select Country First'));
+        cityCtrl.setDisabled(!val);
+      }
+      if (val) {
         loadStates(val).then(function () {
           if (options.onCountryChange) options.onCountryChange(val);
         });
+      } else {
+        if (options.onCountryChange) options.onCountryChange('');
       }
     });
 
@@ -267,11 +338,17 @@
       stateEl.addEventListener('change', function () {
         var countryVal = countryEl.value.trim();
         var stateVal = stateEl.value.trim();
-        if (stateVal !== _lastStateVal) {
-          _lastStateVal = stateVal;
+        _lastStateVal = stateVal;
+        if (cityCtrl) {
+          cityCtrl.setValue('');
+          cityCtrl.setItems([], stateVal ? 'Loading Cities...' : (isFilter ? 'All Cities / Districts' : 'Select State First'));
+        }
+        if (countryVal && stateVal) {
           loadCities(countryVal, stateVal).then(function () {
             if (options.onStateChange) options.onStateChange(stateVal);
           });
+        } else {
+          if (options.onStateChange) options.onStateChange('');
         }
       });
     }
@@ -282,7 +359,17 @@
       });
     }
 
-    loadCountries();
+    loadCountries(initialCountry).then(function () {
+      if (initialCountry) {
+        var initialSt = stateEl ? (stateEl.value || '').trim() : '';
+        return loadStates(initialCountry, initialSt).then(function () {
+          if (initialCountry && initialSt) {
+            var initialCt = cityEl ? (cityEl.value || '').trim() : '';
+            return loadCities(initialCountry, initialSt, initialCt);
+          }
+        });
+      }
+    });
 
     return {
       countryCtrl: countryCtrl,
@@ -293,19 +380,34 @@
         stateVal = (stateVal || '').trim();
         cityVal = (cityVal || '').trim();
 
+        if (countryCtrl) countryCtrl.setValue(countryVal);
+        if (stateCtrl) {
+          stateCtrl.setValue(stateVal);
+          stateCtrl.setDisabled(!countryVal);
+          if (countryVal && !stateVal) stateCtrl.setItems([], statePlaceholder);
+        }
+        if (cityCtrl) {
+          cityCtrl.setValue(cityVal);
+          cityCtrl.setDisabled(!countryVal);
+          if (countryVal && !cityVal) cityCtrl.setItems([], cityPlaceholder);
+        }
+
+        if (!countryVal) {
+          if (stateCtrl) { stateCtrl.setItems([], isFilter ? 'All States' : 'Select Country First'); stateCtrl.setValue(''); stateCtrl.setDisabled(true); }
+          if (cityCtrl) { cityCtrl.setItems([], isFilter ? 'All Cities / Districts' : 'Select State First'); cityCtrl.setValue(''); cityCtrl.setDisabled(true); }
+          return Promise.resolve();
+        }
+
         return loadCountries(countryVal).then(function () {
-          if (!countryVal) {
-            if (stateCtrl) { stateCtrl.setItems([], isFilter ? 'All States' : 'Select Country First'); stateCtrl.setValue(''); stateCtrl.setDisabled(true); }
-            if (cityCtrl) { cityCtrl.setItems([], isFilter ? 'All Cities / Districts' : 'Select State First'); cityCtrl.setValue(''); cityCtrl.setDisabled(true); }
-            return;
-          }
-          return loadStates(countryVal, stateVal).then(function () {
-            if (!stateVal) {
-              if (cityCtrl) { cityCtrl.setItems([], isFilter ? 'All Cities / Districts' : 'Select State First'); cityCtrl.setValue(''); cityCtrl.setDisabled(true); }
-              return;
-            }
-            return loadCities(countryVal, stateVal, cityVal);
-          });
+          if (countryVal) return loadStates(countryVal, stateVal);
+        }).then(function () {
+          if (stateCtrl) stateCtrl.setDisabled(stateEl ? stateEl.disabled : false);
+          if (countryVal && stateVal) return loadCities(countryVal, stateVal, cityVal);
+        }).then(function () {
+          if (cityCtrl) cityCtrl.setDisabled(cityEl ? cityEl.disabled : false);
+        }).catch(function () {
+          if (stateCtrl) stateCtrl.setDisabled(stateEl ? stateEl.disabled : false);
+          if (cityCtrl) cityCtrl.setDisabled(cityEl ? cityEl.disabled : false);
         });
       },
       reset: function () {

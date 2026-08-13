@@ -26,8 +26,8 @@ async function getAssignmentTrend(days) {
   return dashboardRepository.getAssignmentTrend(days);
 }
 
-async function getLeaderStats(leaderId) {
-  const stats = await dashboardRepository.getLeaderStats(leaderId);
+async function getLeaderStats(leaderId, date) {
+  const stats = await dashboardRepository.getLeaderStats(leaderId, date);
   if (!stats || stats.total_assigned === null) {
     throw new NotFoundError('Leader stats');
   }
@@ -37,7 +37,7 @@ async function getLeaderStats(leaderId) {
   const teamId = teams.length > 0 ? teams[0].team_id : null;
   let teamMembers = [];
   if (teamId) {
-    const memberStats = await dashboardRepository.getTeamMemberStats(teamId);
+    const memberStats = await dashboardRepository.getTeamMemberStats(teamId, date);
     teamMembers = memberStats.map(m => {
       const assigned = m.total_assigned || 0;
       const completed = m.completed || 0;

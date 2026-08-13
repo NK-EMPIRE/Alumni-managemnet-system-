@@ -121,18 +121,27 @@
     }
   };
 
-  document.querySelectorAll('.modal-overlay').forEach(function (overlay) {
-    overlay.addEventListener('click', function (e) {
-      if (e.target === this) {
-        this.classList.remove('show');
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+      if (typeof window.closeModal === 'function') {
+        window.closeModal(e.target);
+      } else {
+        e.target.classList.remove('show');
+        e.target.style.display = 'none';
       }
-    });
-  });
-
-  document.querySelectorAll('.modal-close').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      this.closest('.modal-overlay').classList.remove('show');
-    });
+    }
+    var closeBtn = e.target ? (e.target.closest ? e.target.closest('.modal-close') : null) : null;
+    if (closeBtn) {
+      var overlay = closeBtn.closest('.modal-overlay');
+      if (overlay) {
+        if (typeof window.closeModal === 'function') {
+          window.closeModal(overlay);
+        } else {
+          overlay.classList.remove('show');
+          overlay.style.display = 'none';
+        }
+      }
+    }
   });
 
   window.initTabs = function (container) {
@@ -557,6 +566,41 @@
     setTimeout(function () { document.addEventListener('click', dismiss, true); }, 10);
   };
 
+  window.showCopiedPopup = function (targetEl, message) {
+    var textMsg = message || 'Copied!';
+    var popup = document.createElement('div');
+    popup.style.cssText = 'position:fixed;z-index:999999;background:#0F172A;color:#FFFFFF;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:flex;align-items:center;gap:5px;opacity:0;transform:translateY(4px);transition:all 0.2s cubic-bezier(0.16, 1, 0.3, 1);';
+    popup.innerHTML = '<i class="fas fa-check" style="color:#10B981;font-size:10px;"></i> ' + textMsg;
+    document.body.appendChild(popup);
+
+    if (targetEl && targetEl.getBoundingClientRect) {
+      var rect = targetEl.getBoundingClientRect();
+      var popupRect = popup.getBoundingClientRect();
+      var top = rect.top - popupRect.height - 8;
+      var left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+      if (top < 10) top = rect.bottom + 8;
+      if (left < 10) left = 10;
+      if (left + popupRect.width > window.innerWidth - 10) left = window.innerWidth - popupRect.width - 10;
+      popup.style.top = top + 'px';
+      popup.style.left = left + 'px';
+    } else {
+      popup.style.top = '20px';
+      popup.style.left = '50%';
+      popup.style.transform = 'translateX(-50%) translateY(4px)';
+    }
+
+    requestAnimationFrame(function () {
+      popup.style.opacity = '1';
+      popup.style.transform = (targetEl && targetEl.getBoundingClientRect) ? 'translateY(0)' : 'translateX(-50%) translateY(0)';
+    });
+
+    setTimeout(function () {
+      popup.style.opacity = '0';
+      popup.style.transform = (targetEl && targetEl.getBoundingClientRect) ? 'translateY(-4px)' : 'translateX(-50%) translateY(-4px)';
+      setTimeout(function () { popup.remove(); }, 200);
+    }, 1500);
+  };
+
   window.toggleFullScreenSpreadsheet = function (btn) {
     var wrapper = null;
     if (btn && typeof btn.closest === 'function') {
@@ -850,8 +894,11 @@
       if (updateModal && updateModal.classList.contains('show')) return;
       document.querySelectorAll('.modal-overlay, .modal-backdrop').forEach(function (m) {
         if (m.style.display === 'flex' || m.classList.contains('active') || m.classList.contains('show')) {
-          m.style.display = 'none';
-          m.classList.remove('active', 'show');
+          if (window.closeModal) window.closeModal(m);
+          else {
+            m.style.display = 'none';
+            m.classList.remove('active', 'show');
+          }
         }
       });
     }

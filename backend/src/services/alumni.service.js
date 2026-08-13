@@ -48,19 +48,33 @@ async function updateAlumni(alumniId, data, currentUser) {
     throw new NotFoundError('Alumni');
   }
 
+  const repoData = { ...data };
+  if (data.current_city !== undefined && data.city === undefined) {
+    repoData.city = data.current_city;
+  }
+  if (data.linkedin_url !== undefined && data.linkedin_profile === undefined) {
+    repoData.linkedin_profile = data.linkedin_url;
+  }
+  if (data.dob !== undefined && data.date_of_birth === undefined) {
+    repoData.date_of_birth = data.dob;
+  }
+  if (data.fatherName !== undefined && data.father_name === undefined) {
+    repoData.father_name = data.fatherName;
+  }
+
   // Detect which fields changed
   const changes = [];
-  for (const key in data) {
+  for (const key in repoData) {
     let dbKey = key;
     if (key === 'registerNo') dbKey = 'register_no';
     if (key === 'date_of_birth') dbKey = 'date_of_birth';
     if (key === 'linkedin_profile') dbKey = 'linkedin_profile';
-    if (data[key] !== undefined && String(alumni[dbKey] || '').trim() !== String(data[key] || '').trim()) {
+    if (repoData[key] !== undefined && String(alumni[dbKey] || '').trim() !== String(repoData[key] || '').trim()) {
       changes.push(key);
     }
   }
 
-  const updated = await alumniRepository.update(alumniId, data);
+  const updated = await alumniRepository.update(alumniId, repoData);
   const changeDesc = changes.length > 0 ? ` (Fields changed: ${changes.join(', ')})` : '';
 
   await createAuditLog({

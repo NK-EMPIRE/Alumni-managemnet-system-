@@ -54,7 +54,8 @@ const getAssignmentTrend = asyncHandler(async (req, res) => {
 
 const getLeaderStats = asyncHandler(async (req, res) => {
   const { leaderId } = req.params;
-  const result = await dashboardService.getLeaderStats(leaderId);
+  const date = req.query.date || null;
+  const result = await dashboardService.getLeaderStats(leaderId, date);
   success(res, result, 'Leader stats retrieved successfully');
 });
 

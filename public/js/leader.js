@@ -834,7 +834,12 @@
   var myAssignmentsData = [];
   var myFilteredAssignments = [];
   var myCurrentPage = 1;
-  var myPageSize = 10;
+  var myPageSize = 50;
+
+  // Expose to global scope so top-level handlers (e.g. executeUndoSubmission) can refresh the table
+  window.renderMyAssignmentsTable = renderMyAssignmentsTable;
+  window.loadMyAssignments = loadMyAssignments;
+  window.fetchLeaderData = fetchLeaderData;
 
   function populateMyAssignmentsFilters() {
     var depts = {};
@@ -986,7 +991,7 @@
         var actionBtns = '<div style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;">' +
           '<button class="btn btn-sm btn-primary update-alumni-btn" data-id="' + r.alumni_id + '"><i class="fas fa-edit"></i> Update</button>';
         if (isCompleted) {
-          actionBtns += '<button type="button" class="btn-undo-icon" onclick="event.stopPropagation();confirmUndoSubmission(' + r.alumni_id + ', \'' + safeName + '\')" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
+          actionBtns += '<button type="button" class="btn-undo-icon undo-alumni-btn" data-id="' + r.alumni_id + '" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
         }
         actionBtns += '</div>';
         var fatherVal = r.father_name || r.fatherName || r.pi_father_name || '';
@@ -1012,9 +1017,37 @@
       tbody.innerHTML = html;
 
       tbody.querySelectorAll('.update-alumni-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
           var id = this.getAttribute('data-id');
           openUpdateModal(id);
+        });
+      });
+
+      tbody.querySelectorAll('.undo-alumni-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var id = this.getAttribute('data-id');
+          var nameEl = this.closest('tr');
+          var name = '';
+          if (nameEl) {
+            var nameCell = nameEl.querySelector('td:nth-child(2)');
+            if (nameCell) name = nameCell.textContent.trim();
+          }
+          if (typeof window.confirmUndoSubmission === 'function') {
+            window.confirmUndoSubmission(id, name);
+          } else {
+            var modal = document.getElementById('undoConfirmModal');
+            if (modal) {
+              var targetEl = document.getElementById('undoTargetName');
+              if (targetEl) targetEl.textContent = name || 'this record';
+              window._undoTargetId = id;
+              modal.style.display = 'flex';
+              modal.classList.add('show');
+              document.body.style.overflow = 'hidden';
+            }
+          }
         });
       });
 
@@ -1170,19 +1203,40 @@
         document.getElementById('fieldDOB').value = record.date_of_birth || record.dob || '';
         document.getElementById('fieldCompany').value = record.company || record.pi_company || '';
         document.getElementById('fieldDesignation').value = record.designation || record.pi_designation || '';
+        var cntVal = record.country || record.pi_country || '';
+        var stVal = record.state || record.pi_state || '';
+        var ctVal = record.current_city || record.city || record.pi_city || record.pi_current_city || '';
         if (window._leaderLocationCascade) {
-          window._leaderLocationCascade.setValues(record.country, record.state, record.current_city || record.city);
+          window._leaderLocationCascade.setValues(cntVal, stVal, ctVal);
         } else {
-          document.getElementById('fieldCity').value = record.current_city || '';
-          document.getElementById('fieldState').value = record.state || '';
-          document.getElementById('fieldCountry').value = record.country || '';
+          document.getElementById('fieldCity').value = ctVal;
+          document.getElementById('fieldState').value = stVal;
+          document.getElementById('fieldCountry').value = cntVal;
         }
         document.getElementById('fieldEmail').value = record.email || record.pi_email || '';
         document.getElementById('fieldPhone').value = record.phone || record.pi_phone || '';
         document.getElementById('fieldSecondaryEmail').value = record.secondary_email || '';
         document.getElementById('fieldSecondaryPhone').value = record.secondary_phone || '';
-        document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
-        document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
+        if (document.getElementById('fieldLinkedin')) document.getElementById('fieldLinkedin').value = record.linkedin_profile || record.linkedin_url || '';
+        if (document.getElementById('fieldGovtJob')) document.getElementById('fieldGovtJob').value = record.is_government_job ? 'Yes' : 'No';
+        var empStatEl = document.getElementById('fieldEmploymentStatus');
+        if (empStatEl) {
+          empStatEl.value = record.employment_status || 'Working';
+          empStatEl.dispatchEvent(new Event('change'));
+        }
+        var careerTypeEl = document.getElementById('fieldCareerType');
+        if (careerTypeEl) {
+          careerTypeEl.value = record.career_type || '';
+          careerTypeEl.dispatchEvent(new Event('change'));
+        }
+        var careerCatEl = document.getElementById('fieldCareerCategory');
+        if (careerCatEl) careerCatEl.value = record.career_category || '';
+        var roleCatEl = document.getElementById('fieldRoleCategory');
+        if (roleCatEl) roleCatEl.value = record.role_category || '';
+        if (typeof window.onCareerCategoryChange === 'function') window.onCareerCategoryChange();
+        var distEl = document.getElementById('fieldDistrict');
+        if (distEl) distEl.value = record.district || '';
+        if (document.getElementById('fieldUniversity')) document.getElementById('fieldUniversity').value = record.university || '';
 
   var _isModalEditMode = false;
   window.toggleModalFieldsEditMode = function () {
@@ -1301,30 +1355,51 @@
   }
 
   function readFormValues() {
+    var getVal = function (id) {
+      var el = document.getElementById(id);
+      return (el && el.value) ? el.value.trim() : '';
+    };
     return {
-      name: document.getElementById('fieldName').value.trim(),
-      department: document.getElementById('fieldDept').value,
-      batch: document.getElementById('fieldBatch').value,
-      father_name: document.getElementById('fieldFatherName').value.trim(),
-      date_of_birth: document.getElementById('fieldDOB').value.trim(),
-      company: document.getElementById('fieldCompany').value.trim(),
-      designation: document.getElementById('fieldDesignation').value.trim(),
-      current_city: document.getElementById('fieldCity').value.trim(),
-      state: document.getElementById('fieldState').value.trim(),
-      country: document.getElementById('fieldCountry').value.trim(),
-      email: document.getElementById('fieldEmail').value.trim(),
-      phone: document.getElementById('fieldPhone').value.trim(),
-      secondary_email: document.getElementById('fieldSecondaryEmail').value.trim(),
-      secondary_phone: document.getElementById('fieldSecondaryPhone').value.trim(),
-      linkedin_url: document.getElementById('fieldLinkedin').value.trim(),
-      is_government_job: document.getElementById('fieldGovtJob').value === 'Yes',
+      name: getVal('fieldName'),
+      department: getVal('fieldDept'),
+      batch: getVal('fieldBatch'),
+      father_name: getVal('fieldFatherName'),
+      date_of_birth: getVal('fieldDOB'),
+      company: getVal('fieldCompany'),
+      designation: getVal('fieldDesignation'),
+      current_city: getVal('fieldCity'),
+      state: getVal('fieldState'),
+      country: getVal('fieldCountry'),
+      email: getVal('fieldEmail'),
+      phone: getVal('fieldPhone'),
+      secondary_email: getVal('fieldSecondaryEmail'),
+      secondary_phone: getVal('fieldSecondaryPhone'),
+      linkedin_url: getVal('fieldLinkedin'),
+      is_government_job: (document.getElementById('fieldGovtJob') && document.getElementById('fieldGovtJob').value === 'Yes') ? 1 : 0,
+      employment_status: getVal('fieldEmploymentStatus'),
+      career_type: getVal('fieldCareerType'),
+      career_category: getVal('fieldCareerCategory'),
+      role_category: getVal('fieldRoleCategory'),
+      district: getVal('fieldDistrict'),
+      university: getVal('fieldUniversity')
     };
   }
 
   function validateForm() {
     var isValid = true;
-    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation', 'fieldCity'];
+    var empStatusEl = document.getElementById('fieldEmploymentStatus');
+    var isNotWorking = empStatusEl && empStatusEl.value === 'Not Working';
+
+    var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation'];
     required.forEach(function (id) {
+      if (isNotWorking && (id === 'fieldCompany' || id === 'fieldDesignation')) {
+        var el = document.getElementById(id);
+        var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
+        if (el) el.classList.remove('error');
+        if (err) err.style.display = 'none';
+        return;
+      }
+
       var el = document.getElementById(id);
       var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
       if (!el || !el.value || el.value.trim() === '') {
@@ -2139,6 +2214,16 @@
                 val = row.member_name || row.teamMember || row.assigned_to || '';
               } else if (col.key === 'updated_date') {
                 val = row.completed_date || row.completedDate || row.updated_date || row.updatedDate || '';
+              } else if (col.key === 'current_city') {
+                val = row.current_city || row.city || row.pi_city || '';
+              } else if (col.key === 'state') {
+                val = row.state || row.pi_state || '';
+              } else if (col.key === 'country') {
+                val = row.country || row.pi_country || '';
+              } else if (col.key === 'secondary_email') {
+                val = row.secondary_email || row.secondaryEmail || '';
+              } else if (col.key === 'secondary_phone') {
+                val = row.secondary_phone || row.secondaryPhone || '';
               }
               if (col.key === 'date_of_birth' || col.key === 'dob') {
                 val = row.date_of_birth || row.dob || val || '';
@@ -3154,33 +3239,6 @@ window.reopenAlumniRecord = function (alumniId) {
   });
 };
 
-window.undoAlumniSubmission = function () {
-  if (!currentSelectedAlumniId) return;
-  if (!confirm('Are you sure you want to undo submission and set status back to Pending?')) return;
-
-  var undoBtn = document.getElementById('undoSubmitBtn');
-  if (undoBtn) { undoBtn.disabled = true; undoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...'; }
-
-  var token = localStorage.getItem('token');
-  fetch('/api/v1/assignments/reopen/' + currentSelectedAlumniId, {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function (r) { return r.json(); }).then(function (res) {
-    if (res && res.success) {
-      Toast.success('Undo Submission', res.message || 'Submission undone successfully.');
-      var overlay = document.getElementById('updateModal');
-      if (overlay) overlay.classList.remove('show');
-      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
-      if (typeof fetchLeaderData === 'function') fetchLeaderData();
-    } else {
-      Toast.error('Undo Submission', res && res.message || 'Failed to undo submission.');
-    }
-  }).catch(function () {
-    Toast.error('Undo Submission', 'Network error undoing submission.');
-  }).finally(function () {
-    if (undoBtn) { undoBtn.disabled = false; undoBtn.innerHTML = '<i class="fas fa-undo"></i> Undo Submit'; }
-  });
-};
 
 /* ── EMAIL CAMPAIGN (n8n AUTOMATION) HANDLERS ── */
 var _activeCampaignPollInterval = null;
@@ -3340,11 +3398,16 @@ window.pollCampaignProgress = function (campaignId) {
   }, 3000);
 };
 
-window.copyAlumniAndFather = function (name, father) {
+window.copyAlumniAndFather = function (name, father, btnEl) {
+  var targetEl = btnEl || (window.event ? window.event.currentTarget : null);
   var textStr = 'Alumni: ' + name + (father ? ' | Father: ' + father : '');
   if (navigator.clipboard) {
     navigator.clipboard.writeText(textStr).then(function () {
-      if (typeof window.showToast === 'function') window.showToast('Copied: ' + textStr, 'success');
+      if (typeof window.showCopiedPopup === 'function') {
+        window.showCopiedPopup(targetEl, 'Copied Alumni & Father Name!');
+      } else if (typeof window.showToast === 'function') {
+        window.showToast('Copied: ' + textStr, 'success');
+      }
     });
   }
 };
@@ -3462,10 +3525,10 @@ window.executeUndoSubmission = function () {
       : Promise.reject(new Error('API unavailable')));
 
   apiCall.then(function (res) {
-    if (window.Toast && typeof window.Toast.warning === 'function') {
-      window.Toast.warning('Submission Undone!', 'Record moved back to Draft.');
+    if (window.Toast && typeof window.Toast.success === 'function') {
+      window.Toast.success('Submission Undone!', 'Record moved back to Draft successfully.');
     } else if (typeof showToast === 'function') {
-      showToast('Submission Undone', 'Record moved back to Draft.', 'warning');
+      showToast('Submission Undone', 'Record moved back to Draft.', 'success');
     }
 
     // Optimistically update local assignments array so the record status becomes Draft immediately
@@ -3491,8 +3554,9 @@ window.executeUndoSubmission = function () {
     }
 
     // Re-render table and fetch fresh data from backend
-    if (typeof renderMyAssignmentsTable === 'function') renderMyAssignmentsTable();
-    if (typeof loadMyAssignments === 'function') loadMyAssignments();
+    if (typeof window.renderMyAssignmentsTable === 'function') window.renderMyAssignmentsTable();
+    if (typeof window.loadMyAssignments === 'function') window.loadMyAssignments();
+    if (typeof window.fetchLeaderData === 'function') window.fetchLeaderData();
     if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
   }).catch(function (err) {
     var errMsg = (err && err.message) || 'Failed to undo submission.';
@@ -3511,7 +3575,7 @@ window.executeUndoSubmission = function () {
 
 window.undoAlumniSubmission = function () {
   if (!window.currentSelectedAlumniId) return;
-  var recordName = (document.getElementById('modalTitle') ? document.getElementById('modalTitle').textContent : '');
+  var recordName = (document.getElementById('fieldName') ? document.getElementById('fieldName').value : '');
   window.confirmUndoSubmission(window.currentSelectedAlumniId, recordName);
 };
 

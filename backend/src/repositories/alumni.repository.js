@@ -4,7 +4,9 @@ const ALLOWED_UPDATE_FIELDS = [
   'name', 'gender', 'batch', 'department', 'email', 'phone',
   'company', 'designation', 'working_details', 'linkedin_profile', 'date_of_birth',
   'experience', 'salary', 'city', 'country', 'father_name',
-  'address', 'state', 'secondary_phone', 'secondary_email'
+  'address', 'state', 'secondary_phone', 'secondary_email',
+  'employment_status', 'career_type', 'career_category', 'role_category',
+  'district', 'university'
 ];
 
 const FIELD_TYPES = {
@@ -27,7 +29,13 @@ const FIELD_TYPES = {
   address: sql.NVarChar(500),
   state: sql.NVarChar(100),
   secondary_phone: sql.NVarChar(50),
-  secondary_email: sql.NVarChar(150)
+  secondary_email: sql.NVarChar(150),
+  employment_status: sql.NVarChar(30),
+  career_type: sql.NVarChar(100),
+  career_category: sql.NVarChar(100),
+  role_category: sql.NVarChar(100),
+  district: sql.NVarChar(100),
+  university: sql.NVarChar(200)
 };
 
 async function findAll({ page, limit, offset, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField }) {
@@ -57,6 +65,8 @@ async function findAll({ page, limit, offset, search, department, batch, status,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.experience, a.salary, a.country,
         a.date_of_birth, a.address, a.state, a.secondary_phone, a.secondary_email,
+        a.employment_status, a.career_type, a.career_category, a.role_category,
+        a.district, a.university,
         aa.status AS assignment_status, aa.assigned_date, aa.completed_date,
         aa.assignment_id, aa.team_id, aa.member_id,
         ul.first_name + ' ' + ul.last_name AS leader_name,
@@ -210,31 +220,41 @@ async function createProfessionalInfo(data) {
 
     const result = await transaction.request()
       .input('alumniId', sql.Int, data.alumni_id)
-      .input('company', sql.NVarChar(200), data.company)
-      .input('designation', sql.NVarChar(200), data.designation)
-      .input('currentCity', sql.NVarChar(100), data.current_city)
-      .input('state', sql.NVarChar(100), data.state)
-      .input('country', sql.NVarChar(100), data.country)
-      .input('email', sql.NVarChar(150), data.email)
-      .input('phone', sql.NVarChar(50), data.phone)
-      .input('linkedinUrl', sql.NVarChar(500), data.linkedin_url)
-      .input('higherStudies', sql.NVarChar(200), data.higher_studies)
-      .input('isEntrepreneur', sql.Bit, data.is_entrepreneur)
-      .input('isGovernmentJob', sql.Bit, data.is_government_job)
-      .input('otherOccupation', sql.NVarChar(200), data.other_occupation)
-      .input('remarks', sql.NVarChar(sql.MAX), data.remarks)
-      .input('updatedBy', sql.Int, data.updated_by)
-      .input('fatherName', sql.NVarChar(150), data.father_name || null)
+      .input('company', sql.NVarChar(200), data.company || null)
+      .input('designation', sql.NVarChar(200), data.designation || null)
+      .input('currentCity', sql.NVarChar(100), data.current_city || data.city || null)
+      .input('state', sql.NVarChar(100), data.state || null)
+      .input('country', sql.NVarChar(100), data.country || null)
+      .input('email', sql.NVarChar(150), data.email || null)
+      .input('phone', sql.NVarChar(50), data.phone || null)
+      .input('linkedinUrl', sql.NVarChar(500), data.linkedin_url || data.linkedin_profile || null)
+      .input('higherStudies', sql.NVarChar(200), data.higher_studies || data.higherStudies || null)
+      .input('isEntrepreneur', sql.Bit, data.is_entrepreneur ? 1 : 0)
+      .input('isGovernmentJob', sql.Bit, data.is_government_job ? 1 : 0)
+      .input('otherOccupation', sql.NVarChar(200), data.other_occupation || data.otherOcc || null)
+      .input('remarks', sql.NVarChar(sql.MAX), data.remarks || null)
+      .input('updatedBy', sql.Int, data.updated_by || null)
+      .input('fatherName', sql.NVarChar(150), data.father_name || data.fatherName || null)
+      .input('employmentStatus', sql.NVarChar(30), data.employment_status || null)
+      .input('careerType', sql.NVarChar(100), data.career_type || null)
+      .input('careerCategory', sql.NVarChar(100), data.career_category || null)
+      .input('roleCategory', sql.NVarChar(100), data.role_category || null)
+      .input('district', sql.NVarChar(100), data.district || null)
+      .input('university', sql.NVarChar(200), data.university || null)
       .query(`
         INSERT INTO ProfessionalInformation
           (alumni_id, company, designation, current_city, state, country,
            email, phone, linkedin_url, higher_studies, is_entrepreneur,
-           is_government_job, other_occupation, remarks, updated_by, father_name)
+           is_government_job, other_occupation, remarks, updated_by, father_name,
+           employment_status, career_type, career_category, role_category,
+           district, university)
         OUTPUT INSERTED.*
         VALUES
           (@alumniId, @company, @designation, @currentCity, @state, @country,
            @email, @phone, @linkedinUrl, @higherStudies, @isEntrepreneur,
-           @isGovernmentJob, @otherOccupation, @remarks, @updatedBy, @fatherName)
+           @isGovernmentJob, @otherOccupation, @remarks, @updatedBy, @fatherName,
+           @employmentStatus, @careerType, @careerCategory, @roleCategory,
+           @district, @university)
       `);
 
     const updateReq = transaction.request();
@@ -242,20 +262,26 @@ async function createProfessionalInfo(data) {
     updateReq.input('name', sql.NVarChar(150), data.name || null);
     updateReq.input('department', sql.NVarChar(50), data.department || null);
     updateReq.input('batch', sql.NVarChar(10), data.batch || null);
-    updateReq.input('company', sql.NVarChar(200), data.company);
-    updateReq.input('designation', sql.NVarChar(200), data.designation);
-    updateReq.input('email', sql.NVarChar(150), data.email);
-    updateReq.input('phone', sql.NVarChar(50), data.phone);
+    updateReq.input('company', sql.NVarChar(200), data.company || null);
+    updateReq.input('designation', sql.NVarChar(200), data.designation || null);
+    updateReq.input('email', sql.NVarChar(150), data.email || null);
+    updateReq.input('phone', sql.NVarChar(50), data.phone || null);
     updateReq.input('secondaryEmail', sql.NVarChar(150), data.secondary_email || null);
     updateReq.input('secondaryPhone', sql.NVarChar(50), data.secondary_phone || null);
-    updateReq.input('workingDetails', sql.NVarChar(500), data.working_details);
-    updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url);
-    updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth);
-    updateReq.input('fatherName', sql.NVarChar(150), data.father_name || null);
+    updateReq.input('workingDetails', sql.NVarChar(500), data.working_details || null);
+    updateReq.input('linkedinProfile', sql.NVarChar(255), data.linkedin_url || data.linkedin_profile || null);
+    updateReq.input('dateOfBirth', sql.NVarChar(20), data.date_of_birth || data.dob || null);
+    updateReq.input('fatherName', sql.NVarChar(150), data.father_name || data.fatherName || null);
     updateReq.input('address', sql.NVarChar(500), data.address || null);
     updateReq.input('city', sql.NVarChar(100), data.current_city || data.city || null);
     updateReq.input('state', sql.NVarChar(100), data.state || null);
     updateReq.input('country', sql.NVarChar(100), data.country || null);
+    updateReq.input('employmentStatus', sql.NVarChar(30), data.employment_status || null);
+    updateReq.input('careerType', sql.NVarChar(100), data.career_type || null);
+    updateReq.input('careerCategory', sql.NVarChar(100), data.career_category || null);
+    updateReq.input('roleCategory', sql.NVarChar(100), data.role_category || null);
+    updateReq.input('district', sql.NVarChar(100), data.district || null);
+    updateReq.input('university', sql.NVarChar(200), data.university || null);
     await updateReq.query(`
       UPDATE Alumni
       SET name = COALESCE(@name, name),
@@ -275,6 +301,12 @@ async function createProfessionalInfo(data) {
           city = @city,
           state = @state,
           country = @country,
+          employment_status = COALESCE(@employmentStatus, employment_status),
+          career_type = COALESCE(@careerType, career_type),
+          career_category = COALESCE(@careerCategory, career_category),
+          role_category = COALESCE(@roleCategory, role_category),
+          district = COALESCE(@district, district),
+          university = COALESCE(@university, university),
           is_updated = 1,
           updated_date = GETUTCDATE()
       WHERE alumni_id = @alumniId
@@ -324,15 +356,20 @@ async function getAssignmentsByMember(memberId, { page, limit, offset, search, d
         COALESCE(NULLIF(a.company, ''), pi.pi_company) AS company,
         COALESCE(NULLIF(a.designation, ''), pi.pi_designation) AS designation,
         COALESCE(NULLIF(a.city, ''), pi.pi_city) AS city,
+        COALESCE(NULLIF(a.city, ''), pi.pi_city) AS current_city,
+        COALESCE(NULLIF(a.state, ''), pi.pi_state) AS state,
+        COALESCE(NULLIF(a.country, ''), pi.pi_country) AS country,
         a.working_details, a.linkedin_profile, a.experience,
-        a.country, a.state, a.address, a.is_updated,
+        a.address, a.secondary_email, a.secondary_phone, a.is_updated,
         a.updated_date, a.created_at, a.father_name, a.date_of_birth,
+        a.employment_status, a.career_type, a.career_category, a.role_category,
+        a.district, a.university,
         aa.assignment_id, aa.team_id, aa.status,
         aa.assigned_date, aa.completed_date
       FROM AlumniAssignments aa
       INNER JOIN Alumni a ON aa.alumni_id = a.alumni_id
       OUTER APPLY (
-        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city
+        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city, state AS pi_state, country AS pi_country
         FROM ProfessionalInformation
         WHERE alumni_id = a.alumni_id
         ORDER BY updated_at DESC
@@ -375,8 +412,14 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
         COALESCE(NULLIF(a.company, ''), pi.pi_company) AS company,
         COALESCE(NULLIF(a.designation, ''), pi.pi_designation) AS designation,
         COALESCE(NULLIF(a.city, ''), pi.pi_city) AS city,
+        COALESCE(NULLIF(a.city, ''), pi.pi_city) AS current_city,
+        COALESCE(NULLIF(a.state, ''), pi.pi_state) AS state,
+        COALESCE(NULLIF(a.country, ''), pi.pi_country) AS country,
+        a.address, a.secondary_email, a.secondary_phone,
         a.working_details, a.linkedin_profile, a.is_updated,
         a.updated_date, a.created_at, a.father_name, a.date_of_birth,
+        a.employment_status, a.career_type, a.career_category, a.role_category,
+        a.district, a.university,
         aa.assignment_id, aa.team_id, aa.member_id, aa.status,
         aa.assigned_date, aa.completed_date,
         ISNULL(u.first_name + ' ' + u.last_name, 'Unassigned') AS assigned_to
@@ -385,7 +428,7 @@ async function getAssignmentsByLeader(leaderId, { page, limit, offset, search, d
       LEFT JOIN Users u ON aa.member_id = u.user_id
       INNER JOIN Teams t ON aa.team_id = t.team_id
       OUTER APPLY (
-        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city
+        SELECT TOP 1 company AS pi_company, designation AS pi_designation, current_city AS pi_city, state AS pi_state, country AS pi_country
         FROM ProfessionalInformation
         WHERE alumni_id = a.alumni_id
         ORDER BY updated_at DESC

@@ -97,8 +97,8 @@
     getDashboardStats: function () {
         return get('/dashboard/stats');
     },
-    getLeaderStats: function (leaderId) {
-        return get('/dashboard/leader/' + leaderId + '/stats');
+    getLeaderStats: function (leaderId, date) {
+        return get('/dashboard/leader/' + leaderId + '/stats', date ? { date: date } : undefined);
     },
     getMyTasks: function () {
         return get('/tasks/my-tasks');
@@ -173,6 +173,9 @@
         return patch('/alumni/' + id + '/draft', data);
     },
     submitAlumni: function (id, data) {
+        return patch('/alumni/' + id + '/submit', data);
+    },
+    submitProfessionalInfo: function (id, data) {
         return patch('/alumni/' + id + '/submit', data);
     },
     updateAssignmentStatus: function (assignmentId, data) {

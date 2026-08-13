@@ -118,7 +118,7 @@
                     '<button class="btn-update" data-index="' + r.id + '"><i class="fas fa-edit"></i> Update</button>';
                 if (isCompleted) {
                     var safeName = (r.name || '').replace(/'/g, "\\'");
-                    actionButtons += '<button class="btn-undo-icon" onclick="confirmUndoSubmission(' + r.id + ', \'' + safeName + '\')" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
+                    actionButtons += '<button class="btn-undo-icon" onclick="event.stopPropagation();confirmUndoSubmission(' + r.id + ', \'' + safeName + '\')" title="Undo Submission to Draft"><i class="fas fa-undo"></i></button>';
                 }
                 actionButtons += '</div>';
                 var fatherVal = String(r.father_name || r.fatherName || '');
@@ -375,6 +375,15 @@
                 el.disabled = false;
             }
         });
+
+        if (window._memberLocationCascade) {
+            var cEl = document.getElementById('fieldCountry');
+            var sEl = document.getElementById('fieldState');
+            var ctEl = document.getElementById('fieldCity');
+            if (window._memberLocationCascade.countryCtrl) window._memberLocationCascade.countryCtrl.setDisabled(cEl ? cEl.disabled : false);
+            if (window._memberLocationCascade.stateCtrl) window._memberLocationCascade.stateCtrl.setDisabled(sEl ? sEl.disabled : false);
+            if (window._memberLocationCascade.cityCtrl) window._memberLocationCascade.cityCtrl.setDisabled(ctEl ? ctEl.disabled : false);
+        }
     }
 
     window.toggleModalFieldsEditMode = function () {
@@ -402,6 +411,15 @@
                 }
             }
         });
+
+        if (window._memberLocationCascade) {
+            var cEl = document.getElementById('fieldCountry');
+            var sEl = document.getElementById('fieldState');
+            var ctEl = document.getElementById('fieldCity');
+            if (window._memberLocationCascade.countryCtrl) window._memberLocationCascade.countryCtrl.setDisabled(cEl ? cEl.disabled : false);
+            if (window._memberLocationCascade.stateCtrl) window._memberLocationCascade.stateCtrl.setDisabled(sEl ? sEl.disabled : false);
+            if (window._memberLocationCascade.cityCtrl) window._memberLocationCascade.cityCtrl.setDisabled(ctEl ? ctEl.disabled : false);
+        }
 
         if (topEditBtn) {
             topEditBtn.style.transform = 'scale(1.25)';
@@ -508,9 +526,15 @@
 
         // Populate Smart Master Data Fields
         var empStatusEl = document.getElementById('fieldEmploymentStatus');
-        if (empStatusEl) empStatusEl.value = record.employment_status || 'Working';
+        if (empStatusEl) {
+          empStatusEl.value = record.employment_status || 'Working';
+          empStatusEl.dispatchEvent(new Event('change'));
+        }
         var cTypeEl = document.getElementById('fieldCareerType');
-        if (cTypeEl) cTypeEl.value = record.career_type || '';
+        if (cTypeEl) {
+          cTypeEl.value = record.career_type || '';
+          cTypeEl.dispatchEvent(new Event('change'));
+        }
         var cCatEl = document.getElementById('fieldCareerCategory');
         if (cCatEl) cCatEl.value = record.career_category || '';
         if (typeof onCareerCategoryChange === 'function') onCareerCategoryChange();
@@ -757,16 +781,26 @@
         let isValid = true;
         clearErrors();
 
+        const empStatusEl = document.getElementById('fieldEmploymentStatus');
+        const isNotWorking = empStatusEl && empStatusEl.value === 'Not Working';
+
         const fields = [
             { id: 'fieldName', errorId: 'errorName', label: 'Name' },
             { id: 'fieldDept', errorId: 'errorDept', label: 'Department' },
             { id: 'fieldBatch', errorId: 'errorBatch', label: 'Batch' },
             { id: 'fieldCompany', errorId: 'errorCompany', label: 'Company' },
-            { id: 'fieldDesignation', errorId: 'errorDesignation', label: 'Designation' },
-            { id: 'fieldCity', errorId: 'errorCity', label: 'Company Address' }
+            { id: 'fieldDesignation', errorId: 'errorDesignation', label: 'Designation' }
         ];
 
         fields.forEach(function (f) {
+            if (isNotWorking && (f.id === 'fieldCompany' || f.id === 'fieldDesignation')) {
+                const el = document.getElementById(f.id);
+                const err = document.getElementById(f.errorId);
+                if (el) el.classList.remove('error');
+                if (err) err.classList.remove('show');
+                return;
+            }
+
             const el = document.getElementById(f.id);
             const err = document.getElementById(f.errorId);
             if (!el || !el.value || el.value.trim() === '') {
@@ -776,34 +810,26 @@
             }
         });
 
-        // Contact validation: either Email or Phone must be present
+        // Email and Phone are optional contact fields
         const emailEl = document.getElementById('fieldEmail');
         const phoneEl = document.getElementById('fieldPhone');
         const emailErr = document.getElementById('errorEmail');
         const phoneErr = document.getElementById('errorPhone');
 
-        const emailVal = emailEl && emailEl.value ? emailEl.value.trim() : '';
-        const phoneVal = phoneEl && phoneEl.value ? phoneEl.value.trim() : '';
-
-        if (!emailVal && !phoneVal) {
-            if (emailEl) emailEl.classList.add('error');
-            if (phoneEl) phoneEl.classList.add('error');
-            if (emailErr) emailErr.classList.add('show');
-            if (phoneErr) phoneErr.classList.add('show');
-            isValid = false;
-        } else {
-            if (emailEl) emailEl.classList.remove('error');
-            if (phoneEl) phoneEl.classList.remove('error');
-            if (emailErr) emailErr.classList.remove('show');
-            if (phoneErr) phoneErr.classList.remove('show');
-        }
+        if (emailEl) emailEl.classList.remove('error');
+        if (phoneEl) phoneEl.classList.remove('error');
+        if (emailErr) emailErr.classList.remove('show');
+        if (phoneErr) phoneErr.classList.remove('show');
 
         return isValid;
     }
 
     function showToast(message, type) {
-        // Disabled: Toast notifications removed from member page per request
-        return;
+        if (window.Toast) {
+            if (type === 'error' || type === 'danger') window.Toast.error(message);
+            else if (type === 'warning') window.Toast.warning(message);
+            else window.Toast.success(message);
+        }
     }
 
     function handleSaveDraft() {
@@ -923,13 +949,14 @@
             };
             API.submitAlumni(record.id, submitData).then(function () {
                 if (record.assignment_id) {
-                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
+                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' }).catch(function() {});
                 }
             }).then(function () {
                 doLocalSubmit();
             }).catch(function (err) {
                 submitRecordBtn.classList.remove('loading');
                 submitRecordBtn.disabled = false;
+                submitRecordBtn.innerHTML = originalContent;
                 showToast(err.message || 'Failed to submit record.', 'error');
             });
         } else {
@@ -985,27 +1012,31 @@
         if (_apiDataLoaded && record && record.id) {
             readFormValues(record);
             var submitData = {
-                name: record.name,
-                department: record.department,
-                batch: record.batch,
-                company: record.company,
-                designation: record.designation,
-                current_city: record.city,
-                state: record.state,
-                country: record.country,
-                email: record.email,
-                phone: record.phone,
-                linkedin_url: record.linkedin_profile,
-                working_details: record.working_details,
-                higher_studies: record.higherStudies,
-                other_occupation: record.otherOcc,
-                remarks: record.remarks,
+                name: record.name || null,
+                department: record.department || null,
+                batch: record.batch || null,
+                company: record.company || null,
+                designation: record.designation || null,
+                father_name: record.father_name || null,
+                date_of_birth: record.date_of_birth || null,
+                current_city: record.city || null,
+                state: record.state || null,
+                country: record.country || null,
+                email: record.email || null,
+                phone: record.phone || null,
+                secondary_email: record.secondary_email || null,
+                secondary_phone: record.secondary_phone || null,
+                linkedin_url: record.linkedin_profile || null,
+                working_details: record.working_details || null,
+                higher_studies: record.higherStudies || null,
+                other_occupation: record.otherOcc || null,
+                remarks: record.remarks || null,
                 is_entrepreneur: record.entrepreneur === 'Yes' ? 1 : 0,
                 is_government_job: record.govtJob === 'Yes' ? 1 : 0
             };
             API.submitAlumni(record.id, submitData).then(function () {
                 if (record.assignment_id) {
-                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' });
+                    return API.updateAssignmentStatus(record.assignment_id, { status: 'Completed' }).catch(function() {});
                 }
             }).then(function () {
                 doLocalSubmitAndNext();
@@ -1878,19 +1909,27 @@ window.confirmUndoSubmission = function (alumniId, name) {
     _undoTargetId = alumniId;
     var nameEl = document.getElementById('undoTargetName');
     if (nameEl) nameEl.textContent = name || 'this record';
-    var modal = document.getElementById('undoConfirmModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('show');
+    if (typeof window.openModal === 'function') {
+        window.openModal('undoConfirmModal');
+    } else {
+        var modal = document.getElementById('undoConfirmModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
     }
 };
 
 window.closeUndoModal = function () {
     _undoTargetId = null;
-    var modal = document.getElementById('undoConfirmModal');
-    if (modal) {
-        modal.classList.remove('show');
-        modal.style.display = 'none';
+    if (typeof window.closeModal === 'function') {
+        window.closeModal('undoConfirmModal');
+    } else {
+        var modal = document.getElementById('undoConfirmModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
     }
 };
 
@@ -1910,6 +1949,7 @@ window.executeUndoSubmission = function () {
         if (window.Toast) window.Toast.success('Submission Undone!', 'Record moved back to Draft successfully.');
         else _memberShowToast('Submission undone. Record is back in Draft.', 'success');
         window.closeUndoModal();
+        if (window.closeUpdateModal) window.closeUpdateModal();
         if (window.fetchMemberData) window.fetchMemberData();
     }).catch(function (err) {
         if (window.Toast) window.Toast.error('Undo Failed', err && err.message || 'Failed to undo submission.');
@@ -2273,11 +2313,16 @@ window.markReplyAsReviewed = function (replyId) {
     }).catch(function () { });
 };
 
-window.copyAlumniAndFather = function (name, father) {
+window.copyAlumniAndFather = function (name, father, btnEl) {
+    var targetEl = btnEl || (window.event ? window.event.currentTarget : null);
     var textStr = 'Alumni: ' + name + (father ? ' | Father: ' + father : '');
     if (navigator.clipboard) {
         navigator.clipboard.writeText(textStr).then(function () {
-            showToast('Copied: ' + textStr, 'success');
+            if (typeof window.showCopiedPopup === 'function') {
+                window.showCopiedPopup(targetEl, 'Copied Alumni & Father Name!');
+            } else if (typeof showToast === 'function') {
+                showToast('Copied: ' + textStr, 'success');
+            }
         });
     }
 };

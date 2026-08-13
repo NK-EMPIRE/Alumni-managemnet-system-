@@ -446,10 +446,13 @@ function renderAnalysisPagination(total) {
   btns.innerHTML = html;
 }
 
-window.copyToClipboard = function (text, label) {
+window.copyToClipboard = function (text, label, btnEl) {
   if (!text) return;
+  var targetEl = btnEl || (window.event ? window.event.currentTarget : null);
   navigator.clipboard.writeText(text).then(function () {
-    if (typeof showToast === 'function') {
+    if (typeof window.showCopiedPopup === 'function') {
+      window.showCopiedPopup(targetEl, (label || 'Text') + ' Copied!');
+    } else if (typeof showToast === 'function') {
       showToast(label + ' copied to clipboard: ' + text, 'success');
     } else {
       alert(label + ' copied: ' + text);

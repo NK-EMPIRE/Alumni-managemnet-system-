@@ -135,24 +135,24 @@ async function getReport({ page = 1, limit = 50, date, userId, status, role }) {
     WITH Att AS (
       SELECT
         a.attendance_id,
-        a.user_id,
+        u.user_id,
         u.first_name + ' ' + u.last_name AS user_name,
         r.role_name AS role,
         u.department,
-        a.attendance_date,
+        COALESCE(a.attendance_date, @filterDate) AS attendance_date,
         a.login_time,
-        a.status,
-        a.marked_by,
+        COALESCE(a.status, 'Absent') AS status,
+        COALESCE(a.marked_by, 'system') AS marked_by,
         a.notes,
         a.updated_at,
         COUNT(*) OVER() AS total_count
-      FROM dbo.Attendance a
-      JOIN dbo.Users u ON u.user_id = a.user_id
+      FROM dbo.Users u
       LEFT JOIN dbo.Roles r ON u.role_id = r.role_id
-      WHERE (@filterDate IS NULL OR a.attendance_date = @filterDate)
-        AND (@filterUserId IS NULL OR a.user_id = @filterUserId)
-        AND (@filterStatus IS NULL OR a.status = @filterStatus)
+      LEFT JOIN dbo.Attendance a ON u.user_id = a.user_id AND (@filterDate IS NULL OR a.attendance_date = @filterDate)
+      WHERE u.is_active = 1
+        AND (@filterUserId IS NULL OR u.user_id = @filterUserId)
         AND (@filterRole IS NULL OR r.role_name = @filterRole)
+        AND (@filterStatus IS NULL OR COALESCE(a.status, 'Absent') = @filterStatus)
     )
     SELECT * FROM Att
     ORDER BY attendance_date DESC, user_name ASC
@@ -178,15 +178,16 @@ async function getSummary(date) {
 
   const result = await request.query(`
     SELECT
-      a.attendance_date,
+      COALESCE(a.attendance_date, @filterDate) AS attendance_date,
       SUM(CASE WHEN a.status = 'Present' THEN 1 ELSE 0 END) AS present_count,
       SUM(CASE WHEN a.status = 'Late'    THEN 1 ELSE 0 END) AS late_count,
-      SUM(CASE WHEN a.status = 'Absent'  THEN 1 ELSE 0 END) AS absent_count,
-      COUNT(*) AS total_count
-    FROM dbo.Attendance a
-    WHERE (@filterDate IS NULL OR a.attendance_date = @filterDate)
-    GROUP BY a.attendance_date
-    ORDER BY a.attendance_date DESC;
+      SUM(CASE WHEN COALESCE(a.status, 'Absent') = 'Absent' THEN 1 ELSE 0 END) AS absent_count,
+      COUNT(u.user_id) AS total_count
+    FROM dbo.Users u
+    LEFT JOIN dbo.Attendance a ON u.user_id = a.user_id AND (@filterDate IS NULL OR a.attendance_date = @filterDate)
+    WHERE u.is_active = 1
+    GROUP BY COALESCE(a.attendance_date, @filterDate)
+    ORDER BY attendance_date DESC;
   `);
 
   return result.recordset;

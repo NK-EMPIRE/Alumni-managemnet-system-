@@ -2234,3 +2234,197 @@
 {"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-04 21:24:47.370"}
 {"error":"Invalid column name 'company'.","ip":"::1","level":"error","message":"GET /api/v1/alumni-category/groups?onlyUpdated=true","stack":"RequestError: Invalid column name 'company'.\n    at handleError (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:509:28)\n    at addChunk (node:internal/streams/readable:563:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:540:3)\n    at Readable.push (node:internal/streams/readable:395:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-08-04 21:25:21.901","userId":51}
 {"level":"error","message":"UNEXPECTED: Invalid column name 'company'.","stack":"RequestError: Invalid column name 'company'.\n    at handleError (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:509:28)\n    at Connection.emit (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Naveen Karthick\\OneDrive\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:509:28)\n    at addChunk (node:internal/streams/readable:563:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:540:3)\n    at Readable.push (node:internal/streams/readable:395:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-08-04 21:25:21.904"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 12:11:30.350"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 12:11:30.354"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 12:11:30.355"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 12:11:30.356"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 12:11:47.031"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 12:11:47.036"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 12:11:47.037"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 12:11:47.037"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 12:13:26.361"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 12:13:26.364"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 12:13:26.365"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 12:13:26.365"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 12:13:43.143"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 12:13:43.147"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 12:13:43.147"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 12:13:43.148"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 12:20:49.931"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 12:20:49.934"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 12:20:49.935"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 12:20:49.935"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-08-13 12:22:40.012","userId":51}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-08-13 12:33:20.244","userId":55}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"ADMIN","timestamp":"2026-08-13 13:23:49.204","userId":51}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:26:41.400"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:26:41.404"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:26:41.405"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:26:41.405"}
+{"ip":"::1","level":"info","loginId":"admin","message":"[AUDIT] Login failed - user not found","timestamp":"2026-08-13 13:33:18.738"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:36:16.702"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:36:16.705"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:36:16.706"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:36:16.706"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:36:22.031"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:36:22.034"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:36:22.035"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:36:22.035"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:36:56.116"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:36:56.121"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:36:56.122"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:36:56.123"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:44:14.068"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:44:14.073"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:44:14.073"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:44:14.074"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:44:23.378"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:44:23.382"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:44:23.383"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:44:23.384"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:44:33.481"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:44:33.487"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:44:33.487"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:44:33.488"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:44:40.501"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:44:40.505"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:44:40.506"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:44:40.507"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:44:46.871"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:44:46.876"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:44:46.877"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:44:46.877"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:45:00.075"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:45:00.080"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:45:00.081"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:45:00.081"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:45:14.884"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:45:14.888"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:45:14.889"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:45:14.889"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:45:20.451"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:45:20.456"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:45:20.457"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:45:20.457"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:49:06.163"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:49:06.167"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:49:06.168"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:49:06.169"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 13:49:14.388"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 13:49:14.393"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 13:49:14.393"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 13:49:14.394"}
+{"error":"The DELETE statement conflicted with the REFERENCE constraint \"FK_ProfessionalInfo_Alumni\". The conflict occurred in database \"Alumnimanagement\", table \"dbo.ProfessionalInformation\", column 'alumni_id'.","ip":"::1","level":"error","message":"POST /api/v1/upload/rollback/81","stack":"RequestError: The DELETE statement conflicted with the REFERENCE constraint \"FK_ProfessionalInfo_Alumni\". The conflict occurred in database \"Alumnimanagement\", table \"dbo.ProfessionalInformation\", column 'alumni_id'.\n    at handleError (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:519:28)\n    at addChunk (node:internal/streams/readable:559:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:536:3)\n    at Readable.push (node:internal/streams/readable:391:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-08-13 13:58:03.806","userId":51}
+{"level":"error","message":"UNEXPECTED: The DELETE statement conflicted with the REFERENCE constraint \"FK_ProfessionalInfo_Alumni\". The conflict occurred in database \"Alumnimanagement\", table \"dbo.ProfessionalInformation\", column 'alumni_id'.","stack":"RequestError: The DELETE statement conflicted with the REFERENCE constraint \"FK_ProfessionalInfo_Alumni\". The conflict occurred in database \"Alumnimanagement\", table \"dbo.ProfessionalInformation\", column 'alumni_id'.\n    at handleError (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\request.js:395:15)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at RequestTokenHandler.onErrorMessage (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\handler.js:285:21)\n    at Readable.<anonymous> (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:19:33)\n    at Readable.emit (node:events:519:28)\n    at addChunk (node:internal/streams/readable:559:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:536:3)\n    at Readable.push (node:internal/streams/readable:391:5)\n    at nextAsync (node:internal/streams/from:194:22)","timestamp":"2026-08-13 13:58:03.808"}
+{"level":"info","message":"Excel import batch #81 rolled back successfully. 4 records removed.","timestamp":"2026-08-13 14:06:58.632"}
+{"deletedCount":4,"importId":81,"level":"info","message":"[AUDIT] EXCEL_IMPORT_ROLLED_BACK","rolledBackBy":51,"timestamp":"2026-08-13 14:06:58.633"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-08-13 14:16:18.844","userId":28}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:29:14.966"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:29:14.980"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:29:14.982"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:29:14.983"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:29:20.863"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:29:20.867"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:29:20.868"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:29:20.869"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:29:27.359"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:29:27.364"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:29:27.364"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:29:27.365"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:29:33.420"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:29:33.424"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:29:33.425"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:29:33.425"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:29:41.997"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:29:42.003"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:29:42.004"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:29:42.005"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:30:25.493"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:30:25.498"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:30:25.499"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:30:25.500"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 14:40:03.961"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 14:40:03.966"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 14:40:03.967"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 14:40:03.969"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"LEADER","timestamp":"2026-08-13 14:40:17.257","userId":28}
+{"level":"warn","message":"Database connection attempt 1/3 failed (Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)). Retrying in 1000ms...","timestamp":"2026-08-13 15:01:15.626"}
+{"level":"warn","message":"Database connection attempt 2/3 failed (Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)). Retrying in 1000ms...","timestamp":"2026-08-13 15:01:16.644"}
+{"code":"ESOCKET","level":"error","message":"Database connection failed after 3 attempts: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)","name":"ConnectionError","originalError":{"code":"ESOCKET"},"stack":"ConnectionError: Failed to connect to 103.207.1.87:1433 - Could not connect (sequence)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\mssql\\lib\\tedious\\connection-pool.js:86:17\n    at Connection.onConnect (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:883:9)\n    at Object.onceWrapper (node:events:634:26)\n    at Connection.emit (node:events:519:28)\n    at Connection.emit (C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:1022:18)\n    at C:\\Users\\Sundar\\Desktop\\alumni management  sysstem\\node_modules\\tedious\\lib\\connection.js:901:14\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2026-08-13 15:01:17.648"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:02:00.964"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:02:00.968"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:02:00.969"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:02:00.969"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:12:31.335"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:12:31.339"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:12:31.340"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:12:31.340"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:15:51.439"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:15:51.443"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:15:51.443"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:15:51.444"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:19:22.723"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:19:22.727"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:19:22.727"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:19:22.727"}
+{"ip":"::1","level":"info","message":"[AUDIT] Login successful","role":"MEMBER","timestamp":"2026-08-13 15:20:29.696","userId":32}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:25:27.237"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:25:27.241"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:25:27.242"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:25:27.242"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:26:17.671"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:26:17.676"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:26:17.676"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:26:17.677"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:17.635"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:17.639"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:17.640"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:17.640"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:22.336"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:22.340"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:22.341"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:22.341"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:28.696"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:28.701"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:28.702"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:28.702"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:34.204"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:34.210"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:34.211"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:34.212"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:39.988"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:39.993"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:39.994"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:39.995"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:49.705"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:49.710"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:49.710"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:49.711"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:29:56.037"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:29:56.042"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:29:56.043"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:29:56.044"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:30:01.681"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:30:01.688"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:30:01.689"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:30:01.690"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:30:09.447"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:30:09.451"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:30:09.451"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:30:09.452"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:30:15.481"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:30:15.486"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:30:15.486"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:30:15.487"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:30:20.852"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:30:20.860"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:30:20.860"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:30:20.861"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:31:15.990"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:31:15.997"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:31:15.998"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:31:15.999"}
+{"level":"info","message":"Migrations executed successfully","timestamp":"2026-08-13 15:36:44.099"}
+{"level":"info","message":"Server running on http://localhost:2026","timestamp":"2026-08-13 15:36:44.102"}
+{"level":"info","message":"Frontend: http://localhost:2026","timestamp":"2026-08-13 15:36:44.103"}
+{"level":"info","message":"API: http://localhost:2026/api/v1","timestamp":"2026-08-13 15:36:44.103"}

@@ -9,10 +9,7 @@
 
   var FIELDS_CONFIG = [
     { id: 'fieldDesignation', field: 'designation' },
-    { id: 'fieldCompany', field: 'company' },
-    { id: 'fieldCity', field: 'city' },
-    { id: 'fieldState', field: 'state' },
-    { id: 'fieldCountry', field: 'country' }
+    { id: 'fieldCompany', field: 'company' }
   ];
 
   function removeActiveOverlay() {
