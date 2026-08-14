@@ -65,7 +65,7 @@
       color: #FFFFFF !important;
     }
 
-    /* ── DARK MODE OVERRIDES FOR TEAM LEADER & ASSIGNMENT SECTIONS ── */
+    /* -- DARK MODE OVERRIDES FOR TEAM LEADER & ASSIGNMENT SECTIONS -- */
     body.dark-mode #section-teamLeaders,
     body.dark-mode #section-assignAlumni,
     body.dark-mode #section-progress {
@@ -346,7 +346,7 @@
          ============================================================ -->
     <main class="page-content" id="pageContent">
 
-      <!-- ─── DASHBOARD SECTION ─── -->
+      <!-- --- DASHBOARD SECTION --- -->
       <section id="section-dashboard" class="content-section active">
 
         <!-- Page Header -->
@@ -377,7 +377,7 @@
             <div class="stat-card-content">
               <div class="stat-card-value" id="totalAlumni">0</div>
               <div class="stat-card-label">Total Alumni</div>
-              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 12%</span>
+              
             </div>
           </div>
           <div class="stat-card">
@@ -387,7 +387,7 @@
             <div class="stat-card-content">
               <div class="stat-card-value" id="pendingUpdates">0</div>
               <div class="stat-card-label">Pending Updates</div>
-              <span class="stat-card-change down"><i class="fas fa-arrow-down"></i> 3%</span>
+              
             </div>
           </div>
           <div class="stat-card">
@@ -397,7 +397,7 @@
             <div class="stat-card-content">
               <div class="stat-card-value" id="completedUpdates">0</div>
               <div class="stat-card-label">Completed Updates</div>
-              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 8%</span>
+              
             </div>
           </div>
           <div class="stat-card">
@@ -407,7 +407,7 @@
             <div class="stat-card-content">
               <div class="stat-card-value" id="totalTeamLeaders">0</div>
               <div class="stat-card-label">Team Leaders</div>
-              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 2</span>
+              
             </div>
           </div>
           <div class="stat-card">
@@ -417,7 +417,7 @@
             <div class="stat-card-content">
               <div class="stat-card-value" id="totalTeamMembers">0</div>
               <div class="stat-card-label">Team Members</div>
-              <span class="stat-card-change up"><i class="fas fa-arrow-up"></i> 5</span>
+              
             </div>
           </div>
           <div class="stat-card">
@@ -427,7 +427,7 @@
             <div class="stat-card-content">
               <div class="stat-card-value" id="draftCount">0</div>
               <div class="stat-card-label">Draft</div>
-              <span class="stat-card-change up"><i class="fas fa-pen"></i> Saved as Draft</span>
+              
             </div>
           </div>
         </div>
@@ -525,7 +525,7 @@
         </div>
       </section>
 
-      <!-- ─── VIEW ALUMNI SPREADSHEET SECTION ─── -->
+      <!-- --- VIEW ALUMNI SPREADSHEET SECTION --- -->
       <section id="section-viewAlumni" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -672,7 +672,7 @@
         </div>
       </section>
 
-      <!-- ─── TEAM LEADERS SECTION ─── -->
+      <!-- --- TEAM LEADERS SECTION --- -->
       <section id="section-teamLeaders" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -713,7 +713,7 @@
         </div>
       </section>
 
-      <!-- ─── TEAM MEMBERS SECTION ─── -->
+      <!-- --- TEAM MEMBERS SECTION --- -->
       <section id="section-teamMembers" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -758,7 +758,7 @@
         </div>
       </section>
 
-      <!-- ─── ASSIGN ALUMNI SECTION ─── -->
+      <!-- --- ASSIGN ALUMNI SECTION --- -->
       <section id="section-assignAlumni" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -794,7 +794,7 @@
         </div>
       </section>
 
-      <!-- ─── PROGRESS SECTION ─── -->
+      <!-- --- PROGRESS SECTION --- -->
       <section id="section-progress" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -838,7 +838,7 @@
         </div>
       </section>
 
-      <!-- ─── SETTINGS SECTION ─── -->
+      <!-- --- SETTINGS SECTION --- -->
       <section id="section-settings" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -927,7 +927,7 @@
         </div>
       </section>
 
-      <!-- ─── IMPORT ALUMNI SECTION ─── -->
+      <!-- --- IMPORT ALUMNI SECTION --- -->
       <section class="content-section" id="section-import" style="display:none;">
         <div class="section-header">
           <h2><i class="fas fa-file-import"></i> Import Alumni Data</h2>
@@ -1035,7 +1035,7 @@
         </div>
       </section>
 
-      <!-- ─── AUDIT LOGS SECTION ─── -->
+      <!-- --- AUDIT LOGS SECTION --- -->
       <section id="section-audit" class="content-section" style="display:none;">
         <div class="page-header fade-in">
           <div class="page-header-left">
@@ -1060,7 +1060,7 @@
                 </button>
                 <span class="filter-active-dot" title="Filters active"></span>
               </div>
-              <button class="btn btn-outline btn-sm" id="auditResetBtn" onclick="resetAuditFilters()" style="height:36px;"><i class="fas fa-undo"></i> Reset</button>
+              
             </div>
           </div>
         </div>
@@ -1108,7 +1108,7 @@
         </div>
       </section>
 
-      <!-- ─── QUICK ACTIONS ─── -->
+      <!-- --- QUICK ACTIONS --- -->
       <div id="quickActionOverlay" onclick="toggleQuickActions()"
         style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.15);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:1015;display:none;transition:all 0.3s ease;">
       </div>
@@ -1139,7 +1139,7 @@
         </button>
       </div>
 
-      <!-- ─── ALUMNI CATEGORIES SECTION ─── -->
+      <!-- --- ALUMNI CATEGORIES SECTION --- -->
       <section id="section-alumniCategory" class="content-section" style="display:none;">
         <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
           <div>
@@ -1270,7 +1270,7 @@
         </div>
       </section>
 
-      <!-- ─── ALUMNI ANALYSIS REPORTING SECTION ─── -->
+      <!-- --- ALUMNI ANALYSIS REPORTING SECTION --- -->
       <section id="section-alumniAnalysis" class="content-section" style="display:none;">
         <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
           <div>
@@ -1297,37 +1297,37 @@
             <div style="display:flex;gap:14px;align-items:center;background:rgba(255,255,255,0.05);padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;">
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Total Alumni</div>
-                <div style="font-size:1.05rem;font-weight:700;color:#F59E0B;" id="analysisTotalAlumniCount">6,518</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#F59E0B;" id="analysisTotalAlumniCount">-</div>
               </div>
               <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Working</div>
-                <div style="font-size:1.05rem;font-weight:700;color:#34D399;" id="analysisTotalWorkingCount">242</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#34D399;" id="analysisTotalWorkingCount">-</div>
               </div>
               <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Companies</div>
-                <div style="font-size:1.05rem;font-weight:700;color:#60A5FA;" id="analysisCompaniesCount">133</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#60A5FA;" id="analysisCompaniesCount">-</div>
               </div>
               <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Govt Jobs</div>
-                <div style="font-size:1.05rem;font-weight:700;color:#38BDF8;" id="analysisGovtCount">2</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#38BDF8;" id="analysisGovtCount">-</div>
               </div>
               <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Entrepreneurs</div>
-                <div style="font-size:1.05rem;font-weight:700;color:#A7F3D0;" id="analysisBizCount">9</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#A7F3D0;" id="analysisBizCount">-</div>
               </div>
               <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Higher Studies</div>
-                <div style="font-size:1.05rem;font-weight:700;color:#C084FC;" id="analysisHigherStudiesCount">2</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#C084FC;" id="analysisHigherStudiesCount">-</div>
               </div>
               <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
               <div style="text-align:center;">
                 <div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;font-weight:600;">Top Sector</div>
-                <div style="font-size:0.85rem;font-weight:700;color:#F472B6;" id="analysisTopSectorName">Operations / Quality</div>
+                <div style="font-size:0.85rem;font-weight:700;color:#F472B6;" id="analysisTopSectorName">-</div>
               </div>
             </div>
           </div>
@@ -1389,12 +1389,12 @@
         </div>
       </section>
 
-      <!-- ─── AUTO ATTENDANCE SYSTEM SECTION ─── -->
+      <!-- --- AUTO ATTENDANCE SYSTEM SECTION --- -->
       <section id="section-attendance" class="content-section" style="display:none;">
         <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
           <div>
             <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;">Tuesday Auto Attendance System</h1>
-            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated login attendance tracking every Tuesday only (Window: 1:15 PM – 2:45 PM IST). Present (On-Time 1:15 - 1:30 PM) | Late (Delayed 1:30 - 2:45 PM) | Absent (No Login in Window).</p>
+            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated login attendance tracking every Tuesday only (Window: 1:15 PM � 2:45 PM IST). Present (On-Time 1:15 - 1:30 PM) | Late (Delayed 1:30 - 2:45 PM) | Absent (No Login in Window).</p>
           </div>
           <div style="display:flex;gap:10px;">
             <button class="btn btn-secondary btn-sm" onclick="fetchAttendanceData()"><i class="fas fa-sync-alt"></i> Refresh</button>
@@ -1465,7 +1465,7 @@
         </div>
       </section>
 
-      <!-- ─── WHATSAPP FULL-PAGE CHAT SECTION ─── -->
+      <!-- --- WHATSAPP FULL-PAGE CHAT SECTION --- -->
       <section id="section-chat" class="content-section" style="display:none;">
         <div id="chatPageApp"></div>
       </section>
@@ -2206,7 +2206,7 @@
         <!-- Step 3: Preview -->
         <div id="reassignStep3" style="display:none;padding:24px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <strong style="font-size:1rem;color:var(--text-primary);">Preview — Records to be Moved</strong>
+            <strong style="font-size:1rem;color:var(--text-primary);">Preview � Records to be Moved</strong>
             <button class="btn btn-secondary btn-sm"
               onclick="document.getElementById('reassignStep3').style.display='none';document.getElementById('reassignStep2').style.display='block';">
               <i class="fas fa-arrow-left"></i> Back
@@ -2336,10 +2336,10 @@
           style="position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.8;">&times;</button>
         <div
           style="width:64px;height:64px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.8rem;backdrop-filter:blur(4px);">
-          🎓
+          ??
         </div>
         <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#fff;" id="tourStepTitle">Welcome to
-          AlumniMS! 👋</h2>
+          AlumniMS! ??</h2>
         <p style="margin:0;font-size:0.88rem;color:rgba(255,255,255,0.9);line-height:1.4;" id="tourStepSub">Your
           interactive guide to system features and recent updates.</p>
       </div>
@@ -2352,7 +2352,7 @@
           style="margin-top:16px;background:#F0FDF4;border-left:4px solid #10B981;padding:12px 14px;border-radius:6px;font-size:0.83rem;color:#166534;font-style:italic;"
           id="tourMotivationBanner">
           "Success is the sum of small efforts repeated day in and day out. Work smoothly and have a wonderful day!
-          😊"
+          ??"
         </div>
       </div>
       <div
@@ -2772,7 +2772,7 @@
       </div>
     </div>
 
-    <!-- ─── UNIFIED ALUMNI ANALYSIS FILTERS MODAL ─── -->
+    <!-- --- UNIFIED ALUMNI ANALYSIS FILTERS MODAL --- -->
     <div class="modal-overlay" id="analysisFiltersModal" style="position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:100050 !important;align-items:center;justify-content:center;padding:16px;">
       <div class="modal-container" style="background:#FFFFFF;border-radius:16px;width:100%;max-width:680px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);overflow:hidden;border:1px solid #E2E8F0;animation:fadeIn 0.2s ease-out;">
         
@@ -2905,11 +2905,11 @@
       if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
     </script>
     <script src="js/dynamic-tour.js"></script>
-    <script src="js/admin.js?v=2.0.0"></script>
+    <script src="js/admin.js?v=2.0.4"></script>
     <script src="js/adminCategoryAttendance.js"></script>
     <script src="js/alumniAnalysis.js"></script>
     <script src="js/typeahead.js"></script>
-    <script src="js/smartMasterData.js"></script>
+    <script src="js/smartMasterData.js?v=1.0.3"></script>
     <script src="js/chatPage.js"></script>
   <script src="js/alumniAlertPanel.js"></script>
     <script src="js/chat.js"></script>
@@ -2917,3 +2917,4 @@
 </body>
 
 </html>
+

@@ -140,7 +140,7 @@
     var desReq = document.getElementById('errorDesignation');
     var cityReq = document.getElementById('errorCity');
 
-    if (isNotWorking) {
+    if (isNotWorking || status === 'Higher Studies' || status === 'Retired' || status === 'Unknown') {
       if (companyReq) companyReq.style.display = 'none';
       if (desReq) desReq.style.display = 'none';
       if (cityReq) cityReq.style.display = 'none';

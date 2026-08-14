@@ -603,15 +603,17 @@ function updateSsFilterDot() {
   var dept = getVal('ssFilterDept');
   var batch = getVal('ssFilterBatch');
   var status = getVal('ssFilterStatus');
+  var dateFrom = document.getElementById('ssDateFrom') ? document.getElementById('ssDateFrom').value : '';
+  var dateTo = document.getElementById('ssDateTo') ? document.getElementById('ssDateTo').value : '';
   var search = (document.getElementById('ssSearch') ? document.getElementById('ssSearch').value : '').trim();
-  var hasFilter = !!(leader || member || dept || batch || status || search);
+  var hasFilter = !!(leader || member || dept || batch || status || search || dateFrom || dateTo);
   var wrap = document.getElementById('ssFilterBtnWrap');
   if (wrap) {
     if (hasFilter) wrap.classList.add('has-active-filter');
     else wrap.classList.remove('has-active-filter');
   }
   // Also update badge count
-  var count = [leader, member, dept, batch, status].filter(Boolean).length;
+  var count = [leader, member, dept, batch, status, dateFrom, dateTo].filter(Boolean).length;
   var badge = document.getElementById('activeFilterBadge');
   if (badge) {
     badge.textContent = count;
@@ -3304,6 +3306,16 @@ window.resetAuditFilters = function () {
   if (dateTo) dateTo.value = '';
   if (searchInput) searchInput.value = '';
 
+  var badge = document.getElementById('auditActiveFilterBadge');
+  if (badge) {
+    badge.textContent = '0';
+    badge.style.display = 'none';
+  }
+  var wrap = document.getElementById('auditFilterBtnWrap');
+  if (wrap) {
+    wrap.classList.remove('has-active-filter');
+  }
+
   applyAuditFilters();
 };
 
@@ -3876,15 +3888,35 @@ window.resetSpreadsheetFilters = function () {
   var ids = ['ssFilterLeader', 'ssFilterMember', 'ssFilterDept', 'ssFilterBatch', 'ssFilterStatus', 'ssDateFrom', 'ssDateTo'];
   ids.forEach(function (id) {
     var el = document.getElementById(id);
-    if (el) el.value = '';
+    if (el) {
+      el.value = '';
+      if (el.tagName === 'SELECT') {
+        el.selectedIndex = 0;
+      }
+    }
   });
   var ssSearch = document.getElementById('ssSearch');
   if (ssSearch) ssSearch.value = '';
   var ssDateField = document.getElementById('ssDateField');
-  if (ssDateField) ssDateField.value = 'created_at';
+  if (ssDateField) {
+    ssDateField.value = 'created_at';
+    ssDateField.selectedIndex = 0;
+  }
 
   ssSearchQuery = '';
   ssPage = 1;
+
+  // Reset active filter badge immediately
+  var badge = document.getElementById('activeFilterBadge');
+  if (badge) {
+    badge.textContent = '0';
+    badge.style.display = 'none';
+  }
+  var wrap = document.getElementById('ssFilterBtnWrap');
+  if (wrap) {
+    wrap.classList.remove('has-active-filter');
+  }
+
   if (typeof updateSsFilterDot === 'function') updateSsFilterDot();
   if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
   if (typeof closeModal === 'function') closeModal('ssFilterModal');
@@ -3927,6 +3959,11 @@ window.toggleModalFieldsEditMode = function () {
 
 window.openUpdateModalAdmin = function (alumniId) {
   currentSelectedAlumniIdAdmin = alumniId;
+  window._currentAdminModalRecordIndex = -1;
+  if (typeof _spreadsheetData !== 'undefined' && Array.isArray(_spreadsheetData)) {
+    window._currentAdminModalRecordIndex = _spreadsheetData.findIndex(function (r) { return String(r.alumni_id || r.id) === String(alumniId); });
+  }
+  updateAdminModalNavCounter();
 
   var record = null;
   if (typeof _spreadsheetData !== 'undefined' && Array.isArray(_spreadsheetData)) {
@@ -3953,8 +3990,21 @@ window.openUpdateModalAdmin = function (alumniId) {
     setVal('fieldSecondaryPhone', rec.secondary_phone);
     setVal('fieldLinkedin', rec.linkedin_profile || rec.linkedin_url || rec.linkedin);
     setVal('fieldGovtJob', (rec.is_government_job || rec.is_govt_job) ? 'Yes' : 'No');
-    setVal('fieldEmploymentStatus', rec.employment_status || 'Working');
-    setVal('fieldCareerType', rec.career_type || '');
+    var empStatEl = document.getElementById('fieldEmploymentStatus');
+    if (empStatEl) {
+      empStatEl.value = rec.employment_status || 'Working';
+      empStatEl.dispatchEvent(new Event('change'));
+    }
+    var careerTypeEl = document.getElementById('fieldCareerType');
+    if (careerTypeEl) {
+      careerTypeEl.value = rec.career_type || '';
+      careerTypeEl.dispatchEvent(new Event('change'));
+    }
+    setVal('fieldCareerCategory', rec.career_category);
+    setVal('fieldRoleCategory', rec.role_category);
+    setVal('fieldDistrict', rec.district);
+    setVal('fieldUniversity', rec.university);
+    if (typeof onCareerCategoryChange === 'function') onCareerCategoryChange();
 
     // Enable fields for Admin editing
     _isAdminModalEditMode = false;
@@ -3982,6 +4032,31 @@ window.openUpdateModalAdmin = function (alumniId) {
   } else {
     if (typeof openModal === 'function') openModal('updateModal');
   }
+};
+
+window.updateAdminModalNavCounter = function () {
+  var prevBtn = document.getElementById('modalNavPrevBtn');
+  var nextBtn = document.getElementById('modalNavNextBtn');
+  var counterEl = document.getElementById('modalNavCounter');
+  if (!_spreadsheetData || _spreadsheetData.length === 0 || window._currentAdminModalRecordIndex < 0) {
+    if (counterEl) counterEl.textContent = '0 / 0';
+    if (prevBtn) prevBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
+    return;
+  }
+  if (counterEl) counterEl.textContent = (window._currentAdminModalRecordIndex + 1) + ' / ' + _spreadsheetData.length;
+  if (prevBtn) prevBtn.disabled = window._currentAdminModalRecordIndex <= 0;
+  if (nextBtn) nextBtn.disabled = window._currentAdminModalRecordIndex >= _spreadsheetData.length - 1;
+};
+
+window.navigateModalRecord = function (dir) {
+  if (!_spreadsheetData || _spreadsheetData.length === 0) return;
+  var idx = (window._currentAdminModalRecordIndex == null || window._currentAdminModalRecordIndex < 0) ? 0 : window._currentAdminModalRecordIndex;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= _spreadsheetData.length) return;
+  var targetRecord = _spreadsheetData[newIdx];
+  if (!targetRecord) return;
+  openUpdateModalAdmin(targetRecord.alumni_id || targetRecord.id);
 };
 
 window.openAssignmentHistoryDrawer = function (alumniId, alumniName) {
@@ -4847,11 +4922,11 @@ function readAdminFormValues() {
 function validateAdminForm() {
   var isValid = true;
   var empStatusEl = document.getElementById('fieldEmploymentStatus');
-  var isNotWorking = empStatusEl && empStatusEl.value === 'Not Working';
+  var skipWorkFields = empStatusEl && (empStatusEl.value === 'Not Working' || empStatusEl.value === 'Higher Studies' || empStatusEl.value === 'Retired' || empStatusEl.value === 'Unknown');
 
   var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation'];
   required.forEach(function (id) {
-    if (isNotWorking && (id === 'fieldCompany' || id === 'fieldDesignation')) {
+    if (skipWorkFields && (id === 'fieldCompany' || id === 'fieldDesignation')) {
       var el = document.getElementById(id);
       var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
       if (el) el.classList.remove('error');

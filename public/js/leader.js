@@ -257,7 +257,15 @@
       list.forEach(function (a) {
         var status = a.status || 'Pending';
         var statusBadge = status === 'Completed' ? 'badge-success' : status === 'Pending' ? 'badge-warning' : 'badge-info';
-        rows += '<tr><td>' + (a.name || a.fullName || '-') + '</td><td>' + (a.department || a.dept || '-') + '</td><td>' + (a.batch || '-') + '</td><td><span class="badge ' + statusBadge + '">' + status + '</span></td><td style="font-size:0.8rem;color:#64748B">' + (a.updatedAt || '-') + '</td></tr>';
+        var rawUpdateDate = a.updated_date || a.updatedAt || a.completed_date || a.completedDate || '';
+        var updateDateDisplay = '-';
+        if (rawUpdateDate) {
+          var upd = new Date(rawUpdateDate);
+          if (!isNaN(upd.getTime())) {
+            updateDateDisplay = upd.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + upd.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          }
+        }
+        rows += '<tr><td>' + (a.name || a.fullName || '-') + '</td><td>' + (a.department || a.dept || '-') + '</td><td>' + (a.batch || '-') + '</td><td><span class="badge ' + statusBadge + '">' + status + '</span></td><td style="font-size:0.8rem;color:#64748B">' + updateDateDisplay + '</td></tr>';
       });
       body.innerHTML = rows;
     }, 400);
@@ -802,6 +810,8 @@
     document.getElementById('refreshDataBtn').addEventListener('click', function () {
       showToast('Refreshing', 'Dashboard data is being refreshed...', 'info');
       fetchLeaderData();
+      if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+      if (typeof initAnalysisPage === 'function') initAnalysisPage();
       setTimeout(function () {
         showToast('Success', 'Dashboard data refreshed successfully.', 'success');
       }, 1500);
@@ -1349,6 +1359,7 @@
         if (smartParser) smartParser.value = '';
         if (typeof loadAutosave === 'function') loadAutosave(alumniId);
 
+        overlay.style.display = 'flex';
         overlay.classList.add('show');
       }
     });
@@ -1388,11 +1399,11 @@
   function validateForm() {
     var isValid = true;
     var empStatusEl = document.getElementById('fieldEmploymentStatus');
-    var isNotWorking = empStatusEl && empStatusEl.value === 'Not Working';
+    var skipWorkFields = empStatusEl && (empStatusEl.value === 'Not Working' || empStatusEl.value === 'Higher Studies' || empStatusEl.value === 'Retired' || empStatusEl.value === 'Unknown');
 
     var required = ['fieldName', 'fieldDept', 'fieldBatch', 'fieldCompany', 'fieldDesignation'];
     required.forEach(function (id) {
-      if (isNotWorking && (id === 'fieldCompany' || id === 'fieldDesignation')) {
+      if (skipWorkFields && (id === 'fieldCompany' || id === 'fieldDesignation')) {
         var el = document.getElementById(id);
         var err = document.getElementById('error' + id.charAt(5).toUpperCase() + id.slice(6));
         if (el) el.classList.remove('error');
@@ -2901,6 +2912,38 @@
     if (typeof closeModal === 'function') closeModal('myAssignmentsFilterModal');
   };
 
+  window.resetSpreadsheetFilters = function () {
+    var ids = ['ssFilterMember', 'ssFilterDept', 'ssFilterBatch', 'ssFilterStatus', 'ssDateFrom', 'ssDateTo'];
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        if (el.tagName === 'SELECT') {
+          el.selectedIndex = 0;
+        }
+      }
+    });
+    var ssSearch = document.getElementById('ssSearch');
+    if (ssSearch) ssSearch.value = '';
+
+    ssSearchQuery = '';
+    ssPage = 1;
+
+    // Reset active filter badge immediately
+    var badge = document.getElementById('activeFilterBadge');
+    if (badge) {
+      badge.textContent = '0';
+      badge.style.display = 'none';
+    }
+    var wrap = document.getElementById('ssFilterBtnWrap');
+    if (wrap) {
+      wrap.classList.remove('has-active-filter');
+    }
+
+    if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
+    if (typeof closeModal === 'function') closeModal('ssFilterModal');
+  };
+
   window.switchSettingsTab = function (tabName, btn) {
     var tabsContainer = btn.closest('.card-body');
     tabsContainer.querySelectorAll('.tab-item').forEach(function (item) {
@@ -3542,15 +3585,14 @@ window.executeUndoSubmission = function () {
 
     window.closeUndoModal();
 
-    // Hide update modal if open for this record
+    // Hide update modal if open for this record (match the normal close path so
+    // no inline display:none is left stuck on the overlay, which would keep the
+    // update modal from opening again until a page refresh)
     var updateModalOverlay = document.getElementById('updateModal');
     if (updateModalOverlay) {
-      if (typeof window.closeModal === 'function') {
-        window.closeModal('updateModal');
-      } else {
-        updateModalOverlay.classList.remove('show');
-        updateModalOverlay.style.display = 'none';
-      }
+      updateModalOverlay.classList.remove('show');
+      updateModalOverlay.style.display = '';
+      document.body.style.overflow = '';
     }
 
     // Re-render table and fetch fresh data from backend

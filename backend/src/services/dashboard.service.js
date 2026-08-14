@@ -48,6 +48,7 @@ async function getLeaderStats(leaderId, date) {
         name: `${m.first_name} ${m.last_name}`,
         assigned, completed, pending, progress,
         status: progress >= 75 ? 'On Track' : 'Behind',
+        lastActivity: m.last_activity ? formatTimeAgo(m.last_activity) : '-',
         isLeader: m.is_leader === 1 || m.is_leader === true
       };
     });
@@ -145,7 +146,7 @@ async function getLeaderDashboard(leaderId) {
         pending,
         progress,
         status: progress >= 75 ? 'On Track' : 'Behind',
-        lastActivity: '-',
+        lastActivity: m.last_activity ? formatTimeAgo(m.last_activity) : '-',
         email: m.email,
         isLeader: m.is_leader === 1 || m.is_leader === true
       };

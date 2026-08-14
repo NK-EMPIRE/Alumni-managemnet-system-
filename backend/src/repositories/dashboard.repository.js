@@ -172,7 +172,8 @@ async function getTeamMemberStats(teamId, date) {
         ISNULL(aa.completed, 0) AS completed,
         ISNULL(aa.pending, 0) AS pending,
         ISNULL(aa.draft, 0) AS draft,
-        0 AS is_leader
+        0 AS is_leader,
+        aa.last_activity
       FROM TeamMembers tm
       INNER JOIN Users u ON tm.user_id = u.user_id
       LEFT JOIN (
@@ -181,7 +182,8 @@ async function getTeamMemberStats(teamId, date) {
           COUNT(assignment_id) AS total_assigned,
           SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed,
           SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending,
-          SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draft
+          SUM(CASE WHEN status = 'Draft' THEN 1 ELSE 0 END) AS draft,
+          MAX(COALESCE(al.updated_date, aa.completed_date, aa.assigned_date)) AS last_activity
         FROM AlumniAssignments aa
         LEFT JOIN Alumni al ON aa.alumni_id = al.alumni_id
         WHERE team_id = @teamId AND member_id IS NOT NULL
@@ -198,7 +200,8 @@ async function getTeamMemberStats(teamId, date) {
         ISNULL((SELECT COUNT(*) FROM AlumniAssignments aa LEFT JOIN Alumni al ON aa.alumni_id = al.alumni_id WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Completed' ${dateFilter}), 0) AS completed,
         ISNULL((SELECT COUNT(*) FROM AlumniAssignments aa LEFT JOIN Alumni al ON aa.alumni_id = al.alumni_id WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Pending' ${dateFilter}), 0) AS pending,
         ISNULL((SELECT COUNT(*) FROM AlumniAssignments aa LEFT JOIN Alumni al ON aa.alumni_id = al.alumni_id WHERE team_id = @teamId AND member_id = t.leader_id AND status = 'Draft' ${dateFilter}), 0) AS draft,
-        1 AS is_leader
+        1 AS is_leader,
+        (SELECT MAX(COALESCE(al.updated_date, aa.completed_date, aa.assigned_date)) FROM AlumniAssignments aa LEFT JOIN Alumni al ON aa.alumni_id = al.alumni_id WHERE team_id = @teamId AND member_id = t.leader_id ${dateFilter}) AS last_activity
       FROM Teams t
       INNER JOIN Users u ON t.leader_id = u.user_id
       WHERE t.team_id = @teamId

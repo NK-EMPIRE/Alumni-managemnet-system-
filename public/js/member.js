@@ -265,12 +265,28 @@
     };
 
     window.clearModalFilters = function () {
-        if (filterDept) filterDept.value = '';
-        if (filterBatch) filterBatch.value = '';
-        if (filterStatus) filterStatus.value = '';
-        if (document.getElementById('filterDateFrom')) document.getElementById('filterDateFrom').value = '';
-        if (document.getElementById('filterDateTo')) document.getElementById('filterDateTo').value = '';
+        var ids = ['filterDept', 'filterBatch', 'filterStatus', 'filterDateFrom', 'filterDateTo'];
+        ids.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                if (el.tagName === 'SELECT') {
+                    el.selectedIndex = 0;
+                }
+            }
+        });
+        
+        // Reset active filter badge immediately
+        var badge = document.getElementById('activeFilterBadge');
+        if (badge) {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+        }
+        
         applyModalFilters();
+        if (typeof closeFilterModal === 'function') {
+            closeFilterModal();
+        }
     };
 
     function incrementTodayCount() {
@@ -782,7 +798,7 @@
         clearErrors();
 
         const empStatusEl = document.getElementById('fieldEmploymentStatus');
-        const isNotWorking = empStatusEl && empStatusEl.value === 'Not Working';
+        const skipWorkFields = empStatusEl && (empStatusEl.value === 'Not Working' || empStatusEl.value === 'Higher Studies' || empStatusEl.value === 'Retired' || empStatusEl.value === 'Unknown');
 
         const fields = [
             { id: 'fieldName', errorId: 'errorName', label: 'Name' },
@@ -793,7 +809,7 @@
         ];
 
         fields.forEach(function (f) {
-            if (isNotWorking && (f.id === 'fieldCompany' || f.id === 'fieldDesignation')) {
+            if (skipWorkFields && (f.id === 'fieldCompany' || f.id === 'fieldDesignation')) {
                 const el = document.getElementById(f.id);
                 const err = document.getElementById(f.errorId);
                 if (el) el.classList.remove('error');
@@ -879,7 +895,13 @@
                 is_entrepreneur: record.entrepreneur === 'Yes',
                 is_government_job: record.govtJob === 'Yes',
                 other_occupation: record.otherOcc,
-                remarks: record.remarks
+                remarks: record.remarks,
+                employment_status: record.employment_status || '',
+                career_type: record.career_type || '',
+                career_category: record.career_category || '',
+                role_category: record.role_category || '',
+                university: record.university || '',
+                district: record.district || ''
             };
             API.saveAlumniDraft(record.id, draftData).then(function () {
                 doLocalSave();
@@ -945,7 +967,13 @@
                 other_occupation: record.otherOcc,
                 remarks: record.remarks,
                 is_entrepreneur: record.entrepreneur === 'Yes' ? 1 : 0,
-                is_government_job: record.govtJob === 'Yes' ? 1 : 0
+                is_government_job: record.govtJob === 'Yes' ? 1 : 0,
+                employment_status: record.employment_status || '',
+                career_type: record.career_type || '',
+                career_category: record.career_category || '',
+                role_category: record.role_category || '',
+                university: record.university || '',
+                district: record.district || ''
             };
             API.submitAlumni(record.id, submitData).then(function () {
                 if (record.assignment_id) {
@@ -1032,7 +1060,13 @@
                 other_occupation: record.otherOcc || null,
                 remarks: record.remarks || null,
                 is_entrepreneur: record.entrepreneur === 'Yes' ? 1 : 0,
-                is_government_job: record.govtJob === 'Yes' ? 1 : 0
+                is_government_job: record.govtJob === 'Yes' ? 1 : 0,
+                employment_status: record.employment_status || null,
+                career_type: record.career_type || null,
+                career_category: record.career_category || null,
+                role_category: record.role_category || null,
+                university: record.university || null,
+                district: record.district || null
             };
             API.submitAlumni(record.id, submitData).then(function () {
                 if (record.assignment_id) {
@@ -1676,6 +1710,14 @@
                         govtJob: a.is_government_job ? 'Yes' : (a.govtJob || 'No'),
                         otherOcc: a.other_occupation || a.otherOcc || '',
                         remarks: a.remarks || '',
+                        employment_status: a.employment_status || 'Working',
+                        career_type: a.career_type || '',
+                        career_category: a.career_category || '',
+                        role_category: a.role_category || '',
+                        university: a.university || '',
+                        district: a.district || '',
+                        secondary_email: a.secondary_email || '',
+                        secondary_phone: a.secondary_phone || '',
                         status: st
                     };
                 });

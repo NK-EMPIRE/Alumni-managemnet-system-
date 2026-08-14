@@ -7,11 +7,11 @@ const { ROLES } = require('../constants');
 const router = Router();
 router.use(authenticate);
 
-// Read-only analysis endpoints accessible exclusively to ADMIN
-router.get('/', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisAlumni);
-router.get('/companies', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisCompanies);
-router.get('/locations', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisLocations);
-router.get('/role-categories', authorize(ROLES.ADMIN), alumniAnalysisController.getAnalysisRoleCategories);
+// Read-only analysis endpoints accessible to ADMIN and LEADER
+router.get('/', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisAlumni);
+router.get('/companies', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisCompanies);
+router.get('/locations', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisLocations);
+router.get('/role-categories', authorize(ROLES.ADMIN, ROLES.LEADER), alumniAnalysisController.getAnalysisRoleCategories);
 
 // Master Data endpoints accessible to all authenticated roles for update modals & filtering
 router.get('/master/taxonomies', authorize(ROLES.ADMIN, ROLES.LEADER, ROLES.MEMBER), alumniAnalysisController.getTaxonomies);

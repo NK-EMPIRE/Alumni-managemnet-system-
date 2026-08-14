@@ -112,6 +112,15 @@ function loadAnalysisCompanies() {
             companyListEl.innerHTML += '<option value="' + companyName.replace(/"/g, '&quot;') + '">';
           });
         }
+        var companySelectEl = document.getElementById('analysisFilterCompany');
+        if (companySelectEl && companySelectEl.tagName === 'SELECT') {
+          var savedVal = companySelectEl.value;
+          companySelectEl.innerHTML = '<option value="">All Companies</option>';
+          res.data.forEach(function (companyName) {
+            companySelectEl.innerHTML += '<option value="' + companyName.replace(/"/g, '&quot;') + '">' + companyName + '</option>';
+          });
+          if (savedVal) companySelectEl.value = savedVal;
+        }
       }
     })
     .catch(function (err) { console.error('Error loading analysis companies:', err); });
