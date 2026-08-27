@@ -32,12 +32,13 @@ async function findById(userId) {
   return result.recordset[0];
 }
 
-async function updatePassword(userId, passwordHash) {
+async function updatePassword(userId, passwordHash, mustChangePassword = false) {
   const pool = await getPool();
   const result = await pool.request()
     .input('userId', sql.Int, userId)
     .input('passwordHash', sql.NVarChar(255), passwordHash)
-    .query('UPDATE Users SET password_hash = @passwordHash, must_change_password = 0, updated_at = GETUTCDATE() WHERE user_id = @userId');
+    .input('mustChangePassword', sql.Bit, mustChangePassword ? 1 : 0)
+    .query('UPDATE Users SET password_hash = @passwordHash, must_change_password = @mustChangePassword, updated_at = GETUTCDATE() WHERE user_id = @userId');
   return result.rowsAffected[0];
 }
 

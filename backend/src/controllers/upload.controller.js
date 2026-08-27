@@ -1,6 +1,16 @@
+const fs = require('fs/promises');
 const uploadService = require('../services/upload.service');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { success, paginated } = require('../utils/response');
+
+async function removeTempFile(file) {
+  if (!file || !file.path) return;
+  try {
+    await fs.unlink(file.path);
+  } catch (_) {
+    // The file may already have been removed by an upstream failure handler.
+  }
+}
 
 function parseSheetsParam(param) {
   if (!param) return [];
@@ -17,21 +27,36 @@ function parseSheetsParam(param) {
 }
 
 const uploadExcel = asyncHandler(async (req, res) => {
+  if (!req.file) return res.status(400).json({ success: false, message: 'An Excel file is required' });
   const currentUser = req.user;
   const selectedSheets = parseSheetsParam(req.body.sheets);
-  const result = await uploadService.processExcelImport(req.file.path, req.file.originalname, currentUser, selectedSheets);
-  success(res, result, 'File uploaded and processed successfully', 201);
+  try {
+    const result = await uploadService.processExcelImport(req.file.path, req.file.originalname, currentUser, selectedSheets);
+    success(res, result, 'File uploaded and processed successfully', 201);
+  } finally {
+    await removeTempFile(req.file);
+  }
 });
 
 const previewExcel = asyncHandler(async (req, res) => {
+  if (!req.file) return res.status(400).json({ success: false, message: 'An Excel file is required' });
   const selectedSheets = parseSheetsParam(req.body.sheets || req.query.sheets);
-  const result = await uploadService.getExcelPreview(req.file.path, selectedSheets);
-  success(res, result, 'Excel preview generated successfully', 200);
+  try {
+    const result = await uploadService.getExcelPreview(req.file.path, selectedSheets);
+    success(res, result, 'Excel preview generated successfully', 200);
+  } finally {
+    await removeTempFile(req.file);
+  }
 });
 
 const inspectSheets = asyncHandler(async (req, res) => {
-  const result = await uploadService.getExcelSheets(req.file.path);
-  success(res, result, 'Excel sheets inspected successfully', 200);
+  if (!req.file) return res.status(400).json({ success: false, message: 'An Excel file is required' });
+  try {
+    const result = await uploadService.getExcelSheets(req.file.path);
+    success(res, result, 'Excel sheets inspected successfully', 200);
+  } finally {
+    await removeTempFile(req.file);
+  }
 });
 
 const getImportHistory = asyncHandler(async (req, res) => {
@@ -42,20 +67,22 @@ const getImportHistory = asyncHandler(async (req, res) => {
 });
 
 const downloadTemplate = asyncHandler(async (req, res) => {
-  const XLSX = require('xlsx');
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([
+  const ExcelJS = require('exceljs');
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Alumni');
+  worksheet.addRows([
     ['Register No', 'Name', 'Email', 'Phone', 'Department', 'Batch', 'Gender', 'Date of Birth', 'Company', 'Designation', 'Working Details', 'LinkedIn Profile'],
     ['CS2024001', 'John Doe', 'john@example.com', '9876543210', 'CSE', '2024', 'Male', '15-05-2002', 'Google', 'Software Engineer', 'Working at Google as SDE', 'https://linkedin.com/in/johndoe'],
     ['CS2024002', 'Jane Smith', 'jane@example.com', '9876543211', 'ECE', '2024', 'Female', '20-08-2001', '', '', '', '']
   ]);
-  ws['!cols'] = [
-    { wch: 18 }, { wch: 20 }, { wch: 25 }, { wch: 14 },
-    { wch: 15 }, { wch: 10 }, { wch: 10 }, { wch: 16 },
-    { wch: 20 }, { wch: 20 }, { wch: 30 }, { wch: 35 }
+  worksheet.columns = [
+    { width: 18 }, { width: 20 }, { width: 25 }, { width: 14 },
+    { width: 15 }, { width: 10 }, { width: 10 }, { width: 16 },
+    { width: 20 }, { width: 20 }, { width: 30 }, { width: 35 }
   ];
-  XLSX.utils.book_append_sheet(wb, ws, 'Alumni');
-  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true };
+  const buf = await workbook.xlsx.writeBuffer();
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename="alumni_import_template.xlsx"');
   res.send(buf);

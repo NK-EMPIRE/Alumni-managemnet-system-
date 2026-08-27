@@ -7,6 +7,9 @@ const { AppError, NotFoundError, ConflictError } = require('../middleware/errorH
 async function getUsers({ page, limit, search, role, isActive }) {
   page = parseInt(page, 10) || 1;
   limit = parseInt(limit, 10) || 10;
+  if (page < 1) page = 1;
+  if (limit < 1) limit = 10;
+  if (limit > 100) limit = 100;
   const offset = (page - 1) * limit;
 
   const result = await userRepository.findAll({ page, limit, offset, search, role, isActive });
@@ -38,7 +41,7 @@ async function createUser(userData, currentUser) {
   }
 
   const userProvidedPassword = userData.password && userData.password.trim() !== '';
-  const plainPassword = userProvidedPassword ? userData.password : 'mzcet@123';
+  const plainPassword = userProvidedPassword ? userData.password : generateTemporaryPassword();
   const passwordHash = await hashPassword(plainPassword);
 
   const created = await userRepository.create({
@@ -49,7 +52,8 @@ async function createUser(userData, currentUser) {
     passwordHash,
     roleId: userData.roleId,
     leaderId: userData.leaderId,
-    department: userData.department
+    department: userData.department,
+    mustChangePassword: !userProvidedPassword
   });
 
   createAuditLog({
@@ -85,14 +89,15 @@ async function createUser(userData, currentUser) {
   }
 
   const { password_hash, ...userWithoutPassword } = created;
-  if (!userProvidedPassword) {
-    userWithoutPassword.temporaryPassword = plainPassword;
-  }
-  return userWithoutPassword;
+  return {
+    ...userWithoutPassword,
+    mustChangePassword: !userProvidedPassword
+  };
 }
 
 async function updateUser(userId, userData, currentUser) {
-  if (currentUser.role !== 'Admin' && Number(userId) !== Number(currentUser.userId)) {
+  const isAdmin = String(currentUser.role || '').toUpperCase() === 'ADMIN';
+  if (!isAdmin && Number(userId) !== Number(currentUser.userId)) {
     throw new AppError('Insufficient permissions to update this profile', 403);
   }
 
@@ -103,7 +108,7 @@ async function updateUser(userId, userData, currentUser) {
   }
 
   let fieldsToUpdate = { ...userData };
-  if (currentUser.role !== 'Admin') {
+  if (!isAdmin) {
     fieldsToUpdate = {
       firstName: userData.firstName,
       lastName: userData.lastName,

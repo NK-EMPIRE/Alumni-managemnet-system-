@@ -1,5 +1,5 @@
 const authRepo = require('../repositories/auth.repository');
-const { hashPassword, comparePassword } = require('../utils/password');
+const { hashPassword, comparePassword, generateTemporaryPassword } = require('../utils/password');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { AuthenticationError } = require('../middleware/errorHandler');
 const { logger } = require('../utils/logger');
@@ -123,7 +123,8 @@ async function refreshToken(token) {
 async function forgotPassword(email) {
   const user = await authRepo.findByEmail(email);
   if (!user) {
-    throw new Error('No account found with this email address.');
+    logger.auditLog('Password reset request ignored for unknown account', { email });
+    return;
   }
 
   const pool = await getPool();
@@ -134,7 +135,7 @@ async function forgotPassword(email) {
     .query(`SELECT * FROM ResetRequests WHERE email = @email AND status = 'Pending'`);
     
   if (checkReq.recordset.length > 0) {
-    throw new Error('A password reset request is already pending for this account.');
+    return;
   }
 
   const name = (user.first_name + ' ' + (user.last_name || '')).trim();
@@ -195,9 +196,8 @@ async function updateResetRequestStatus(requestId, status, adminUser) {
   const req = requestRes.recordset[0];
   
   if (status === 'Accepted') {
-    // Hash default password "mzcet@123"
-    const defaultPassword = 'mzcet@123';
-    const hashed = await hashPassword(defaultPassword);
+    const temporaryPassword = generateTemporaryPassword();
+    const hashed = await hashPassword(temporaryPassword);
     
     // Find user by email
     const user = await authRepo.findByEmail(req.email);
@@ -206,7 +206,7 @@ async function updateResetRequestStatus(requestId, status, adminUser) {
     }
     
     // Update password
-    await authRepo.updatePassword(user.user_id, hashed);
+    await authRepo.updatePassword(user.user_id, hashed, true);
     
     // Update request status
     await pool.request()
@@ -219,7 +219,7 @@ async function updateResetRequestStatus(requestId, status, adminUser) {
     try {
       const { sendPasswordResetApprovedEmail } = require('../helpers/email');
       const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-      await sendPasswordResetApprovedEmail({ email: req.email, name: fullName, tempPassword: defaultPassword });
+      await sendPasswordResetApprovedEmail({ email: req.email, name: fullName, tempPassword: temporaryPassword });
     } catch (err) {
       logger.error('Failed to send password reset approved email', { email: req.email, error: err.message });
     }

@@ -128,7 +128,7 @@ async function findByEmail(email) {
   return result.recordset[0];
 }
 
-async function create({ firstName, lastName, email, phone, passwordHash, roleId, leaderId, department }) {
+async function create({ firstName, lastName, email, phone, passwordHash, roleId, leaderId, department, mustChangePassword = false }) {
   const pool = await getPool();
   const request = pool.request()
     .input('firstName', sql.NVarChar(100), firstName)
@@ -139,12 +139,13 @@ async function create({ firstName, lastName, email, phone, passwordHash, roleId,
     .input('roleId', sql.Int, roleId)
     .input('leaderId', sql.Int, leaderId || null)
     .input('isActive', sql.Bit, 1)
-    .input('department', sql.NVarChar(100), department || null);
+    .input('department', sql.NVarChar(100), department || null)
+    .input('mustChangePassword', sql.Bit, mustChangePassword ? 1 : 0);
 
   const result = await request.query(`
-    INSERT INTO Users (first_name, last_name, email, phone, password_hash, role_id, leader_id, is_active, department)
+    INSERT INTO Users (first_name, last_name, email, phone, password_hash, role_id, leader_id, is_active, department, must_change_password)
     OUTPUT INSERTED.*
-    VALUES (@firstName, @lastName, @email, @phone, @passwordHash, @roleId, @leaderId, @isActive, @department)
+    VALUES (@firstName, @lastName, @email, @phone, @passwordHash, @roleId, @leaderId, @isActive, @department, @mustChangePassword)
   `);
 
   return result.recordset[0];

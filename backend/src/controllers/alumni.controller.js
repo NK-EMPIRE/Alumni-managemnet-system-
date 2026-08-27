@@ -87,7 +87,7 @@ const getAlumniHistory = asyncHandler(async (req, res) => {
   if (!alumniId) {
     return res.status(400).json({ success: false, message: 'Invalid Alumni ID' });
   }
-  const history = await alumniService.getAlumniHistory(alumniId);
+  const history = await alumniService.getAlumniHistory(alumniId, req.user);
   success(res, history, 'Alumni history retrieved successfully');
 });
 

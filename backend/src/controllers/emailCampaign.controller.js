@@ -5,7 +5,11 @@ async function createCampaign(req, res, next) {
   try {
     const leaderId = req.user.userId;
     const { assignmentIds } = req.body;
-    const result = await emailService.createCampaign({ leaderId, assignmentIds });
+    const result = await emailService.createCampaign({
+      leaderId,
+      assignmentIds,
+      allowAll: String(req.user.role || '').toUpperCase() === 'ADMIN'
+    });
     return success(res, result, 'Email campaign created and queued successfully', 201);
   } catch (err) {
     if (err.statusCode) {

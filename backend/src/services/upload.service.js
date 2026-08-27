@@ -76,7 +76,7 @@ async function getFacultyAndAliasStdin(selectedSheets = []) {
   }
 }
 
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 async function getExcelSheets(filePath) {
   // Primary engine: Python openpyxl via main.py --inspect-sheets
@@ -89,31 +89,18 @@ async function getExcelSheets(filePath) {
     logger.warn('Python sheet inspection fallback triggered: ' + pyErr.message);
   }
 
-  // Secondary engine: Node XLSX fallback with bulletproof safety
+  // Secondary engine: ExcelJS fallback with bounded workbook metadata access
   try {
-    const workbook = XLSX.readFile(filePath);
-    const sheetNames = workbook.SheetNames || [];
-    
-    const sheetsInfo = sheetNames.map(name => {
-      let totalRows = 'All';
-      try {
-        if (workbook.Sheets && workbook.Sheets[name]) {
-          const sheet = workbook.Sheets[name];
-          if (sheet && sheet['!ref']) {
-            const range = XLSX.utils.decode_range(sheet['!ref']);
-            const count = range.e.r - range.s.r + 1;
-            totalRows = count > 1 ? count - 1 : (count > 0 ? count : 'All');
-          }
-        }
-      } catch (e) {
-        totalRows = 'All';
-      }
-      return { name, totalRows };
-    });
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filePath);
+    const sheetsInfo = workbook.worksheets.map((worksheet) => ({
+      name: worksheet.name,
+      totalRows: worksheet.rowCount > 1 ? worksheet.rowCount - 1 : (worksheet.rowCount || 'All')
+    }));
 
     return { sheets: sheetsInfo.length > 0 ? sheetsInfo : [{ name: 'Sheet1', totalRows: 'All' }] };
   } catch (err) {
-    logger.error('Node xlsx sheet inspection fallback error: ' + err.message);
+    logger.error('ExcelJS sheet inspection fallback error: ' + err.message);
     return { sheets: [{ name: 'Sheet1', totalRows: 'All' }] };
   }
 }
@@ -144,7 +131,7 @@ async function processExcelImport(filePath, originalName, currentUser, selectedS
         'secondaryPhone', 'secondaryEmail'
       ];
       
-      checkFields.forEach(f => {
+      for (const f of checkFields) {
         const dbField = f === 'dateOfBirth' ? 'date_of_birth' :
                         f === 'workingDetails' ? 'working_details' :
                         f === 'linkedinProfile' ? 'linkedin_profile' :
@@ -158,15 +145,10 @@ async function processExcelImport(filePath, originalName, currentUser, selectedS
         let incomingVal = row[f];
         const existingVal = existing[dbField];
 
-        // Master Data Normalization during Excel Import
         if (f === 'company' && incomingVal) {
-          masterDataService.resolveAndStoreCompany(incomingVal).then(cleanC => {
-            if (cleanC) fieldsToUpdate['company'] = cleanC;
-          }).catch(() => {});
+          incomingVal = await masterDataService.resolveAndStoreCompany(incomingVal) || incomingVal;
         } else if (f === 'designation' && incomingVal) {
-          masterDataService.resolveAndStoreDesignation(incomingVal).then(cleanD => {
-            if (cleanD) fieldsToUpdate['designation'] = cleanD;
-          }).catch(() => {});
+          incomingVal = await masterDataService.resolveAndStoreDesignation(incomingVal) || incomingVal;
         }
 
         if (incomingVal !== null && incomingVal !== undefined && String(incomingVal).trim() !== '') {
@@ -174,7 +156,7 @@ async function processExcelImport(filePath, originalName, currentUser, selectedS
             fieldsToUpdate[dbField] = incomingVal;
           }
         }
-      });
+      }
 
       if (Object.keys(fieldsToUpdate).length > 0) {
         await uploadRepository.updateAlumniFields(existing.alumni_id, fieldsToUpdate);

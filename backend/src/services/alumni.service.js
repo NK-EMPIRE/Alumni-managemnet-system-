@@ -1,12 +1,48 @@
 const { sql, getPool } = require('../config/database');
 const alumniRepository = require('../repositories/alumni.repository');
 const { createAuditLog } = require('../helpers/audit');
-const { NotFoundError, ConflictError } = require('../middleware/errorHandler');
+const { NotFoundError, ConflictError, AuthorizationError } = require('../middleware/errorHandler');
 
 function computeOffset(page, limit) {
   page = parseInt(page, 10) || 1;
   limit = parseInt(limit, 10) || 10;
+  if (page < 1) page = 1;
+  if (limit < 1) limit = 10;
+  if (limit > 100) limit = 100;
   return { page, limit, offset: (page - 1) * limit };
+}
+
+async function assertAssignedAccess(alumniId, currentUser) {
+  const role = String(currentUser.role || '').toUpperCase();
+  if (role === 'ADMIN') return;
+
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('alumniId', sql.Int, alumniId)
+    .input('userId', sql.Int, currentUser.userId)
+    .input('isLeader', sql.Bit, role === 'LEADER' ? 1 : 0)
+    .query(`
+      SELECT TOP 1 aa.assignment_id
+      FROM dbo.AlumniAssignments aa
+      WHERE aa.alumni_id = @alumniId
+        AND (
+          aa.member_id = @userId
+          OR (
+            @isLeader = 1 AND (
+              aa.team_id IN (SELECT team_id FROM dbo.Teams WHERE leader_id = @userId AND is_active = 1)
+              OR aa.member_id IN (
+                SELECT tm.user_id FROM dbo.TeamMembers tm
+                INNER JOIN dbo.Teams t ON t.team_id = tm.team_id
+                WHERE t.leader_id = @userId AND t.is_active = 1
+              )
+            )
+          )
+        )
+    `);
+
+  if (!result.recordset.length) {
+    throw new AuthorizationError('You are not assigned to this alumni record');
+  }
 }
 
 async function getAlumni({ page, limit, search, department, batch, status, leaderId, memberId, dateFrom, dateTo, dateField }) {
@@ -94,6 +130,7 @@ async function submitProfessionalInfo(alumniId, info, currentUser) {
   if (!alumni) {
     throw new NotFoundError('Alumni');
   }
+  await assertAssignedAccess(alumniId, currentUser);
 
   // Update Alumni table basic fields from submitted info
   const alumniUpdate = {
@@ -170,6 +207,15 @@ async function updateAssignmentStatus(assignmentId, status, currentUser) {
     throw new Error('Status must be either "Draft" or "Completed"');
   }
 
+  const pool = await getPool();
+  const assignment = await pool.request()
+    .input('assignmentId', sql.Int, assignmentId)
+    .input('userId', sql.Int, currentUser.userId)
+    .query('SELECT assignment_id FROM dbo.AlumniAssignments WHERE assignment_id = @assignmentId AND member_id = @userId');
+  if (!assignment.recordset.length) {
+    throw new AuthorizationError('You are not assigned to this task');
+  }
+
   await alumniRepository.updateAssignmentStatus(assignmentId, status);
 
   await createAuditLog({
@@ -191,6 +237,7 @@ async function saveDraft(alumniId, data, currentUser) {
   if (!alumni) {
     throw new NotFoundError('Alumni');
   }
+  await assertAssignedAccess(alumniId, currentUser);
 
   // Map linkedin_url -> linkedin_profile for Alumni table update
   const repoData = { ...data };
@@ -269,6 +316,7 @@ async function submitAndComplete(alumniId, data, currentUser) {
   if (!alumni) {
     throw new NotFoundError('Alumni');
   }
+  await assertAssignedAccess(alumniId, currentUser);
 
   const professionalInfo = await alumniRepository.createProfessionalInfo({
     ...data,
@@ -323,6 +371,7 @@ async function reopenAlumni(alumniId, currentUser) {
   if (!alumni) {
     throw new NotFoundError('Alumni');
   }
+  await assertAssignedAccess(alumniId, currentUser);
 
   await alumniRepository.reopenAlumniRecord(alumniId);
 
@@ -338,7 +387,8 @@ async function reopenAlumni(alumniId, currentUser) {
   return { alumniId, status: 'Draft' };
 }
 
-async function getAlumniHistory(alumniId) {
+async function getAlumniHistory(alumniId, currentUser) {
+  await assertAssignedAccess(alumniId, currentUser);
   return alumniRepository.getAlumniHistoryByAlumniId(alumniId);
 }
 

@@ -171,10 +171,10 @@ function fetchAllData() {
     API.getAdminDashboard().catch(function () { return null; }),
     API.getUsers({ role: 'LEADER', page: 1, limit: 100 }).catch(function () { return null; }),
     API.getUsers({ role: 'MEMBER', page: 1, limit: 100 }).catch(function () { return null; }),
-    API.getAlumni({ page: 1, limit: 10000 }).catch(function () { return null; }),
+    API.getAlumni({ page: 1, limit: 100 }).catch(function () { return null; }),
     API.getImportHistory().catch(function () { return null; }),
     API.getTeams().catch(function () { return null; }),
-    API.getAuditLogs({ page: 1, limit: 1000 }).catch(function () { return null; }),
+    API.getAuditLogs({ page: 1, limit: 100 }).catch(function () { return null; }),
     API.getAssignmentHistory({ page: 1, limit: 100 }).catch(function () { return null; }),
     API.getAlumniFilters().catch(function () { return null; })
   ]).then(function (results) {
@@ -3187,7 +3187,7 @@ function populateAuditActionFilter() {
 }
 
 function fetchLatestAuditLogs(callback) {
-  API.getAuditLogs({ page: 1, limit: 1000 }).then(function (res) {
+  API.getAuditLogs({ page: 1, limit: 100 }).then(function (res) {
     if (res.success && res.data) {
       _apiAuditLogs = res.data;
     }
@@ -3563,7 +3563,7 @@ window.buildExportParams = function () {
 
   return {
     page: 1,
-    limit: 100000,
+    limit: 100,
     search: expSearch && expSearch.value.trim() ? expSearch.value.trim() : undefined,
     department: expDept && expDept.value ? expDept.value : undefined,
     batch: expBatch && expBatch.value ? expBatch.value : undefined,
@@ -3572,6 +3572,27 @@ window.buildExportParams = function () {
     memberId: expMember && expMember.value ? expMember.value : undefined
   };
 };
+
+function fetchExportRecords(params) {
+  var pageSize = 100;
+  var maxPages = 50;
+
+  function fetchPage(page, rows, total) {
+    var pageParams = Object.assign({}, params, { page: page, limit: pageSize });
+    return API.getAlumni(pageParams).then(function (res) {
+      var pageRows = (res && res.data && Array.isArray(res.data.records)) ? res.data.records : [];
+      var pagination = (res && res.data && res.data.pagination) ? res.data.pagination : {};
+      var nextTotal = Number(pagination.total || total || pageRows.length);
+      var combined = rows.concat(pageRows);
+      if (pageRows.length === 0 || combined.length >= nextTotal || page >= maxPages || pageRows.length < pageSize) {
+        return combined;
+      }
+      return fetchPage(page + 1, combined, nextTotal);
+    });
+  }
+
+  return fetchPage(1, [], 0);
+}
 
 window.startExportDownloadProcess = function () {
   var selectedKeys = Object.keys(_exportSelectedCols).filter(function (k) { return _exportSelectedCols[k]; });
@@ -3597,15 +3618,8 @@ window.startExportDownloadProcess = function () {
 
   var params = buildExportParams();
 
-  API.getAlumni(params).then(function (res) {
-    if (res && res.success) {
-      var data = (res.data && res.data.records) ? res.data.records : (Array.isArray(res.data) ? res.data : []);
-      if (data.length === 0) {
-        if (overlay) overlay.classList.remove('show');
-        Toast.danger('Export', 'No alumni records found matching selected export filters.');
-        return;
-      }
-
+  fetchExportRecords(params).then(function (data) {
+    if (data && data.length > 0) {
       if (countEl) countEl.innerText = '0 / ' + data.length + ' records';
 
       var progress = 15;
@@ -4766,7 +4780,7 @@ window.reassignCommit = function () {
 // Real-time sync listener (Feature 5)
 if (typeof io !== 'undefined') {
   try {
-    var socket = io();
+    var socket = io({ auth: { token: localStorage.getItem('token') || '' } });
     socket.emit('join', { role: 'ADMIN' });
     socket.on('assignmentsUpdated', function () {
       if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();
@@ -5265,7 +5279,7 @@ window.reassignCommit = function () {
 // Real-time sync listener (Feature 5)
 if (typeof io !== 'undefined') {
   try {
-    var socket = io();
+    var socket = io({ auth: { token: localStorage.getItem('token') || '' } });
     socket.emit('join', { role: 'ADMIN' });
     socket.on('assignmentsUpdated', function () {
       if (typeof fetchSpreadsheetData === 'function') fetchSpreadsheetData();

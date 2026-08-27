@@ -56,13 +56,13 @@
     },
     {
       "parameters": {
-        "url": "={{$node[\"Parse Plus Address Tag\"].json[\"amsBaseUrl\"] || \"http://alumni.mzcet.in:2026\"}}/api/v1/email-campaigns/replies/ingest",
+        "url": "={{$node[\"Parse Plus Address Tag\"].json[\"amsBaseUrl\"] || $env.AMS_BASE_URL || \"https://alumni.mzcet.in\"}}/api/v1/email-campaigns/replies/ingest",
         "options": {},
         "headerParametersUi": {
           "parameter": [
             {
               "name": "X-Automation-Secret",
-              "value": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
+              "value": "={{$env.N8N_SHARED_SECRET}}"
             }
           ]
         },

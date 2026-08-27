@@ -29,6 +29,7 @@ async function getEligibleRecipients(leaderId) {
         FROM dbo.AlumniAssignments aa
         JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
         WHERE a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
+          AND ISNULL(aa.status, '') <> 'Completed'
       `);
     return adminRes.recordset;
   }
@@ -45,6 +46,7 @@ async function getEligibleRecipients(leaderId) {
       )
     )
     AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
+    AND ISNULL(aa.status, '') <> 'Completed'
   `;
 
   const recipientsRes = await pool.request()
@@ -55,7 +57,7 @@ async function getEligibleRecipients(leaderId) {
   return recipientsRes.recordset;
 }
 
-async function createCampaign({ leaderId, assignmentIds }) {
+async function createCampaign({ leaderId, assignmentIds, allowAll = false }) {
   const pool = await getPool();
 
   // Get team info
@@ -63,7 +65,17 @@ async function createCampaign({ leaderId, assignmentIds }) {
     .input('leaderId', sql.Int, leaderId)
     .query('SELECT team_id FROM dbo.Teams WHERE leader_id = @leaderId AND is_active = 1');
 
-  let teamId = teamRes.recordset.length > 0 ? teamRes.recordset[0].team_id : 1;
+  let teamId = teamRes.recordset.length > 0 ? teamRes.recordset[0].team_id : null;
+  if (!teamId && allowAll) {
+    const fallbackTeam = await pool.request()
+      .query('SELECT TOP 1 team_id FROM dbo.Teams WHERE is_active = 1 ORDER BY team_id');
+    teamId = fallbackTeam.recordset[0]?.team_id || null;
+  }
+  if (!teamId) {
+    const err = new Error('No active team is assigned to this leader');
+    err.statusCode = 409;
+    throw err;
+  }
 
   let recipients = await getEligibleRecipients(leaderId);
 
@@ -140,7 +152,7 @@ async function createCampaign({ leaderId, assignmentIds }) {
   const n8nWebhookUrl = process.env.N8N_CAMPAIGN_WEBHOOK_URL;
   const sharedSecret = process.env.N8N_SHARED_SECRET;
 
-  if (!n8nWebhookUrl) {
+  if (!n8nWebhookUrl || !sharedSecret) {
     logger.warn('N8N_CAMPAIGN_WEBHOOK_URL not configured. Campaign created in database but n8n trigger skipped.');
     await markCampaignFailed(pool, campaignId);
     const err = new Error('N8N_CAMPAIGN_WEBHOOK_URL is not configured on the server. Cannot trigger the n8n email automation.');
@@ -150,7 +162,10 @@ async function createCampaign({ leaderId, assignmentIds }) {
 
   let accepted = false;
   try {
-    const amsBaseUrl = process.env.AMS_BASE_URL || 'http://localhost:3000';
+    const amsBaseUrl = process.env.AMS_BASE_URL || (process.env.NODE_ENV === 'production' ? null : `http://localhost:${process.env.PORT || 3000}`);
+    if (!amsBaseUrl) {
+      throw new Error('AMS_BASE_URL is required in production so n8n can call the public API');
+    }
     const payload = JSON.stringify({
       campaignId,
       amsBaseUrl,
@@ -199,6 +214,12 @@ async function getCampaignStatus(campaignId, userId, role) {
 async function logRecipientResult({ campaignId, recipientId, status, messageId }) {
   const pool = await getPool();
 
+  if (!['Sent', 'Failed'].includes(status)) {
+    const err = new Error('Recipient status must be Sent or Failed');
+    err.statusCode = 400;
+    throw err;
+  }
+
   const recipientRes = await pool.request()
     .input('recipientId', sql.Int, recipientId)
     .input('campaignId', sql.Int, campaignId)
@@ -207,8 +228,12 @@ async function logRecipientResult({ campaignId, recipientId, status, messageId }
     .query(`
       UPDATE dbo.EmailCampaignRecipients
       SET status = @status, message_id = @messageId, sent_at = GETUTCDATE()
-      WHERE recipient_id = @recipientId AND campaign_id = @campaignId
+      WHERE recipient_id = @recipientId AND campaign_id = @campaignId AND status = 'Pending'
     `);
+
+  if (recipientRes.rowsAffected[0] !== 1) {
+    return { success: true, ignored: true, reason: 'Recipient was already finalized or does not belong to the campaign' };
+  }
 
   if (status === 'Sent') {
     await pool.request()

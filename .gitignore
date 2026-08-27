@@ -24,3 +24,13 @@ backend\logs
 /error.logs
 
 *.txt
+
+# Runtime and sensitive data
+backend/logs/
+backend/uploads/
+**/logs/
+**/uploads/
+*.log
+*.xlsx
+*.xls
+*.csv

@@ -59,6 +59,7 @@ router.get(
 
 router.post(
   '/',
+  body('registerNo').trim().notEmpty().withMessage('Register number is required'),
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('department').trim().notEmpty().withMessage('Department is required'),
   body('batch').trim().notEmpty().withMessage('Batch is required'),

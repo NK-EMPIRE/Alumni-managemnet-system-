@@ -22,7 +22,7 @@
           "string": [
             {
               "value1": "={{$node[\"Webhook Trigger\"].json[\"headers\"][\"x-automation-secret\"]}}",
-              "value2": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
+              "value2": "={{$env.N8N_SHARED_SECRET}}"
             }
           ]
         }
@@ -62,6 +62,7 @@
       },
       "name": "SMTP Send Mail",
       "type": "n8n-nodes-base.emailSend",
+      "onError": "continueErrorOutput",
       "typeVersion": 1,
       "position": [
         900,
@@ -70,13 +71,13 @@
     },
     {
       "parameters": {
-        "url": "={{$node[\"Webhook Trigger\"].json[\"body\"][\"amsBaseUrl\"] || \"http://localhost:3000\"}}/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
+        "url": "={{$node[\"Webhook Trigger\"].json[\"body\"][\"amsBaseUrl\"] || $env.AMS_BASE_URL || \"https://alumni.mzcet.in\"}}/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
         "options": {},
         "headerParametersUi": {
           "parameter": [
             {
               "name": "X-Automation-Secret",
-              "value": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
+              "value": "={{$env.N8N_SHARED_SECRET}}"
             }
           ]
         },
@@ -94,13 +95,13 @@
     },
     {
       "parameters": {
-        "url": "={{$node[\"Webhook Trigger\"].json[\"body\"][\"amsBaseUrl\"] || \"http://localhost:3000\"}}/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
+        "url": "={{$node[\"Webhook Trigger\"].json[\"body\"][\"amsBaseUrl\"] || $env.AMS_BASE_URL || \"https://alumni.mzcet.in\"}}/api/v1/email-campaigns/{{$node[\"Webhook Trigger\"].json[\"body\"][\"campaignId\"]}}/log",
         "options": {},
         "headerParametersUi": {
           "parameter": [
             {
               "name": "X-Automation-Secret",
-              "value": "3a8b29f01c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
+              "value": "={{$env.N8N_SHARED_SECRET}}"
             }
           ]
         },

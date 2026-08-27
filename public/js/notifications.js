@@ -432,7 +432,10 @@
     if (typeof io === 'undefined') return; // socket.io not loaded
 
     try {
-      _socket = io({ transports: ['websocket', 'polling'] });
+      _socket = io({
+        transports: ['websocket', 'polling'],
+        auth: { token: localStorage.getItem('token') || '' }
+      });
       _socket.on('connect', function () {
         _socket.emit('joinUser', { userId: _currentUserId });
       });

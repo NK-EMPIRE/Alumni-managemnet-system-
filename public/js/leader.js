@@ -3251,7 +3251,7 @@ window.circulateCommit = function () {
 // Real-time sync listener (Feature 5)
 if (typeof io !== 'undefined') {
   try {
-    var socket = io();
+    var socket = io({ auth: { token: localStorage.getItem('token') || '' } });
     var user = API.getCurrentUser ? API.getCurrentUser() : null;
     socket.emit('join', { role: 'LEADER', teamId: user ? user.team_id : null });
     socket.on('assignmentsUpdated', function () {
