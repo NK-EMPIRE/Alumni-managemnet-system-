@@ -4025,7 +4025,12 @@ body.dark-mode #uploadZone {
 body.dark-mode [style*="color:#1E293B"],
 body.dark-mode [style*="color: #1E293B"],
 body.dark-mode [style*="color:#0F172A"],
-body.dark-mode [style*="color: #0F172A"] {
+body.dark-mode [style*="color: #0F172A"],
+body.dark-mode [style*="color:#334155"],
+body.dark-mode [style*="color: #334155"],
+body.dark-mode [style*="color:#1E293B"],
+body.dark-mode [style*="color:#000"],
+body.dark-mode [style*="color: #000"] {
   color: #F8FAFC !important;
 }
 body.dark-mode [style*="color:#64748B"],
@@ -4033,9 +4038,25 @@ body.dark-mode [style*="color: #64748B"] {
   color: #CBD5E1 !important;
 }
 body.dark-mode [style*="background:#F8FAFC"],
-body.dark-mode [style*="background: #F8FAFC"] {
+body.dark-mode [style*="background: #F8FAFC"],
+body.dark-mode [style*="background:#EEF2F6"],
+body.dark-mode [style*="background: #EEF2F6"],
+body.dark-mode [style*="background:#F1F5F9"],
+body.dark-mode [style*="background: #F1F5F9"],
+body.dark-mode [style*="background:#E2E8F0"],
+body.dark-mode [style*="background: #E2E8F0"] {
   background-color: #0F172A !important;
   background: #0F172A !important;
+}
+body.dark-mode [style*="background:#fff"],
+body.dark-mode [style*="background: #fff"],
+body.dark-mode [style*="background:#ffffff"],
+body.dark-mode [style*="background: #ffffff"],
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background:white"] {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  color: #F8FAFC !important;
 }
 body.dark-mode [style*="background:#FFFBEB"],
 body.dark-mode [style*="background: #FFFBEB"] {
@@ -4062,6 +4083,89 @@ body.dark-mode [style*="background:#FEF2F2"],
 body.dark-mode [style*="background: #FEF2F2"] {
   background-color: rgba(239, 68, 68, 0.1) !important;
   background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* ── Dark Mode Border Overrides for Tables & Elements ── */
+body.dark-mode table,
+body.dark-mode th,
+body.dark-mode td,
+body.dark-mode thead,
+body.dark-mode tbody,
+body.dark-mode .table,
+body.dark-mode .spreadsheet-table,
+body.dark-mode .table th,
+body.dark-mode .table td,
+body.dark-mode .spreadsheet-table th,
+body.dark-mode .spreadsheet-table td,
+body.dark-mode .card,
+body.dark-mode .table-container,
+body.dark-mode .spreadsheet-card,
+body.dark-mode [style*="border"],
+body.dark-mode [style*="border-color"] {
+  border-color: #334155 !important;
+}
+
+/* ── Dark Mode Table Row Backgrounds & Hovers ── */
+body.dark-mode table,
+body.dark-mode .table,
+body.dark-mode .spreadsheet-table {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+}
+body.dark-mode table tbody tr,
+body.dark-mode .table tbody tr,
+body.dark-mode .spreadsheet-table tbody tr,
+body.dark-mode table tbody td,
+body.dark-mode .table tbody td,
+body.dark-mode .spreadsheet-table tbody td {
+  background-color: #1E293B !important;
+  background: #1E293B !important;
+  color: #F8FAFC !important;
+}
+body.dark-mode table tbody tr:nth-child(even),
+body.dark-mode .table tbody tr:nth-child(even),
+body.dark-mode .spreadsheet-table tbody tr:nth-child(even),
+body.dark-mode table tbody tr:nth-child(even) td,
+body.dark-mode .table tbody tr:nth-child(even) td,
+body.dark-mode .spreadsheet-table tbody tr:nth-child(even) td {
+  background-color: #161F30 !important;
+  background: #161F30 !important;
+}
+body.dark-mode table tbody tr:hover,
+body.dark-mode table tbody tr:nth-child(even):hover,
+body.dark-mode .table tbody tr:hover,
+body.dark-mode .table tbody tr:nth-child(even):hover,
+body.dark-mode .spreadsheet-table tbody tr:hover,
+body.dark-mode .spreadsheet-table tbody tr:nth-child(even):hover,
+body.dark-mode table tbody tr:hover td,
+body.dark-mode table tbody tr:nth-child(even):hover td,
+body.dark-mode .table tbody tr:hover td,
+body.dark-mode .table tbody tr:nth-child(even):hover td,
+body.dark-mode .spreadsheet-table tbody tr:hover td,
+body.dark-mode .spreadsheet-table tbody tr:nth-child(even):hover td {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #F8FAFC !important;
+}
+
+/* ── Dark Mode Header & Highlight overrides ── */
+body.dark-mode .spreadsheet-table th.sortable:hover {
+  background-color: #334155 !important;
+  background: #334155 !important;
+  color: #F8FAFC !important;
+}
+body.dark-mode .spreadsheet-table tbody tr.selected {
+  background-color: rgba(37, 99, 235, 0.2) !important;
+  background: rgba(37, 99, 235, 0.2) !important;
+  color: #F8FAFC !important;
+}
+body.dark-mode [style*="background:#EFF6FF"],
+body.dark-mode [style*="background: #EFF6FF"],
+body.dark-mode [style*="background:#dbeafe"],
+body.dark-mode [style*="background: #dbeafe"] {
+  background-color: rgba(37, 99, 235, 0.12) !important;
+  background: rgba(37, 99, 235, 0.12) !important;
+  color: #F8FAFC !important;
 }
 
 /* Extra dark mode fixes for admin and leader dashboards */

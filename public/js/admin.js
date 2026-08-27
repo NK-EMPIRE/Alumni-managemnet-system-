@@ -1104,7 +1104,7 @@ function markNotifRead(btn) {
   var dot = btn.querySelector('span:first-child');
   if (dot) dot.style.background = 'transparent';
   btn.querySelector('[data-nid]');
-  var count = document.querySelector('.notification-count');
+  var count = document.getElementById('notifCount');
   if (count) {
     var c = parseInt(count.textContent);
     if (c > 0) count.textContent = c - 1;
@@ -1128,7 +1128,7 @@ window.clearAllNotifications = function () {
   if (list) {
     list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.8rem;">No new notifications</div>';
   }
-  var count = document.querySelector('.notification-count');
+  var count = document.getElementById('notifCount');
   if (count) {
     count.textContent = '0';
     count.style.display = 'none';
@@ -4316,9 +4316,9 @@ window.renderSpreadsheetTable = function (data) {
     var actionButtons = '<div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:nowrap;">';
     actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 0.75rem; font-weight:600;" onclick="openUpdateModalAdmin(' + row.alumni_id + ')" title="View / Edit Profile"><i class="fas fa-edit"></i> View/Edit</button>';
     var _safeName = String(row.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    actionButtons += '<button class="btn btn-warning btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#F59E0B;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="Workload History"><i class="fas fa-history"></i></button>';
+    actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="openAssignmentHistoryDrawer(' + row.alumni_id + ', \'' + _safeName + '\')" title="Workload History"><i class="fas fa-history"></i></button>';
     if (isCompleted || row.assignment_status === 'Completed') {
-      actionButtons += '<button class="btn btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff; background:#EF4444; border:none; border-radius:6px;" onclick="confirmAdminReopenModal(' + row.alumni_id + ', \'' + _safeName + '\')" title="Reopen Record"><i class="fas fa-redo-alt"></i></button>';
+      actionButtons += '<button class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color:#fff;" onclick="confirmAdminReopenModal(' + row.alumni_id + ', \'' + _safeName + '\')" title="Reopen Record"><i class="fas fa-redo-alt"></i></button>';
     }
     actionButtons += '</div>';
 
@@ -4794,10 +4794,10 @@ window.openDbHealthModal = function () {
     var d = res.data;
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-bottom:20px;">' +
       '<div style="background:#F8FAFC;padding:12px;border-radius:10px;border:1px solid #E2E8F0;text-align:center;"><div style="font-size:0.75rem;color:#64748B;">Total Alumni</div><div style="font-size:1.4rem;font-weight:700;color:#0F172A;">' + d.totalAlumni + '</div></div>' +
-      '<div style="background:#FEF2F2;padding:12px;border-radius:10px;border:1px solid #FCA5A5;text-align:center;"><div style="font-size:0.75rem;color:#991B1B;">Duplicates</div><div style="font-size:1.4rem;font-weight:700;color:#991B1B;">' + d.duplicates + '</div><button class="btn btn-sm btn-danger" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'duplicates\')">View (' + d.duplicates + ')</button></div>' +
-      '<div style="background:#FFFBEB;padding:12px;border-radius:10px;border:1px solid #FCD34D;text-align:center;"><div style="font-size:0.75rem;color:#92400E;">Pending</div><div style="font-size:1.4rem;font-weight:700;color:#92400E;">' + d.assignments.pending + '</div><button class="btn btn-sm btn-warning" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;color:#fff;" onclick="loadDbHealthDetail(\'pending\')">View (' + d.assignments.pending + ')</button></div>' +
-      '<div style="background:#F0FDF4;padding:12px;border-radius:10px;border:1px solid #86EFAC;text-align:center;"><div style="font-size:0.75rem;color:#166534;">Completed</div><div style="font-size:1.4rem;font-weight:700;color:#166534;">' + d.assignments.completed + '</div><button class="btn btn-sm btn-success" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'completed\')">View (' + d.assignments.completed + ')</button></div>' +
-      '<div style="background:#F1F5F9;padding:12px;border-radius:10px;border:1px solid #CBD5E1;text-align:center;"><div style="font-size:0.75rem;color:#475569;">Unassigned</div><div style="font-size:1.4rem;font-weight:700;color:#475569;">' + d.assignments.unassigned + '</div><button class="btn btn-sm btn-secondary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'unassigned\')">View (' + d.assignments.unassigned + ')</button></div>' +
+      '<div style="background:#FEF2F2;padding:12px;border-radius:10px;border:1px solid #FCA5A5;text-align:center;"><div style="font-size:0.75rem;color:#991B1B;">Duplicates</div><div style="font-size:1.4rem;font-weight:700;color:#991B1B;">' + d.duplicates + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'duplicates\')">View (' + d.duplicates + ')</button></div>' +
+      '<div style="background:#FFFBEB;padding:12px;border-radius:10px;border:1px solid #FCD34D;text-align:center;"><div style="font-size:0.75rem;color:#92400E;">Pending</div><div style="font-size:1.4rem;font-weight:700;color:#92400E;">' + d.assignments.pending + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;color:#fff;" onclick="loadDbHealthDetail(\'pending\')">View (' + d.assignments.pending + ')</button></div>' +
+      '<div style="background:#F0FDF4;padding:12px;border-radius:10px;border:1px solid #86EFAC;text-align:center;"><div style="font-size:0.75rem;color:#166534;">Completed</div><div style="font-size:1.4rem;font-weight:700;color:#166534;">' + d.assignments.completed + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'completed\')">View (' + d.assignments.completed + ')</button></div>' +
+      '<div style="background:#F1F5F9;padding:12px;border-radius:10px;border:1px solid #CBD5E1;text-align:center;"><div style="font-size:0.75rem;color:#475569;">Unassigned</div><div style="font-size:1.4rem;font-weight:700;color:#475569;">' + d.assignments.unassigned + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'unassigned\')">View (' + d.assignments.unassigned + ')</button></div>' +
       '</div>';
 
     html += '<h4 style="font-size:0.9rem;margin-bottom:10px;color:var(--text-primary);">Missing Fields Breakdown</h4>' +
@@ -5300,10 +5300,10 @@ window.openDbHealthModal = function () {
     var d = res.data;
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-bottom:20px;">' +
       '<div style="background:#F8FAFC;padding:12px;border-radius:10px;border:1px solid #E2E8F0;text-align:center;"><div style="font-size:0.75rem;color:#64748B;">Total Alumni</div><div style="font-size:1.4rem;font-weight:700;color:#0F172A;">' + d.totalAlumni + '</div></div>' +
-      '<div style="background:#FEF2F2;padding:12px;border-radius:10px;border:1px solid #FCA5A5;text-align:center;"><div style="font-size:0.75rem;color:#991B1B;">Duplicates</div><div style="font-size:1.4rem;font-weight:700;color:#991B1B;">' + d.duplicates + '</div><button class="btn btn-sm btn-danger" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'duplicates\')">View (' + d.duplicates + ')</button></div>' +
-      '<div style="background:#FFFBEB;padding:12px;border-radius:10px;border:1px solid #FCD34D;text-align:center;"><div style="font-size:0.75rem;color:#92400E;">Pending</div><div style="font-size:1.4rem;font-weight:700;color:#92400E;">' + d.assignments.pending + '</div><button class="btn btn-sm btn-warning" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;color:#fff;" onclick="loadDbHealthDetail(\'pending\')">View (' + d.assignments.pending + ')</button></div>' +
-      '<div style="background:#F0FDF4;padding:12px;border-radius:10px;border:1px solid #86EFAC;text-align:center;"><div style="font-size:0.75rem;color:#166534;">Completed</div><div style="font-size:1.4rem;font-weight:700;color:#166534;">' + d.assignments.completed + '</div><button class="btn btn-sm btn-success" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'completed\')">View (' + d.assignments.completed + ')</button></div>' +
-      '<div style="background:#F1F5F9;padding:12px;border-radius:10px;border:1px solid #CBD5E1;text-align:center;"><div style="font-size:0.75rem;color:#475569;">Unassigned</div><div style="font-size:1.4rem;font-weight:700;color:#475569;">' + d.assignments.unassigned + '</div><button class="btn btn-sm btn-secondary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'unassigned\')">View (' + d.assignments.unassigned + ')</button></div>' +
+      '<div style="background:#FEF2F2;padding:12px;border-radius:10px;border:1px solid #FCA5A5;text-align:center;"><div style="font-size:0.75rem;color:#991B1B;">Duplicates</div><div style="font-size:1.4rem;font-weight:700;color:#991B1B;">' + d.duplicates + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'duplicates\')">View (' + d.duplicates + ')</button></div>' +
+      '<div style="background:#FFFBEB;padding:12px;border-radius:10px;border:1px solid #FCD34D;text-align:center;"><div style="font-size:0.75rem;color:#92400E;">Pending</div><div style="font-size:1.4rem;font-weight:700;color:#92400E;">' + d.assignments.pending + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;color:#fff;" onclick="loadDbHealthDetail(\'pending\')">View (' + d.assignments.pending + ')</button></div>' +
+      '<div style="background:#F0FDF4;padding:12px;border-radius:10px;border:1px solid #86EFAC;text-align:center;"><div style="font-size:0.75rem;color:#166534;">Completed</div><div style="font-size:1.4rem;font-weight:700;color:#166534;">' + d.assignments.completed + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'completed\')">View (' + d.assignments.completed + ')</button></div>' +
+      '<div style="background:#F1F5F9;padding:12px;border-radius:10px;border:1px solid #CBD5E1;text-align:center;"><div style="font-size:0.75rem;color:#475569;">Unassigned</div><div style="font-size:1.4rem;font-weight:700;color:#475569;">' + d.assignments.unassigned + '</div><button class="btn btn-sm btn-primary" style="margin-top:6px;font-size:0.7rem;padding:2px 8px;" onclick="loadDbHealthDetail(\'unassigned\')">View (' + d.assignments.unassigned + ')</button></div>' +
       '</div>';
 
     html += '<h4 style="font-size:0.9rem;margin-bottom:10px;color:var(--text-primary);">Missing Fields Breakdown</h4>' +

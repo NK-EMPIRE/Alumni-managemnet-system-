@@ -145,8 +145,8 @@
     var wrap = document.createElement('div');
     wrap.style.cssText = 'position:relative;display:inline-flex;align-items:center;';
     wrap.innerHTML =
-      '<button id="alumniAlertNavBtn" onclick="toggleAlumniAlertPanel(event)" title="Report Alumni Detail Found" ' +
-        'style="background:none;border:none;cursor:pointer;font-size:1.15rem;color:#F59E0B;position:relative;padding:4px 6px;">' +
+      '<button id="alumniAlertNavBtn" class="navbar-btn" onclick="toggleAlumniAlertPanel(event)" title="Report Alumni Detail Found" ' +
+        'style="background:none;border:none;cursor:pointer;position:relative;">' +
         '<i class="fas fa-graduation-cap"></i>' +
       '</button>';
     var first = container.firstChild;

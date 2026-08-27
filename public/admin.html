@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -285,7 +285,7 @@
       <div class="navbar-right" style="display:flex;align-items:center;gap:12px;">
         <!-- Today's Tasks Modal Button -->
         <button class="navbar-btn" onclick="openTodayTasksModal()" title="Today's Tasks & Auto Summary"
-          style="background:none;border:none;color:#10B981;cursor:pointer;font-size:1.1rem;position:relative;">
+          style="background:none;border:none;cursor:pointer;position:relative;">
           <i class="fas fa-tasks"></i>
           <span id="todayTasksDot"
             style="position:absolute;top:2px;right:2px;width:8px;height:8px;background:#EF4444;border-radius:50%;display:none;"></span>
@@ -293,8 +293,8 @@
 
         <!-- Quick Tour / Welcome Tutorial Button -->
         <button class="navbar-btn" onclick="startIntelligentProductTour()" title="Interactive SaaS Product Tour"
-          style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:1.1rem;">
-          <i class="fas fa-graduation-cap"></i>
+          style="background:none;border:none;cursor:pointer;">
+          <i class="fas fa-magic"></i>
         </button>
 
         <!-- Reset Requests Dropdown -->
@@ -381,7 +381,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-icon yellow">
+            <div class="stat-card-icon blue">
               <i class="fas fa-clock"></i>
             </div>
             <div class="stat-card-content">
@@ -391,7 +391,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-icon green">
+            <div class="stat-card-icon blue">
               <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-card-content">
@@ -401,7 +401,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-icon purple">
+            <div class="stat-card-icon blue">
               <i class="fas fa-user-tie"></i>
             </div>
             <div class="stat-card-content">
@@ -411,7 +411,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-icon" style="background:#CCFBF1;color:#0D9488;">
+            <div class="stat-card-icon blue">
               <i class="fas fa-users"></i>
             </div>
             <div class="stat-card-content">
@@ -421,7 +421,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-icon" style="background:#FCE7F3;color:#DB2777;">
+            <div class="stat-card-icon blue">
               <i class="fas fa-file-alt"></i>
             </div>
             <div class="stat-card-content">
@@ -445,10 +445,10 @@
               <button class="btn btn-sm btn-primary" onclick="openModal('assignAlumniModal')">
                 <i class="fas fa-plus"></i> Assign New
               </button>
-              <button class="btn btn-sm btn-warning" onclick="openReassignModal()" style="color:#fff;">
+              <button class="btn btn-sm btn-primary" onclick="openReassignModal()">
                 <i class="fas fa-exchange-alt"></i> Reassign
               </button>
-              <button class="btn btn-sm btn-info" onclick="openDbHealthModal()" style="color:#fff;background:#0EA5E9;">
+              <button class="btn btn-sm btn-primary" onclick="openDbHealthModal()">
                 <i class="fas fa-heartbeat"></i> DB Health
               </button>
               <button class="btn btn-sm btn-secondary" onclick="openExportCustomizationModal()">
@@ -547,7 +547,7 @@
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon green"
+            <div class="stat-card-icon blue"
               style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
               <i class="fas fa-check-circle"></i>
             </div>
@@ -557,7 +557,7 @@
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon purple"
+            <div class="stat-card-icon blue"
               style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
               <i class="fas fa-user-tie"></i>
             </div>
@@ -567,8 +567,8 @@
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon"
-              style="background:#CCFBF1;color:#0D9488;width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
+            <div class="stat-card-icon blue"
+              style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
               <i class="fas fa-tasks"></i>
             </div>
             <div style="margin-left:12px;">
@@ -577,7 +577,7 @@
             </div>
           </div>
           <div class="stat-card" style="padding:16px 20px; display: flex; align-items: center;">
-            <div class="stat-card-icon yellow"
+            <div class="stat-card-icon blue"
               style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:8px;">
               <i class="fas fa-clock"></i>
             </div>
@@ -613,16 +613,15 @@
               <button class="btn btn-secondary btn-sm" onclick="toggleFullScreenSpreadsheet(this)"
                 style="height:36px;white-space:nowrap;" title="View in Full Screen"><i class="fas fa-expand"></i> Full
                 Screen</button>
-              <button class="btn btn-warning btn-sm" onclick="openReassignModal()"
+              <button class="btn btn-primary btn-sm" onclick="openReassignModal()"
                 style="height:36px;color:#fff;white-space:nowrap;"><i class="fas fa-exchange-alt"></i> Reassign</button>
-              <button class="btn btn-info btn-sm" onclick="openDbHealthModal()"
-                style="height:36px;color:#fff;background:#0EA5E9;white-space:nowrap;"><i class="fas fa-heartbeat"></i>
-                DB Health</button>
+              <button class="btn btn-primary btn-sm" onclick="openDbHealthModal()"
+                style="height:36px;color:#fff;white-space:nowrap;"><i class="fas fa-heartbeat"></i> DB Health</button>
               <button class="btn btn-primary btn-sm" onclick="fetchRealtimeDatabaseData()"
                 style="height:36px;white-space:nowrap;" title="Fetch latest data from database"><i
                   class="fas fa-sync-alt"></i> Fetch Data</button>
-              <button class="btn btn-purple btn-sm" onclick="openMasterDataGovernanceModal()"
-                style="height:36px;color:#fff;background:#7C3AED;white-space:nowrap;" title="Review & Approve New Auto-Learned Companies, Designations, Universities"><i class="fas fa-check-double"></i> Master Data Queue</button>
+              <button class="btn btn-primary btn-sm" onclick="openMasterDataGovernanceModal()"
+                style="height:36px;color:#fff;white-space:nowrap;" title="Review & Approve New Auto-Learned Companies, Designations, Universities"><i class="fas fa-check-double"></i> Master Data Queue</button>
               <button class="btn btn-secondary btn-sm" onclick="openExportCustomizationModal()"
                 style="height:36px;white-space:nowrap;"><i class="fas fa-download"></i> Export</button>
             </div>
@@ -1119,12 +1118,12 @@
             style="border-radius:50px;box-shadow:var(--shadow-md);">
             <i class="fas fa-user-tie"></i> Add Team Leader
           </button>
-          <button class="btn btn-success btn-sm" onclick="openModal('addTeamMemberModal')"
+          <button class="btn btn-primary btn-sm" onclick="openModal('addTeamMemberModal')"
             style="border-radius:50px;box-shadow:var(--shadow-md);">
             <i class="fas fa-user-plus"></i> Add Team Member
           </button>
-          <button class="btn btn-warning btn-sm" onclick="openModal('assignAlumniModal')"
-            style="border-radius:50px;box-shadow:var(--shadow-md);color:#fff;">
+          <button class="btn btn-primary btn-sm" onclick="openModal('assignAlumniModal')"
+            style="border-radius:50px;box-shadow:var(--shadow-md);">
             <i class="fas fa-user-graduate"></i> Assign Alumni
           </button>
           <button class="btn btn-secondary btn-sm"
@@ -1394,7 +1393,7 @@
         <div class="page-header fade-in" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
           <div>
             <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-dark, #0F172A);margin:0 0 4px;">Tuesday Auto Attendance System</h1>
-            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated login attendance tracking every Tuesday only (Window: 1:15 PM � 2:45 PM IST). Present (On-Time 1:15 - 1:30 PM) | Late (Delayed 1:30 - 2:45 PM) | Absent (No Login in Window).</p>
+            <p style="color:var(--text-muted, #64748B);margin:0;font-size:0.9rem;">Automated login attendance tracking every Tuesday only (Window: 1:15 PM ? 2:45 PM IST). Present (On-Time 1:15 - 1:30 PM) | Late (Delayed 1:30 - 2:45 PM) | Absent (No Login in Window).</p>
           </div>
           <div style="display:flex;gap:10px;">
             <button class="btn btn-secondary btn-sm" onclick="fetchAttendanceData()"><i class="fas fa-sync-alt"></i> Refresh</button>
@@ -2055,7 +2054,7 @@
               <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text">Save Changes</span>
             </button>
-            <button type="button" class="btn btn-success" id="submitNextBtn" style="background-color: var(--success); border-color: var(--success); color: #fff;">
+            <button type="button" class="btn btn-primary" id="submitNextBtn">
               <span class="spinner spinner-sm" style="display:none;margin-right:8px;"></span>
               <span class="btn-text"><i class="fas fa-arrow-right"></i> Save & Next</span>
             </button>
@@ -2206,14 +2205,14 @@
         <!-- Step 3: Preview -->
         <div id="reassignStep3" style="display:none;padding:24px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <strong style="font-size:1rem;color:var(--text-primary);">Preview � Records to be Moved</strong>
+            <strong style="font-size:1rem;color:var(--text-primary);">Preview ? Records to be Moved</strong>
             <button class="btn btn-secondary btn-sm"
               onclick="document.getElementById('reassignStep3').style.display='none';document.getElementById('reassignStep2').style.display='block';">
               <i class="fas fa-arrow-left"></i> Back
             </button>
           </div>
           <div id="reassignPreviewContent" style="max-height:380px;overflow-y:auto;margin-bottom:18px;"></div>
-          <button class="btn btn-success" onclick="reassignCommit()" style="width:100%;font-weight:600;">
+          <button class="btn btn-primary" onclick="reassignCommit()" style="width:100%;font-weight:600;">
             <i class="fas fa-check-circle" style="margin-right:8px;"></i>Confirm Reassignment
           </button>
         </div>
@@ -2248,7 +2247,7 @@
             style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
             <strong id="dbHealthDetailTitle" style="font-size:1rem;color:var(--text-primary);"></strong>
             <div style="display:flex;gap:10px;align-items:center;">
-              <button class="btn btn-warning btn-sm" id="notifyAllDbHealthBtn" style="color:#fff;font-weight:600;"
+              <button class="btn btn-primary btn-sm" id="notifyAllDbHealthBtn" style="color:#fff;font-weight:600;"
                 onclick="notifyAllDbHealth()"><i class="fas fa-paper-plane"></i> Notify All Assignees</button>
               <button class="btn btn-secondary btn-sm"
                 onclick="document.getElementById('dbHealthDetailContainer').style.display='none';">Close Detail
@@ -2904,7 +2903,7 @@
       };
       if (!API.isAuthenticated()) { window.location.href = 'index.html'; }
     </script>
-    <script src="js/dynamic-tour.js"></script>
+    <script src="js/dynamic-tour.js?v=1.0.2"></script>
     <script src="js/admin.js?v=2.0.4"></script>
     <script src="js/adminCategoryAttendance.js"></script>
     <script src="js/alumniAnalysis.js"></script>
