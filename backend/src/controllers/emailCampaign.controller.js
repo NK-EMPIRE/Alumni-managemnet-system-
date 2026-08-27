@@ -4,11 +4,12 @@ const { success, error } = require('../utils/response');
 async function createCampaign(req, res, next) {
   try {
     const leaderId = req.user.userId;
-    const { assignmentIds } = req.body;
+    const { assignmentIds, testMode = false } = req.body;
     const result = await emailService.createCampaign({
       leaderId,
       assignmentIds,
-      allowAll: String(req.user.role || '').toUpperCase() === 'ADMIN'
+      allowAll: String(req.user.role || '').toUpperCase() === 'ADMIN',
+      testMode: testMode === true
     });
     return success(res, result, 'Email campaign created and queued successfully', 201);
   } catch (err) {

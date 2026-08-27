@@ -21,8 +21,8 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{$node[\"Webhook Trigger\"].json[\"headers\"][\"x-automation-secret\"]}}",
-              "value2": "={{$env.N8N_SHARED_SECRET}}"
+              "value1": "={{ String($node[\"Webhook Trigger\"].json[\"headers\"][\"x-automation-secret\"] || \"\") === String($env.N8N_SHARED_SECRET || \"\") && (!$node[\"Webhook Trigger\"].json[\"body\"][\"testMode\"] || ($node[\"Webhook Trigger\"].json[\"body\"][\"recipients\"] || []).every(r => [\"naveen.karthickbusiness@gmail.com\", \"sundareswaran9407@mountzion.ac.in\"].includes(String(r.email || \"\").trim().toLowerCase()))) }}",
+              "value2": true
             }
           ]
         }

@@ -11,16 +11,16 @@ This runbook describes how the checked-in AMS automation should be configured in
 | SMTP credentials | Managed through an n8n credential | Sends campaign and unmatched-reply notifications without embedding credentials in workflow JSON. |
 | IMAP credentials | Managed through an n8n credential | Reads the alumni reply mailbox. |
 
-## Recipient allowlist
+## Test-mode recipient safety
 
-The campaign sender and unmatched-reply notification branches are restricted to these two addresses only:
+Normal production campaigns are allowed to send to the eligible alumni recipients selected by the AMS team and assignment rules. Testing must be launched with the explicit `testMode: true` flag, available through the campaign modal’s **Test mode** checkbox. In test mode, the AMS API replaces the selected alumni destinations with exactly these two addresses:
 
-| Approved recipient | Use |
+| Approved test recipient | Use |
 |---|---|
-| `naveen.karthickbusiness@gmail.com` | Approved test and administration recipient |
-| `sundareswaran9407@mountzion.ac.in` | Approved test and administration recipient |
+| `naveen.karthickbusiness@gmail.com` | Controlled test recipient |
+| `sundareswaran9407@mountzion.ac.in` | Controlled test recipient |
 
-The AMS API applies the same allowlist before creating a campaign payload. The n8n campaign workflow applies a second fail-closed check immediately before SMTP. Any other address is rejected or routed to the false branch, which has no SMTP connection.
+The n8n campaign workflow applies a second fail-closed check for test-mode payloads immediately before SMTP. If `testMode` is true, every recipient must match the two-address allowlist; otherwise the workflow routes to the false branch, which has no SMTP connection. This preserves normal production alumni sending while ensuring an explicit test cannot email alumni.
 
 ## Workflow installation
 
@@ -30,12 +30,12 @@ The email sender node must be configured to continue through its error output. T
 
 ## Pre-publish checks
 
-Before publishing, verify the following conditions in n8n. The `N8N_SHARED_SECRET` expression resolves to a non-empty value in the n8n runtime. The SMTP and IMAP credentials are selected from n8n-managed credentials. The callback URL resolves to `https://alumni.mzcet.in/api/v1/email-campaigns/...`, and the request header is `X-Automation-Secret` with the runtime expression rather than a literal secret. Finally, confirm that the workflow is published and that the webhook is active.
+Before publishing, verify the following conditions in n8n. The `N8N_SHARED_SECRET` expression resolves to a non-empty value in the n8n runtime. The SMTP and IMAP credentials are selected from n8n-managed credentials. The callback URL resolves to `https://alumni.mzcet.in/api/v1/email-campaigns/...`, and the request header is `X-Automation-Secret` with the runtime expression rather than a literal secret. Confirm that the sender authorization condition is `shared secret matches AND (testMode is false OR every test recipient is on the two-address allowlist)`. Finally, confirm that the workflow is published and that the webhook is active.
 
-Publishing or activating the workflow is a production state change. It should be performed only after the values above have been checked. Do not use `Execute workflow`, a live webhook, a test campaign, or an SMTP test while validating this change unless the user separately authorizes sending. The current requested validation mode is no-send.
+Publishing or activating the workflow is a production state change. It should be performed only after the values above have been checked. Testing must use the campaign modal’s **Test mode** checkbox, which routes only to the two approved addresses. Do not launch that test or use `Execute workflow` until the user separately authorizes the actual test send.
 
 ## Verification sequence
 
-First, call the AMS health endpoint and confirm that it returns HTTP 200 without opening a webhook execution. Then validate the workflow JSON, confirm that every SMTP `toEmail` expression or literal is limited to the two approved addresses, and confirm that the allowlist false branch has no outgoing connection. Do not send a campaign or test reply during this validation pass.
+First, call the AMS health endpoint and confirm that it returns HTTP 200 without opening a webhook execution. Then validate the workflow JSON and confirm that test-mode authorization is fail-closed while normal-mode SMTP still receives the dynamic eligible-alumni address. Confirm that the false branch has no SMTP connection. For the controlled test, enable **Test mode** in the AMS campaign modal and verify the outgoing payload contains only the two approved addresses before authorizing the send.
 
 The current n8n workspace inspection showed the AMS reply watcher workflow but no recorded executions. The workflow should therefore be published and tested explicitly before being treated as production-ready.

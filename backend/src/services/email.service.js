@@ -13,6 +13,14 @@ function isAllowedCampaignRecipient(email) {
   return ALLOWED_CAMPAIGN_RECIPIENT_SET.has(String(email || '').trim().toLowerCase());
 }
 
+function buildTestRecipients(sourceRecipient) {
+  return ALLOWED_CAMPAIGN_RECIPIENTS.map((email) => ({
+    ...sourceRecipient,
+    name: 'AMS n8n Test Recipient',
+    email
+  }));
+}
+
 async function getEligibleRecipients(leaderId) {
   const pool = await getPool();
 
@@ -34,17 +42,14 @@ async function getEligibleRecipients(leaderId) {
 
   if (!teamId) {
     const adminRes = await pool.request()
-      .input('recipientA', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[0])
-      .input('recipientB', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[1])
       .query(`
         SELECT aa.assignment_id, aa.alumni_id, a.name, a.email, a.department, a.batch
         FROM dbo.AlumniAssignments aa
         JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
         WHERE a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
-          AND LOWER(LTRIM(RTRIM(a.email))) IN (@recipientA, @recipientB)
           AND ISNULL(aa.status, '') <> 'Completed'
       `);
-      return adminRes.recordset.filter((recipient) => isAllowedCampaignRecipient(recipient.email));
+    return adminRes.recordset;
   }
 
   const queryStr = `
@@ -59,21 +64,18 @@ async function getEligibleRecipients(leaderId) {
       )
     )
     AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
-    AND LOWER(LTRIM(RTRIM(a.email))) IN (@recipientA, @recipientB)
     AND ISNULL(aa.status, '') <> 'Completed'
   `;
 
   const recipientsRes = await pool.request()
     .input('teamId', sql.Int, teamId)
     .input('leaderId', sql.Int, leaderId)
-    .input('recipientA', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[0])
-    .input('recipientB', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[1])
     .query(queryStr);
 
-  return recipientsRes.recordset.filter((recipient) => isAllowedCampaignRecipient(recipient.email));
+  return recipientsRes.recordset;
 }
 
-async function createCampaign({ leaderId, assignmentIds, allowAll = false }) {
+async function createCampaign({ leaderId, assignmentIds, allowAll = false, testMode = false }) {
   const pool = await getPool();
 
   // Get team info
@@ -98,6 +100,13 @@ async function createCampaign({ leaderId, assignmentIds, allowAll = false }) {
   if (Array.isArray(assignmentIds) && assignmentIds.length > 0) {
     const idSet = new Set(assignmentIds.map(id => Number(id)));
     recipients = recipients.filter(r => idSet.has(Number(r.assignment_id)));
+  }
+
+  if (testMode) {
+    if (recipients.length === 0) {
+      throw new Error('Test mode needs at least one active alumni assignment for campaign tracking');
+    }
+    recipients = buildTestRecipients(recipients[0]);
   }
 
   if (recipients.length === 0) {
@@ -185,6 +194,7 @@ async function createCampaign({ leaderId, assignmentIds, allowAll = false }) {
     const payload = JSON.stringify({
       campaignId,
       amsBaseUrl,
+      testMode: !!testMode,
       recipients: recipientPayloads
     });
 
@@ -413,5 +423,6 @@ module.exports = {
   getReplies,
   reviewReply,
   isAllowedCampaignRecipient,
+  buildTestRecipients,
   ALLOWED_CAMPAIGN_RECIPIENTS
 };

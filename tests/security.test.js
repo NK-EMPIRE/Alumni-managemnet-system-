@@ -4,7 +4,7 @@ const assert = require('assert');
 const { parseAllowedOrigins, isAllowedOrigin } = require('../backend/src/config/security');
 const { generateTemporaryPassword, validatePassword } = require('../backend/src/utils/password');
 const requireAutomationSecret = require('../backend/src/middleware/requireAutomationSecret');
-const { isAllowedCampaignRecipient, ALLOWED_CAMPAIGN_RECIPIENTS } = require('../backend/src/services/email.service');
+const { isAllowedCampaignRecipient, buildTestRecipients, ALLOWED_CAMPAIGN_RECIPIENTS } = require('../backend/src/services/email.service');
 
 describe('Security helpers', function () {
   it('normalizes configured origins and rejects unconfigured cross-origin requests', function () {
@@ -29,6 +29,18 @@ describe('Security helpers', function () {
     assert.strictEqual(isAllowedCampaignRecipient('sundareswaran9407@mountzion.ac.in'), true);
     assert.strictEqual(isAllowedCampaignRecipient('someone-else@example.com'), false);
     assert.strictEqual(isAllowedCampaignRecipient(''), false);
+  });
+
+  it('builds test campaigns with only the two approved destinations', function () {
+    const testRecipients = buildTestRecipients({
+      assignment_id: 42,
+      alumni_id: 7,
+      name: 'Actual Alumni Name',
+      email: 'alumni@example.com'
+    });
+    assert.deepStrictEqual(testRecipients.map((recipient) => recipient.email), ALLOWED_CAMPAIGN_RECIPIENTS);
+    assert.ok(testRecipients.every((recipient) => recipient.name === 'AMS n8n Test Recipient'));
+    assert.ok(testRecipients.every((recipient) => !recipient.email.includes('alumni@example.com')));
   });
 
   it('accepts only the configured automation secret', function () {

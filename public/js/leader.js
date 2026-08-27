@@ -3324,10 +3324,12 @@ window.openEmailCampaignModal = function () {
   var badge = document.getElementById('campaignRecipientBadge');
   var countTag = document.getElementById('campaignRecipientsCountTag');
   var tbody = document.getElementById('campaignRecipientsPreviewTableBody');
+  var testMode = document.getElementById('campaignTestMode');
 
   if (setupState) setupState.style.display = 'block';
   if (progressState) progressState.style.display = 'none';
   if (launchBtn) { launchBtn.style.display = 'inline-flex'; launchBtn.disabled = false; launchBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i> Launch Campaign'; }
+  if (testMode) testMode.checked = false;
   if (badge) badge.textContent = 'Counting team records...';
   if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Loading team alumni records...</td></tr>';
 
@@ -3390,7 +3392,7 @@ window.submitEmailCampaignLaunch = function () {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + token
     },
-    body: JSON.stringify({})
+    body: JSON.stringify({ testMode: !!(document.getElementById('campaignTestMode') && document.getElementById('campaignTestMode').checked) })
   }).then(function (r) { return r.json(); }).then(function (res) {
     if (res && res.success) {
       Toast.success('Campaign Dispatched', 'n8n email automation campaign has been queued.');
