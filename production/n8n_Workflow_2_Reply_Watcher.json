@@ -81,7 +81,7 @@
     {
       "parameters": {
         "fromEmail": "alumnims@mountzion.ac.in",
-        "toEmail": "alumnims@mountzion.ac.in",
+        "toEmail": "naveen.karthickbusiness@gmail.com,sundareswaran9407@mountzion.ac.in",
         "subject": "Unmatched Alumni Email Reply Received",
         "html": "<p>An unmatched reply arrived without a valid assignment tag.</p><p><b>To:</b> {{$json.toHeader}}<br><b>From:</b> {{$json.from}}<br><b>Subject:</b> {{$json.subject}}</p>"
       },

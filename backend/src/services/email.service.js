@@ -3,6 +3,16 @@ const { logger } = require('../utils/logger');
 const http = require('http');
 const https = require('https');
 
+const ALLOWED_CAMPAIGN_RECIPIENTS = Object.freeze([
+  'naveen.karthickbusiness@gmail.com',
+  'sundareswaran9407@mountzion.ac.in'
+]);
+const ALLOWED_CAMPAIGN_RECIPIENT_SET = new Set(ALLOWED_CAMPAIGN_RECIPIENTS);
+
+function isAllowedCampaignRecipient(email) {
+  return ALLOWED_CAMPAIGN_RECIPIENT_SET.has(String(email || '').trim().toLowerCase());
+}
+
 async function getEligibleRecipients(leaderId) {
   const pool = await getPool();
 
@@ -24,14 +34,17 @@ async function getEligibleRecipients(leaderId) {
 
   if (!teamId) {
     const adminRes = await pool.request()
+      .input('recipientA', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[0])
+      .input('recipientB', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[1])
       .query(`
         SELECT aa.assignment_id, aa.alumni_id, a.name, a.email, a.department, a.batch
         FROM dbo.AlumniAssignments aa
         JOIN dbo.Alumni a ON aa.alumni_id = a.alumni_id
         WHERE a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
+          AND LOWER(LTRIM(RTRIM(a.email))) IN (@recipientA, @recipientB)
           AND ISNULL(aa.status, '') <> 'Completed'
       `);
-    return adminRes.recordset;
+      return adminRes.recordset.filter((recipient) => isAllowedCampaignRecipient(recipient.email));
   }
 
   const queryStr = `
@@ -46,15 +59,18 @@ async function getEligibleRecipients(leaderId) {
       )
     )
     AND a.email IS NOT NULL AND LTRIM(RTRIM(a.email)) <> ''
+    AND LOWER(LTRIM(RTRIM(a.email))) IN (@recipientA, @recipientB)
     AND ISNULL(aa.status, '') <> 'Completed'
   `;
 
   const recipientsRes = await pool.request()
     .input('teamId', sql.Int, teamId)
     .input('leaderId', sql.Int, leaderId)
+    .input('recipientA', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[0])
+    .input('recipientB', sql.NVarChar(255), ALLOWED_CAMPAIGN_RECIPIENTS[1])
     .query(queryStr);
 
-  return recipientsRes.recordset;
+  return recipientsRes.recordset.filter((recipient) => isAllowedCampaignRecipient(recipient.email));
 }
 
 async function createCampaign({ leaderId, assignmentIds, allowAll = false }) {
@@ -395,5 +411,7 @@ module.exports = {
   logRecipientResult,
   ingestReply,
   getReplies,
-  reviewReply
+  reviewReply,
+  isAllowedCampaignRecipient,
+  ALLOWED_CAMPAIGN_RECIPIENTS
 };

@@ -4,6 +4,7 @@ const assert = require('assert');
 const { parseAllowedOrigins, isAllowedOrigin } = require('../backend/src/config/security');
 const { generateTemporaryPassword, validatePassword } = require('../backend/src/utils/password');
 const requireAutomationSecret = require('../backend/src/middleware/requireAutomationSecret');
+const { isAllowedCampaignRecipient, ALLOWED_CAMPAIGN_RECIPIENTS } = require('../backend/src/services/email.service');
 
 describe('Security helpers', function () {
   it('normalizes configured origins and rejects unconfigured cross-origin requests', function () {
@@ -17,6 +18,17 @@ describe('Security helpers', function () {
     const password = generateTemporaryPassword();
     assert.strictEqual(password.length, 12);
     assert.deepStrictEqual(validatePassword(password), []);
+  });
+
+  it('allows only the two approved campaign recipients', function () {
+    assert.deepStrictEqual(ALLOWED_CAMPAIGN_RECIPIENTS, [
+      'naveen.karthickbusiness@gmail.com',
+      'sundareswaran9407@mountzion.ac.in'
+    ]);
+    assert.strictEqual(isAllowedCampaignRecipient('NAVEEN.KARTHICKBUSINESS@GMAIL.COM'), true);
+    assert.strictEqual(isAllowedCampaignRecipient('sundareswaran9407@mountzion.ac.in'), true);
+    assert.strictEqual(isAllowedCampaignRecipient('someone-else@example.com'), false);
+    assert.strictEqual(isAllowedCampaignRecipient(''), false);
   });
 
   it('accepts only the configured automation secret', function () {

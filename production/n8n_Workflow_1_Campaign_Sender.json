@@ -52,6 +52,25 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ [\"naveen.karthickbusiness@gmail.com\", \"sundareswaran9407@mountzion.ac.in\"].includes(String($json.email || \"\").trim().toLowerCase()) }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Recipient Allowlist Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ]
+    },
+    {
+      "parameters": {
         "fromEmail": "alumnims@mountzion.ac.in",
         "toEmail": "={{$json.email}}",
         "subject": "Request for Professional Information Update - Mount Zion College of Engineering and Technology",
@@ -158,11 +177,23 @@
       "main": [
         [
           {
-            "node": "SMTP Send Mail",
+            "node": "Recipient Allowlist Check",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Recipient Allowlist Check": {
+      "main": [
+        [
+          {
+            "node": "SMTP Send Mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     },
     "SMTP Send Mail": {
